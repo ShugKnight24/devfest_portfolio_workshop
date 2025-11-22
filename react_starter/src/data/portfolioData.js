@@ -13,8 +13,8 @@ export const portfolioData = {
   personal: {
     name: "Shugmi Shumunov",
     title: "Full Stack Developer - Love JavaScript",
-    avatar: "src/assets/shug_headshot.jpg", // Path to your avatar image
-    aboutImage: "src/assets/shug_animated.jpg", // Path to an about section image
+    avatar: "./assets/images/shug_headshot.jpg", // Path to your avatar image
+    aboutImage: "./assets/images/shug_animated.jpg", // Path to an about section image
     bio: "I'm a passionate developer who loves building beautiful, functional web applications. I specialize in modern JavaScript frameworks and creating seamless user experiences.",
     email: "sshumunov@gmail.com",
     portfolio: "https://shugknight24.github.io",
@@ -52,7 +52,7 @@ export const portfolioData = {
       title: "MiDevFest Website",
       description:
         "The official website for MiDevFest 2025, built with React and Tailwind CSS. Features event details, speaker bios, and previous events.",
-      image: "src/assets/devfest_site.png",
+      image: "./assets/images/devfest_site.png",
       tags: ["React", "TailwindCSS"],
       githubUrl: "https://github.com/GDG-Detroit/devfest-website",
       liveUrl: "https://midevfest.com",
@@ -63,7 +63,7 @@ export const portfolioData = {
       title: "My Portfolio Site",
       description:
         "My personal portfolio website showcasing my projects, skills, and experience.",
-      image: "src/assets/personal_portfolio.png",
+      image: "./assets/images/personal_portfolio.png",
       tags: ["React", "SCSS"],
       githubUrl: "https://github.com/ShugKnight24/react_portfolio",
       liveUrl: "https://shugknight24.github.io",
@@ -74,7 +74,7 @@ export const portfolioData = {
       title: "Shumunov Solutions",
       description:
         "A business website for Shumunov Solutions, a company offering web development and consulting services.",
-      image: "src/assets/shum_sol.png",
+      image: "./assets/images/shum_sol.png",
       tags: ["React", "SCSS"],
       githubUrl: null,
       liveUrl: "http://shumunovsolutions.com",
@@ -85,7 +85,7 @@ export const portfolioData = {
       title: "Pomodoro",
       description:
         "Beautiful weather app with 7-day forecasts, location search, and animated weather icons.",
-      image: "src/assets/pomodoro.png",
+      image: "./assets/images/pomodoro.png",
       tags: ["JavaScript"],
       githubUrl: "https://github.com/shugknight24/pomodoro",
       liveUrl: "https://shugknight24.github.io/pomodoro/",

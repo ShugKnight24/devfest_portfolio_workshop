@@ -26,12 +26,12 @@ import {
 
 export const Header = ({ personal }) => {
   const renderHeader = () => {
-    return <HeaderDefault personal={personal} />;
+    // return <HeaderDefault personal={personal} />;
     // return <HeaderSimple personal={personal} />;
     // return <HeaderGradient personal={personal} />;
     // return <HeaderSplit personal={personal} />;
     // return <HeaderAnimated personal={personal} />;
-    // return <HeaderAnimatedSplit personal={personal} />;
+    return <HeaderAnimatedSplit personal={personal} />;
   };
 
   return <>{renderHeader()}</>;

@@ -7,6 +7,11 @@ export const InstructionSteps = () => {
 
   const steps = [
     {
+      title: "Connect to WIFI",
+      component: "Devfest2025",
+      description: "Connect to the WIFI - The password is Devfest2025!",
+    },
+    {
       title: "Download the Repo",
       component: "git clone <repo-url>",
       description:

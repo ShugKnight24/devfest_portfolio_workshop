@@ -17,27 +17,47 @@
  * Perfect for: Advanced styling and storytelling through design
  */
 
-export const AboutAnimated = ({ avatar, bio }) => {
+export const AboutAnimated = ({ avatar, aboutImage, bio }) => {
   const journey = [
     {
-      year: "2020",
+      year: "2015",
       title: "Started Coding Journey",
-      description: "Fell in love with web development",
+      description:
+        "Fell in love with development thanks to a coworker that taught me basics through code katas",
     },
     {
-      year: "2021",
+      year: "2016",
       title: "First Professional Role",
       description: "Joined as a junior developer",
     },
     {
-      year: "2023",
-      title: "Full Stack Developer",
-      description: "Building complete applications",
+      year: "2016",
+      title: "First Professional Role",
+      description:
+        "Joined as an intern at GTB and got the full time job after 3 months",
+    },
+    {
+      year: "2016",
+      title: "Working at Lovebook",
+      description:
+        "Joined as a software developer / engineer and worked there till 2020 in various capacities",
+    },
+    {
+      year: "2021",
+      title: "JavaScript / React / React Native Consultant",
+      description:
+        "Levi's Mobile App, internal tools, and greenfield 3D configurator at Vectorform",
+    },
+    {
+      year: "2025",
+      title: "Volunteer",
+      description: "MiDevFest website developer",
     },
     {
       year: "2025",
       title: "Present",
-      description: "Creating innovative solutions",
+      description:
+        "Consulting and freelance work in modern web development and other areas",
     },
   ];
 
@@ -66,7 +86,7 @@ export const AboutAnimated = ({ avatar, bio }) => {
               {/* Main Image */}
               <img
                 src={
-                  avatar ||
+                  aboutImage ||
                   "https://placehold.co/500x500/667eea/FFFFFF?text=Your+Photo"
                 }
                 alt="Profile"

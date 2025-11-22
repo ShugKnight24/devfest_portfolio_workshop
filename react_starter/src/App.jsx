@@ -27,7 +27,7 @@ function App() {
   // Data prep
   // We destructure (unpack) our data here so we can pass specific pieces to specific components.
   const { personal, skills, projects } = portfolioData;
-  const { avatar, bio, name, social } = personal; // further destructure personal data
+  const { aboutImage, avatar, bio, name, social } = personal; // further destructure personal data
 
   return (
     <div className="min-h-screen bg-linear-to-br from-(--color-background) to-gray-100 dark:from-(--color-dark) dark:to-gray-800 transition-colors duration-300">
@@ -44,13 +44,13 @@ function App() {
         5. Deploy your portfolio and share it with the world!
         6. Profit???
       */}
-      <StarterInstructions />
+      {/* <StarterInstructions /> */}
 
-      {/* <Header personal={personal} /> */}
-      {/* <About avatar={avatar} bio={bio} /> */}
-      {/* <Skills skills={skills} /> */}
-      {/* <Projects projects={projects} /> */}
-      {/* <Footer social={social} name={name} /> */}
+      <Header personal={personal} />
+      <About avatar={avatar} aboutImage={aboutImage} bio={bio} />
+      <Skills skills={skills} />
+      <Projects projects={projects} />
+      <Footer social={social} name={name} />
     </div>
   );
 }

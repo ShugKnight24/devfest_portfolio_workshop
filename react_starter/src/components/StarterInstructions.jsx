@@ -14,6 +14,7 @@ export const StarterInstructions = () => (
       <div className="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto text-left">
         <h2 className="text-2xl font-semibold mb-4">Quick Start Guide:</h2>
         <ol className="list-decimal list-inside space-y-2 text-gray-700">
+          <li>Connect to the WIFI - The password is Devfest2025!</li>
           <li>
             Look up Shugknight24 on GitHub or Google and find this repository.
             Clone this repo with{" "}

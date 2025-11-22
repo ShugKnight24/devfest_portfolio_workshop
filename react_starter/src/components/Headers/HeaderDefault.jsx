@@ -22,10 +22,10 @@
 // import DarkModeToggle from "../DarkModeToggle";
 
 export const HeaderDefault = ({ personal }) => {
-  // 1. console.log(personal); // or look at portfolioData.js to see what data is available
+  // console.log(personal); // or look at portfolioData.js to see what data is available
 
   // 3. Destructure the props you want to use here
-  // const { name, title ... } = personal;
+  const { name, title, avatar } = personal;
 
   return (
     <header className="flex flex-col items-center gap-3 py-6 md:py-10 border-b border-slate-200 dark:border-slate-800">
@@ -39,22 +39,22 @@ export const HeaderDefault = ({ personal }) => {
         {/* 2. Render your Name & Title */}
         <div className="flex text-center justify-center items-center">
           {/* 6. Do you want to include your Avatar ??? */}
-          {/* <div className="relative group">
+          <div className="relative group">
             <div className="absolute -inset-1 bg-linear-to-r from-primary-500 to-secondary-500 rounded-full blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
             <img
-              src="https://placehold.co/150x150" // TODO: Replace with your avatar
+              src={avatar} // TODO: Replace with your avatar
               alt="Profile"
               className="relative w-32 h-32 rounded-full object-cover border-4 border-white dark:border-slate-900 shadow-lg"
             />
-          </div> */}
+          </div>
           {/* Text Content */}
           <div>
             <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-linear-to-r from-(--color-primary) to-(--color-secondary)">
-              Your Name Here {/* TODO: Replace with your name */}
+              {name} {/* TODO: Replace with your name */}
             </h1>
             {/* 5. Style your title with some tailwind classes */}
             <p className="">
-              Your Title Here {/* TODO: Replace with your title */}
+              {title} {/* TODO: Replace with your title */}
             </p>
           </div>
         </div>

@@ -11,21 +11,20 @@
 export const portfolioData = {
   // Personal Information
   personal: {
-    name: "Your Name",
-    title: "Full Stack Developer",
-    // Path to your avatar / headshot image
-    // For a placeholder you can use this - https://placehold.co/600x400/34A853/FFFFFF?text=Your+Name
-    avatar: "/path/to/avatar.jpg",
+    name: "Shugmi Shumunov",
+    title: "Full Stack Developer - Love JavaScript",
+    avatar: "src/assets/shug_headshot.jpg", // Path to your avatar image
+    aboutImage: "src/assets/shug_animated.jpg", // Path to an about section image
     bio: "I'm a passionate developer who loves building beautiful, functional web applications. I specialize in modern JavaScript frameworks and creating seamless user experiences.",
-    email: "your.email@example.com",
-    portfolio: "https://yourwebsite.com",
+    email: "sshumunov@gmail.com",
+    portfolio: "https://shugknight24.github.io",
     // Social links
     // TODO: Feel free to add more social links if needed
     // Create components similar to those in `src/components/Icons/` & update how they're used in place like `Footer.jsx`, `Header.jsx`, and other places you want to display your social icons
     social: {
-      github: "https://github.com/yourusername",
-      linkedin: "https://linkedin.com/in/yourusername",
-      twitter: "https://twitter.com/yourusername",
+      github: "https://github.com/shugknight24",
+      linkedin: "https://www.linkedin.com/in/shugmishumunov/",
+      twitter: null,
     },
   },
 
@@ -50,35 +49,46 @@ export const portfolioData = {
   projects: [
     {
       id: 1,
-      title: "E-Commerce Platform",
+      title: "MiDevFest Website",
       description:
-        "A full-stack online store with cart functionality, payment integration, and admin dashboard.",
-      image: "/placeholder-project.jpg",
-      tags: ["React", "Node.js", "MongoDB", "Stripe"],
-      githubUrl: "https://github.com/yourusername/ecommerce",
-      liveUrl: "https://your-ecommerce-demo.com",
+        "The official website for MiDevFest 2025, built with React and Tailwind CSS. Features event details, speaker bios, and previous events.",
+      image: "src/assets/devfest_site.png",
+      tags: ["React", "TailwindCSS"],
+      githubUrl: "https://github.com/GDG-Detroit/devfest-website",
+      liveUrl: "https://midevfest.com",
       featured: true,
     },
     {
       id: 2,
-      title: "Task Management App",
+      title: "My Portfolio Site",
       description:
-        "A collaborative task tracker with real-time updates, drag-and-drop interface, and team features.",
-      image: "/placeholder-project.jpg",
-      tags: ["React", "Firebase", "Tailwind CSS"],
-      githubUrl: "https://github.com/yourusername/task-app",
-      liveUrl: "https://your-task-app.com",
+        "My personal portfolio website showcasing my projects, skills, and experience.",
+      image: "src/assets/personal_portfolio.png",
+      tags: ["React", "SCSS"],
+      githubUrl: "https://github.com/ShugKnight24/react_portfolio",
+      liveUrl: "https://shugknight24.github.io",
       featured: true,
     },
     {
       id: 3,
-      title: "Weather Dashboard",
+      title: "Shumunov Solutions",
+      description:
+        "A business website for Shumunov Solutions, a company offering web development and consulting services.",
+      image: "src/assets/shum_sol.png",
+      tags: ["React", "SCSS"],
+      githubUrl: null,
+      liveUrl: "http://shumunovsolutions.com",
+      featured: true,
+    },
+    {
+      id: 4,
+      title: "Pomodoro",
       description:
         "Beautiful weather app with 7-day forecasts, location search, and animated weather icons.",
-      image: "/placeholder-project.jpg",
-      tags: ["React", "OpenWeather API", "CSS"],
-      githubUrl: "https://github.com/yourusername/weather-app",
-      liveUrl: "https://your-weather-app.com",
+      image: "src/assets/pomodoro.png",
+      tags: ["JavaScript"],
+      githubUrl: "https://github.com/shugknight24/pomodoro",
+      liveUrl: "https://shugknight24.github.io/pomodoro/",
       featured: false,
     },
   ],

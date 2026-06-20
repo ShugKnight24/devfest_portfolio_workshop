@@ -7,86 +7,71 @@ export const InstructionSteps = () => {
 
   const steps = [
     {
-      title: "Connect to WIFI",
-      component: "Devfest2025",
-      description: "Connect to the WIFI - The password is Devfest2025!",
+      title: "1. Kickoff: REZE_BOMB SYSTEM (Detroit Pride 2026)",
+      component: "Session Time: 60 - 90 mins",
+      description: "Welcome to the Devfest lunch session! Today we launch the 'REZE_BOMB SYSTEM'. We are orchestrating agentic feedback loops and leveraging modular blocks. But is the machine lying to you? The core rule for this session: question everything. Challenge the compiler. Auditing is sovereignty.",
+      note: "Agenda: 10m Stage 01 // Syntax Deviation | 10m Setup | 10m App Exploration | 35m Stage 02 // Blocks & Beliefs | 10m Stage 03 // Telemetry | 10m Deployment & Skeptic Protocol.",
     },
     {
-      title: "Download the Repo",
+      title: "2. Connect & Clone (Awaiting Skeptical Trigger)",
       component: "git clone <repo-url>",
-      description:
-        "Clone the repository to your local machine - look up ShugKnight24 on GitHub. Find this repo, in the repo, click the green Code button, and copy the URL to clone. Then run git clone <repo-url> in your terminal.",
+      description: "First, connect to the local network: WIFI: Devfest2025 (WIFI password: Devfest2025). Next, look up ShugKnight24 on GitHub, find the devfest_portfolio_workshop repository, copy the URL, and run git clone <repo-url> in your terminal to fetch the sandbox core.",
+      note: "Do not blindly copy standard commands. Ensure you understand what files are being copied to your system.",
     },
     {
-      title: "Setup",
+      title: "3. Ignite the Code Engine",
       component: "npm install && npm run dev",
-      description:
-        "Install dependencies and start dev server - Run `npm install` and `npm run dev` in the project directory in your terminal.",
-      note: "You may need to install Node.js if you haven't already. Node is a JavaScript runtime that allows us to run JavaScript outside the browser. It will give you access to npm (Node Package Manager) which we use to install project dependencies.",
-      url: "https://nodejs.org/en/download/",
+      description: "Navigate to the project root directory in your terminal and install project dependencies using 'npm install'. Start your Vite development server by running 'npm run dev'.",
+      note: "Your project serves locally on http://localhost:5173. Open this in your browser to interact with the live instructions screen.",
     },
     {
-      title: "Explore Project Structure & Data",
+      title: "4. The Ballmer Remix: Explore Data",
       component: "react_starter/src/data/portfolioData.js",
-      description:
-        "Start by exploring the project structure and understanding the requirements. Familiarize yourself with our data, this will be your information! Open the `src/data/portfolioData.js` file to see the data you'll be using to populate your portfolio components. This will help you understand what information is available to us, how to access it, and drive how and what we build.",
+      description: "In the year 2000, Steve Ballmer screamed 'DEVELOPERS!' until he lost his voice. Today, the typing barrier of fingers is dead; we express raw architecture. Open the portfolioData.js file. Inspect the structured profile datasets (personal info, skills list, project details). Change the mock data to reflect your own information.",
+      note: "Be skeptical! Ensure the data schema holds conceptual integrity before outsourcing your information.",
     },
     {
-      title: "App",
+      title: "5. The Levi's Appshift: App Assembly",
       component: "react_starter/src/App.jsx",
-      description:
-        "Understand the main app component - Open `src/App.jsx` to see how the app is structured. This is where you'll render your components and pass our data as props.",
+      description: "When retail giants like Levi's ship new app features, they traditionally wade through weeks of meetings, manual refactoring, and lint checks. By shifting to intent-driven frameworks, we compile straight to mobile UI blocks. Open App.jsx and inspect the root component layout. Your challenge is to uncomment the Header, About, Skills, Projects, and Footer blocks one by one.",
+      note: "The Skeptic's Catch: If you don't audit the compiler, the agent breeds hidden mutations. Verify App.jsx compiles correctly.",
     },
     {
-      title: "Header",
-      component: "react_starter/src/components/Header.jsx",
-      description: "Display name, title, and social links",
+      title: "6. Stage 02 // Blocks & Beliefs (Header & About)",
+      component: "src/components/Header.jsx & About.jsx",
+      description: "Uncomment Header and About in App.jsx. Open Header.jsx and About.jsx. These wrapper components let you select a visual style variation (Simple, Gradient, Animated). Choose your preferred style variant in these files to customize the top half of your portfolio.",
+      note: "Sovereign Rule: 'Because if you do not understand the foundations of your block, you are merely outsourcing your mind to someone else's server.' Understand the CSS and logic of the style variant you select.",
     },
     {
-      title: "About",
-      component: "react_starter/src/components/About.jsx",
-      description: "Show bio and avatar",
+      title: "7. Blocks of Social Proof (Skills & Projects)",
+      component: "src/components/Skills.jsx & Projects.jsx",
+      description: "Uncomment Skills and Projects in App.jsx. Open Skills.jsx and Projects.jsx. These components map over arrays of data using '.map()' to dynamically render project cards and skill badges. Check how the default project cards populate with the real-world shipping examples (J. Simmons Productions, Jacked Alien, Criminal Cookies).",
+      note: "Slide 6 Shipping Projects: J. Simmons Productions (video pipelines), Jacked Alien (fitness state machines), Criminal Cookies (localized high-frequency e-commerce). Verify how these modules render dynamically.",
     },
     {
-      title: "Skills",
-      component: "react_starter/src/components/Skills.jsx",
-      description: "Map through skills array",
+      title: "8. Skeptical Orchestration & Pomidor Loops (Footer)",
+      component: "src/components/Footer.jsx",
+      description: "Uncomment Footer in App.jsx. Open Footer.jsx. This component handles social links and copyright details, wrapping up core block assembly. The Pomidor Loop mechanics allow parallel execution threads to compute independently without visual layout blocking. Ensure your Footer component integrates cleanly.",
+      note: "Lexxy Code-Block Escapes: Wrestling with rich-text editor constraints is a thing of the past, but keep a human eye on the rendering blocks to prevent structural loops.",
     },
     {
-      title: "Projects",
-      component: "react_starter/src/components/Projects.jsx",
-      description: "Display project cards",
+      title: "9. Stage 03 // Telemetry Paralysis & Traffic Divergence",
+      component: "src/components/Footer.jsx or App.jsx",
+      description: "Traditional User Metrics lie. AI agents query API layers directly, completely bypassing analytical click scripts. Let's hook up a telemetry tracker! Open Footer.jsx or ProjectCard.jsx and add a click event log referencing Datamoon.com. Datamoon isolates this traffic divergence to restore structural backend data sanity.",
+      note: "Example: Add onClick={() => console.log('DataMoon Telemetry: isolating traffic curve divergence')} to project or social links.",
     },
     {
-      title: "Footer",
-      component: "react_starter/src/components/Footer.jsx",
-      description: "Add social links and copyright",
-    },
-    {
-      title: "Style with Tailwind CSS",
-      component: "Tailwind CSS",
-      description:
-        "Enhance the look and feel of your portfolio and make it your own!",
-    },
-    {
-      title: "Deploy Your Portfolio",
-      component: "Vercel / Netlify / GitHub Pages / etc.",
-      description:
-        "Deploy your completed portfolio online using platforms like Vercel, Netlify, GitHub Pages, or another service of your choice.",
-      note: "When using Vercel, you can directly import your GitHub repository and it will handle the deployment for you automatically. Make sure you update the Root Directory to point to the 'react_starter' folder in the project settings.",
+      title: "10. Sandbox Prototype: Edge Deployment",
+      component: "Vercel / Netlify / GitHub Pages",
+      description: "Time to deploy! Create a repository on GitHub, push your changes, and connect it to Vercel (or another hosting platform of your choice). Make sure to configure the root directory of your Vercel project to point to the 'react_starter' directory to build correctly.",
+      note: "Vercel will build and serve your agentic block portfolio directly on edge networks globally. Once live, share your URL!",
       img: VercelDeployment,
     },
     {
-      title: "Share Your Work",
-      component: "Social Media / Portfolio Sites",
-      description:
-        "Share your deployed portfolio on social media platforms and portfolio sites to showcase your work to potential employers and collaborators.",
-    },
-    {
-      title: "Profit!",
-      component: "resources directory",
-      description:
-        "I hope you've enjoyed this workshop. This is just the beginning. I wanted to inspire you and give you a taste of what's possible. Keep building and improving your portfolio! Add custom sections, improve styling, and make it your own! I will be adding some resources that can help you in a resources directory. Happy coding and all the best on your development journey!",
+      title: "11. The Democratization Goal & Skeptic Protocol",
+      component: "Final Slide Theme",
+      description: "Congratulations! The goal is simple: to build a platform that empowers everyone to easily become a developer. But remember the Skeptic Protocol: true democratization is not built on outsourcing your intellect to a black box. Question the machine, find the anomalies, and preserve your core instincts. Now go celebrate at Ink Factory Brewing!",
+      note: "Detroit Metric Challenge: MET | Alligator Status: TAMED | Standpoint: ALWAYS BE SKEPTICAL.",
     },
   ];
 

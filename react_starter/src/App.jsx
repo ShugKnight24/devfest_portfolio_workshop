@@ -4,11 +4,11 @@ import portfolioData from "./data/portfolioData";
 import { StarterInstructions } from "./components/StarterInstructions";
 
 // These are the building blocks of your portfolio!
-import { Header } from "./components/Header";
-import { About } from "./components/About";
-import { Skills } from "./components/Skills";
-import { Projects } from "./components/Projects";
-import { Footer } from "./components/Footer";
+// import { Header } from "./components/Header";
+// import { About } from "./components/About";
+// import { Skills } from "./components/Skills";
+// import { Projects } from "./components/Projects";
+// import { Footer } from "./components/Footer";
 
 /**
  * The Component Tree & Props
@@ -18,8 +18,8 @@ import { Footer } from "./components/Footer";
  * (Header, About, etc.) via "props".
  *
  * Think of it like a waterfall: Data flows DOWN from parent to child.
- * In React, this is a one-way flow, but we can use some nifty techniques
- * like "lifting state up" and "callback" functions to send data back up if needed.
+ * In React, this is a one-way flow, we can use some techniques
+ * like "lifting state up" and "callback" functions to send data back up when needed.
  */
 
 function App() {
@@ -44,13 +44,13 @@ function App() {
         5. Deploy your portfolio and share it with the world!
         6. Profit???
       */}
-      {/* <StarterInstructions /> */}
+      <StarterInstructions />
 
-      <Header personal={personal} />
-      <About avatar={avatar} aboutImage={aboutImage} bio={bio} />
-      <Skills skills={skills} />
-      <Projects projects={projects} />
-      <Footer social={social} name={name} />
+      {/* <Header personal={personal} /> */}
+      {/* <About avatar={avatar} aboutImage={aboutImage} bio={bio} /> */}
+      {/* <Skills skills={skills} /> */}
+      {/* <Projects projects={projects} /> */}
+      {/* <Footer social={social} name={name} /> */}
     </div>
   );
 }

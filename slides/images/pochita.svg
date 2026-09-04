@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- Pochita silhouette — chainsaw devil puppy -->
+  <!-- Body: round, compact -->
+  <ellipse cx="60" cy="68" rx="32" ry="28" fill="currentColor" opacity="0.9"/>
+  <!-- Head -->
+  <circle cx="60" cy="40" r="22" fill="currentColor" opacity="0.9"/>
+  <!-- Ears -->
+  <path d="M42 28 L36 10 L50 24Z" fill="currentColor" opacity="0.9"/>
+  <path d="M78 28 L84 10 L70 24Z" fill="currentColor" opacity="0.9"/>
+  <!-- Chainsaw handle/nose -->
+  <rect x="55" y="18" width="10" height="20" rx="3" fill="currentColor" opacity="0.7"/>
+  <!-- Chainsaw blade extending up -->
+  <rect x="57" y="2" width="6" height="18" rx="2" fill="currentColor" opacity="0.6"/>
+  <!-- Teeth on blade (jagged) -->
+  <path d="M56 4 L58 2 L58 6Z" fill="currentColor" opacity="0.5"/>
+  <path d="M56 8 L58 6 L58 10Z" fill="currentColor" opacity="0.5"/>
+  <path d="M56 12 L58 10 L58 14Z" fill="currentColor" opacity="0.5"/>
+  <path d="M56 16 L58 14 L58 18Z" fill="currentColor" opacity="0.5"/>
+  <!-- Eyes -->
+  <circle cx="52" cy="38" r="3" fill="var(--slide-bg, #070709)"/>
+  <circle cx="68" cy="38" r="3" fill="var(--slide-bg, #070709)"/>
+  <!-- Cord/ripcord tail -->
+  <path d="M92 68 Q100 68 104 60 Q108 52 116 54" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.7"/>
+  <!-- Cord handle -->
+  <circle cx="116" cy="54" r="4" fill="currentColor" opacity="0.6"/>
+  <!-- Stubby legs -->
+  <ellipse cx="42" cy="92" rx="8" ry="6" fill="currentColor" opacity="0.8"/>
+  <ellipse cx="78" cy="92" rx="8" ry="6" fill="currentColor" opacity="0.8"/>
+</svg>

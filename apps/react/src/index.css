@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+/* Define the dark mode variant explicitly for v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --color-primary: #00FFCC;
+    --color-secondary: #FFCC00;
+    --color-accent: #FF0055;
+    --color-background: #08090C;
+    --color-dark: #020304;
+    --color-surface: #FFFFFF;
+    --color-surface-dark: #0A0D14;
+    --color-surface-hover: #F8FAFC;
+    --color-surface-hover-dark: #101622;
+    --color-border: #E2E8F0;
+    --color-border-dark: #15202B;
+    --color-border-subtle: #00FFCC26;
+    --color-text: #0F172A;
+    --color-text-dark: #FFFFFF;
+    --color-muted-text: #64748B;
+    --color-muted-text-dark: #94A3B8;
+    --color-primary-text: #020304;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    transition: background-color 300ms ease, color 300ms ease;
+  }
+
+  .dark body,
+  :where(.dark, .dark *) body {
+    background-color: var(--color-dark);
+    color: var(--color-text-dark);
+  }
+}
+
+@layer components {
+  .section-container {
+    @apply max-w-6xl mx-auto px-4 py-12 sm:px-6 lg:px-8;
+  }
+
+  .section-title {
+    @apply text-3xl font-bold mb-8 text-center;
+    color: var(--color-text);
+  }
+  .dark .section-title {
+    color: var(--color-text-dark);
+  }
+
+  /* Universal Themed Card */
+  .card,
+  .theme-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    border-radius: 1rem;
+    transition: background-color 300ms ease, border-color 300ms ease, color 300ms ease, box-shadow 300ms ease;
+  }
+  .dark .card,
+  .dark .theme-card {
+    background-color: var(--color-surface-dark);
+    border-color: var(--color-border-dark);
+    color: var(--color-text-dark);
+  }
+
+  .card-hover,
+  .theme-card-hover {
+    transition: all 300ms ease;
+  }
+  .card-hover:hover,
+  .theme-card-hover:hover {
+    background-color: var(--color-surface-hover);
+    border-color: var(--color-primary);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 0 15px -3px var(--color-primary);
+  }
+  .dark .card-hover:hover,
+  .dark .theme-card-hover:hover {
+    background-color: var(--color-surface-hover-dark);
+    border-color: var(--color-primary);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 20px -3px var(--color-primary);
+  }
+
+  /* Semantic Themed Utility Classes */
+  .theme-surface {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+  }
+  .dark .theme-surface {
+    background-color: var(--color-surface-dark);
+    color: var(--color-text-dark);
+  }
+
+  .theme-border {
+    border-color: var(--color-border);
+  }
+  .dark .theme-border {
+    border-color: var(--color-border-dark);
+  }
+
+  .theme-muted {
+    color: var(--color-muted-text);
+  }
+  .dark .theme-muted {
+    color: var(--color-muted-text-dark);
+  }
+}
+
+/* Animations */
+@layer utilities {
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 1s ease-in-out;
+  }
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.8s ease-out;
+  }
+
+  .delay-1000 {
+    animation-delay: 1s;
+  }
+
+  .delay-2000 {
+    animation-delay: 2s;
+  }
+}

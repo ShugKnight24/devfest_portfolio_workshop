@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Safety Division 4 // Chainsaw Man Lens — 60 Min Masterclass</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;900&family=JetBrains+Mono:wght@700&display=swap');
+        :root { --bg: #0f0005; --accent: #ff0055; --text: #fff; --border: #330011; --accent2: #c6ff00;}
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Space Grotesk', sans-serif; overflow: hidden; }
+
+        /* Top HUD Variant Switcher */
+        .top-hud {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            background: rgba(15, 0, 5, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+        }
+
+        .nav-links { display: flex; align-items: center; gap: 0.5rem; }
+        .nav-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: #aaa;
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover { color: #fff; border-color: var(--accent); }
+        .nav-btn.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            font-weight: 900;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+        }
+
+        .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 5rem 10vw 4rem; opacity: 0; transition: 0.4s; transform: scale(0.95); pointer-events: none; box-sizing: border-box; }
+        .slide.active { opacity: 1; transform: scale(1); pointer-events: auto; }
+        h1 { font-size: 5rem; text-transform: uppercase; margin: 0 0 1rem; color: var(--accent); line-height: 1; text-shadow: 4px 4px 0px rgba(255,0,85,0.2);}
+        h2 { color: var(--accent2); font-family: 'JetBrains Mono'; text-transform: uppercase; margin-bottom: 2rem;}
+        p { font-size: 1.4rem; line-height: 1.5; max-width: 900px; color: #ddd; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; margin-top: 1.5rem;}
+        .box { background: rgba(0,0,0,0.8); border: 2px solid var(--border); padding: 1.5rem; font-family: 'JetBrains Mono'; font-size: 1rem; line-height: 1.5;}
+        .bad { border-color: #555; color: #888;} .good { border-color: var(--accent); box-shadow: 0 0 20px rgba(255,0,85,0.15); }
+        .char-title { color: var(--accent2); font-size: 1.4rem; text-transform: uppercase; margin-bottom: 10px;}
+
+        /* Teleprompter Notes Panel */
+        .notes-panel { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: #111; border-left: 4px solid var(--accent2); padding: 1.5rem; border-radius: 8px; width: 70%; color: var(--accent2); font-family: 'JetBrains Mono'; font-size: 1.1rem; display: none; z-index: 200; box-shadow: 0 10px 40px rgba(0,0,0,0.9); max-height: 250px; overflow-y: auto;}
+        body.show-notes .notes-panel { display: block; }
+
+        .hud-bottom {
+            position: fixed;
+            bottom: 1rem;
+            left: 2rem;
+            right: 2rem;
+            display: flex;
+            justify-content: space-between;
+            font-family: 'JetBrains Mono', monospace;
+            color: #888;
+            font-size: 0.75rem;
+            pointer-events: none;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 50px;
+            left: 0;
+            height: 3px;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+            z-index: 105;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Variant Switcher -->
+    <header class="top-hud">
+        <div class="nav-links">
+            <a href="../../" class="nav-btn">← PORTFOLIO</a>
+            <span style="color: #888; font-size: 0.7rem; margin-left: 8px;">MASTERCLASS SQUADS:</span>
+        </div>
+        <div class="nav-links">
+            <a href="../nomad/index.html" class="nav-btn">1: THE 110th</a>
+            <a href="../ripcord/index.html" class="nav-btn active">2: DIVISION 4</a>
+            <a href="../iron/index.html" class="nav-btn">3: IRON PROTOCOL</a>
+            <a href="../combined/index.html" class="nav-btn">4: COMBINED</a>
+        </div>
+        <div>
+            <button class="nav-btn" onclick="toggleNotes()">NOTES (N)</button>
+        </div>
+    </header>
+
+    <div class="progress-bar" id="progress"></div>
+
+    <!-- SLIDE 1 -->
+    <div class="slide active">
+        <h2>Contract Initialized</h2>
+        <h1>Manage The<br>Chaos.</h1>
+        <p>We are making contracts with AI entities that code better than we do. The blank page is a trap. The modern developer doesn't write syntax; they curate chaos.</p>
+        <div class="notes-panel">NOTES: Welcome them. Set the stage: The tech industry right now is chaotic. Just like CSM, the ones who survive are the ones who learn how to wield the chaos, not hide from it. [Press N to hide/show notes]</div>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="slide">
+        <h2>Phase 02 // Momentum vs Contracts</h2>
+        <div class="grid-2">
+            <div>
+                <div class="char-title">The Denji Ripcord</div>
+                <p style="font-size: 1.1rem;">Denji has no formal training. He just pulls the cord and swings. Stop whiteboarding architecture for 3 weeks. "Vibe code." Get the prototype on screen and iterate with momentum.</p>
+            </div>
+            <div>
+                <div class="char-title">The Aki Contracts</div>
+                <p style="font-size: 1.1rem;">Aki pays a physical price for his power. <strong>Dependencies are contracts.</strong> Every time you let an AI hallucinate 10 NPM packages into your code, you trade your codebase's lifespan for a shortcut.</p>
+            </div>
+        </div>
+        <div class="notes-panel">NOTES: Contrast Denji's raw momentum with Aki's rigid contracts. Tell them to move fast like Denji, but be careful of the "Tech Debt Devils" like Aki. Keep the stack lean.</div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="slide">
+        <h2>Phase 03 // Generative AI</h2>
+        <div class="grid-2">
+            <div>
+                <div class="char-title">The Power Paradigm</div>
+                <p style="font-size: 1.1rem;">Power is pure chaos. She's incredibly strong, but she lies about her stats and needs constant babysitting. <strong>This is your LLM.</strong> It will confidently hallucinate functions that don't exist. You must point it at the enemy and verify the kill.</p>
+            </div>
+            <div class="box bad" style="margin-top: 1rem;">
+                <span style="color:#ff0055; text-transform:uppercase; font-weight:bold;">The Hallucination:</span><br><br>
+                AI: "I imported the proprietary API you asked for!"<br><br>
+                <i>You: "This repository hasn't existed since 2019."</i>
+            </div>
+        </div>
+        <div class="notes-panel">NOTES: The crowd will love the Power analogy. We all know LLMs act exactly like her. They lie to our faces to look good. We have to be the adults in the room auditing the compiler.</div>
+    </div>
+
+    <!-- SLIDE 4 -->
+    <div class="slide">
+        <h2>Phase 04 // The Orchestrator</h2>
+        <div class="grid-2">
+            <div>
+                <div class="char-title">Makima's Orchestration</div>
+                <p style="font-size: 1.1rem;">Makima views agents as tools to achieve a macro vision. <strong>Your taste and curation are now the only bottlenecks.</strong> Be the orchestrator. Generate 4 architecture variations, discard 3, merge the winner.</p>
+            </div>
+            <div>
+                <div class="char-title">The Kishibe Truth</div>
+                <p style="font-size: 1.1rem;">"The devils fear the hunters with a screw loose." To survive the AI wave, you have to be slightly crazy. Burn the resume. Build bespoke software for an Audience of One.</p>
+            </div>
+        </div>
+        <div class="notes-panel">NOTES: You are Makima (hopefully less evil). You aren't laying bricks; you are directing the team. Kishibe is the ultimate senior dev. You have to be fearless to throw away old habits.</div>
+    </div>
+
+    <!-- SLIDE 5 -->
+    <div class="slide">
+        <h2>Phase 05 // The Reality</h2>
+        <div class="grid-2">
+            <div class="box bad"><span style="color:#888; text-transform:uppercase; font-weight:bold;">The Telemetry Devil</span><br><br>Bot traffic is destroying web analytics. The agentic loops are creating synthetic noise everywhere.</div>
+            <div class="box good"><span style="color:var(--accent); text-transform:uppercase; font-weight:bold;">Sovereign Truth</span><br><br>You need sovereign truth. Sovereign forensic telemetry is how we survive the noise and prove our proof of work is real.</div>
+        </div>
+        <div class="notes-panel">NOTES: Defeat the "Telemetry Devil" (bot traffic). We have to own our data with sovereign auditing.</div>
+    </div>
+
+    <!-- SLIDE 6 -->
+    <div class="slide" style="text-align: center;">
+        <h2>The Mandate</h2>
+        <h1 style="font-size: 5rem;">What is your dream?</h1>
+        <p style="margin: 0 auto;">Denji fought for basic autonomy. You have the most powerful creative engine in human history at your fingertips. Stop waiting. Pull the cord.</p>
+        <p style="color: var(--accent2); font-family: 'JetBrains Mono'; margin-top: 3rem; font-weight: bold;">github.com/shugknight24<br>[ VERIFIED ] ¯\_(ツ)_/¯ jackpot ¯\_(ツ)_/¯ [ VERIFIED ]</p>
+        <div class="notes-panel">NOTES: End on massive inspiration. Computers don't have dreams, humans do. Use the tools to build your life with absolute fire.</div>
+    </div>
+
+    <!-- HUD BOTTOM -->
+    <div class="hud-bottom">
+        <div>Shortcuts: [←/→] Navigate &bull; [N] Teleprompter Notes &bull; [1-4] Switch Squad</div>
+        <div id="counter">01 / 06</div>
+    </div>
+
+    <script>
+        let current = 0; 
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progress');
+        const counter = document.getElementById('counter');
+
+        function updateSlide() {
+            slides.forEach((s, i) => s.classList.toggle('active', i === current));
+            const progressPct = ((current + 1) / slides.length) * 100;
+            progressBar.style.width = progressPct + '%';
+            counter.textContent = String(current + 1).padStart(2, '0') + ' / ' + String(slides.length).padStart(2, '0');
+        }
+
+        function toggleNotes() {
+            document.body.classList.toggle('show-notes');
+        }
+
+        document.addEventListener('keydown', (e) => { 
+            if(e.key === 'ArrowRight' || e.key === ' ') { 
+                current = Math.min(current + 1, slides.length - 1); 
+                updateSlide();
+            }
+            if(e.key === 'ArrowLeft') { 
+                current = Math.max(current - 1, 0); 
+                updateSlide();
+            }
+            if(e.key.toLowerCase() === 'n') { 
+                toggleNotes(); 
+            }
+            if(e.key === '1') window.location.href = '../nomad/index.html';
+            if(e.key === '2') window.location.href = '../ripcord/index.html';
+            if(e.key === '3') window.location.href = '../iron/index.html';
+            if(e.key === '4' || e.key === 'c' || e.key === 'C') window.location.href = '../combined/index.html';
+        });
+
+        updateSlide();
+    </script>
+</body>
+</html>

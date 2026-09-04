@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Trilogy Ensemble // The 110th x Division 4 x The Iron — 60 Min Masterclass</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        :root {
+            --bg: #06080a;
+            --surface: #0e1217;
+            --accent: #00e5ff;
+            --accent-dim: rgba(0, 229, 255, 0.15);
+            --accent-rip: #ff0055;
+            --accent-iron: #d32f2f;
+            --accent2: #ffaa00;
+            --text-main: #ffffff;
+            --text-dim: #8c9ba5;
+            --border: #1a232e;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text-main);
+            font-family: 'Space Grotesk', sans-serif;
+            overflow: hidden;
+            background-image: 
+                linear-gradient(to right, rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 0, 85, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* Top HUD Variant Switcher */
+        .top-hud {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            background: rgba(6, 8, 10, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+        }
+
+        .nav-links { display: flex; align-items: center; gap: 0.5rem; }
+        .nav-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover { color: #fff; border-color: var(--accent); }
+        .nav-btn.active {
+            background: linear-gradient(90deg, #00e5ff, #ff0055);
+            color: #000;
+            border-color: #00e5ff;
+            font-weight: 900;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+            padding: 5rem 8vw 4rem;
+            box-sizing: border-box;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .phase-badge {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--accent);
+            background: var(--accent-dim);
+            padding: 6px 14px;
+            border-radius: 9999px;
+            box-shadow: 0 0 20px var(--accent-dim);
+        }
+
+        h1 {
+            font-size: clamp(3.2rem, 6vw, 5.5rem);
+            font-weight: 900;
+            line-height: 0.95;
+            margin: 0 0 1.5rem 0;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            text-align: center;
+            text-shadow: 0 0 35px rgba(0, 229, 255, 0.3);
+        }
+
+        p.narrative {
+            font-size: clamp(1.1rem, 2vw, 1.5rem);
+            color: var(--text-dim);
+            max-width: 900px;
+            text-align: center;
+            line-height: 1.5;
+            margin: 0 0 2rem 0;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            width: 100%;
+            max-width: 1100px;
+            align-items: start;
+        }
+
+        .card {
+            background: var(--surface);
+            padding: 1.75rem;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            position: relative;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card.bad {
+            border-top: 4px solid #ff4444;
+            background: rgba(255, 68, 68, 0.04);
+            border-color: rgba(255, 68, 68, 0.2);
+            color: #ccc;
+        }
+
+        .card.good {
+            border-top: 4px solid var(--accent);
+            box-shadow: 0 0 25px var(--accent-dim);
+            border-color: rgba(0, 229, 255, 0.25);
+            color: #fff;
+        }
+
+        .char-title {
+            color: var(--accent2);
+            font-weight: bold;
+            font-family: 'Space Grotesk', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-size: 1.2rem;
+        }
+
+        .tag {
+            font-weight: bold;
+            margin-bottom: 0.75rem;
+            display: inline-block;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+        .bad .tag { background: rgba(255, 68, 68, 0.2); color: #ff4444; border: 1px solid rgba(255, 68, 68, 0.3); }
+        .good .tag { background: rgba(0, 229, 255, 0.2); color: var(--accent); border: 1px solid rgba(0, 229, 255, 0.3); }
+
+        .code-box {
+            background: #000;
+            padding: 1rem;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            border: 1px solid var(--border);
+            margin: 0.5rem 0;
+            font-size: 0.85rem;
+        }
+
+        .result {
+            margin-top: 0.75rem;
+            color: var(--text-dim);
+            font-style: italic;
+            font-size: 0.8rem;
+        }
+        .good .result { color: var(--accent); }
+        .bad .result { color: #ff6666; }
+
+        .signature {
+            margin-top: 2rem;
+            padding: 1rem 2rem;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #bbb;
+            text-align: center;
+        }
+
+        /* Teleprompter Notes Panel */
+        .notes-panel {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10, 14, 20, 0.96);
+            border-top: 3px solid var(--accent);
+            padding: 1.5rem 2.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            color: var(--accent);
+            border-radius: 8px;
+            width: 75%;
+            display: none;
+            z-index: 200;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        body.show-notes .notes-panel { display: block; }
+
+        .hud-bottom {
+            position: fixed;
+            bottom: 1rem;
+            left: 2rem;
+            right: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            z-index: 80;
+            pointer-events: none;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 50px;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00e5ff, #ff0055);
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+            z-index: 105;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Variant Switcher -->
+    <header class="top-hud">
+        <div class="nav-links">
+            <a href="../../" class="nav-btn">← PORTFOLIO</a>
+            <span style="color: var(--text-dim); font-size: 0.7rem; margin-left: 8px;">MASTERCLASS SQUADS:</span>
+        </div>
+        <div class="nav-links">
+            <a href="../nomad/index.html" class="nav-btn">1: THE 110th</a>
+            <a href="../ripcord/index.html" class="nav-btn">2: DIVISION 4</a>
+            <a href="../iron/index.html" class="nav-btn">3: IRON PROTOCOL</a>
+            <a href="../combined/index.html" class="nav-btn active">4: COMBINED</a>
+        </div>
+        <div>
+            <button class="nav-btn" onclick="toggleNotes()">NOTES (N)</button>
+        </div>
+    </header>
+
+    <div class="progress-bar" id="progress"></div>
+
+    <!-- SLIDE 1: Prologue -->
+    <div class="slide active">
+        <div class="phase-badge">Prologue // The Paradigm</div>
+        <h1>Assemble The<br>Investigators.</h1>
+        <p class="narrative">The syntax barrier is dead. Solo coding is over. You are now the Commander of an AI squad directing agents with different roles, different flaws, and different strengths.</p>
+        <div class="notes-panel">NOTES: Welcome to the master session. Today we fuse three mental models: The 110th Special Investigators (Reacher squad deduction), Public Safety Division 4 (Chainsaw Man contracts and chaos), and The Iron Protocol (Bodybuilding overload and form). [Press N for notes]</div>
+    </div>
+
+    <!-- SLIDE 2: Act I Token Economics -->
+    <div class="slide">
+        <div class="phase-badge">Act I // Token Economics</div>
+        <div class="grid-2">
+            <div class="card bad">
+                <div class="char-title">The Reacher Protocol</div>
+                <p style="font-size: 0.95rem; color: #bbb; margin: 0 0 1rem;">"Reacher said nothing." Stop talking to the machine like it's human. Every polite word wastes context memory. Be surgical.</p>
+                <span class="tag">Civilian Prompt</span>
+                <div class="code-box">"Hi AI, could you please help me write a tracker? Make it nice!"</div>
+                <div class="result">-> Result: Hallucinates 5 NPM packages.</div>
+            </div>
+            <div class="card good">
+                <div class="char-title" style="color: var(--accent);">The Neagley Precision</div>
+                <p style="font-size: 0.95rem; color: #eee; margin: 0 0 1rem;">"Neagley never misses." She doesn't like to be touched. These are your isolated, pure functions. Zero dependencies. Absolute precision execution.</p>
+                <span class="tag">Investigator Prompt</span>
+                <div class="code-box">Target: auth.ts
+Constraints: Vanilla JS, Zero deps.
+Output: Diff only.</div>
+                <div class="result">-> Result: Exact execution. Zero bloat.</div>
+            </div>
+        </div>
+        <div class="notes-panel">NOTES: ACT I - The 110th. Reacher brings blunt force; Neagley brings pure isolated execution. Cut civilian token bloat.</div>
+    </div>
+
+    <!-- SLIDE 3: Act I Domain Expertise -->
+    <div class="slide">
+        <div class="phase-badge">Act I // Domain Expertise</div>
+        <div class="grid-2">
+            <div class="card">
+                <div class="char-title">The Finlay Architecture</div>
+                <p style="font-size: 0.95rem; color: #bbb; line-height: 1.5;">Finlay is by-the-book. Strict typings. Legacy rules. He relies on evidence and facts. Don't ask AI to "fix the bug"—give it the exact stack trace. Finlay is your CI/CD pipeline demanding proof.</p>
+            </div>
+            <div class="card">
+                <div class="char-title">The Roscoe Advantage</div>
+                <p style="font-size: 0.95rem; color: #bbb; line-height: 1.5;">Roscoe has deep local roots. AI has global knowledge, but it doesn't know your specific problem. <strong>Domain expertise</strong> is your ultimate moat. Build for an Audience of One.</p>
+            </div>
+        </div>
+        <div class="notes-panel">NOTES: Finlay demands stack traces and strict proof; Roscoe builds for the local problem (Audience of One).</div>
+    </div>
+
+    <!-- SLIDE 4: Act I Specialist Tools -->
+    <div class="slide">
+        <div class="phase-badge">Act I // The Specialist Tools</div>
+        <div class="grid-2">
+            <div class="card">
+                <div class="char-title">O'Donnell's Switchblade</div>
+                <p style="font-size: 0.95rem; color: #bbb; line-height: 1.5;">O'Donnell wears a corporate suit now, but still carries a ceramic switchblade to bypass metal detectors. <strong>Build micro-utilities.</strong> Avoid monolithic AWS frameworks when localized storage will do.</p>
+            </div>
+            <div class="card">
+                <div class="char-title">Dixon's Telemetry</div>
+                <p style="font-size: 0.95rem; color: #bbb; line-height: 1.5;">Dixon finds the pattern in the numbers. AI bots generate +6,900% more web traffic today. Your dashboards are lying. <strong>Sovereign forensic telemetry</strong> is how we isolate human intent from agentic noise.</p>
+            </div>
+        </div>
+        <div class="notes-panel">NOTES: O'Donnell carries a ceramic switchblade (micro-utilities). Dixon audits the numbers when evidence is corrupt.</div>
+    </div>
+
+    <!-- SLIDE 5: Act II Momentum vs Contracts -->
+    <div class="slide">
+        <div class="phase-badge">Act II // Momentum vs. Contracts</div>
+        <div class="grid-2">
+            <div class="card">
+                <div class="char-title" style="color: var(--accent-rip);">The Denji Ripcord</div>
+                <p style="font-size: 0.95rem; color: #bbb; line-height: 1.5;">Denji has no formal training. He just pulls the cord and swings. Stop whiteboarding architecture for 3 weeks. "Vibe code." Get the prototype on screen and iterate with momentum.</p>
+            </div>
+            <div class="card">
+                <div class="char-title" style="color: #c6ff00;">The Aki Contracts</div>
+                <p style="font-size: 0.95rem; color: #bbb; line-height: 1.5;">Aki pays a physical price for his power. <strong>Dependencies are contracts.</strong> Every time you let an AI hallucinate 10 NPM packages into your code, you trade your codebase's lifespan for a shortcut.</p>
+            </div>
+        </div>
+        <div class="notes-panel">NOTES: ACT II - Division 4. Denji vibes with momentum, but Aki warns that every dependency is a contract with a devil.</div>
+    </div>
+
+    <!-- SLIDE 6: Act II Generative AI -->
+    <div class="slide">
+        <div class="phase-badge">Act II // Generative AI</div>
+        <div class="grid-2">
+            <div class="card">
+                <div class="char-title" style="color: var(--accent-rip);">The Power Paradigm</div>
+                <p style="font-size: 0.95rem; color: #bbb; line-height: 1.5;">Power is pure chaos. She's incredibly strong, but she lies about her stats and needs constant babysitting. <strong>This is your LLM.</strong> It will confidently hallucinate functions that don't exist. You must verify every kill.</p>
+            </div>
+            <div class="card bad">
+                <span class="tag">The Hallucination</span>
+                <div class="code-box">AI: "I imported the proprietary API you asked for!"
+
+You: "This repository hasn't existed since 2019."</div>
+                <div class="result">-> Result: Confident lies requiring compiler audit.</div>
+            </div>
+        </div>
+        <div class="notes-panel">NOTES: Power is your LLM: brilliant, powerful, but lies to your face. You must audit the compiler.</div>
+    </div>
+
+    <!-- SLIDE 7: Act II The Orchestrator -->
+    <div class="slide">
+        <div class="phase-badge">Act II // The Orchestrator</div>
+        <div class="grid-2">
+            <div class="card">
+                <div class="char-title" style="color: var(--accent-rip);">Makima's Orchestration</div>
+                <p style="font-size: 0.95rem; color: #bbb; line-height: 1.5;">Makima views agents as tools to achieve a macro vision. <strong>Your taste and curation are now the only bottlenecks.</strong> Be the orchestrator. Generate 4 architecture variations, discard 3, merge the winner.</p>
+            </div>
+            <div class="card">
+                <div class="char-title" style="color: #c6ff00;">The Kishibe Truth</div>
+                <p style="font-size: 0.95rem; color: #bbb; line-height: 1.5;">"The devils fear the hunters with a screw loose." To survive the AI wave, you have to be slightly crazy. Burn the resume. Build bespoke software for an Audience of One.</p>
+            </div>
+        </div>
+        <div class="notes-panel">NOTES: Makima orchestrates agents; taste and curation are your only bottlenecks. Kishibe builds bespoke tools with zero fear.</div>
+    </div>
+
+    <!-- SLIDE 8: Act III The Warmup -->
+    <div class="slide">
+        <div class="phase-badge">Act III // The Iron Protocol</div>
+        <h1 style="color: var(--accent-iron);">Progressive<br>Overload.</h1>
+        <p class="narrative">In the age of AI, the machine does the heavy lifting, but YOU are the spotter. Code is irrelevant now. The bottleneck is your discipline, your curation, and your form.</p>
+        <div class="notes-panel">NOTES: ACT III - The Iron Protocol. AI is steroids for developers—you need progressive overload and cognitive hypertrophy.</div>
+    </div>
+
+    <!-- SLIDE 9: Act III Form Check -->
+    <div class="slide">
+        <div class="phase-badge">Act III // Form Check</div>
+        <div class="grid-2">
+            <div class="card bad">
+                <span class="tag">Bad Form: Ego Lifting</span>
+                <div class="code-box">"Build me a full SaaS platform like Uber. Write the backend, frontend, and DB all at once."</div>
+                <div class="result">-> Result: You get crushed by code you can't debug.</div>
+            </div>
+            <div class="card good">
+                <span class="tag">Good Form: Isolation Sets</span>
+                <div class="code-box">"Step 1: Design the DB schema for auth. Wait for approval.
+Step 2: Write the API route. Spot me on the form."</div>
+                <div class="result">-> Result: Flawless execution. Total architectural sovereignty.</div>
+            </div>
+        </div>
+        <div class="notes-panel">NOTES: Ego lifting crashes codebases; isolation sets build unbreakable systems.</div>
+    </div>
+
+    <!-- SLIDE 10: Act III Hypertrophy -->
+    <div class="slide">
+        <div class="phase-badge">Act III // Hypertrophy</div>
+        <h1 style="color: var(--accent-iron);">Tear it<br>Down.</h1>
+        <p class="narrative">Muscle grows by tearing fibers. Codebases evolve the same way. Build great apps by letting AI write the prototype, actively breaking it, and forcing it to refactor stronger. <strong>Never skip leg day (Automated Testing).</strong></p>
+        <div class="notes-panel">NOTES: Hypertrophy. Don't be afraid to delete generated code. Never skip leg day (automated testing).</div>
+    </div>
+
+    <!-- SLIDE 11: The Climax -->
+    <div class="slide">
+        <div class="phase-badge">The Climax // The Mirror vs. The Scale</div>
+        <div class="grid-2">
+            <div class="card bad">
+                <span class="tag">The Dirty Bulk</span>
+                <div class="code-box">Generating massive monorepos. Bloated metrics from bot traffic. Looking massive on paper, but zero actual strength.</div>
+                <div class="result">-> Result: Fragile bundle bloat that collapses under true strain.</div>
+            </div>
+            <div class="card good">
+                <span class="tag">The True Scale</span>
+                <div class="code-box">Generative AI inflates vanity metrics. Sovereign forensic auditing is the scale that proves your actual proof of work. Question everything.</div>
+                <div class="result">-> Result: Cold, unyielding truth of sovereign performance.</div>
+            </div>
+        </div>
+        <div class="notes-panel">NOTES: The Mirror vs The Scale. The dirty bulk of bloated monorepos vs. sovereign forensic auditing.</div>
+    </div>
+
+    <!-- SLIDE 12: Epilogue -->
+    <div class="slide" style="text-align: center;">
+        <div class="phase-badge">Epilogue // The Commander's Mandate</div>
+        <h1>Your Set.<br>Your Rules.</h1>
+        <p class="narrative">Investigate like the 110th. Move with the momentum of Denji. Lift with the strict form of an iron athlete. The platform is yours—stop asking for permission. Take the shot.</p>
+        <div class="signature">
+            github.com/shugknight24<br>
+            [ VERIFIED ] ¯\_(ツ)_/¯ jackpot ¯\_(ツ)_/¯ [ VERIFIED ]
+        </div>
+        <div class="notes-panel">NOTES: The Final Mandate. You are the commander of the squad. Take the shot. Pull the cord. Step up to the platform.</div>
+    </div>
+
+    <!-- HUD BOTTOM -->
+    <div class="hud-bottom">
+        <div>Shortcuts: [←/→] Navigate &bull; [N] Teleprompter Notes &bull; [1-4] Switch Squad</div>
+        <div id="counter">01 / 12</div>
+    </div>
+
+    <script>
+        let current = 0; 
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progress');
+        const counter = document.getElementById('counter');
+
+        function updateSlide() {
+            slides.forEach((s, i) => s.classList.toggle('active', i === current));
+            const progressPct = ((current + 1) / slides.length) * 100;
+            progressBar.style.width = progressPct + '%';
+            counter.textContent = String(current + 1).padStart(2, '0') + ' / ' + String(slides.length).padStart(2, '0');
+        }
+
+        function toggleNotes() {
+            document.body.classList.toggle('show-notes');
+        }
+
+        document.addEventListener('keydown', (e) => { 
+            if(e.key === 'ArrowRight' || e.key === ' ') { 
+                current = Math.min(current + 1, slides.length - 1); 
+                updateSlide();
+            }
+            if(e.key === 'ArrowLeft') { 
+                current = Math.max(current - 1, 0); 
+                updateSlide();
+            }
+            if(e.key.toLowerCase() === 'n') { 
+                toggleNotes(); 
+            }
+            if(e.key === '1') window.location.href = '../nomad/index.html';
+            if(e.key === '2') window.location.href = '../ripcord/index.html';
+            if(e.key === '3') window.location.href = '../iron/index.html';
+            if(e.key === '4' || e.key === 'c' || e.key === 'C') window.location.href = '../combined/index.html';
+        });
+
+        updateSlide();
+    </script>
+</body>
+</html>

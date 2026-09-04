@@ -1,0 +1,5 @@
+/* Add any custom styles here */
+.gradient-text {
+  color: var(--color-primary);
+  font-weight: 700;
+}

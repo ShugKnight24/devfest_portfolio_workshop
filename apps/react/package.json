@@ -1,0 +1,39 @@
+{
+  "name": "portfolio_workshop_starter",
+  "version": "0.0.1",
+  "description": "Interactive Portfolio Builder Workshop - Vite + React + Tailwind",
+  "type": "module",
+  "packageManager": "pnpm@10.18.3",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@portfolio/icons": "workspace:*",
+    "@portfolio/themes": "workspace:*",
+    "@portfolio/telemetry": "workspace:*",
+    "@vercel/analytics": "^1.5.0",
+    "@vercel/speed-insights": "^1.2.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.9.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.16",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@vitejs/plugin-react": "^5.1.0",
+    "@vitest/ui": "^4.0.15",
+    "happy-dom": "^20.0.11",
+    "jsdom": "^27.0.1",
+    "tailwindcss": "^4.1.16",
+    "vite": "^7.1.12",
+    "vitest": "^4.0.15"
+  }
+}

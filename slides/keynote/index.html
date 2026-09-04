@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Reacher Protocol // Master Keynote — Detroit LHM &amp; DevFest 2026</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700;900&family=JetBrains+Mono:wght@400;700;800&display=swap');
+        
+        /* REACHER MODE (Tactical, Cold, Methodical) */
+        :root {
+            --bg: #050606; --surface: rgba(10, 15, 15, 0.85); --grid: rgba(0, 255, 204, 0.05);
+            --text-main: #e0e0e0; --text-dim: #8b9598;
+            --accent: #00ffcc; --accent-alt: #ffcc00; --border: #1a2626; --glitch: 0px;
+        }
+
+        /* REZE MODE (Explosive, High-Octane, Chaotic) */
+        body.reze-mode {
+            --bg: #0a0004; --surface: rgba(15, 5, 10, 0.85); --grid: rgba(255, 0, 85, 0.1);
+            --accent: #ff0055; --accent-alt: #c6ff00; --border: #330011; --glitch: 3px;
+        }
+
+        body { 
+            margin: 0; background-color: var(--bg); color: var(--text-main); font-family: 'Space Grotesk', sans-serif; overflow: hidden; 
+            background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 40px 40px; transition: all 0.5s ease;
+        }
+
+        .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; opacity: 0; transform: scale(1.02) translateY(15px); transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1); pointer-events: none; padding: 4rem; box-sizing: border-box; }
+        .slide.active { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
+
+        .glass-panel { background: var(--surface); border: 1px solid var(--accent); backdrop-filter: blur(10px); padding: 4rem; max-width: 1200px; width: 100%; margin: 0 auto; box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 20px var(--grid); transition: all 0.5s ease; position: relative;}
+        
+        .badge { display: inline-flex; align-items: center; gap: 10px; font-family: 'JetBrains Mono'; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); border: 1px solid var(--accent); padding: 8px 16px; border-radius: 4px; background: rgba(0, 0, 0, 0.5); margin-bottom: 2rem; }
+        
+        h1 { font-size: clamp(3rem, 5vw, 5rem); font-weight: 900; margin: 0 0 1rem 0; line-height: 1.05; text-transform: uppercase; letter-spacing: -2px; text-shadow: var(--glitch) 0 var(--accent), calc(var(--glitch) * -1) 0 var(--accent-alt); transition: all 0.3s;}
+        h2 { font-size: 1.5rem; font-family: 'JetBrains Mono'; color: var(--text-dim); margin: 0 0 2rem 0; font-weight: 700; text-transform: uppercase; border-bottom: 1px solid var(--border); padding-bottom: 1rem; display: inline-block;}
+        p { font-size: 1.3rem; color: var(--text-dim); max-width: 900px; line-height: 1.6; margin-bottom: 1.5rem; }
+        strong { color: var(--text-main); }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-top: 2rem;}
+        
+        .card { border: 1px solid var(--border); background: rgba(0,0,0,0.4); padding: 2rem; transition: all 0.3s; border-left: 3px solid var(--accent); }
+        .card:hover { transform: translateX(10px); background: rgba(255,255,255,0.02); }
+        .card h3 { font-family: 'JetBrains Mono'; font-size: 1.2rem; color: var(--text-main); margin: 0 0 1rem 0; text-transform: uppercase;}
+
+        .code-block { background: #000; border: 1px solid var(--border); border-left: 4px solid var(--accent); padding: 2rem; font-family: 'JetBrains Mono'; font-size: 1.1rem; color: var(--text-main); border-radius: 4px; overflow-x: auto;}
+        .comment { color: #666; } .keyword { color: var(--accent); } .string { color: var(--accent-alt); }
+
+        .photo-zone { background: rgba(255,255,255,0.02); border: 2px dashed var(--border); border-radius: 8px; height: 300px; display: flex; align-items: center; justify-content: center; color: #555; font-family: 'JetBrains Mono'; text-transform: uppercase; letter-spacing: 2px; position: relative; overflow: hidden; transition: 0.3s;}
+        .photo-zone:hover { border-color: var(--accent); color: var(--accent); }
+        .photo-zone img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(20%); }
+
+        /* Top HUD Variant Switcher */
+        .top-hud {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            background: rgba(10, 15, 15, 0.88);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 90;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+        }
+
+        .nav-links { display: flex; align-items: center; gap: 0.5rem; }
+        .nav-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover { color: #fff; border-color: var(--accent); }
+        .nav-btn.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+            font-weight: 900;
+        }
+
+        /* Reze Override Button */
+        #reze-btn { background: #000; border: 1px solid var(--accent); color: var(--accent); font-family: 'JetBrains Mono'; padding: 6px 14px; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-weight: bold; transition: all 0.3s; font-size: 0.75rem; }
+        #reze-btn:hover { background: var(--accent); color: #000; }
+        body.reze-mode #reze-btn { border-color: #fff; color: #fff; animation: pulse 1.5s infinite alternate; }
+
+        @keyframes pulse { 0% { box-shadow: 0 0 10px var(--accent); } 100% { box-shadow: 0 0 30px var(--accent), 0 0 10px var(--accent-alt); } }
+        @keyframes glitch-anim { 0% { transform: translate(0) } 20% { transform: translate(-2px, 2px) } 40% { transform: translate(-2px, -2px) } 60% { transform: translate(2px, 2px) } 80% { transform: translate(2px, -2px) } 100% { transform: translate(0) } }
+        body.reze-mode h1 { animation: glitch-anim 0.2s infinite; }
+
+        .hud { position: fixed; bottom: 2rem; left: 2rem; right: 2rem; display: flex; justify-content: space-between; font-family: 'JetBrains Mono'; color: var(--text-dim); z-index: 50; border-top: 1px solid var(--border); padding-top: 1rem; }
+        .progress-bar { position: fixed; top: 52px; left: 0; height: 3px; background: var(--accent); z-index: 100; transition: width 0.3s ease; }
+
+        /* PDF Export Styles */
+        @media print {
+            body { overflow: visible; background: #fff !important; color: #000 !important; background-image: none !important; }
+            .top-hud, #reze-btn, .hud, .progress-bar { display: none !important; }
+            .slide { position: static !important; opacity: 1 !important; transform: none !important; pointer-events: auto !important; page-break-after: always; min-height: 100vh; padding: 2rem; }
+            .glass-panel { background: #fff !important; color: #000 !important; border: 1px solid #ccc !important; box-shadow: none !important; backdrop-filter: none !important; }
+            h1, h2, h3, p, strong { color: #000 !important; text-shadow: none !important; }
+            .code-block { background: #f5f5f5 !important; color: #000 !important; border-color: #ccc !important; }
+            .card { background: #fafafa !important; border-color: #ddd !important; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Variant Switcher -->
+    <header class="top-hud">
+        <div class="nav-links">
+            <a href="../../" class="nav-btn">← PORTFOLIO</a>
+            <span style="color: var(--text-dim); font-size: 0.7rem; margin-left: 8px;">MASTERCLASS LENSES:</span>
+        </div>
+        <div class="nav-links">
+            <a href="../nomad/index.html" class="nav-btn">1: NOMAD</a>
+            <a href="../ripcord/index.html" class="nav-btn">2: RIPCORD</a>
+            <a href="../iron/index.html" class="nav-btn">3: IRON</a>
+            <a href="../combined/index.html" class="nav-btn">4: COMBINED</a>
+        </div>
+        <div>
+            <button id="reze-btn" onclick="toggleReze()">[ SYSTEM NORMAL ]</button>
+        </div>
+    </header>
+
+    <div class="progress-bar" id="progress"></div>
+
+    <!-- SLIDE 1 -->
+    <div class="slide active">
+        <div class="glass-panel text-center" style="text-align: center;">
+            <div class="badge">GDG Detroit • Latin Heritage Month &amp; DevFest 2026</div>
+            <h1>The Reacher<br>Protocol</h1>
+            <h2 style="border: none;">Critical Deduction &amp; Overwhelming Force in Agentic Dev</h2>
+            <p style="margin: 0 auto;">Beyond the static portfolio: pairing Sherlock Holmes-level root cause deduction with the explosive physical leverage of AI to build bespoke software tools.</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="slide">
+        <div class="glass-panel grid-2">
+            <div>
+                <h2>Phase 01 // Token Economics</h2>
+                <h1>Noise vs. Silence</h1>
+                <p>Ballmer screamed <strong>"DEVELOPERS!"</strong> until his vocal cords tore. But true agentic power is silent.</p>
+                <p><strong>Every token you waste yapping is memory your agent forgets.</strong> Eliminate noise, cut polite filler, preserve context, and strike once.</p>
+            </div>
+            <div class="code-block">
+<span class="comment">// The Corporate Loop</span>
+<span class="keyword">const</span> <span style="color: #fff;">bloatedAgency</span> = {
+  standups: <span class="string">4</span>,
+  unnecessaryNpmDeps: <span class="string">142</span>,
+  codeShipped: <span class="string">"2 buttons"</span>
+};
+
+<span class="comment">// The Reacher Response</span>
+<span class="keyword">function</span> <span style="color: #fff;">reacherProtocol</span>() {
+  <span class="comment">/* "Reacher said nothing." */</span>
+  <span class="keyword">return</span> deduceRootCause() 
+      &amp;&amp; applyOverwhelmingForce();
+}
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="slide">
+        <div class="glass-panel grid-2">
+            <div class="photo-zone">
+                [ DROP DEADLIFT / TECH PHOTO HERE ]
+            </div>
+            <div>
+                <h2>Phase 02 // Architecture</h2>
+                <h1>The Zero-Bloat<br>Doctrine</h1>
+                <p><strong>"You don't need a lot of luggage when you know where you're going."</strong></p>
+                <p>Jack Reacher travels with an expired passport and a folding toothbrush. Stop pulling in 80 NPM packages for a simple helper. Keep your stack lean, sovereign, and fast.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 4 -->
+    <div class="slide">
+        <div class="glass-panel" style="text-align: center;">
+            <h2>System Warning</h2>
+            <h1>Strength isn't enough.</h1>
+            <p style="margin: 0 auto 2rem auto;">Reacher’s deduction is flawless. But in 2026, executing at human speed gets you killed in the market.</p>
+            <p style="font-family: 'JetBrains Mono'; color: var(--text-dim); font-size: 1.1rem;">
+                &gt;&gt; SPEAKER: INITIATE REZE OVERRIDE (TOP RIGHT) &lt;&lt;
+            </p>
+        </div>
+    </div>
+
+    <!-- SLIDE 5 -->
+    <div class="slide">
+        <div class="glass-panel">
+            <h2>Paradigm Shift // Execute</h2>
+            <h1>Audience of One.</h1>
+            <p>Traditional advice: spend weeks polishing a static resume that sits untouched. <strong>Burn the resume.</strong></p>
+            <div class="grid-3" style="margin-top: 3rem;">
+                <div class="card">
+                    <h3>01. Solve Your Friction</h3>
+                    <p style="font-size: 1rem;">Build software to eliminate your own acute daily friction. A workout tracker, a localized checkout engine.</p>
+                </div>
+                <div class="card">
+                    <h3>02. Proof of Sovereignty</h3>
+                    <p style="font-size: 1rem;">A bespoke tool that persists state and solves a real problem is 100x more impressive to hiring managers than a template.</p>
+                </div>
+                <div class="card">
+                    <h3>03. Audience of Many</h3>
+                    <p style="font-size: 1rem;">Package it. Open-source it. Let others run it and build on top of your architecture.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 6 -->
+    <div class="slide">
+        <div class="glass-panel">
+            <h2>Proof of Work</h2>
+            <h1>Production Scale</h1>
+            <div class="grid-3">
+                <div class="card">
+                    <h3 style="color: var(--accent);">J. Simmons Prod.</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-dim);">Media Distribution Engine</p>
+                    <p style="font-size: 1rem;">Zero-bloat backend replacing hours of manual video encoding workflows. Channels scale instantly.</p>
+                </div>
+                <div class="card">
+                    <h3 style="color: var(--accent);">Jacked Alien</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-dim);">Fitness State Machine</p>
+                    <p style="font-size: 1rem;">Modular FSM governing real-time workout cadence. Zero external dependencies. Runs offline.</p>
+                </div>
+                <div class="card">
+                    <h3 style="color: var(--accent);">Criminal Cookies</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-dim);">Guerilla E-Commerce</p>
+                    <p style="font-size: 1rem;">Bypassing legacy Shopify bloat. Localized high-frequency checkout compiled to micro-components.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 7 -->
+    <div class="slide">
+        <div class="glass-panel">
+            <h2>Architecture // CI Gate</h2>
+            <h1>The Agentic Dev Loop</h1>
+            <p><strong>"Beware of unearned wisdom."</strong> If you don't audit the compiler, you are outsourcing your mind to someone else's server.</p>
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <div style="flex: 1; border-top: 3px solid var(--accent); padding-top: 1rem;">
+                    <h3 style="font-family: 'JetBrains Mono'; margin:0 0 0.5rem 0;">1. Investigate</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-dim);">Scrape symbols and line numbers. Do NOT dump whole files into context.</p>
+                </div>
+                <div style="flex: 1; border-top: 3px solid var(--accent); padding-top: 1rem;">
+                    <h3 style="font-family: 'JetBrains Mono'; margin:0 0 0.5rem 0;">2. Deduce</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-dim);">Formulate surgical &le;2 file diffs based on typed specs and root cause.</p>
+                </div>
+                <div style="flex: 1; border-top: 3px solid var(--accent); padding-top: 1rem;">
+                    <h3 style="font-family: 'JetBrains Mono'; margin:0 0 0.5rem 0;">3. Verify</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-dim);">Vitest suite + Production build gate. Zero human intervention required.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 8 -->
+    <div class="slide">
+        <div class="glass-panel grid-2">
+            <div>
+                <h2>Clearance Level: Admin</h2>
+                <h1 style="font-size: 4rem;">Shugmi<br>Shumunov</h1>
+                <p style="font-size: 1.2rem; color: var(--text-main);">Software Engineer &amp; Builder @ Shumunov Solutions</p>
+                <p style="color: var(--text-dim); font-size: 1.1rem; line-height: 1.6;">Obsessed with web performance, developer sovereignty, and heavy deadlifts.</p>
+                <p style="font-family: 'JetBrains Mono'; color: var(--accent); font-weight: bold; margin-top: 2rem;">¯\_(ツ)_/¯ jackpot ¯\_(ツ)_/¯ // VERIFIED</p>
+            </div>
+            <div class="photo-zone" style="height: 400px; border-color: var(--accent);">
+                <img src="../images/shug_headshot.jpg" alt="ShugKnight24" onerror="this.style.display='none'">
+                [ DROP PORTRAIT PHOTO HERE ]
+            </div>
+        </div>
+    </div>
+
+    <!-- HUD CONTROLS -->
+    <div class="hud">
+        <div id="slide-count">01 / 08</div>
+        <div>
+            <span style="cursor:pointer; margin-right: 15px;" onclick="prevSlide()">[ &lt; PREV ]</span>
+            <span style="cursor:pointer; margin-right: 15px;" onclick="nextSlide()">[ NEXT &gt; ]</span>
+            <span style="cursor:pointer;" onclick="window.print()">[ PDF EXPORT ]</span>
+        </div>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const progress = document.getElementById('progress');
+        const count = document.getElementById('slide-count');
+        let current = 0;
+
+        function updateUI() {
+            slides.forEach((s, i) => s.classList.toggle('active', i === current));
+            progress.style.width = `${((current + 1) / slides.length) * 100}%`;
+            count.innerText = `${(current + 1).toString().padStart(2, '0')} / ${slides.length.toString().padStart(2, '0')}`;
+        }
+
+        function nextSlide() { current = Math.min(current + 1, slides.length - 1); updateUI(); }
+        function prevSlide() { current = Math.max(current - 1, 0); updateUI(); }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+            if ((e.key === 'p' || e.key === 'P') && !e.metaKey && !e.ctrlKey) {
+                e.preventDefault();
+                window.print();
+            }
+            if (e.key === '1') window.location.href = '../nomad/index.html';
+            if (e.key === '2') window.location.href = '../ripcord/index.html';
+            if (e.key === '3') window.location.href = '../iron/index.html';
+            if (e.key === '4' || e.key === 'c' || e.key === 'C') window.location.href = '../combined/index.html';
+        });
+
+        let rezeMode = false;
+        function toggleReze() {
+            rezeMode = !rezeMode;
+            const btn = document.getElementById('reze-btn');
+            if(rezeMode) {
+                document.body.classList.add('reze-mode');
+                btn.innerText = "[ DANGER: REZE PROTOCOL ACTIVE ]";
+            } else {
+                document.body.classList.remove('reze-mode');
+                btn.innerText = "[ SYSTEM NORMAL ]";
+            }
+        }
+        updateUI();
+    </script>
+</body>
+</html>

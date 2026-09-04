@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A clean, customizable portfolio website built with vanilla HTML, CSS, and JavaScript. No frameworks, no build tools — just the web platform.">
+  <title>My Portfolio</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="author" content="Your Name">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#3B82F6">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- =============================================
+       NAVIGATION BAR
+       ============================================= -->
+  <nav class="navbar" id="navbar">
+    <div class="container nav-content">
+      <!-- Logo / Brand -->
+      <a href="#hero" class="nav-brand" id="nav-brand">Portfolio</a>
+
+      <!-- Desktop Navigation Links -->
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#hero" class="nav-link">Home</a></li>
+        <li><a href="#about" class="nav-link">About</a></li>
+        <li><a href="#skills" class="nav-link">Skills</a></li>
+        <li><a href="#projects" class="nav-link">Projects</a></li>
+        <li><a href="#contact" class="nav-link">Contact</a></li>
+      </ul>
+
+      <!-- Controls: Theme Switcher + Dark Mode + Hamburger -->
+      <div class="nav-controls">
+        <!-- Theme Switcher -->
+        <div class="theme-switcher" id="theme-switcher">
+          <button class="btn-icon" id="theme-switcher-btn" aria-label="Change theme" title="Change theme">
+            <svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.4c3 0 5.6-2.5 5.6-5.6C22 5.5 17.5 2 12 2z" fill="currentColor" fill-opacity="0.1" stroke="currentColor" stroke-width="1.5" /><circle cx="7.5" cy="11" r="1.5" fill="#ef4444" /><circle cx="10" cy="7" r="1.5" fill="#eab308" /><circle cx="15" cy="7" r="1.5" fill="#22c55e" /><circle cx="17.5" cy="11" r="1.5" fill="#3b82f6" /></svg>
+          </button>
+          <div class="theme-menu" id="theme-menu">
+            <!-- Theme buttons are rendered by app.js -->
+          </div>
+        </div>
+
+        <!-- Dark Mode Toggle -->
+        <button class="btn-icon" id="dark-mode-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor" fill-opacity="0.2" /></svg>
+        </button>
+
+        <!-- Mobile Hamburger Menu -->
+        <button class="btn-icon hamburger" id="hamburger-btn" aria-label="Toggle menu" title="Toggle menu">
+          <svg class="w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- =============================================
+       MAIN CONTENT
+       ============================================= -->
+  <main>
+
+    <!-- HERO SECTION -->
+    <header class="hero" id="hero">
+      <div class="container hero-content">
+        <h1 class="hero-title" id="hero-title">Your Name</h1>
+        <p class="hero-subtitle" id="hero-subtitle">Web Developer</p>
+        <p class="hero-bio" id="hero-bio">A passionate developer who loves building for the web.</p>
+        <div class="hero-actions">
+          <a href="#projects" class="btn btn-primary">View My Work</a>
+          <a href="#contact" class="btn btn-outline">Get In Touch</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- ABOUT SECTION -->
+    <section class="section" id="about">
+      <div class="container">
+        <h2 class="section-title">About Me</h2>
+        <p class="section-description" id="about-text">
+          A passionate developer who loves building for the web.
+        </p>
+      </div>
+    </section>
+
+    <!-- SKILLS SECTION -->
+    <section class="section section-alt" id="skills">
+      <div class="container">
+        <h2 class="section-title">Skills</h2>
+        <div class="skills-grid" id="skills-grid">
+          <!-- Skill badges are rendered by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECTS SECTION -->
+    <section class="section" id="projects">
+      <div class="container">
+        <h2 class="section-title">Projects</h2>
+        <div class="projects-grid" id="projects-grid">
+          <!-- Project cards are rendered by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section class="section section-alt" id="contact">
+      <div class="container contact-content">
+        <h2 class="section-title">Get In Touch</h2>
+        <p class="section-description">
+          Have a project in mind or just want to say hello? Reach out!
+        </p>
+        <div class="contact-links" id="contact-links">
+          <!-- Contact links are rendered by app.js -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =============================================
+       FOOTER
+       ============================================= -->
+  <footer class="footer" id="footer">
+    <div class="container">
+      <p class="footer-text" id="footer-text">
+        &copy; 2025 Your Name. Built with HTML, CSS &amp; JS.
+      </p>
+    </div>
+  </footer>
+
+  <!-- =============================================
+       SCRIPTS — loaded at the bottom so the DOM is ready
+       ============================================= -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>

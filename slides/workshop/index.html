@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Reacher Protocol // Workshop Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        body { 
+            margin: 0; background: #09090b; color: #f4f4f5; font-family: 'Space Grotesk', sans-serif; overflow: hidden; display: flex; height: 100vh;
+        }
+        
+        .sidebar { 
+            width: 280px; background: #121214; border-right: 1px solid #27272a; padding: 2rem 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; z-index: 50; transition: all 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 0; padding: 0; border-right: none; overflow: hidden; opacity: 0; pointer-events: none;
+        }
+
+        .sidebar-header {
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;
+        }
+
+        .sidebar-title {
+            color: #fff; margin: 0; font-weight: 900; font-size: 1.25rem; text-transform: uppercase; font-family: 'JetBrains Mono'; letter-spacing: 1px;
+        }
+
+        .sidebar-toggle-btn {
+            background: rgba(255, 255, 255, 0.06); border: 1px solid #333; color: #888; border-radius: 6px; padding: 4px 8px; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;
+        }
+        .sidebar-toggle-btn:hover { color: #fff; background: rgba(0, 255, 204, 0.15); border-color: #00ffcc; }
+
+        .floating-sidebar-btn {
+            position: fixed; top: 1.25rem; left: 1.25rem; z-index: 100; background: rgba(18, 18, 20, 0.9); border: 1px solid #00ffcc; color: #00ffcc; padding: 6px 14px; border-radius: 8px; font-family: 'JetBrains Mono'; font-size: 0.75rem; font-weight: 700; cursor: pointer; backdrop-filter: blur(12px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); transition: all 0.2s;
+        }
+        .floating-sidebar-btn:hover { background: #00ffcc; color: #000; }
+        
+        .nav-item { 
+            padding: 1rem 1.2rem; border-radius: 8px; cursor: pointer; color: #a1a1aa; font-family: 'JetBrains Mono'; font-weight: bold; transition: 0.3s; border-left: 3px solid transparent; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px;
+        }
+        .nav-item:hover { color: #fff; background: rgba(255, 255, 255, 0.04); }
+        .nav-item.active { background: rgba(0, 255, 204, 0.1); color: #00ffcc; border-left-color: #00ffcc; }
+        
+        .content { flex: 1; position: relative; background-image: radial-gradient(circle at 50% 0%, #18181b 0%, #09090b 100%); overflow-y: auto;}
+        .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; opacity: 0; transform: translateY(20px); transition: all 0.5s ease; pointer-events: none; padding: 4rem 5rem; }
+        .slide.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        
+        .module-badge { display: inline-block; padding: 8px 16px; background: rgba(255, 0, 85, 0.15); color: #ff0055; border-radius: 4px; font-family: 'JetBrains Mono'; font-weight: bold; margin-bottom: 2rem; border: 1px solid rgba(255, 0, 85, 0.3); font-size: 0.85rem; letter-spacing: 1px;}
+        h1 { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 900; margin: 0 0 1.5rem 0; line-height: 1.1; letter-spacing: -1px; text-transform: uppercase;}
+        p { font-size: clamp(1.1rem, 2vw, 1.35rem); color: #a1a1aa; max-width: 900px; line-height: 1.7; }
+        
+        .lab-box { background: #000; border: 1px solid #27272a; border-left: 4px solid #00ffcc; padding: 2.5rem; border-radius: 12px; margin-top: 2rem; max-width: 900px;}
+        .terminal { font-family: 'JetBrains Mono'; color: #00ffcc; margin-top: 1.5rem; background: #050505; padding: 1.5rem; border-radius: 6px; border: 1px solid #27272a; font-size: 0.95rem; line-height: 1.8;}
+
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; flex-direction: row; overflow-x: auto; padding: 1rem; border-right: none; border-bottom: 1px solid #27272a;}
+            .sidebar-header { display: none; }
+            .nav-item { white-space: nowrap; padding: 0.5rem 0.8rem; font-size: 0.75rem; border-left: none; border-bottom: 3px solid transparent;}
+            .nav-item.active { border-bottom-color: #00ffcc; border-left-color: transparent;}
+            .slide { padding: 2rem; }
+        }
+
+        @media print {
+            body { overflow: visible; background: #fff !important; color: #000 !important; }
+            .sidebar, .floating-sidebar-btn { display: none !important; }
+            .slide { position: static !important; opacity: 1 !important; transform: none !important; page-break-after: always; min-height: 100vh; padding: 2rem; }
+            .lab-box { background: #f9f9f9 !important; border-color: #ccc !important; }
+            .terminal { background: #f0f0f0 !important; color: #000 !important; }
+            h1, p { color: #000 !important; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating toggle when sidebar is folded -->
+    <button id="sidebar-expand-btn" class="floating-sidebar-btn" style="display: none;" title="Show Sidebar">
+        [ MENU ]
+    </button>
+
+    <div class="sidebar" id="workshop-sidebar">
+        <div class="sidebar-header">
+            <h3 class="sidebar-title">WORKSHOP SETUP</h3>
+            <button id="sidebar-collapse-btn" class="sidebar-toggle-btn" title="Collapse Sidebar (Save Space)">&lt;</button>
+        </div>
+        <div class="nav-item active" onclick="showSlide(0)">01. The Sandbox Clone</div>
+        <div class="nav-item" onclick="showSlide(1)">02. Data Audit</div>
+        <div class="nav-item" onclick="showSlide(2)">03. Assembly Blocks</div>
+        <div class="nav-item" onclick="showSlide(3)">04. Skeptic Protocol Gate</div>
+    </div>
+
+    <div class="content">
+        <!-- LAB 01 -->
+        <div class="slide active">
+            <div class="module-badge">LAB 01 // INITIATE</div>
+            <h1>Clone the Sandbox</h1>
+            <p>First step: secure your local environment and drop the dead weight.</p>
+            <div class="lab-box">
+                <p style="color: #fff; font-weight: bold;">Objective: Establish Sovereign Architecture.</p>
+                <div class="terminal">
+                    &gt; git clone github.com/shugknight24/devfest_portfolio_workshop<br>
+                    &gt; cd devfest_portfolio_workshop &amp;&amp; npm install<br>
+                    &gt; <span style="color: #ff0055;">Warning: Strip all unnecessary NPM dependencies. Keep it lean.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- LAB 02 -->
+        <div class="slide">
+            <div class="module-badge" style="background: rgba(0, 255, 204, 0.15); color: #00ffcc; border-color: #00ffcc;">LAB 02 // DEDUCE</div>
+            <h1>Audit your Data</h1>
+            <p>Open <code>portfolioData.js</code>. Inject your authentic story. Don't let an LLM write a generic, soulless biography for you. Authenticity is your moat.</p>
+            <div class="lab-box">
+                <p style="color: #fff; font-weight: bold;">File: apps/react/src/data/portfolioData.js</p>
+                <div class="terminal">
+                    &gt; vim apps/react/src/data/portfolioData.js<br>
+                    &gt; // Define your true narrative, custom projects, and sovereign skills<br>
+                    &gt; <span style="color: #00ffcc;">[OK] Local data layer updated. Zero third-party telemetry leak.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- LAB 03 -->
+        <div class="slide">
+            <div class="module-badge" style="background: rgba(198, 255, 0, 0.15); color: #c6ff00; border-color: #c6ff00;">LAB 03 // BUILD</div>
+            <h1>Modular Assembly</h1>
+            <p>Launch the Audience of One Maker Studio. Blueprint your bespoke tool by assembling Header, About, Skills, Projects, and Footer blocks.</p>
+            <div class="lab-box">
+                <p style="color: #fff; font-weight: bold;">Component Tree Architecture</p>
+                <div class="terminal">
+                    &gt; App &rarr; ThemeProvider &rarr; LayoutEngine &rarr; PortfolioBuilder<br>
+                    &gt; Scaffolding 5 modular UI variants...<br>
+                    &gt; <span style="color: #c6ff00;">[READY] Interactive state machine compiled.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- LAB 04 -->
+        <div class="slide">
+            <div class="module-badge" style="background: rgba(255, 255, 255, 0.1); color: #fff; border-color: #555;">LAB 04 // VERIFY</div>
+            <h1>The Skeptic Protocol</h1>
+            <p>Never trust the machine blindly. Run your tests, pass Vitest, and deploy live on Vercel.</p>
+            <div class="lab-box">
+                <div class="terminal" style="color: #c6ff00;">
+                    &gt; npm --prefix apps/react run test:run<br>
+                    &gt; 54 tests passed. 0 failed. (820ms)<br>
+                    &gt; vercel deploy --prod<br>
+                    &gt; <span style="color: #fff;">[ DEPLOYMENT SECURED: Audience of One Live. ]</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const navItems = document.querySelectorAll('.nav-item');
+        let current = 0;
+
+        function showSlide(index) {
+            current = index;
+            slides.forEach((s, i) => s.classList.toggle('active', i === index));
+            navItems.forEach((n, i) => n.classList.toggle('active', i === index));
+        }
+
+        document.addEventListener('keydown', (e) => { 
+            if(e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') { 
+                current = Math.min(current + 1, slides.length - 1); 
+                showSlide(current); 
+            }
+            if(e.key === 'ArrowUp' || e.key === 'ArrowLeft') { 
+                current = Math.max(current - 1, 0); 
+                showSlide(current); 
+            }
+            if((e.key === 'p' || e.key === 'P') && !e.metaKey && !e.ctrlKey) {
+                e.preventDefault();
+                window.print();
+            }
+        });
+
+        // Sidebar collapse / expand
+        const sidebar = document.getElementById('workshop-sidebar');
+        const collapseBtn = document.getElementById('sidebar-collapse-btn');
+        const expandBtn = document.getElementById('sidebar-expand-btn');
+
+        if (collapseBtn && expandBtn && sidebar) {
+            collapseBtn.addEventListener('click', () => {
+                sidebar.classList.add('collapsed');
+                expandBtn.style.display = 'block';
+            });
+            expandBtn.addEventListener('click', () => {
+                sidebar.classList.remove('collapsed');
+                expandBtn.style.display = 'none';
+            });
+        }
+    </script>
+</body>
+</html>

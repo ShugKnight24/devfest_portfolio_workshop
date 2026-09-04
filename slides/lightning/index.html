@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Reacher Protocol — Lightning Strike (15 Minutes)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;900&family=JetBrains+Mono:wght@700&display=swap');
+        body { margin: 0; background: #070709; color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; }
+        .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transform: translateY(40px); transition: all 0.6s ease; padding: 2rem; text-align: center; }
+        .slide.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        h1 { font-size: clamp(3rem, 7vw, 5.5rem); text-transform: uppercase; font-weight: 900; margin: 0 0 1rem 0; line-height: 1.1; color: #ff0055;}
+        h2 { font-size: clamp(1rem, 2vw, 1.5rem); color: #00ffcc; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; margin-bottom: 1.5rem; letter-spacing: 2px;}
+        p { font-size: clamp(1.1rem, 2vw, 1.6rem); color: #a0a0a5; max-width: 900px; line-height: 1.6; }
+        
+        .hud { position: fixed; bottom: 2rem; left: 2rem; right: 2rem; display: flex; justify-content: space-between; font-family: 'JetBrains Mono'; color: #666; z-index: 50; border-top: 1px solid #1a1a20; padding-top: 1rem; font-size: 0.85rem;}
+        .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: #ff0055; z-index: 100; transition: width 0.3s ease; }
+
+        @media print {
+            body { overflow: visible; background: #fff !important; color: #000 !important; }
+            .hud, .progress-bar { display: none !important; }
+            .slide { position: static !important; opacity: 1 !important; transform: none !important; page-break-after: always; min-height: 100vh; }
+            h1 { color: #000 !important; }
+            h2, p { color: #333 !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progress"></div>
+
+    <div class="slide active">
+        <h2>Detroit Latin Heritage Month Innovation Summit 2026</h2>
+        <h1>The Reacher Protocol</h1>
+        <p>Analyze like Reacher. Execute like Chainsaw Man. The end of the static portfolio.</p>
+    </div>
+    <div class="slide">
+        <h2>Token Economics</h2>
+        <h1>"Reacher Said Nothing."</h1>
+        <p>Every polite apology your AI generates is wasted compute. Eliminate noise. Investigate the root cause, form a surgical diff, and strike.</p>
+    </div>
+    <div class="slide">
+        <h2>Audience of One</h2>
+        <h1>Burn the Resume.</h1>
+        <p>Stop building cookie-cutter portfolio sites. Build software to eliminate your own acute daily friction. A bespoke tool that persists state and solves a problem is 100x more impressive.</p>
+    </div>
+    <div class="slide">
+        <h2>Clearance Profile</h2>
+        <h1 style="color: #fff;">Shugmi Shumunov</h1>
+        <p style="color: #00ffcc; font-family: 'JetBrains Mono'; font-size: clamp(1rem, 2vw, 1.3rem);">github.com/shugknight24 &bull; Datamoon.com</p>
+        <p style="font-family: 'JetBrains Mono'; color: #ffcc00; margin-top: 1rem;">😎 ¯\_(ツ)_/¯ jackpot ¯\_(ツ)_/¯ 😎</p>
+    </div>
+
+    <div class="hud">
+        <div id="slide-count">01 / 04</div>
+        <div>
+            <span style="cursor:pointer; margin-right: 15px;" onclick="prevSlide()">[ &lt; PREV ]</span>
+            <span style="cursor:pointer; margin-right: 15px;" onclick="nextSlide()">[ NEXT &gt; ]</span>
+            <span style="cursor:pointer;" onclick="window.print()">[ PDF EXPORT ]</span>
+        </div>
+    </div>
+
+    <script>
+        let current = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progress = document.getElementById('progress');
+        const count = document.getElementById('slide-count');
+
+        function updateUI() {
+            slides.forEach((s, i) => s.classList.toggle('active', i === current));
+            if (progress) progress.style.width = `${((current + 1) / slides.length) * 100}%`;
+            if (count) count.innerText = `${(current + 1).toString().padStart(2, '0')} / ${slides.length.toString().padStart(2, '0')}`;
+        }
+
+        function nextSlide() { current = Math.min(current + 1, slides.length - 1); updateUI(); }
+        function prevSlide() { current = Math.max(current - 1, 0); updateUI(); }
+
+        document.addEventListener('keydown', (e) => { 
+            if(e.key === 'ArrowRight' || e.key === ' ') { nextSlide(); }
+            if(e.key === 'ArrowLeft') { prevSlide(); }
+            if((e.key === 'p' || e.key === 'P') && !e.metaKey && !e.ctrlKey) {
+                e.preventDefault();
+                window.print();
+            }
+        });
+
+        // Click anywhere to advance
+        document.body.addEventListener('click', (e) => {
+            if (e.target.closest('.hud')) return;
+            nextSlide();
+        });
+
+        updateUI();
+    </script>
+</body>
+</html>

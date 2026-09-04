@@ -12,292 +12,292 @@ const resourceCategories = [
   {
     id: "ai-tools",
     label: "AI Development Tools",
-    emoji: "🤖",
+    icon: "robot",
     description: "AI-powered tools to supercharge your development workflow",
     resources: [
       {
         name: "Gemini Code Assist",
         url: "https://gemini.google.com",
         description: "Google's AI coding assistant",
-        icon: "✨",
+        icon: "sparkles",
       },
       {
         name: "GitHub Copilot",
         url: "https://github.com/features/copilot",
         description: "AI pair programmer",
-        icon: "🤖",
+        icon: "robot",
       },
       {
         name: "Cursor",
         url: "https://cursor.com",
         description: "AI-first code editor",
-        icon: "🖱️",
+        icon: "mouse",
       },
       {
         name: "Claude",
         url: "https://claude.ai",
         description: "Anthropic's AI assistant",
-        icon: "🧠",
+        icon: "brain",
       },
       {
         name: "OpenCode",
         url: "https://github.com/nicepkg/opencode",
         description: "Open-source AI coding CLI",
-        icon: "💻",
+        icon: "laptop",
       },
       {
         name: "Antigravity",
         url: "https://deepmind.google",
         description: "Google DeepMind's agentic AI assistant",
-        icon: "🚀",
+        icon: "rocket",
       },
       {
         name: "v0",
         url: "https://v0.dev",
         description: "Vercel's AI UI generator",
-        icon: "🎨",
+        icon: "palette",
       },
       {
         name: "Bolt",
         url: "https://bolt.new",
         description: "StackBlitz AI full-stack generator",
-        icon: "⚡",
+        icon: "lightning",
       },
     ],
   },
   {
     id: "frameworks",
     label: "Framework Documentation",
-    emoji: "📖",
+    icon: "book",
     description: "Official docs for modern web frameworks and tools",
     resources: [
       {
         name: "React",
         url: "https://react.dev",
         description: "Official React documentation with interactive examples",
-        icon: "⚛️",
+        icon: "atom",
       },
       {
         name: "Vue 3",
         url: "https://vuejs.org",
         description: "Progressive JavaScript framework docs",
-        icon: "💚",
+        icon: "heartGreen",
       },
       {
         name: "Svelte",
         url: "https://svelte.dev",
         description: "Cybernetically enhanced web apps",
-        icon: "🔥",
+        icon: "fire",
       },
       {
         name: "MDN Web Docs",
         url: "https://developer.mozilla.org",
         description: "The definitive resource for web technologies",
-        icon: "📖",
+        icon: "book",
       },
       {
         name: "Tailwind CSS",
         url: "https://tailwindcss.com",
         description: "Utility-first CSS framework",
-        icon: "💨",
+        icon: "wind",
       },
       {
         name: "web.dev",
         url: "https://web.dev",
         description: "Google's guidance for modern web development",
-        icon: "🌐",
+        icon: "globe",
       },
     ],
   },
   {
     id: "learning",
     label: "Learning Platforms",
-    emoji: "🎓",
+    icon: "gradCap",
     description: "Structured learning paths and interactive courses",
     resources: [
       {
         name: "freeCodeCamp",
         url: "https://freecodecamp.org",
         description: "Free comprehensive web development curriculum",
-        icon: "🏕️",
+        icon: "camp",
       },
       {
         name: "The Odin Project",
         url: "https://theodinproject.com",
         description: "Full stack curriculum with real-world projects",
-        icon: "⚔️",
+        icon: "swords",
       },
       {
         name: "Frontend Masters",
         url: "https://frontendmasters.com",
         description: "Expert-led frontend and full-stack courses",
-        icon: "🎓",
+        icon: "gradCap",
       },
       {
         name: "Scrimba",
         url: "https://scrimba.com",
         description: "Interactive screencasts you can edit live",
-        icon: "📺",
+        icon: "tv",
       },
       {
         name: "Codedex",
         url: "https://codedex.io",
         description: "Gamified approach to learning programming",
-        icon: "🎮",
+        icon: "gamepad",
       },
       {
         name: "Codecademy",
         url: "https://codecademy.com",
         description: "Interactive coding lessons in many languages",
-        icon: "📚",
+        icon: "books",
       },
     ],
   },
   {
     id: "practice",
     label: "Practice & Challenges",
-    emoji: "🏋️",
+    icon: "dumbbell",
     description: "Sharpen your skills with coding challenges and projects",
     resources: [
       {
         name: "Frontend Mentor",
         url: "https://frontendmentor.io",
         description: "Real-world frontend challenges with designs provided",
-        icon: "🎨",
+        icon: "palette",
       },
       {
         name: "LeetCode",
         url: "https://leetcode.com",
         description: "Coding challenges for interview preparation",
-        icon: "🧮",
+        icon: "calculator",
       },
       {
         name: "Exercism",
         url: "https://exercism.org",
         description: "Practice coding with mentorship in 70+ languages",
-        icon: "🏋️",
+        icon: "dumbbell",
       },
       {
         name: "Codewars",
         url: "https://codewars.com",
         description: "Train on coding challenges called kata",
-        icon: "⛩️",
+        icon: "torii",
       },
     ],
   },
   {
     id: "css-games",
     label: "CSS Games",
-    emoji: "🎮",
+    icon: "gamepad",
     description: "Learn CSS layout techniques through fun interactive games",
     resources: [
       {
         name: "Flexbox Froggy",
         url: "https://flexboxfroggy.com",
         description: "Learn CSS Flexbox by helping a frog reach its lily pad",
-        icon: "🐸",
+        icon: "frog",
       },
       {
         name: "Grid Garden",
         url: "https://cssgridgarden.com",
         description: "Learn CSS Grid by growing your virtual garden",
-        icon: "🥕",
+        icon: "carrot",
       },
       {
         name: "CSS Diner",
         url: "https://flukeout.github.io",
         description: "Master CSS selectors with a restaurant theme",
-        icon: "🍽️",
+        icon: "forkKnife",
       },
     ],
   },
   {
     id: "design",
     label: "Design Resources",
-    emoji: "🎨",
+    icon: "palette",
     description: "Tools for colors, typography, icons, and visual design",
     resources: [
       {
         name: "Figma",
         url: "https://figma.com",
         description: "Collaborative design tool for mockups and prototypes",
-        icon: "🎨",
+        icon: "palette",
       },
       {
         name: "Coolors",
         url: "https://coolors.co",
         description: "Color palette generator",
-        icon: "🌈",
+        icon: "rainbow",
       },
       {
         name: "Google Fonts",
         url: "https://fonts.google.com",
         description: "Free open-source font library",
-        icon: "🔤",
+        icon: "letters",
       },
       {
         name: "Heroicons",
         url: "https://heroicons.com",
         description: "Beautiful hand-crafted SVG icons by the Tailwind team",
-        icon: "🦸",
+        icon: "hero",
       },
       {
         name: "Lucide Icons",
         url: "https://lucide.dev",
         description: "Beautiful and consistent open-source icons",
-        icon: "✏️",
+        icon: "pencil",
       },
     ],
   },
   {
     id: "deployment",
     label: "Deployment",
-    emoji: "🚀",
+    icon: "rocket",
     description: "Ship your projects to the world with modern hosting",
     resources: [
       {
         name: "Vercel",
         url: "https://vercel.com",
         description: "Deploy frontend projects in seconds",
-        icon: "▲",
+        icon: "rocket",
       },
       {
         name: "Netlify",
         url: "https://netlify.com",
         description: "Build, deploy, and scale modern web projects",
-        icon: "🌐",
+        icon: "globe",
       },
       {
         name: "GitHub Pages",
         url: "https://pages.github.com",
         description: "Free static hosting directly from your GitHub repos",
-        icon: "📄",
+        icon: "document",
       },
     ],
   },
   {
     id: "community",
     label: "Community",
-    emoji: "👥",
+    icon: "users",
     description: "Connect with developers and grow your network",
     resources: [
       {
         name: "GDG",
         url: "https://developers.google.com/community/gdg",
         description: "Google Developer Groups — local tech communities",
-        icon: "🌍",
+        icon: "globe",
       },
       {
         name: "Dev.to",
         url: "https://dev.to",
         description: "Community of developers sharing articles and ideas",
-        icon: "👩‍💻",
+        icon: "user",
       },
       {
         name: "Stack Overflow",
         url: "https://stackoverflow.com",
         description: "Q&A for programmers — search for solutions",
-        icon: "📚",
+        icon: "books",
       },
     ],
   },
@@ -326,17 +326,17 @@ const ResourceLink = ({ resource }) => (
     href={resource.url}
     target="_blank"
     rel="noopener noreferrer"
-    className="group flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+    className="group flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-(--color-border)/20 dark:hover:bg-(--color-border-dark)/30 transition-colors"
   >
-    <span className="text-xl shrink-0">
-      <EmojiIcon emoji={resource.icon} className="w-5 h-5" />
+    <span className="shrink-0 text-(--color-primary)">
+      <EmojiIcon name={resource.icon} emoji={resource.icon} className="w-5 h-5" />
     </span>
     <div className="flex-1 min-w-0">
-      <span className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-(--color-primary) transition-colors">
+      <span className="font-semibold text-(--color-text) dark:text-(--color-text-dark) group-hover:text-(--color-primary) transition-colors">
         {resource.name}
       </span>
-      <span className="text-gray-400 dark:text-gray-500 mx-2">—</span>
-      <span className="text-sm text-gray-500 dark:text-gray-400">
+      <span className="text-(--color-border) dark:text-(--color-border-dark) mx-2">—</span>
+      <span className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
         {resource.description}
       </span>
     </div>
@@ -348,30 +348,30 @@ const ResourceLink = ({ resource }) => (
 const CategoryCard = ({ category }) => (
   <div
     id={`resource-category-${category.id}`}
-    className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-shadow duration-300"
+    className="bg-(--color-surface) dark:bg-(--color-surface-dark) rounded-xl shadow-lg border border-(--color-border) dark:border-(--color-border-dark) overflow-hidden hover:shadow-xl transition-shadow duration-300"
   >
     {/* Category header */}
-    <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/80">
+    <div className="px-6 py-5 border-b border-(--color-border) dark:border-(--color-border-dark) bg-(--color-surface-dark)/20">
       <div className="flex items-center gap-3">
-        <span className="text-2xl">
-          <EmojiIcon emoji={category.emoji} className="w-7 h-7" />
+        <span className="text-2xl text-(--color-primary)">
+          <EmojiIcon name={category.icon || category.emoji} emoji={category.emoji} className="w-7 h-7" />
         </span>
         <div>
-          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+          <h2 className="text-lg font-bold text-(--color-text) dark:text-(--color-text-dark)">
             {category.label}
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
             {category.description}
           </p>
         </div>
-        <span className="ml-auto px-2.5 py-1 text-xs font-medium bg-(--color-primary)/10 text-(--color-primary) rounded-full">
+        <span className="ml-auto px-2.5 py-1 text-xs font-semibold bg-(--color-primary)/15 text-(--color-primary) rounded-full border border-(--color-primary)/20">
           {category.resources.length}
         </span>
       </div>
     </div>
 
     {/* Resource links */}
-    <div className="p-2 divide-y divide-gray-100 dark:divide-gray-700/50">
+    <div className="p-2 divide-y divide-(--color-border)/40 dark:divide-(--color-border-dark)/40">
       {category.resources.map((resource) => (
         <ResourceLink key={resource.name} resource={resource} />
       ))}
@@ -413,27 +413,27 @@ export const Resources = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-24">
+    <div className="min-h-screen bg-(--color-background) text-(--color-text) dark:text-(--color-text-dark) py-24">
       {/* Hero Section */}
       <div className="section-container text-center mb-12">
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-(--color-primary)/10 text-(--color-primary) rounded-full text-sm font-medium mb-6">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-(--color-primary)/10 text-(--color-primary) rounded-full text-sm font-semibold mb-6 border border-(--color-primary)/20">
           <span>
-            <EmojiIcon emoji="📦" className="w-5 h-5 inline-block" />
+            <EmojiIcon name="box" className="w-5 h-5 inline-block" />
           </span>
           <span>{totalResources} curated resources</span>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+        <h1 className="text-4xl md:text-5xl font-bold text-(--color-text) dark:text-(--color-text-dark) mb-4">
           Developer{" "}
           <span className="text-(--color-primary)">Resources</span>
         </h1>
-        <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-10">
+        <p className="text-xl text-(--color-muted-text) dark:text-(--color-muted-text-dark) max-w-2xl mx-auto mb-10">
           A curated collection of tools, platforms, and communities to help you
           build, learn, and grow as a developer.
         </p>
 
         {/* Search / Filter Bar */}
         <div className="max-w-xl mx-auto relative">
-          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-gray-400 dark:text-gray-500">
+          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
             <svg
               className="w-5 h-5"
               fill="none"
@@ -454,12 +454,12 @@ export const Resources = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search resources..."
-            className="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-(--color-primary)/50 focus:border-(--color-primary) shadow-sm transition-all"
+            className="w-full pl-12 pr-4 py-3.5 bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl text-(--color-text) dark:text-(--color-text-dark) placeholder-(--color-muted-text)/60 focus:outline-none focus:ring-2 focus:ring-(--color-primary)/50 focus:border-(--color-primary) shadow-sm transition-all"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer"
+              className="absolute inset-y-0 right-4 flex items-center text-(--color-muted-text) hover:text-(--color-text) dark:hover:text-(--color-text-dark) cursor-pointer"
               aria-label="Clear search"
             >
               <svg
@@ -481,7 +481,7 @@ export const Resources = () => {
 
         {/* Search result count */}
         {searchQuery && (
-          <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-4 text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark) font-medium">
             {filteredCategories.length === 0
               ? "No resources found"
               : `Showing ${filteredCategories.reduce((acc, cat) => acc + cat.resources.length, 0)} resources in ${filteredCategories.length} ${filteredCategories.length === 1 ? "category" : "categories"}`}
@@ -497,9 +497,9 @@ export const Resources = () => {
               <a
                 key={category.id}
                 href={`#resource-category-${category.id}`}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full border border-gray-200 dark:border-gray-700 hover:border-(--color-primary) hover:text-(--color-primary) transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-(--color-surface) dark:bg-(--color-surface-dark) text-(--color-text) dark:text-(--color-text-dark) rounded-full border border-(--color-border) dark:border-(--color-border-dark) hover:border-(--color-primary) hover:text-(--color-primary) font-medium transition-colors"
               >
-                <EmojiIcon emoji={category.emoji} className="w-4 h-4" />
+                <EmojiIcon name={category.icon || category.emoji} className="w-4 h-4 text-(--color-primary)" />
                 {category.label}
               </a>
             ))}
@@ -511,11 +511,11 @@ export const Resources = () => {
       <div className="section-container">
         {filteredCategories.length === 0 ? (
           <div className="text-center py-16">
-            <EmojiIcon emoji="🔍" className="w-12 h-12 mx-auto mb-4" />
-            <p className="text-xl text-gray-500 dark:text-gray-400 font-medium">
+            <EmojiIcon name="search" className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+            <p className="text-xl text-gray-700 dark:text-gray-200 font-medium">
               No resources match your search
             </p>
-            <p className="text-gray-400 dark:text-gray-500 mt-2">
+            <p className="text-gray-500 dark:text-gray-400 mt-2">
               Try a different search term
             </p>
           </div>

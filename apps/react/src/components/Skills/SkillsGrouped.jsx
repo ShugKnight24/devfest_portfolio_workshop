@@ -16,6 +16,7 @@
  */
 
 import { SkillBadge } from "../SkillBadge";
+import { EmojiIcon } from "@portfolio/icons/react";
 
 export const SkillsGrouped = ({ skills }) => {
   // Group skills by category
@@ -32,27 +33,27 @@ export const SkillsGrouped = ({ skills }) => {
   const categoryInfo = {
     frontend: {
       name: "Frontend",
-      icon: "🎨",
+      icon: "palette",
       color: "text-(--color-primary) border border-(--color-primary)",
     },
     backend: {
       name: "Backend",
-      icon: "⚙️",
+      icon: "gear",
       color: "text-(--color-secondary) border border-(--color-secondary)",
     },
     language: {
       name: "Languages",
-      icon: "💻",
+      icon: "laptop",
       color: "text-(--color-accent) border border-(--color-accent)",
     },
     tools: {
       name: "Tools & Others",
-      icon: "🛠️",
+      icon: "tools",
       color: "text-(--color-text-primary) border border-(--color-text-primary)",
     },
     other: {
       name: "Other",
-      icon: "📦",
+      icon: "box",
       color:
         "text-(--color-text-secondary) border border-(--color-text-secondary)",
     },
@@ -75,9 +76,10 @@ export const SkillsGrouped = ({ skills }) => {
                 "text-(--color-text-secondary)"
               }`}
             >
-              <span className="text-2xl">
-                {categoryInfo[category]?.icon || "📦"}
-              </span>
+              <EmojiIcon
+                name={categoryInfo[category]?.icon || "box"}
+                className="w-6 h-6 shrink-0"
+              />
               <span>{categoryInfo[category]?.name || category}</span>
             </h3>
 

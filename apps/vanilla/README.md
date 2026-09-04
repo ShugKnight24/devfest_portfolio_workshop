@@ -22,7 +22,7 @@ No `npm install`, no build step, no server required. It works offline via `file:
 ## Features
 
 - **5 color themes** — Light, Dark, Ocean, Forest, Sunset
-- **Dark mode** — toggle with 🌙 button, saved to localStorage
+- **Dark mode** — toggle with theme button, saved to localStorage
 - **Responsive** — looks great on phones, tablets, and desktops
 - **Zero dependencies** — no frameworks, no build tools, no CDN
 - **Works offline** — double-click `index.html` and go

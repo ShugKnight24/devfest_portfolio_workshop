@@ -78,8 +78,8 @@ Still stuck? Try using yarn instead:
 
 3. **Typo in property name**: Double-check spelling
    \`\`\`jsx
-   // portfolioData.persnal ❌
-   // portfolioData.personal ✅
+   // portfolioData.persnal [INCORRECT]
+   // portfolioData.personal [CORRECT]
    \`\`\``,
       },
       {
@@ -482,10 +482,10 @@ export const Troubleshooting = () => {
 
       {/* Still stuck? */}
       <div className="mt-12 p-6 bg-linear-to-r from-(--color-primary)/10 to-(--color-secondary)/10 rounded-xl text-center">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2 inline-flex items-center gap-1.5">
-          Still Stuck? <EmojiIcon emoji="🤔" className="w-5 h-5" />
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 inline-flex items-center gap-1.5">
+          Still Stuck? <EmojiIcon name="thinking" className="w-5 h-5 text-(--color-primary)" />
         </h3>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">
+        <p className="text-gray-700 dark:text-gray-200 mb-4">
           Don't worry! Debugging is a normal part of development.
         </p>
         <div className="flex flex-wrap justify-center gap-3">

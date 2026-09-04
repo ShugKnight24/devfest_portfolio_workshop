@@ -3,41 +3,42 @@ import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { Playground } from "../components/Playground";
 import { Tooltip } from "../components/Tooltip";
 import { ProgressTracker } from "../components/ProgressTracker";
+import { EmojiIcon } from "@portfolio/icons/react";
 
 // ─── Track definitions ───────────────────────────────────────────────
 const TRACKS = {
   react: {
     id: "react",
     name: "React 19",
-    icon: "⚛️",
+    icon: "atom",
     color: "text-cyan-400",
     description: "Modern React with hooks, context, and Tailwind CSS",
   },
   vanilla: {
     id: "vanilla",
     name: "Vanilla JS",
-    icon: "⚡",
+    icon: "lightning",
     color: "text-amber-400",
     description: "Zero-dependency HTML5, CSS3, and DOM manipulation",
   },
   vue: {
     id: "vue",
     name: "Vue 3",
-    icon: "🎨",
+    icon: "palette",
     color: "text-emerald-400",
     description: "Composition API, SFCs, and reactive state with Vue 3",
   },
   svelte: {
     id: "svelte",
     name: "SvelteKit",
-    icon: "🧱",
+    icon: "brick",
     color: "text-red-400",
     description: "Compile-time optimized components and reactive declarations",
   },
   agentic: {
     id: "agentic",
     name: "Agentic Dev",
-    icon: "🤖",
+    icon: "robot",
     color: "text-purple-400",
     description: "AI-assisted development with Gemini, Claude, Copilot, Cursor & more",
   },
@@ -443,10 +444,10 @@ function capitalize(str) {
 
 // Your test:
 const result = capitalize('hello');
-console.log('Test:', result === 'Hello' ? '✅ PASS' : '❌ FAIL');
+console.log('Test:', result === 'Hello' ? '[PASS]' : '[FAIL]');
 
 const result2 = capitalize('world');
-console.log('Test 2:', result2 === 'World' ? '✅ PASS' : '❌ FAIL');`,
+console.log('Test 2:', result2 === 'World' ? '[PASS]' : '[FAIL]');`,
       hints: ["Think about edge cases: empty strings, already capitalized, numbers"],
     },
   },
@@ -528,10 +529,10 @@ git push -u origin main`}
         </ul>
         <h3>Effective Prompting for React:</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
-          {`// ❌ Vague prompt:
+          {`// [AVOID] Vague prompt:
 "Make a component"
 
-// ✅ Specific prompt:
+// [RECOMMENDED] Specific prompt:
 "Create a React component called SkillCard that:
 - Accepts props: name (string), level (string), icon (string)
 - Renders a card with a colored border based on level
@@ -935,12 +936,12 @@ console.log(\`Columns: \${
         </p>
         <h3>Semantic HTML (The Foundation):</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
-          {`<!-- ❌ Div soup (bad) -->
+          {`<!-- [AVOID] Div soup (bad) -->
 <div class="header">
   <div class="nav">...</div>
 </div>
 
-<!-- ✅ Semantic HTML (good) -->
+<!-- [RECOMMENDED] Semantic HTML (good) -->
 <header>
   <nav aria-label="Main navigation">
     <a href="#about">About</a>
@@ -959,7 +960,7 @@ console.log(\`Columns: \${
 </a>
 
 <!-- Buttons need labels -->
-<button aria-label="Toggle dark mode">🌙</button>
+<button aria-label="Toggle dark mode">Theme</button>
 
 <!-- Images need alt text -->
 <img src="photo.jpg" alt="Profile photo of Jane, smiling">`}
@@ -1955,9 +1956,9 @@ const agenticLessons = [
         </ul>
         <h3>Bad vs Good Prompts:</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
-          {`❌ "Make a card component"
+          {`[AVOID] "Make a card component"
 
-✅ "Create a React component called ProjectCard that:
+[RECOMMENDED] "Create a React component called ProjectCard that:
 - Accepts props: title (string), description (string),
   tags (string[]), githubUrl (string), liveUrl (string)
 - Renders as a rounded card with shadow
@@ -2193,7 +2194,7 @@ What's causing this and how do I fix it?"`}
 
 const projects = [
   { id: 1, title: "Portfolio", tags: ["React"] },
-  { id: 2, title: "Blog" },  // 🐛 Bug: missing 'tags'
+  { id: 2, title: "Blog" },  // Bug: missing 'tags'
   { id: 3, title: "Chat App", tags: ["Node", "Socket.io"] },
 ];
 
@@ -2211,7 +2212,7 @@ projects.forEach(p => {
   try {
     console.log(p.title + ': ' + renderTags(p));
   } catch (e) {
-    console.log(p.title + ': ❌ ' + e.message);
+    console.log(p.title + ': [CRASH] ' + e.message);
     console.log('  Fixed: ' + renderTagsSafe(p));
   }
 });`,
@@ -2488,10 +2489,10 @@ const TrackSelector = ({ activeTrack, onTrackChange }) => (
         className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${
           activeTrack === track.id
             ? "bg-(--color-primary) text-white shadow-md"
-            : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
+            : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
         }`}
       >
-        <span>{track.icon}</span>
+        <EmojiIcon name={track.icon} className="w-4 h-4" />
         <span>{track.name}</span>
       </button>
     ))}
@@ -2582,13 +2583,13 @@ export const Lessons = () => {
         <div className="lg:col-span-1">
           <div className="sticky top-24 space-y-6">
             {/* Lesson Navigation */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
+            <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow-lg p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                  <span>{track.icon}</span>
+                <h3 className="font-bold text-(--color-text) dark:text-(--color-text-dark) flex items-center gap-2">
+                  <EmojiIcon name={track.icon} className="w-5 h-5 text-(--color-primary)" />
                   <span>{track.name}</span>
                 </h3>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+                <span className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) font-medium">
                   {activeLesson + 1}/{lessons.length}
                 </span>
               </div>
@@ -2597,17 +2598,17 @@ export const Lessons = () => {
                   <button
                     key={lesson.id}
                     onClick={() => setActiveLesson(index)}
-                    className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-3 transition-colors text-sm ${
+                    className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-3 transition-colors text-sm cursor-pointer ${
                       activeLesson === index
-                        ? "bg-(--color-primary) text-white"
-                        : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                        ? "bg-(--color-primary) text-(--color-primary-text)"
+                        : "hover:bg-(--color-border)/20 dark:hover:bg-(--color-border-dark)/30 text-(--color-text) dark:text-(--color-text-dark)"
                     }`}
                   >
                     <span
                       className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
                         activeLesson === index
-                          ? "bg-white/20 text-white"
-                          : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+                          ? "bg-black/20 text-(--color-primary-text)"
+                          : "bg-(--color-border)/40 dark:bg-(--color-border-dark)/60 text-(--color-muted-text) dark:text-(--color-muted-text-dark)"
                       }`}
                     >
                       {index + 1}
@@ -2619,11 +2620,11 @@ export const Lessons = () => {
             </div>
 
             {/* Keyboard Hint */}
-            <div className="text-center text-xs text-gray-500 dark:text-gray-400 flex items-center justify-center gap-2">
-              <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs">
+            <div className="text-center text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) flex items-center justify-center gap-2">
+              <kbd className="px-2 py-1 bg-(--color-border)/30 dark:bg-(--color-border-dark)/50 rounded text-xs">
                 ←
               </kbd>
-              <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs">
+              <kbd className="px-2 py-1 bg-(--color-border)/30 dark:bg-(--color-border-dark)/50 rounded text-xs">
                 →
               </kbd>
               <span>to navigate</span>
@@ -2636,7 +2637,7 @@ export const Lessons = () => {
 
         {/* Main Content */}
         <div className="lg:col-span-3">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+          <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow-lg p-8">
             <div className="flex items-center gap-4 mb-8">
               <span className="w-10 h-10 rounded-full bg-(--color-primary)/10 text-(--color-primary) flex items-center justify-center font-bold">
                 {activeLesson + 1}
@@ -2645,7 +2646,7 @@ export const Lessons = () => {
                 <p className={`text-xs font-bold uppercase tracking-wider ${track.color} mb-1`}>
                   {track.name} Track
                 </p>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                <h1 className="text-3xl font-bold text-(--color-text) dark:text-(--color-text-dark)">
                   {currentLesson.title}
                 </h1>
               </div>

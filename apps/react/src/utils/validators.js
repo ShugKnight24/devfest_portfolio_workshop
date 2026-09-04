@@ -39,7 +39,7 @@ export function validateHelloWorld(code) {
   return {
     valid: errors.length === 0,
     errors,
-    message: errors.length === 0 ? "All tests passed! ✓" : "Some tests failed",
+    message: errors.length === 0 ? "All tests passed!" : "Some tests failed",
   };
 }
 
@@ -76,7 +76,7 @@ export function validatePropsBasics(code) {
   return {
     valid: errors.length === 0,
     errors,
-    message: errors.length === 0 ? "All tests passed! ✓" : "Some tests failed",
+    message: errors.length === 0 ? "All tests passed!" : "Some tests failed",
   };
 }
 
@@ -118,7 +118,7 @@ export function validateStateCounter(code) {
   return {
     valid: errors.length === 0,
     errors,
-    message: errors.length === 0 ? "All tests passed! ✓" : "Some tests failed",
+    message: errors.length === 0 ? "All tests passed!" : "Some tests failed",
   };
 }
 
@@ -155,7 +155,7 @@ export function validateListRendering(code) {
   return {
     valid: errors.length === 0,
     errors,
-    message: errors.length === 0 ? "All tests passed! ✓" : "Some tests failed",
+    message: errors.length === 0 ? "All tests passed!" : "Some tests failed",
   };
 }
 
@@ -189,14 +189,14 @@ export function validateConditionalRender(code) {
     errors.push("Button text should indicate 'Show' or 'Hide'");
   }
 
-  if (!/Hello|👋/.test(code)) {
-    errors.push("Display 'Hello! 👋' when visible");
+  if (!/Hello/.test(code)) {
+    errors.push("Display 'Hello!' when visible");
   }
 
   return {
     valid: errors.length === 0,
     errors,
-    message: errors.length === 0 ? "All tests passed! ✓" : "Some tests failed",
+    message: errors.length === 0 ? "All tests passed!" : "Some tests failed",
   };
 }
 
@@ -233,7 +233,7 @@ export function validateUseEffectBasic(code) {
   return {
     valid: errors.length === 0,
     errors,
-    message: errors.length === 0 ? "All tests passed! ✓" : "Some tests failed",
+    message: errors.length === 0 ? "All tests passed!" : "Some tests failed",
   };
 }
 

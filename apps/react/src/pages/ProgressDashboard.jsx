@@ -112,13 +112,13 @@ const ProgressRing = ({
 
 // Stat card component
 const StatCard = ({ icon, value, label, color = "blue", subtext }) => (
-  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
+  <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow-lg p-6 text-center">
     <div className={`mb-2 text-${color}-500 flex justify-center`}>
-      <EmojiIcon emoji={icon} className="w-10 h-10" />
+      <EmojiIcon name={icon} emoji={icon} className="w-10 h-10" />
     </div>
     <p className={`text-3xl font-bold text-${color}-500`}>{value}</p>
-    <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
-    {subtext && <p className="text-xs text-gray-400 mt-1">{subtext}</p>}
+    <p className="text-sm font-medium text-(--color-text) dark:text-(--color-text-dark)">{label}</p>
+    {subtext && <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) mt-1">{subtext}</p>}
   </div>
 );
 
@@ -137,20 +137,20 @@ const ActivityCalendar = ({ activities = [] }) => {
   });
 
   const getIntensity = (count) => {
-    if (count === 0) return "bg-gray-100 dark:bg-gray-800";
+    if (count === 0) return "bg-(--color-surface-hover) dark:bg-(--color-surface-dark)/60";
     if (count === 1) return "bg-green-200 dark:bg-green-900";
     if (count <= 3) return "bg-green-400 dark:bg-green-700";
     return "bg-green-600 dark:bg-green-500";
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-      <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4">
+    <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow-lg p-6">
+      <h3 className="font-bold text-(--color-text) dark:text-(--color-text-dark) mb-4 flex items-center gap-2">
         <EmojiIcon
-          emoji="📅"
-          className="w-5 h-5 inline-block align-text-bottom"
-        />{" "}
-        Activity
+          name="calendar"
+          className="w-5 h-5 text-blue-500"
+        />
+        <span>Activity</span>
       </h3>
       <div className="grid grid-cols-7 gap-1">
         {days.map((day, i) => (
@@ -163,9 +163,9 @@ const ActivityCalendar = ({ activities = [] }) => {
           />
         ))}
       </div>
-      <div className="flex items-center justify-end gap-1 mt-2 text-xs text-gray-500">
+      <div className="flex items-center justify-end gap-1 mt-2 text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
         <span>Less</span>
-        <div className="w-3 h-3 rounded-sm bg-gray-100 dark:bg-gray-800" />
+        <div className="w-3 h-3 rounded-sm bg-(--color-surface-hover) dark:bg-(--color-surface-dark)/60" />
         <div className="w-3 h-3 rounded-sm bg-green-200 dark:bg-green-900" />
         <div className="w-3 h-3 rounded-sm bg-green-400 dark:bg-green-700" />
         <div className="w-3 h-3 rounded-sm bg-green-600 dark:bg-green-500" />
@@ -178,16 +178,16 @@ const ActivityCalendar = ({ activities = [] }) => {
 // Lesson progress list
 const LessonProgress = ({ completedLessons = [] }) => {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+    <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow-lg p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-gray-900 dark:text-gray-100">
+        <h3 className="font-bold text-(--color-text) dark:text-(--color-text-dark) flex items-center gap-2">
           <EmojiIcon
-            emoji="📚"
-            className="w-5 h-5 inline-block align-text-bottom"
-          />{" "}
-          Lessons
+            name="books"
+            className="w-5 h-5 text-blue-500"
+          />
+          <span>Lessons</span>
         </h3>
-        <span className="text-sm text-gray-500">
+        <span className="text-sm font-medium text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
           {completedLessons.length}/{LESSONS.length} completed
         </span>
       </div>
@@ -198,33 +198,25 @@ const LessonProgress = ({ completedLessons = [] }) => {
             <Link
               key={lesson.id}
               to={lesson.path}
-              className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                isCompleted
-                  ? "bg-green-50 dark:bg-green-900/20"
-                  : "bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-700"
-              }`}
+              className="flex items-center justify-between p-3 rounded-lg hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark) transition-colors"
             >
-              <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
-                  isCompleted
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-200 dark:bg-gray-700 text-gray-500"
-                }`}
-              >
-                {isCompleted ? (
-                  <Checkmark className="w-3.5 h-3.5 text-white" />
-                ) : (
-                  <span className="w-2 h-2 rounded-full border border-current opacity-60" />
-                )}
-              </div>
               <span
-                className={`flex-1 text-sm ${
+                className={`text-sm ${
                   isCompleted
-                    ? "text-green-700 dark:text-green-300"
-                    : "text-gray-700 dark:text-gray-300"
+                    ? "text-green-600 dark:text-green-400 font-medium"
+                    : "text-(--color-text) dark:text-(--color-text-dark)"
                 }`}
               >
                 {lesson.title}
+              </span>
+              <span
+                className={`text-xs px-2 py-1 rounded-full ${
+                  isCompleted
+                    ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium"
+                    : "bg-(--color-surface-hover) dark:bg-(--color-surface-hover-dark) text-(--color-muted-text) dark:text-(--color-muted-text-dark)"
+                }`}
+              >
+                {isCompleted ? "Done" : "Pending"}
               </span>
             </Link>
           );
@@ -235,24 +227,24 @@ const LessonProgress = ({ completedLessons = [] }) => {
 };
 
 // Achievement preview
-const AchievementPreview = ({ achievements, unlockedIds }) => {
+const AchievementPreview = ({ achievements = {}, unlockedIds = [] }) => {
   const recentUnlocked = Object.values(achievements)
     .filter((a) => unlockedIds.includes(a.id))
     .slice(0, 6);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+    <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow-lg p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-gray-900 dark:text-gray-100">
+        <h3 className="font-bold text-(--color-text) dark:text-(--color-text-dark) flex items-center gap-2">
           <EmojiIcon
-            emoji="🏆"
-            className="w-5 h-5 inline-block align-text-bottom"
-          />{" "}
-          Achievements
+            name="trophy"
+            className="w-5 h-5 text-yellow-500"
+          />
+          <span>Achievements</span>
         </h3>
         <Link
           to="/achievements"
-          className="text-sm text-blue-500 hover:text-blue-600"
+          className="text-sm font-semibold text-blue-500 hover:text-blue-400"
         >
           View all →
         </Link>
@@ -262,15 +254,15 @@ const AchievementPreview = ({ achievements, unlockedIds }) => {
           {recentUnlocked.map((achievement) => (
             <div
               key={achievement.id}
-              className="aspect-square rounded-xl bg-linear-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-2xl shadow-lg"
+              className="aspect-square rounded-xl bg-linear-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg"
               title={achievement.title}
             >
-              {achievement.icon}
+              <EmojiIcon name={achievement.icon} emoji={achievement.icon} className="w-6 h-6 text-white" />
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-gray-500 text-sm text-center py-4">
+        <p className="text-(--color-muted-text) dark:text-(--color-muted-text-dark) text-sm text-center py-4">
           Complete tasks to unlock achievements!
         </p>
       )}
@@ -284,18 +276,18 @@ const ChallengeStats = ({ stats, challenges, completedChallenges }) => {
   const totalCount = challenges.length;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+    <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow-lg p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-gray-900 dark:text-gray-100">
+        <h3 className="font-bold text-(--color-text) dark:text-(--color-text-dark) flex items-center gap-2">
           <EmojiIcon
-            emoji="⚡"
-            className="w-5 h-5 inline-block align-text-bottom"
-          />{" "}
-          Challenges
+            name="lightning"
+            className="w-5 h-5 text-yellow-500"
+          />
+          <span>Challenges</span>
         </h3>
         <Link
           to="/challenges"
-          className="text-sm text-blue-500 hover:text-blue-600"
+          className="text-sm font-semibold text-blue-500 hover:text-blue-400"
         >
           View all →
         </Link>
@@ -303,23 +295,23 @@ const ChallengeStats = ({ stats, challenges, completedChallenges }) => {
       <div className="grid grid-cols-3 gap-4 text-center">
         <div>
           <p className="text-2xl font-bold text-purple-500">{completedCount}</p>
-          <p className="text-xs text-gray-500">Completed</p>
+          <p className="text-xs font-semibold text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Completed</p>
         </div>
         <div>
           <p className="text-2xl font-bold text-yellow-500">
             {stats.totalPoints}
           </p>
-          <p className="text-xs text-gray-500">Points</p>
+          <p className="text-xs font-semibold text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Points</p>
         </div>
         <div>
           <p className="text-2xl font-bold text-green-500">
             {Math.round((completedCount / totalCount) * 100) || 0}%
           </p>
-          <p className="text-xs text-gray-500">Complete</p>
+          <p className="text-xs font-semibold text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Complete</p>
         </div>
       </div>
       {/* Progress bar */}
-      <div className="mt-4 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+      <div className="mt-4 h-2 bg-(--color-border) dark:bg-(--color-border-dark) rounded-full overflow-hidden">
         <div
           className="h-full bg-linear-to-r from-purple-500 to-pink-500 transition-all duration-500"
           style={{ width: `${(completedCount / totalCount) * 100}%` }}
@@ -371,14 +363,14 @@ export const ProgressDashboard = () => {
   // Get rank
   const getRank = (points) => {
     if (points >= 400)
-      return { name: "Grand Master", emoji: "👑", color: "purple" };
-    if (points >= 300) return { name: "Expert", emoji: "🔥", color: "red" };
+      return { name: "Grand Master", icon: "crown", color: "purple" };
+    if (points >= 300) return { name: "Expert", icon: "fire", color: "red" };
     if (points >= 200)
-      return { name: "Advanced", emoji: "⭐", color: "orange" };
+      return { name: "Advanced", icon: "star", color: "orange" };
     if (points >= 100)
-      return { name: "Intermediate", emoji: "🌟", color: "yellow" };
-    if (points >= 50) return { name: "Beginner", emoji: "🌱", color: "green" };
-    return { name: "Newcomer", emoji: "🥚", color: "gray" };
+      return { name: "Intermediate", icon: "sparkle", color: "yellow" };
+    if (points >= 50) return { name: "Beginner", icon: "seedling", color: "green" };
+    return { name: "Newcomer", icon: "egg", color: "gray" };
   };
 
   const totalPoints = getTotalPoints() + challengeStats.totalPoints;
@@ -386,41 +378,41 @@ export const ProgressDashboard = () => {
   const streak = calculateStreak(achievementStats);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-24">
+    <div className="min-h-screen bg-(--color-background) dark:bg-(--color-dark) text-(--color-text) dark:text-(--color-text-dark) py-24 transition-colors duration-300">
       <div className="section-container">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800 rounded-full text-sm font-medium mb-6">
             <span>
               <EmojiIcon
-                emoji="📊"
-                className="w-5 h-5 inline-block align-text-bottom"
+                name="chartBar"
+                className="w-5 h-5 text-blue-600 dark:text-blue-400 inline-block align-text-bottom"
               />
             </span>
             <span>Your Learning Journey</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-(--color-text) dark:text-(--color-text-dark) mb-4">
             Progress <span className="text-(--color-primary)">Dashboard</span>
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="text-xl text-(--color-muted-text) dark:text-(--color-muted-text-dark) max-w-2xl mx-auto">
             Track your progress, celebrate achievements, and see how far you've
             come!
           </p>
         </div>
 
         {/* Overall Progress */}
-        <div className="bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl shadow-xl p-8 mb-8 text-white">
+        <div className="bg-linear-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl shadow-xl p-8 mb-8 text-white">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="text-center md:text-left">
-              <p className="text-blue-100 text-sm mb-1">Current Rank</p>
+              <p className="text-blue-100 text-sm mb-1 font-medium">Current Rank</p>
               <h2 className="text-3xl font-bold flex items-center gap-2">
-                <EmojiIcon emoji={rank.emoji} className="w-8 h-8" /> {rank.name}
+                <EmojiIcon name={rank.icon} className="w-8 h-8 text-yellow-300" /> {rank.name}
               </h2>
-              <p className="text-blue-100 mt-2">
+              <p className="text-blue-100 mt-2 font-medium">
                 {totalPoints} total points •{" "}
                 {streak > 0 ? (
                   <>
-                    <EmojiIcon emoji="🔥" className="w-4 h-4 inline-block" />{" "}
+                    <EmojiIcon name="fire" className="w-4 h-4 inline-block text-orange-300" />{" "}
                     {streak} day streak
                   </>
                 ) : (
@@ -432,7 +424,7 @@ export const ProgressDashboard = () => {
               <ProgressRing progress={overallProgress} color="#FFFFFF" />
               <div className="text-center">
                 <p className="text-3xl font-bold">{overallProgress}%</p>
-                <p className="text-blue-100 text-sm">Overall Progress</p>
+                <p className="text-blue-100 text-sm font-medium">Overall Progress</p>
               </div>
             </div>
           </div>
@@ -441,28 +433,28 @@ export const ProgressDashboard = () => {
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <StatCard
-            icon="📚"
+            icon="books"
             value={achievementStats.lessonsCompleted?.length || 0}
             label="Lessons Done"
             color="blue"
             subtext={`of ${LESSONS.length}`}
           />
           <StatCard
-            icon="⚡"
+            icon="lightning"
             value={completedChallenges.length}
             label="Challenges"
             color="purple"
             subtext={`of ${challenges.length}`}
           />
           <StatCard
-            icon="🏆"
+            icon="trophy"
             value={unlockedAchievements.length}
             label="Achievements"
             color="yellow"
             subtext={`of ${Object.keys(achievements).length}`}
           />
           <StatCard
-            icon="⏱️"
+            icon="timer"
             value={formatTime(sessionTime)}
             label="This Session"
             color="green"
@@ -494,78 +486,78 @@ export const ProgressDashboard = () => {
             />
 
             {/* Quick Actions */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-              <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4">
+            <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow-lg p-6">
+              <h3 className="font-bold text-(--color-text) dark:text-(--color-text-dark) mb-4 flex items-center gap-2">
                 <EmojiIcon
-                  emoji="🚀"
-                  className="w-5 h-5 inline-block align-text-bottom"
-                />{" "}
-                Continue Learning
+                  name="rocket"
+                  className="w-5 h-5 text-blue-500"
+                />
+                <span>Continue Learning</span>
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <Link
                   to="/lessons"
-                  className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
+                  className="p-4 bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 rounded-lg text-center hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors"
                 >
-                  <span className="text-2xl flex justify-center">
-                    <EmojiIcon emoji="📖" className="w-7 h-7" />
+                  <span className="flex justify-center text-blue-600 dark:text-blue-400">
+                    <EmojiIcon name="book" className="w-7 h-7" />
                   </span>
-                  <p className="text-sm font-medium text-blue-700 dark:text-blue-300 mt-1">
+                  <p className="text-sm font-semibold text-blue-900 dark:text-blue-200 mt-1">
                     Lessons
                   </p>
                 </Link>
                 <Link
                   to="/challenges"
-                  className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors"
+                  className="p-4 bg-purple-50 dark:bg-purple-950/40 border border-purple-100 dark:border-purple-900/50 rounded-lg text-center hover:bg-purple-100 dark:hover:bg-purple-900/60 transition-colors"
                 >
-                  <span className="text-2xl flex justify-center">
-                    <EmojiIcon emoji="⚡" className="w-7 h-7" />
+                  <span className="flex justify-center text-purple-600 dark:text-purple-400">
+                    <EmojiIcon name="lightning" className="w-7 h-7" />
                   </span>
-                  <p className="text-sm font-medium text-purple-700 dark:text-purple-300 mt-1">
+                  <p className="text-sm font-semibold text-purple-900 dark:text-purple-200 mt-1">
                     Challenges
                   </p>
                 </Link>
                 <Link
                   to="/showcase"
-                  className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors"
+                  className="p-4 bg-green-50 dark:bg-green-950/40 border border-green-100 dark:border-green-900/50 rounded-lg text-center hover:bg-green-100 dark:hover:bg-green-900/60 transition-colors"
                 >
-                  <span className="text-2xl flex justify-center">
-                    <EmojiIcon emoji="🎨" className="w-7 h-7" />
+                  <span className="flex justify-center text-green-600 dark:text-green-400">
+                    <EmojiIcon name="palette" className="w-7 h-7" />
                   </span>
-                  <p className="text-sm font-medium text-green-700 dark:text-green-300 mt-1">
+                  <p className="text-sm font-semibold text-green-900 dark:text-green-200 mt-1">
                     Showcase
                   </p>
                 </Link>
                 <Link
                   to="/achievements"
-                  className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition-colors"
+                  className="p-4 bg-yellow-50 dark:bg-yellow-950/40 border border-yellow-100 dark:border-yellow-900/50 rounded-lg text-center hover:bg-yellow-100 dark:hover:bg-yellow-900/60 transition-colors"
                 >
-                  <span className="text-2xl flex justify-center">
-                    <EmojiIcon emoji="🏆" className="w-7 h-7" />
+                  <span className="flex justify-center text-yellow-600 dark:text-yellow-400">
+                    <EmojiIcon name="trophy" className="w-7 h-7" />
                   </span>
-                  <p className="text-sm font-medium text-yellow-700 dark:text-yellow-300 mt-1">
+                  <p className="text-sm font-semibold text-yellow-900 dark:text-yellow-200 mt-1">
                     Achievements
                   </p>
                 </Link>
                 <Link
                   to="/components"
-                  className="p-4 bg-teal-50 dark:bg-teal-900/20 rounded-lg text-center hover:bg-teal-100 dark:hover:bg-teal-900/40 transition-colors"
+                  className="p-4 bg-teal-50 dark:bg-teal-950/40 border border-teal-100 dark:border-teal-900/50 rounded-lg text-center hover:bg-teal-100 dark:hover:bg-teal-900/60 transition-colors"
                 >
-                  <span className="text-2xl flex justify-center">
-                    <EmojiIcon emoji="🧩" className="w-7 h-7" />
+                  <span className="flex justify-center text-teal-600 dark:text-teal-400">
+                    <EmojiIcon name="puzzle" className="w-7 h-7" />
                   </span>
-                  <p className="text-sm font-medium text-teal-700 dark:text-teal-300 mt-1">
+                  <p className="text-sm font-semibold text-teal-900 dark:text-teal-200 mt-1">
                     Playground
                   </p>
                 </Link>
                 <Link
                   to="/dashboard/telemetry"
-                  className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
+                  className="p-4 bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900/50 rounded-lg text-center hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors"
                 >
-                  <span className="text-2xl flex justify-center">
-                    <EmojiIcon emoji="🤖" className="w-7 h-7" />
+                  <span className="flex justify-center text-red-600 dark:text-red-400">
+                    <EmojiIcon name="robot" className="w-7 h-7" />
                   </span>
-                  <p className="text-sm font-medium text-red-700 dark:text-red-300 mt-1">
+                  <p className="text-sm font-semibold text-red-900 dark:text-red-200 mt-1">
                     Telemetry
                   </p>
                 </Link>
@@ -575,37 +567,36 @@ export const ProgressDashboard = () => {
         </div>
 
         {/* Motivation Section */}
-        <div className="mt-8 bg-linear-to-r from-green-400 to-cyan-500 rounded-xl shadow-lg p-6 text-white text-center">
-          <p className="text-lg font-medium">
+        <div className="mt-8 bg-linear-to-r from-emerald-600 to-teal-600 rounded-xl shadow-lg p-6 text-white text-center">
+          <p className="text-lg font-semibold flex items-center justify-center gap-2">
             {overallProgress < 25 && (
               <>
-                <EmojiIcon emoji="🚀" className="w-5 h-5 inline-block" /> You're
-                just getting started! Every expert was once a beginner.
+                <EmojiIcon name="rocket" className="w-5 h-5 text-yellow-300" />
+                <span>You're just getting started! Every expert was once a beginner.</span>
               </>
             )}
             {overallProgress >= 25 && overallProgress < 50 && (
               <>
-                <EmojiIcon emoji="💪" className="w-5 h-5 inline-block" /> Great
-                progress! You're building momentum.
+                <EmojiIcon name="muscle" className="w-5 h-5 text-yellow-300" />
+                <span>Great progress! You're building momentum.</span>
               </>
             )}
             {overallProgress >= 50 && overallProgress < 75 && (
               <>
-                <EmojiIcon emoji="🔥" className="w-5 h-5 inline-block" />{" "}
-                Halfway there! Keep up the amazing work!
+                <EmojiIcon name="fire" className="w-5 h-5 text-amber-300" />
+                <span>Halfway there! Keep up the amazing work!</span>
               </>
             )}
             {overallProgress >= 75 && overallProgress < 100 && (
               <>
-                <EmojiIcon emoji="⭐" className="w-5 h-5 inline-block" /> Almost
-                there! The finish line is in sight!
+                <EmojiIcon name="star" className="w-5 h-5 text-yellow-300" />
+                <span>Almost there! The finish line is in sight!</span>
               </>
             )}
             {overallProgress >= 100 && (
               <>
-                <EmojiIcon emoji="🎉" className="w-5 h-5 inline-block" />{" "}
-                Incredible! You've mastered everything! Consider becoming a
-                mentor!
+                <EmojiIcon name="party" className="w-5 h-5 text-yellow-300" />
+                <span>Incredible! You've mastered everything! Consider becoming a mentor!</span>
               </>
             )}
           </p>

@@ -20,7 +20,7 @@ const ACHIEVEMENTS = {
     id: "firstVisit",
     title: "Hello, World!",
     description: "Visit the portfolio builder for the first time",
-    icon: "👋",
+    icon: "wave",
     points: 10,
     secret: false,
   },
@@ -28,7 +28,7 @@ const ACHIEVEMENTS = {
     id: "dataCustomizer",
     title: "Data Master",
     description: "Customize your portfolio data",
-    icon: "📝",
+    icon: "notepad",
     points: 25,
     secret: false,
   },
@@ -36,7 +36,7 @@ const ACHIEVEMENTS = {
     id: "themeExplorer",
     title: "Style Guru",
     description: "Try 5 different themes",
-    icon: "🎨",
+    icon: "palette",
     points: 20,
     secret: false,
   },
@@ -44,7 +44,7 @@ const ACHIEVEMENTS = {
     id: "lessonComplete",
     title: "Quick Learner",
     description: "Complete your first lesson",
-    icon: "📚",
+    icon: "books",
     points: 15,
     secret: false,
   },
@@ -52,7 +52,7 @@ const ACHIEVEMENTS = {
     id: "allLessonsComplete",
     title: "Knowledge Seeker",
     description: "Complete all lessons",
-    icon: "🎓",
+    icon: "gradCap",
     points: 100,
     secret: false,
   },
@@ -60,7 +60,7 @@ const ACHIEVEMENTS = {
     id: "showcaseExplorer",
     title: "Component Explorer",
     description: "View all component variants in the showcase",
-    icon: "🔍",
+    icon: "search",
     points: 20,
     secret: false,
   },
@@ -68,7 +68,7 @@ const ACHIEVEMENTS = {
     id: "darkModeMaster",
     title: "Night Owl",
     description: "Toggle dark mode 10 times",
-    icon: "🌙",
+    icon: "moon",
     points: 15,
     secret: true,
   },
@@ -76,7 +76,7 @@ const ACHIEVEMENTS = {
     id: "konamiCode",
     title: "Secret Gamer",
     description: "Enter the Konami Code",
-    icon: "🎮",
+    icon: "gamepad",
     points: 50,
     secret: true,
   },
@@ -84,7 +84,7 @@ const ACHIEVEMENTS = {
     id: "speedRunner",
     title: "Speed Runner",
     description: "Complete the workshop in under 30 minutes",
-    icon: "⚡",
+    icon: "lightning",
     points: 75,
     secret: false,
   },
@@ -92,7 +92,7 @@ const ACHIEVEMENTS = {
     id: "codePlayground",
     title: "Code Explorer",
     description: "Run code in the playground 5 times",
-    icon: "💻",
+    icon: "laptop",
     points: 20,
     secret: false,
   },
@@ -100,7 +100,7 @@ const ACHIEVEMENTS = {
     id: "helpSeeker",
     title: "Problem Solver",
     description: "Visit the troubleshooting page",
-    icon: "🔧",
+    icon: "wrench",
     points: 10,
     secret: false,
   },
@@ -108,7 +108,7 @@ const ACHIEVEMENTS = {
     id: "keyboardNinja",
     title: "Keyboard Ninja",
     description: "Use 5 keyboard shortcuts",
-    icon: "⌨️",
+    icon: "laptop",
     points: 25,
     secret: false,
   },
@@ -116,7 +116,7 @@ const ACHIEVEMENTS = {
     id: "resourceReader",
     title: "Lifelong Learner",
     description: "Visit the What's Next page",
-    icon: "🚀",
+    icon: "rocket",
     points: 15,
     secret: false,
   },
@@ -124,7 +124,7 @@ const ACHIEVEMENTS = {
     id: "persistentLearner",
     title: "Persistent Learner",
     description: "Return to the workshop on a different day",
-    icon: "📅",
+    icon: "calendar",
     points: 30,
     secret: false,
   },
@@ -132,7 +132,7 @@ const ACHIEVEMENTS = {
     id: "socialButterfly",
     title: "Social Butterfly",
     description: "Add all your social links",
-    icon: "🦋",
+    icon: "butterfly",
     points: 20,
     secret: false,
   },
@@ -385,7 +385,7 @@ export const AchievementBadge = ({ achievementId, size = "md" }) => {
       title={isUnlocked ? achievement.title : "???"}
     >
       <EmojiIcon
-        emoji={isUnlocked || !achievement.secret ? achievement.icon : "🔒"}
+        name={isUnlocked || !achievement.secret ? achievement.icon : "lock"}
         className={
           sizes[size].includes("w-12")
             ? "w-6 h-6"
@@ -409,34 +409,34 @@ export const AchievementsPanel = () => {
   );
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+    <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow-lg p-6">
       {/* Header with stats */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+          <h2 className="text-xl font-bold text-(--color-text) dark:text-(--color-text-dark)">
             Achievements
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
             {unlockedAchievements.length} / {achievementList.length} unlocked
           </p>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-bold text-yellow-500">
+          <p className="text-2xl font-bold text-amber-500">
             {getTotalPoints()}
           </p>
-          <p className="text-xs text-gray-500">Total Points</p>
+          <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Total Points</p>
         </div>
       </div>
 
       {/* Progress bar */}
       <div className="mb-6">
-        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+        <div className="h-3 bg-(--color-border)/40 dark:bg-(--color-border-dark)/60 rounded-full overflow-hidden">
           <div
-            className="h-full bg-linear-to-r from-yellow-400 to-orange-500 transition-all duration-500"
+            className="h-full bg-linear-to-r from-amber-400 to-(--color-primary) transition-all duration-500"
             style={{ width: `${getProgress()}%` }}
           />
         </div>
-        <p className="text-xs text-gray-500 mt-1 text-right">
+        <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) mt-1 text-right">
           {getProgress()}%
         </p>
       </div>
@@ -450,8 +450,8 @@ export const AchievementsPanel = () => {
               key={achievement.id}
               className={`p-4 rounded-xl border-2 transition-all ${
                 isUnlocked
-                  ? "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20"
-                  : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 opacity-60"
+                  ? "border-amber-400/80 bg-amber-400/10"
+                  : "border-(--color-border) dark:border-(--color-border-dark) bg-(--color-surface) dark:bg-(--color-surface-dark) opacity-60"
               }`}
             >
               <div className="mb-2 text-(--color-primary)">
@@ -460,13 +460,13 @@ export const AchievementsPanel = () => {
               <h3
                 className={`font-bold text-sm ${
                   isUnlocked
-                    ? "text-gray-900 dark:text-gray-100"
-                    : "text-gray-500"
+                    ? "text-(--color-text) dark:text-(--color-text-dark)"
+                    : "text-(--color-muted-text) dark:text-(--color-muted-text-dark)"
                 }`}
               >
                 {isUnlocked ? achievement.title : "???"}
               </h3>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) mt-1">
                 {isUnlocked ? achievement.description : "Keep exploring!"}
               </p>
               {isUnlocked && (
@@ -483,10 +483,10 @@ export const AchievementsPanel = () => {
       {achievementList.filter(
         (a) => a.secret && !unlockedAchievements.includes(a.id),
       ).length > 0 && (
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-sm text-gray-400 mt-6">
           <EmojiIcon
-            emoji="🔒"
-            className="w-4 h-4 inline-block align-text-bottom"
+            name="lock"
+            className="w-4 h-4 inline-block align-text-bottom mr-1.5 text-gray-400"
           />{" "}
           There are secret achievements waiting to be discovered...
         </p>

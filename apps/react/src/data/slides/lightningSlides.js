@@ -77,7 +77,7 @@ function reacherProtocol() {
     name: "Shugmi Shumunov",
     role: "Software Engineer & Builder @ Shumunov Solutions",
     details: [
-      "github.com/shugknight24 • Datamoon.com",
+      "github.com/shugknight24",
       "Obsessed with web performance, developer sovereignty, and heavy deadlifts.",
       "Beyond the static portfolio: building bespoke software tools for an Audience of One.",
     ],
@@ -85,7 +85,7 @@ function reacherProtocol() {
       "To replace passive resumes with sovereign, production-grade tools.",
       "To demonstrate surgical deduction before applying overwhelming force.",
     ],
-    jackpot: "😎 ¯\\_(ツ)_/¯ jackpot ¯\\_(ツ)_/¯ 😎",
+    jackpot: "¯\\_(ツ)_/¯ jackpot ¯\\_(ツ)_/¯ // VERIFIED",
     photoZoneText: "[ DROP PORTRAIT PHOTO HERE ]",
     image: "/assets/images/shug_headshot.jpg",
   },

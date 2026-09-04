@@ -1,4 +1,29 @@
 export const themes = {
+  // === THE REACHER PROTOCOL ===
+  reacher: {
+    name: "Reacher Protocol",
+    description: "Tactical deduction, military precision, and zero hesitation",
+    colors: {
+      primary: "#00FFCC", // Tactical Neon Cyan
+      secondary: "#FFCC00", // Reacher Chronometer Amber
+      accent: "#FF0055", // Overwhelming Force Crimson (Reze Mode)
+      background: "#08090C", // Tactical Charcoal Canvas (light fallback)
+      dark: "#020304", // Deep Obsidian canvas
+      surface: "#0D1117", // Tactical Surface
+      surfaceDark: "#0A0D14", // Tactical Charcoal Card surface
+      surfaceHover: "#161B22",
+      surfaceHoverDark: "#101622",
+      border: "#1E2530",
+      borderDark: "#15202B",
+      borderSubtle: "#00FFCC26", // Faint cyan border
+      text: "#E2E8F0", // Slate 200 (Crisp Light Steel)
+      textDark: "#FFFFFF", // Pure White
+      mutedText: "#94A3B8", // Slate 400
+      mutedTextDark: "#64748B", // Slate 500
+      primaryText: "#020304", // High contrast dark text on cyan
+    },
+  },
+
   // === ANIME-INSPIRED THEMES ===
   pochita: {
     name: "Pochita",
@@ -35,8 +60,18 @@ export const themes = {
       accent: "#8B9DAF", // Chainsaw Steel
       background: "#0A0A0C", // Pitch Black Canvas
       dark: "#050507", // Deep Obsidian
+      surface: "#141012", // Blood-tinted dark surface
+      surfaceDark: "#120B0D", // Blood-tinted obsidian card
+      surfaceHover: "#1E1317",
+      surfaceHoverDark: "#1A1014",
+      border: "#2D181C",
+      borderDark: "#261317",
+      borderSubtle: "#CC222233",
       text: "#E8E6E3", // Crisp Off-White
       textDark: "#FFFFFF", // Pure White
+      mutedText: "#A09B98",
+      mutedTextDark: "#7E7773",
+      primaryText: "#FFFFFF",
     },
   },
   denji: {
@@ -199,9 +234,19 @@ export const themes = {
       secondary: "#8338EC", // Purple
       accent: "#3A86FF", // Blue
       background: "#F8F9FA", // Light Gray
-      dark: "#10002B", // Deep Purple
-      text: "#10002B", // Deep Purple
-      textDark: "#E0AAFF", // Light Purple
+      dark: "#0D0221", // Deep Purple canvas
+      surface: "#FFFFFF",
+      surfaceDark: "#180A33", // Retro synth dark card
+      surfaceHover: "#F3E8FF",
+      surfaceHoverDark: "#230E4A",
+      border: "#E9D5FF",
+      borderDark: "#2F125F",
+      borderSubtle: "#FF006E33",
+      text: "#10002B",
+      textDark: "#F3E8FF",
+      mutedText: "#6B7280",
+      mutedTextDark: "#C084FC",
+      primaryText: "#FFFFFF",
     },
   },
   forestZen: {
@@ -212,9 +257,19 @@ export const themes = {
       secondary: "#5D4037", // Brown
       accent: "#8BC34A", // Light Green
       background: "#F1F8E9", // Light Green
-      dark: "#1B5E20", // Dark Green
-      text: "#1B5E20", // Dark Green
-      textDark: "#DCEDC8", // Light Green
+      dark: "#0B1710", // Deep Evergreen canvas
+      surface: "#FFFFFF",
+      surfaceDark: "#12241A", // Sage charcoal card
+      surfaceHover: "#E8F5E9",
+      surfaceHoverDark: "#183224",
+      border: "#C8E6C9",
+      borderDark: "#1E3F2D",
+      borderSubtle: "#2E7D3233",
+      text: "#1B5E20",
+      textDark: "#E8F5E9",
+      mutedText: "#4B5563",
+      mutedTextDark: "#A5D6A7",
+      primaryText: "#FFFFFF",
     },
   },
   oceanBreeze: {
@@ -225,9 +280,19 @@ export const themes = {
       secondary: "#00B4D8", // Light Blue
       accent: "#90E0EF", // Pale Blue
       background: "#F0F9FF", // Ice Blue
-      dark: "#03045E", // Deep Navy
-      text: "#03045E", // Deep Navy
-      textDark: "#CAF0F8", // Light Cyan
+      dark: "#040B1A", // Deep Navy abyss
+      surface: "#FFFFFF",
+      surfaceDark: "#081730", // Arctic abyss card
+      surfaceHover: "#E0F2FE",
+      surfaceHoverDark: "#0D2245",
+      border: "#BAE6FD",
+      borderDark: "#13315C",
+      borderSubtle: "#0077B633",
+      text: "#03045E",
+      textDark: "#E0F2FE",
+      mutedText: "#475569",
+      mutedTextDark: "#7DD3FC",
+      primaryText: "#FFFFFF",
     },
   },
   sunsetGlow: {
@@ -312,7 +377,7 @@ export const themes = {
   },
 
   // === CLASSIC THEMES ===
-  default: {
+  modernMinimal: {
     name: "Modern Minimal",
     description: "Clean and professional",
     colors: {
@@ -320,9 +385,42 @@ export const themes = {
       secondary: "#8B5CF6", // Violet 500
       accent: "#EC4899", // Pink 500
       background: "#F9FAFB", // Gray 50
-      dark: "#111827", // Gray 900
+      dark: "#09090B", // Zinc 950 canvas
+      surface: "#FFFFFF", // White card
+      surfaceDark: "#141417", // Zinc 900 card
+      surfaceHover: "#F3F4F6",
+      surfaceHoverDark: "#1C1C21",
+      border: "#E5E7EB", // Gray 200
+      borderDark: "#27272A", // Zinc 800
+      borderSubtle: "#3B82F626",
       text: "#1F2937", // Gray 800
-      textDark: "#F3F4F6", // Gray 100
+      textDark: "#F4F4F5", // Zinc 100
+      mutedText: "#6B7280", // Gray 500
+      mutedTextDark: "#A1A1AA", // Zinc 400
+      primaryText: "#FFFFFF",
+    },
+  },
+  default: {
+    name: "Modern Minimal (Legacy)",
+    description: "Clean and professional",
+    colors: {
+      primary: "#3B82F6", // Blue 500
+      secondary: "#8B5CF6", // Violet 500
+      accent: "#EC4899", // Pink 500
+      background: "#F9FAFB", // Gray 50
+      dark: "#09090B", // Zinc 950 canvas
+      surface: "#FFFFFF",
+      surfaceDark: "#141417",
+      surfaceHover: "#F3F4F6",
+      surfaceHoverDark: "#1C1C21",
+      border: "#E5E7EB",
+      borderDark: "#27272A",
+      borderSubtle: "#3B82F626",
+      text: "#1F2937", // Gray 800
+      textDark: "#F4F4F5", // Zinc 100
+      mutedText: "#6B7280",
+      mutedTextDark: "#A1A1AA",
+      primaryText: "#FFFFFF",
     },
   },
   monochrome: {
@@ -420,15 +518,20 @@ export const themes = {
   },
 };
 
-export const defaultTheme = "default";
+export const defaultTheme = "reacher";
 
 // Theme categories for the theme switcher UI
 export const themeCategories = {
+  tactical: {
+    name: "Tactical & Keynote",
+    themes: ["reacher", "chainsawDark"],
+  },
   anime: {
     name: "Anime Inspired",
     themes: [
       "pochita",
       "chainsaw",
+      "chainsawDark",
       "denji",
       "reze",
       "youngGoku",
@@ -443,7 +546,8 @@ export const themeCategories = {
   modern: {
     name: "Modern",
     themes: [
-      "default",
+      "reacher",
+      "modernMinimal",
       "neonNight",
       "synthwave",
       "oceanBreeze",

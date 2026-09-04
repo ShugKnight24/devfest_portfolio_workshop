@@ -52,13 +52,13 @@ const AchievementPopup = ({ show, onClose }) => {
       <div className="bg-linear-to-br from-purple-600 via-pink-500 to-orange-400 p-1 rounded-2xl shadow-2xl">
         <div className="bg-gray-900 rounded-xl p-8 text-center">
           <div className="flex justify-center mb-4">
-            <EmojiIcon emoji="🎮" className="w-14 h-14" />
+            <EmojiIcon name="gamepad" className="w-14 h-14 text-purple-400" />
           </div>
           <h2 className="text-2xl font-bold text-white mb-2">
             Achievement Unlocked!
           </h2>
-          <p className="text-purple-300 text-lg mb-4">Secret Gamer</p>
-          <p className="text-gray-400 text-sm">
+          <p className="text-purple-300 text-lg mb-4 font-bold">Secret Gamer</p>
+          <p className="text-gray-200 text-sm">
             You found the Konami Code easter egg!
           </p>
           <div className="mt-6 flex justify-center gap-1">

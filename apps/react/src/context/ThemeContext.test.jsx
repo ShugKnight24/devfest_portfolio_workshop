@@ -42,7 +42,7 @@ describe("ThemeContext", () => {
 
     // Should have a default theme
     expect(screen.getByTestId("current-theme")).toHaveTextContent(
-      /default|ocean|sunset/
+      /reacher|default|ocean|sunset/
     );
   });
 

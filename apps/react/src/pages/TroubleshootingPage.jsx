@@ -22,17 +22,17 @@ export const TroubleshootingPage = () => {
       <div className="section-container">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-full text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 rounded-full text-sm font-bold border border-amber-300 dark:border-amber-800 mb-6">
             <span>
-              <EmojiIcon emoji="🔧" className="w-4 h-4" />
+              <EmojiIcon name="wrench" className="w-4 h-4" />
             </span>
             <span>Help & Support</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+          <h1 className="text-4xl md:text-5xl font-black text-gray-950 dark:text-white mb-4">
             Troubleshooting{" "}
             <span className="text-(--color-primary)">Guide</span>
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-700 dark:text-gray-200 font-medium max-w-2xl mx-auto">
             Stuck on something? Don't worry, we've got you covered. Find
             solutions to common issues below.
           </p>

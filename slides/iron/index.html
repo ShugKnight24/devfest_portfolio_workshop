@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Iron Protocol // Bodybuilding Lens — 60 Min Masterclass</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Roboto+Mono:wght@400;700&display=swap');
+        :root { --bg: #e5e5e5; --accent: #d32f2f; --text: #111; --border: #333; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Oswald', sans-serif; overflow: hidden; }
+
+        /* Top HUD Variant Switcher */
+        .top-hud {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            background: rgba(229, 229, 229, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--border);
+            z-index: 100;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.75rem;
+        }
+
+        .nav-links { display: flex; align-items: center; gap: 0.5rem; }
+        .nav-btn {
+            background: #fff;
+            border: 1px solid var(--border);
+            color: #111;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover { background: #111; color: #fff; }
+        .nav-btn.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            font-weight: 900;
+        }
+
+        .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 5rem 10vw 4rem; opacity: 0; transition: 0.5s ease-out; pointer-events: none; box-sizing: border-box; }
+        .slide.active { opacity: 1; pointer-events: auto; }
+        h1 { font-size: 5.5rem; text-transform: uppercase; margin: 0 0 0.5rem; line-height: 1; color: var(--text); text-shadow: 4px 4px 0px rgba(0,0,0,0.1);}
+        h2 { color: var(--accent); font-family: 'Roboto Mono'; text-transform: uppercase; font-size: 1.4rem; margin-bottom: 2rem; letter-spacing: 2px;}
+        p { font-size: 1.6rem; line-height: 1.4; max-width: 900px; color: #333; font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 500;}
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; margin-top: 1.5rem;}
+        .box { background: #111; color: #eee; padding: 2rem; font-family: 'Roboto Mono'; font-size: 1rem; border-radius: 4px; box-shadow: 10px 10px 0px rgba(0,0,0,0.15); line-height: 1.6;}
+        .bad { border-top: 6px solid #555; } .good { border-top: 6px solid var(--accent); }
+        .tag { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; margin-bottom: 1rem; text-transform: uppercase; font-weight: bold;}
+
+        /* Teleprompter Notes Panel */
+        .notes-panel { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: #111; border-top: 4px solid var(--accent); padding: 1.5rem; border-radius: 8px; width: 70%; color: #eee; font-family: 'Roboto Mono'; font-size: 1.1rem; display: none; z-index: 200; box-shadow: 0 10px 40px rgba(0,0,0,0.5); max-height: 250px; overflow-y: auto;}
+        body.show-notes .notes-panel { display: block; }
+
+        .hud-bottom {
+            position: fixed;
+            bottom: 1rem;
+            left: 2rem;
+            right: 2rem;
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Roboto Mono', monospace;
+            color: #555;
+            font-size: 0.75rem;
+            pointer-events: none;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 50px;
+            left: 0;
+            height: 3px;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+            z-index: 105;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Variant Switcher -->
+    <header class="top-hud">
+        <div class="nav-links">
+            <a href="../../" class="nav-btn">← PORTFOLIO</a>
+            <span style="color: #666; font-size: 0.7rem; margin-left: 8px;">MASTERCLASS SQUADS:</span>
+        </div>
+        <div class="nav-links">
+            <a href="../nomad/index.html" class="nav-btn">1: THE 110th</a>
+            <a href="../ripcord/index.html" class="nav-btn">2: DIVISION 4</a>
+            <a href="../iron/index.html" class="nav-btn active">3: IRON PROTOCOL</a>
+            <a href="../combined/index.html" class="nav-btn">4: COMBINED</a>
+        </div>
+        <div>
+            <button class="nav-btn" onclick="toggleNotes()">NOTES (N)</button>
+        </div>
+    </header>
+
+    <div class="progress-bar" id="progress"></div>
+
+    <!-- SLIDE 1 -->
+    <div class="slide active">
+        <h2>The Warmup</h2>
+        <h1>Progressive<br>Overload.</h1>
+        <p>In the age of AI, the machine does the heavy lifting, but YOU are the spotter. Code is irrelevant now. The bottleneck is your discipline, your curation, and your form.</p>
+        <div class="notes-panel">NOTES: Welcome them to the gym. Code is a commodity. AI is steroids for developers—it gives leverage, but without discipline, you get crushed. [Press N to toggle notes]</div>
+    </div>
+    
+    <!-- SLIDE 2 -->
+    <div class="slide">
+        <h2>Form Check</h2>
+        <div class="grid-2">
+            <div class="box bad">
+                <span class="tag" style="background:#333; color:#888;">Bad Form: Ego Lifting</span><br>
+                "Build me a full SaaS platform like Uber. Write the backend, frontend, and DB all at once."<br><br>
+                <i style="font-size:0.9rem; color:#d32f2f;">-> Result: You get crushed by code you can't debug.</i>
+            </div>
+            <div class="box good">
+                <span class="tag" style="background:#441111; color:var(--accent);">Good Form: Isolation Sets</span><br>
+                "Step 1: Design the DB schema for auth. Wait for approval.<br>Step 2: Write the API route. Spot me on the form."<br><br>
+                <i style="font-size:0.9rem; color:#4caf50;">-> Result: Exact tension on the muscle. Flawless recovery.</i>
+            </div>
+        </div>
+        <div class="notes-panel">NOTES: "Ego Lifting" with AI always fails. Show them how to isolate the component. Do one rep (schema), verify it, then do the next rep (routes). Maintain the Mind-Muscle connection with your architecture.</div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="slide">
+        <h2>Hypertrophy</h2>
+        <h1>Tear it Down.</h1>
+        <p>Muscle grows by tearing fibers. Codebases evolve the same way. You build great apps by letting AI write the prototype, actively breaking it, and forcing it to refactor stronger. <strong>Never skip leg day (Automated Testing).</strong></p>
+        <div class="notes-panel">NOTES: Hypertrophy. Don't be afraid to delete the code the AI gives you. If it wrote it in 10 seconds, you can afford to throw it away and demand a stronger architectural foundation.</div>
+    </div>
+    
+    <!-- SLIDE 4 -->
+    <div class="slide">
+        <h2>The Mirror vs The Scale</h2>
+        <div class="grid-2">
+            <div class="box bad">
+                <span class="tag" style="background:#333; color:#888;">The Dirty Bulk</span><br><br>
+                Generating massive monorepos. Bloated metrics from bot traffic. Looking massive on paper, but zero actual strength.
+            </div>
+            <div class="box good">
+                <span class="tag" style="background:#441111; color:var(--accent);">The True Scale</span><br><br>
+                Generative AI inflates vanity metrics. <strong>Sovereign forensic auditing</strong> is the scale that proves your actual proof of work. Question everything.
+            </div>
+        </div>
+        <div class="notes-panel">NOTES: If you are doing the reps, you need a scale that doesn't lie. Agentic bots ruin telemetry. Sovereign forensic auditing isolates true human traffic.</div>
+    </div>
+
+    <!-- SLIDE 5 -->
+    <div class="slide" style="text-align: center;">
+        <h2>The Platform</h2>
+        <h1 style="font-size: 5.5rem;">Your Set.<br>Your Rules.</h1>
+        <p style="margin: 0 auto;">The weights are free. Don't wait for a legacy tech company to hand you a routine. Pursue your dreams with the absolute fire and discipline they deserve.</p>
+        <p style="color: var(--accent); font-family: 'Roboto Mono'; margin-top: 3rem; font-weight: bold; font-size: 1.1rem;">github.com/shugknight24<br>[ VERIFIED ] ¯\_(ツ)_/¯ jackpot ¯\_(ツ)_/¯ [ VERIFIED ]</p>
+        <div class="notes-panel">NOTES: The Fire. The gym is open. The tools are free. Challenge them to go lift the weight and build their dreams.</div>
+    </div>
+
+    <!-- HUD BOTTOM -->
+    <div class="hud-bottom">
+        <div>Shortcuts: [←/→] Navigate &bull; [N] Teleprompter Notes &bull; [1-4] Switch Squad</div>
+        <div id="counter">01 / 05</div>
+    </div>
+
+    <script>
+        let current = 0; 
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progress');
+        const counter = document.getElementById('counter');
+
+        function updateSlide() {
+            slides.forEach((s, i) => s.classList.toggle('active', i === current));
+            const progressPct = ((current + 1) / slides.length) * 100;
+            progressBar.style.width = progressPct + '%';
+            counter.textContent = String(current + 1).padStart(2, '0') + ' / ' + String(slides.length).padStart(2, '0');
+        }
+
+        function toggleNotes() {
+            document.body.classList.toggle('show-notes');
+        }
+
+        document.addEventListener('keydown', (e) => { 
+            if(e.key === 'ArrowRight' || e.key === ' ') { 
+                current = Math.min(current + 1, slides.length - 1); 
+                updateSlide();
+            }
+            if(e.key === 'ArrowLeft') { 
+                current = Math.max(current - 1, 0); 
+                updateSlide();
+            }
+            if(e.key.toLowerCase() === 'n') { 
+                toggleNotes(); 
+            }
+            if(e.key === '1') window.location.href = '../nomad/index.html';
+            if(e.key === '2') window.location.href = '../ripcord/index.html';
+            if(e.key === '3') window.location.href = '../iron/index.html';
+            if(e.key === '4' || e.key === 'c' || e.key === 'C') window.location.href = '../combined/index.html';
+        });
+
+        updateSlide();
+    </script>
+</body>
+</html>

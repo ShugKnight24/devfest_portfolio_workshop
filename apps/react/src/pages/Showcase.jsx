@@ -300,12 +300,12 @@ export const Showcase = () => {
       </div>
 
       {/* Collapsible Guide */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 mb-3 max-w-4xl mx-auto overflow-hidden">
+      <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) rounded-xl shadow-lg border border-(--color-border) dark:border-(--color-border-dark) mb-3 max-w-4xl mx-auto overflow-hidden">
         <button
           onClick={() => setShowGuide(!showGuide)}
-          className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
+          className="w-full px-6 py-4 flex items-center justify-between hover:bg-(--color-border)/20 dark:hover:bg-(--color-border-dark)/30 transition-colors cursor-pointer"
         >
-          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+          <h2 className="text-lg font-bold text-(--color-text) dark:text-(--color-text-dark) flex items-center gap-2">
             <svg
               className="w-5 h-5 text-(--color-primary)"
               fill="none"
@@ -644,13 +644,13 @@ export const Showcase = () => {
           <div className="flex flex-wrap justify-center gap-4">
             <a
               href="/lessons"
-              className="px-6 py-3 bg-(--color-primary) text-white rounded-lg font-medium hover:opacity-90 transition-opacity"
+              className="px-6 py-3 bg-(--color-primary) text-(--color-primary-text) rounded-lg font-medium hover:opacity-90 transition-opacity"
             >
               Start Learning →
             </a>
             <a
               href="/"
-              className="px-6 py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg font-medium border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="px-6 py-3 bg-(--color-surface) dark:bg-(--color-surface-dark) text-(--color-text) dark:text-(--color-text-dark) rounded-lg font-medium border border-(--color-border) dark:border-(--color-border-dark) hover:border-(--color-primary) transition-colors"
             >
               Let's Build!
             </a>

@@ -611,16 +611,16 @@ return <h1>Hello, {name}!</h1>;`,
 
 // Topic display metadata for UI labels and icons
 const TOPIC_META = {
-  jsx: { label: "JSX", icon: "⚛️", description: "JavaScript XML syntax" },
-  components: { label: "Components", icon: "🧩", description: "Reusable UI building blocks" },
-  props: { label: "Props", icon: "📦", description: "Passing data between components" },
-  state: { label: "State", icon: "🔄", description: "Managing component data" },
-  events: { label: "Events", icon: "🖱️", description: "Handling user interactions" },
-  lists: { label: "Lists & Keys", icon: "📋", description: "Rendering dynamic lists" },
-  vue: { label: "Vue", icon: "💚", description: "The progressive JavaScript framework" },
-  svelte: { label: "Svelte", icon: "🔥", description: "Cybernetically enhanced web apps" },
-  ai: { label: "AI / Agentic", icon: "🤖", description: "AI-assisted development" },
-  "web-fundamentals": { label: "Web Fundamentals", icon: "🌐", description: "HTML, CSS & JS essentials" },
+  jsx: { label: "JSX", icon: "atom", description: "JavaScript XML syntax" },
+  components: { label: "Components", icon: "puzzle", description: "Reusable UI building blocks" },
+  props: { label: "Props", icon: "box", description: "Passing data between components" },
+  state: { label: "State", icon: "cycle", description: "Managing component data" },
+  events: { label: "Events", icon: "mouse", description: "Handling user interactions" },
+  lists: { label: "Lists & Keys", icon: "clipboard", description: "Rendering dynamic lists" },
+  vue: { label: "Vue", icon: "heartGreen", description: "The progressive JavaScript framework" },
+  svelte: { label: "Svelte", icon: "fire", description: "Cybernetically enhanced web apps" },
+  ai: { label: "AI / Agentic", icon: "robot", description: "AI-assisted development" },
+  "web-fundamentals": { label: "Web Fundamentals", icon: "globe", description: "HTML, CSS & JS essentials" },
 };
 
 // Quiz Context
@@ -718,13 +718,13 @@ const MultipleChoiceQuestion = ({
             className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
               showResult
                 ? isCorrect
-                  ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                  ? "border-emerald-500 bg-emerald-500/10 text-(--color-text) dark:text-(--color-text-dark)"
                   : isSelected
-                    ? "border-red-500 bg-red-50 dark:bg-red-900/20"
-                    : "border-gray-200 dark:border-gray-700"
+                    ? "border-rose-500 bg-rose-500/10 text-(--color-text) dark:text-(--color-text-dark)"
+                    : "border-(--color-border) dark:border-(--color-border-dark) bg-(--color-surface) dark:bg-(--color-surface-dark) text-(--color-text) dark:text-(--color-text-dark)"
                 : isSelected
-                  ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                  : "border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600"
+                  ? "border-(--color-primary) bg-(--color-primary)/10 text-(--color-text) dark:text-(--color-text-dark)"
+                  : "border-(--color-border) dark:border-(--color-border-dark) bg-(--color-surface) dark:bg-(--color-surface-dark) hover:border-(--color-primary) text-(--color-text) dark:text-(--color-text-dark)"
             }`}
           >
             <div className="flex items-center gap-3">
@@ -732,20 +732,20 @@ const MultipleChoiceQuestion = ({
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                   showResult
                     ? isCorrect
-                      ? "bg-green-500 text-white"
+                      ? "bg-emerald-500 text-white"
                       : isSelected
-                        ? "bg-red-500 text-white"
-                        : "bg-gray-200 dark:bg-gray-700"
+                        ? "bg-rose-500 text-white"
+                        : "bg-(--color-border)/50 dark:bg-(--color-border-dark)/50 text-(--color-text) dark:text-(--color-text-dark)"
                     : isSelected
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 dark:bg-gray-700"
+                      ? "bg-(--color-primary) text-(--color-primary-text)"
+                      : "bg-(--color-border)/50 dark:bg-(--color-border-dark)/50 text-(--color-text) dark:text-(--color-text-dark)"
                 }`}
               >
                 {String.fromCharCode(65 + index)}
               </div>
-              <span className="text-gray-700 dark:text-gray-300">{option}</span>
+              <span className="text-(--color-text) dark:text-(--color-text-dark)">{option}</span>
               {showResult && isCorrect && (
-                <Checkmark className="w-5 h-5 text-green-500 ml-auto" />
+                <Checkmark className="w-5 h-5 text-emerald-500 ml-auto" />
               )}
             </div>
           </button>
@@ -757,7 +757,7 @@ const MultipleChoiceQuestion = ({
 
 // Code block display
 const CodeBlock = ({ code }) => (
-  <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm font-mono mb-4">
+  <pre className="bg-gray-950 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm font-mono mb-4 border border-gray-800">
     <code>{code}</code>
   </pre>
 );
@@ -786,33 +786,33 @@ export const QuizQuestion = ({ question, onComplete }) => {
   const isCorrect = selectedAnswer === question.correct;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+    <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow-lg p-6">
       {/* Question Header */}
       <div className="flex items-center justify-between mb-4">
         <span
           className={`text-xs px-2 py-1 rounded-full ${
             question.difficulty === "beginner"
-              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+              ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
               : question.difficulty === "intermediate"
-                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
-                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                : "bg-rose-500/15 text-rose-600 dark:text-rose-400"
           }`}
         >
           {question.difficulty}
         </span>
-        <span className="text-sm text-gray-500">{question.points} pts</span>
+        <span className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">{question.points} pts</span>
       </div>
 
       {/* Question */}
-      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
+      <h3 className="text-lg font-bold text-(--color-text) dark:text-(--color-text-dark) mb-4">
         {question.question}
       </h3>
 
       {/* Bug description for fix-the-bug type */}
       {question.bugDescription && (
-        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p className="text-sm text-red-700 dark:text-red-300 inline-flex items-center gap-1.5">
-            <EmojiIcon emoji="🐛" className="w-4 h-4" /> Bug:{" "}
+        <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg">
+          <p className="text-sm text-rose-600 dark:text-rose-400 inline-flex items-center gap-1.5">
+            <EmojiIcon name="bug" className="w-4 h-4 text-rose-500" /> Bug:{" "}
             {question.bugDescription}
           </p>
         </div>
@@ -832,36 +832,36 @@ export const QuizQuestion = ({ question, onComplete }) => {
       {/* Explanation */}
       {showExplanation && (
         <div
-          className={`mt-6 p-4 rounded-lg ${
+          className={`mt-6 p-4 rounded-lg border ${
             isCorrect
-              ? "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800"
-              : "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
+              ? "bg-emerald-500/10 border-emerald-500/30 text-(--color-text) dark:text-(--color-text-dark)"
+              : "bg-rose-500/10 border-rose-500/30 text-(--color-text) dark:text-(--color-text-dark)"
           }`}
         >
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xl">
               {isCorrect ? (
-                <EmojiIcon emoji="✅" className="w-5 h-5" />
+                <EmojiIcon name="check" className="w-5 h-5 text-emerald-500" />
               ) : (
-                <EmojiIcon emoji="❌" className="w-5 h-5" />
+                <EmojiIcon name="cross" className="w-5 h-5 text-rose-500" />
               )}
             </span>
             <span
               className={`font-bold ${
                 isCorrect
-                  ? "text-green-700 dark:text-green-300"
-                  : "text-red-700 dark:text-red-300"
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-rose-600 dark:text-rose-400"
               }`}
             >
               {isCorrect ? "Correct!" : "Incorrect"}
             </span>
             {isCorrect && (
-              <span className="text-sm text-green-600 dark:text-green-400 ml-auto">
+              <span className="text-sm text-emerald-600 dark:text-emerald-400 ml-auto font-medium">
                 +{question.points} pts
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-700 dark:text-gray-300">
+          <p className="text-sm text-(--color-text) dark:text-(--color-text-dark)">
             {question.explanation}
           </p>
         </div>
@@ -871,7 +871,7 @@ export const QuizQuestion = ({ question, onComplete }) => {
       {answered && onComplete && (
         <button
           onClick={onComplete}
-          className="mt-6 w-full py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+          className="mt-6 w-full py-3 bg-(--color-primary) text-(--color-primary-text) hover:opacity-90 rounded-lg font-medium transition-colors cursor-pointer"
         >
           Continue →
         </button>
@@ -908,31 +908,34 @@ export const QuizModal = ({ isOpen, onClose, topic }) => {
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-200 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="relative bg-gray-50 dark:bg-gray-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 z-200 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div className="relative bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div className="flex items-center justify-between p-4 border-b border-(--color-border) dark:border-(--color-border-dark) bg-(--color-surface) dark:bg-(--color-surface-dark)">
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-              {TOPIC_META[topic]?.icon} {TOPIC_META[topic]?.label ?? topic} Quiz
+            <h2 className="text-xl font-bold text-(--color-text) dark:text-(--color-text-dark) inline-flex items-center gap-2">
+              {TOPIC_META[topic]?.icon && (
+                <EmojiIcon name={TOPIC_META[topic].icon} className="w-5 h-5 text-(--color-primary)" />
+              )}
+              <span>{TOPIC_META[topic]?.label ?? topic} Quiz</span>
             </h2>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
               Question {currentIndex + 1} of {topicQuestions.length}
             </p>
           </div>
           <button
             onClick={handleClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
+            className="p-2 hover:bg-(--color-border)/20 dark:hover:bg-(--color-border-dark)/30 rounded-lg transition-colors cursor-pointer text-(--color-muted-text) dark:text-(--color-muted-text-dark)"
             aria-label="Close quiz"
           >
-            <Close className="w-5 h-5 text-gray-500" />
+            <Close className="w-5 h-5" />
           </button>
         </div>
 
         {/* Progress bar */}
-        <div className="h-2 bg-gray-200 dark:bg-gray-700">
+        <div className="h-2 bg-(--color-border)/30 dark:bg-(--color-border-dark)/50">
           <div
-            className="h-full bg-blue-500 transition-all duration-300"
+            className="h-full bg-(--color-primary) transition-all duration-300"
             style={{
               width: `${((currentIndex + 1) / topicQuestions.length) * 100}%`,
             }}
@@ -943,18 +946,18 @@ export const QuizModal = ({ isOpen, onClose, topic }) => {
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
           {completed ? (
             <div className="text-center py-12">
-              <div className="text-(--color-text-primary) mb-4 flex justify-center">
-                <EmojiIcon emoji="🎉" className="w-14 h-14" />
+              <div className="text-amber-500 mb-4 flex justify-center">
+                <EmojiIcon name="party" className="w-14 h-14" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              <h3 className="text-2xl font-bold text-(--color-text) dark:text-(--color-text-dark) mb-2">
                 Quiz Complete!
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
+              <p className="text-(--color-muted-text) dark:text-(--color-muted-text-dark) mb-6">
                 Great job finishing the {topic} quiz!
               </p>
               <button
                 onClick={handleClose}
-                className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium"
+                className="px-6 py-3 bg-(--color-primary) text-(--color-primary-text) hover:opacity-90 rounded-lg font-medium cursor-pointer"
               >
                 Done
               </button>
@@ -962,7 +965,7 @@ export const QuizModal = ({ isOpen, onClose, topic }) => {
           ) : currentQuestion ? (
             <QuizQuestion question={currentQuestion} onComplete={handleNext} />
           ) : (
-            <p className="text-center text-gray-500">No questions available</p>
+            <p className="text-center text-(--color-muted-text) dark:text-(--color-muted-text-dark)">No questions available</p>
           )}
         </div>
       </div>
@@ -984,28 +987,31 @@ export const QuizTopicCard = ({ topic, questions, onStart }) => {
   const totalPoints = questions.reduce((sum, q) => sum + q.points, 0);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">
-        {TOPIC_META[topic]?.icon} {TOPIC_META[topic]?.label ?? topic}
+    <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow-lg p-6">
+      <h3 className="text-lg font-bold text-(--color-text) dark:text-(--color-text-dark) mb-2 inline-flex items-center gap-2">
+        {TOPIC_META[topic]?.icon && (
+          <EmojiIcon name={TOPIC_META[topic].icon} className="w-5 h-5 text-(--color-primary)" />
+        )}
+        <span>{TOPIC_META[topic]?.label ?? topic}</span>
       </h3>
-      <p className="text-sm text-gray-500 mb-1">
+      <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark) mb-1">
         {TOPIC_META[topic]?.description}
       </p>
-      <p className="text-sm text-gray-400 mb-4">
+      <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark) mb-4">
         {questions.length} questions • {totalPoints} points
       </p>
 
       {/* Progress */}
       <div className="mb-4">
-        <div className="flex justify-between text-xs text-gray-500 mb-1">
+        <div className="flex justify-between text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) mb-1">
           <span>
             {answeredCount}/{questions.length} answered
           </span>
           <span>{correctCount} correct</span>
         </div>
-        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+        <div className="h-2 bg-(--color-border)/30 dark:bg-(--color-border-dark)/50 rounded-full overflow-hidden">
           <div
-            className="h-full bg-green-500 transition-all"
+            className="h-full bg-emerald-500 transition-all"
             style={{ width: `${(correctCount / questions.length) * 100}%` }}
           />
         </div>
@@ -1013,7 +1019,7 @@ export const QuizTopicCard = ({ topic, questions, onStart }) => {
 
       <button
         onClick={() => onStart(topic)}
-        className="w-full py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+        className="w-full py-2 bg-(--color-primary) text-(--color-primary-text) hover:opacity-90 rounded-lg font-medium transition-colors cursor-pointer"
       >
         {answeredCount > 0 ? "Continue Quiz" : "Start Quiz"}
       </button>
@@ -1030,21 +1036,21 @@ export const QuizPanel = () => {
     <div className="space-y-8">
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 text-center">
-          <p className="text-2xl font-bold text-blue-500">
+        <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow p-4 text-center">
+          <p className="text-2xl font-bold text-(--color-primary)">
             {quizStats.totalQuestions}
           </p>
-          <p className="text-sm text-gray-500">Questions Answered</p>
+          <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Questions Answered</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 text-center">
-          <p className="text-2xl font-bold text-green-500">{getAccuracy()}%</p>
-          <p className="text-sm text-gray-500">Accuracy</p>
+        <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow p-4 text-center">
+          <p className="text-2xl font-bold text-emerald-500">{getAccuracy()}%</p>
+          <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Accuracy</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 text-center">
-          <p className="text-2xl font-bold text-yellow-500">
+        <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow p-4 text-center">
+          <p className="text-2xl font-bold text-amber-500">
             {quizStats.pointsEarned}
           </p>
-          <p className="text-sm text-gray-500">Points Earned</p>
+          <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Points Earned</p>
         </div>
       </div>
 

@@ -44,8 +44,8 @@ const shortcuts = [
     items: [
       {
         keys: ["↑", "↑", "↓", "↓", "←", "→", "←", "→", "B", "A"],
-        description: "gamepad",
-        emoji: "🎮",
+        description: "Konami Code",
+        icon: "gamepad",
       },
     ],
   },
@@ -128,7 +128,7 @@ export const KeyboardShortcutsModal = ({ isOpen, onClose }) => {
           <div className="space-y-6">
             {shortcuts.map((section) => (
               <div key={section.category}>
-                <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+                <h3 className="text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider mb-3">
                   {section.category}
                 </h3>
                 <div className="space-y-2">
@@ -137,11 +137,11 @@ export const KeyboardShortcutsModal = ({ isOpen, onClose }) => {
                       key={index}
                       className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                     >
-                      <span className="text-gray-700 dark:text-gray-300 text-sm inline-flex items-center gap-1.5">
-                        {shortcut.emoji && (
+                      <span className="text-gray-800 dark:text-gray-200 text-sm inline-flex items-center gap-2">
+                        {shortcut.icon && (
                           <EmojiIcon
-                            emoji={shortcut.emoji}
-                            className="w-4 h-4"
+                            name={shortcut.icon}
+                            className="w-4 h-4 text-purple-500 shrink-0"
                           />
                         )}
                         {shortcut.description}

@@ -179,7 +179,7 @@ export default TodoList;`,
     instructions: [
       "Create a Toggle component",
       "Add a button that says 'Show' or 'Hide'",
-      "When shown, display a message 'Hello! 👋'",
+      "When shown, display a message 'Hello!'",
       "When hidden, don't render the message",
     ],
     starterCode: `import { useState } from 'react';
@@ -205,7 +205,7 @@ function Toggle() {
       <button onClick={() => setIsVisible(!isVisible)}>
         {isVisible ? 'Hide' : 'Show'}
       </button>
-      {isVisible && <p>Hello! 👋</p>}
+      {isVisible && <p>Hello!</p>}
     </div>
   );
 }
@@ -381,7 +381,7 @@ export const ChallengeCard = ({ challenge, onStart }) => {
       className={`p-6 rounded-xl border-2 transition-all ${
         isCompleted
           ? "border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20"
-          : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-300 dark:hover:border-blue-600"
+          : "border-(--color-border) dark:border-(--color-border-dark) bg-(--color-surface) dark:bg-(--color-surface-dark) hover:border-(--color-primary)"
       }`}
     >
       <div className="flex items-start justify-between mb-3">
@@ -544,9 +544,9 @@ export const ChallengeModal = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-200 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="relative bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between p-4 border-b border-(--color-border) dark:border-(--color-border-dark)">
           <div className="flex items-center gap-4">
             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
               {currentChallenge.title}
@@ -604,7 +604,7 @@ export const ChallengeModal = ({ isOpen, onClose }) => {
             // Completion Screen
             <div className="text-center py-12">
               <div className="text-(--color-text-primary) mb-4 flex justify-center">
-                <EmojiIcon emoji="🎉" className="w-14 h-14" />
+                <EmojiIcon name="trophy" className="w-14 h-14 text-yellow-500" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                 Challenge Complete!
@@ -652,7 +652,7 @@ export const ChallengeModal = ({ isOpen, onClose }) => {
                 <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium text-yellow-700 dark:text-yellow-300 inline-flex items-center gap-1.5">
-                      <EmojiIcon emoji="💡" className="w-5 h-5" /> Need a hint?
+                      <EmojiIcon name="lightbulb" className="w-5 h-5" /> Need a hint?
                     </h4>
                     <span className="text-xs text-yellow-600 dark:text-yellow-400">
                       -5 pts per hint
@@ -756,13 +756,13 @@ export const ChallengeModal = ({ isOpen, onClose }) => {
                     {isRunningTests ? (
                       <>
                         <span className="animate-spin">
-                          <EmojiIcon emoji="⚙️" className="w-5 h-5" />
+                          <EmojiIcon name="gear" className="w-5 h-5" />
                         </span>
                         Running Tests...
                       </>
                     ) : (
                       <>
-                        <EmojiIcon emoji="▶️" className="w-5 h-5" /> Run Tests
+                        <EmojiIcon name="play" className="w-5 h-5" /> Run Tests
                       </>
                     )}
                   </button>
@@ -785,7 +785,7 @@ export const ChallengeModal = ({ isOpen, onClose }) => {
                 {/* Help text */}
                 {!testResults && (
                   <p className="text-sm text-gray-500 dark:text-gray-400 text-center inline-flex items-center justify-center gap-1.5 w-full">
-                    <EmojiIcon emoji="💡" className="w-4 h-4" /> Click "Run
+                    <EmojiIcon name="lightbulb" className="w-4 h-4" /> Click "Run
                     Tests" to check if your code is correct
                   </p>
                 )}
@@ -839,25 +839,25 @@ export const ChallengeModePanel = () => {
     <div className="space-y-8">
       {/* Stats Header */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="p-4 bg-white dark:bg-gray-800 rounded-xl shadow text-center">
+        <div className="p-4 bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow text-center">
           <p className="text-2xl font-bold text-yellow-500">
             {challengeStats.totalPoints}
           </p>
-          <p className="text-sm text-gray-500">Total Points</p>
+          <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Total Points</p>
         </div>
-        <div className="p-4 bg-white dark:bg-gray-800 rounded-xl shadow text-center">
+        <div className="p-4 bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow text-center">
           <p className="text-2xl font-bold text-blue-500">
             {challengeStats.attempts}
           </p>
-          <p className="text-sm text-gray-500">Challenges Done</p>
+          <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Challenges Done</p>
         </div>
-        <div className="p-4 bg-white dark:bg-gray-800 rounded-xl shadow text-center">
+        <div className="p-4 bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow text-center">
           <p className="text-2xl font-bold text-green-500">
             {challengeStats.totalTime > 0
               ? `${Math.floor(challengeStats.totalTime / 60)}m`
               : "0m"}
           </p>
-          <p className="text-sm text-gray-500">Time Spent</p>
+          <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Time Spent</p>
         </div>
       </div>
 
@@ -866,13 +866,13 @@ export const ChallengeModePanel = () => {
         <div key={difficulty}>
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 capitalize flex items-center gap-2">
             {difficulty === "beginner" && (
-              <EmojiIcon emoji="🌱" className="w-5 h-5" />
+              <EmojiIcon name="seedling" className="w-5 h-5 text-emerald-500" />
             )}
             {difficulty === "intermediate" && (
-              <EmojiIcon emoji="🌿" className="w-5 h-5" />
+              <EmojiIcon name="herb" className="w-5 h-5 text-amber-500" />
             )}
             {difficulty === "advanced" && (
-              <EmojiIcon emoji="🌳" className="w-5 h-5" />
+              <EmojiIcon name="tree" className="w-5 h-5 text-red-500" />
             )}
             {difficulty}
           </h2>

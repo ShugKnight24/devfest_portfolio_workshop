@@ -15,22 +15,24 @@
  *
  * Perfect for: Learning card layouts and advanced styling
  */
+import { EmojiIcon } from "@portfolio/icons/react";
+
 export const SkillsIcons = ({ skills }) => {
   // Skill icons mapping
-  // TODO: Expand this mapping as needed
+  // Clean SVG icons mapped by skill name
   const skillIcons = {
-    React: "⚛️",
-    JavaScript: "🟨",
-    TypeScript: "🔷",
-    "Node.js": "🟩",
-    Python: "🐍",
-    "Tailwind CSS": "🌊",
-    Git: "🔀",
-    "REST APIs": "🔌",
-    MongoDB: "🍃",
-    PostgreSQL: "🐘",
-    Docker: "🐋",
-    AWS: "☁️",
+    React: "atom",
+    JavaScript: "squareYellow",
+    TypeScript: "diamondBlue",
+    "Node.js": "squareGreen",
+    Python: "python",
+    "Tailwind CSS": "wave",
+    Git: "branch",
+    "REST APIs": "plug",
+    MongoDB: "leaf",
+    PostgreSQL: "postgres",
+    Docker: "whale",
+    AWS: "cloud",
   };
 
   const levelColors = {
@@ -65,8 +67,11 @@ export const SkillsIcons = ({ skills }) => {
             } hover:shadow-lg transition-all duration-200 hover:-translate-y-1`}
           >
             {/* Icon */}
-            <div className="text-4xl mb-3 text-center">
-              {skillIcons[skill.name] || "💻"}
+            <div className="mb-3 flex justify-center">
+              <EmojiIcon
+                name={skillIcons[skill.name] || "laptop"}
+                className="w-10 h-10 text-(--color-primary)"
+              />
             </div>
 
             {/* Skill name */}

@@ -47,9 +47,10 @@ const portfolioData = {
  * The keys match the --color-* variables in style.css.
  */
 const themes = {
-  light:  { name: 'Light',  primary: '#3B82F6', background: '#F9FAFB', text: '#1F2937', surface: '#FFFFFF', accent: '#8B5CF6' },
-  dark:   { name: 'Dark',   primary: '#60A5FA', background: '#111827', text: '#F9FAFB', surface: '#1F2937', accent: '#A78BFA' },
-  ocean:  { name: 'Ocean',  primary: '#06B6D4', background: '#F0FDFA', text: '#134E4A', surface: '#FFFFFF', accent: '#14B8A6' },
-  forest: { name: 'Forest', primary: '#22C55E', background: '#F0FDF4', text: '#14532D', surface: '#FFFFFF', accent: '#A3E635' },
-  sunset: { name: 'Sunset', primary: '#F97316', background: '#FFF7ED', text: '#7C2D12', surface: '#FFFFFF', accent: '#FB923C' },
+  reacher: { name: 'Reacher', primary: '#00FFCC', primaryText: '#050608', background: '#050608', text: '#E2E8F0', surface: '#0D1117', border: '#1E293B', mutedText: '#94A3B8', accent: '#FFCC00' },
+  light:  { name: 'Light',  primary: '#3B82F6', primaryText: '#FFFFFF', background: '#F9FAFB', text: '#1F2937', surface: '#FFFFFF', border: '#E5E7EB', mutedText: '#6B7280', accent: '#8B5CF6' },
+  dark:   { name: 'Dark',   primary: '#60A5FA', primaryText: '#050608', background: '#111827', text: '#F9FAFB', surface: '#1F2937', border: '#374151', mutedText: '#9CA3AF', accent: '#A78BFA' },
+  ocean:  { name: 'Ocean',  primary: '#06B6D4', primaryText: '#042F2E', background: '#F0FDFA', text: '#134E4A', surface: '#FFFFFF', border: '#CCFBF1', mutedText: '#0D9488', accent: '#14B8A6' },
+  forest: { name: 'Forest', primary: '#22C55E', primaryText: '#052E16', background: '#F0FDF4', text: '#14532D', surface: '#FFFFFF', border: '#DCFCE7', mutedText: '#16A34A', accent: '#A3E635' },
+  sunset: { name: 'Sunset', primary: '#F97316', primaryText: '#FFFFFF', background: '#FFF7ED', text: '#7C2D12', surface: '#FFFFFF', border: '#FFEDD5', mutedText: '#EA580C', accent: '#FB923C' },
 };

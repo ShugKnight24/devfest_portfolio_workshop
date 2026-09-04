@@ -322,7 +322,7 @@ describe("validateConditionalRender", () => {
             <button onClick={() => setIsVisible(!isVisible)}>
               {isVisible ? 'Hide' : 'Show'}
             </button>
-            {isVisible && <p>Hello! 👋</p>}
+            {isVisible && <p>Hello!</p>}
           </div>
         );
       }
@@ -343,7 +343,7 @@ describe("validateConditionalRender", () => {
             <button onClick={() => setIsVisible(!isVisible)}>
               {isVisible ? 'Hide' : 'Show'}
             </button>
-            {isVisible ? <p>Hello! 👋</p> : null}
+            {isVisible ? <p>Hello!</p> : null}
           </div>
         );
       }
@@ -359,7 +359,7 @@ describe("validateConditionalRender", () => {
         return (
           <div>
             <button onClick={() => isVisible = !isVisible}>Show</button>
-            {isVisible && <p>Hello! 👋</p>}
+            {isVisible && <p>Hello!</p>}
           </div>
         );
       }

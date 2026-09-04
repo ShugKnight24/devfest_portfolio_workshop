@@ -116,9 +116,9 @@ const ReacherIntroSlide = ({ slide, isActive, isRezeMode }) => (
       {slide.traits.map((trait, idx) => (
         <div
           key={idx}
-          className="p-6 rounded-2xl bg-black/60 border backdrop-blur-md transition-all flex flex-col justify-between shadow-xl"
+          className="p-6 rounded-2xl bg-(--color-surface-dark)/80 border backdrop-blur-md transition-all flex flex-col justify-between shadow-xl"
           style={{
-            borderColor: isRezeMode ? "rgba(255, 0, 85, 0.3)" : "rgba(0, 255, 204, 0.25)",
+            borderColor: isRezeMode ? "rgba(255, 0, 85, 0.3)" : "var(--color-border-dark)",
             borderLeftWidth: "4px",
             borderLeftColor: isRezeMode ? "#ff0055" : "#00ffcc",
           }}
@@ -133,17 +133,17 @@ const ReacherIntroSlide = ({ slide, isActive, isRezeMode }) => (
             >
               <EmojiIcon name={trait.icon} className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-black text-white mb-2 uppercase font-mono">
+            <h3 className="text-xl font-black text-(--color-text-dark) mb-2 uppercase font-mono">
               {trait.title}
             </h3>
-            <p className="text-xs text-gray-300 leading-relaxed mb-4">
+            <p className="text-xs text-(--color-muted-text-dark) leading-relaxed mb-4">
               {trait.description}
             </p>
           </div>
           <div
             className="pt-3 border-t font-mono text-[11px] italic"
             style={{
-              borderColor: "rgba(255, 255, 255, 0.1)",
+              borderColor: "var(--color-border-dark)",
               color: isRezeMode ? "#c6ff00" : "#ffcc00",
             }}
           >
@@ -205,21 +205,21 @@ const EnergySlide = ({ slide, isActive, isRezeMode }) => (
 
       {/* Code Terminal */}
       <div
-        className="w-full rounded-2xl overflow-hidden shadow-2xl border backdrop-blur-lg bg-black/90"
+        className="w-full rounded-2xl overflow-hidden shadow-2xl border backdrop-blur-lg bg-(--color-surface-dark)/95"
         style={{
-          borderColor: isRezeMode ? "#ff0055" : "#00ffcc",
+          borderColor: isRezeMode ? "#ff0055" : "var(--color-primary, #00ffcc)",
           borderLeftWidth: "5px",
         }}
       >
-        <div className="flex items-center justify-between px-4 py-3 bg-gray-950 border-b border-gray-800">
+        <div className="flex items-center justify-between px-4 py-3 bg-(--color-surface-dark) border-b border-(--color-border-dark)">
           <div className="flex gap-2">
             <div className="w-3 h-3 rounded-full bg-red-500" />
             <div className="w-3 h-3 rounded-full bg-yellow-500" />
             <div className="w-3 h-3 rounded-full bg-green-500" />
           </div>
-          <span className="text-xs font-mono text-gray-400">protocol.js</span>
+          <span className="text-xs font-mono text-(--color-text-dark) font-semibold">protocol.js</span>
         </div>
-        <pre className="p-5 text-xs md:text-sm font-mono overflow-x-auto text-gray-200 leading-relaxed">
+        <pre className="p-5 text-xs md:text-sm font-mono overflow-x-auto text-gray-100 leading-relaxed">
           <code>
             {slide.content.split("\n").map((line, i) => {
               const isComment = line.trim().startsWith("//") || line.trim().startsWith("/*");
@@ -227,7 +227,7 @@ const EnergySlide = ({ slide, isActive, isRezeMode }) => (
               return (
                 <div key={i} className="leading-6">
                   {isComment ? (
-                    <span className="text-gray-500 italic">{line}</span>
+                    <span className="text-gray-300 italic font-medium">{line}</span>
                   ) : isKeyword ? (
                     <span style={{ color: isRezeMode ? "#ff0055" : "#00ffcc" }}>{line}</span>
                   ) : (
@@ -253,9 +253,9 @@ const ZeroBloatSlide = ({ slide, isActive, isRezeMode }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center w-full">
       {/* Left Column: Photo Drop Zone */}
       <div
-        className="rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-8 min-h-[340px] relative overflow-hidden text-center transition-all bg-black/40"
+        className="rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-8 min-h-[340px] relative overflow-hidden text-center transition-all bg-(--color-surface-dark)/40"
         style={{
-          borderColor: isRezeMode ? "rgba(255, 0, 85, 0.4)" : "rgba(0, 255, 204, 0.4)",
+          borderColor: isRezeMode ? "rgba(255, 0, 85, 0.4)" : "var(--color-border-dark)",
         }}
       >
         {slide.image ? (
@@ -268,10 +268,10 @@ const ZeroBloatSlide = ({ slide, isActive, isRezeMode }) => (
             }}
           />
         ) : null}
-        <div className="z-10 flex flex-col items-center gap-3 text-gray-400 font-mono text-xs uppercase tracking-wider">
-          <EmojiIcon name="camera" className="w-8 h-8 opacity-70" />
+        <div className="z-10 flex flex-col items-center gap-3 text-(--color-text-dark) font-mono text-xs uppercase tracking-wider font-semibold">
+          <EmojiIcon name="camera" className="w-8 h-8 opacity-80" />
           <span>{slide.photoZoneText || "[ DROP DEADLIFT / TECH PHOTO HERE ]"}</span>
-          <span className="text-[10px] text-gray-500">
+          <span className="text-[10px] text-(--color-muted-text-dark) font-medium">
             Sovereign Physical Rigor &bull; Lean Architecture
           </span>
         </div>
@@ -363,11 +363,11 @@ const SystemWarningSlide = ({ slide, isActive, isRezeMode, onToggleReze }) => (
         }}
       >
         {isRezeMode
-          ? "💥 [ REZE OVERRIDE ENGAGED — SYSTEM RUNNING AT MAX VELOCITY ]"
-          : "⚡ [ CLICK TO ENGAGE REZE OVERRIDE PROTOCOL ]"}
+          ? "[ REZE OVERRIDE ENGAGED — SYSTEM RUNNING AT MAX VELOCITY ]"
+          : "[ CLICK TO ENGAGE REZE OVERRIDE PROTOCOL ]"}
       </button>
 
-      <p className="mt-4 font-mono text-xs text-gray-500 uppercase">
+      <p className="mt-4 font-mono text-xs text-gray-300 font-semibold uppercase">
         {isRezeMode
           ? "Explosive Chainsaw Man execution mode active"
           : slide.triggerPrompt || ">> SPEAKER: INITIATE REZE OVERRIDE (TOP RIGHT) <<"}
@@ -411,9 +411,9 @@ const ParadigmSlide = ({ slide, isActive, isRezeMode }) => (
       {slide.steps.map((st, i) => (
         <div
           key={i}
-          className="p-6 rounded-2xl bg-black/60 border backdrop-blur-md transition-all flex flex-col justify-between shadow-xl"
+          className="p-6 rounded-2xl bg-(--color-surface-dark)/80 border backdrop-blur-md transition-all flex flex-col justify-between shadow-xl"
           style={{
-            borderColor: isRezeMode ? "rgba(255, 0, 85, 0.3)" : "rgba(0, 255, 204, 0.25)",
+            borderColor: isRezeMode ? "rgba(255, 0, 85, 0.3)" : "var(--color-border-dark)",
             borderLeftWidth: "4px",
             borderLeftColor: isRezeMode ? "#ff0055" : "#00ffcc",
           }}
@@ -425,12 +425,12 @@ const ParadigmSlide = ({ slide, isActive, isRezeMode }) => (
             >
               {st.step}
             </span>
-            <h4 className="text-xl font-bold text-white mb-2 uppercase font-mono">
+            <h4 className="text-xl font-bold text-(--color-text-dark) mb-2 uppercase font-mono">
               {st.label}
             </h4>
-            <p className="text-xs text-gray-300 leading-relaxed">{st.desc}</p>
+            <p className="text-xs text-(--color-muted-text-dark) leading-relaxed">{st.desc}</p>
           </div>
-          <div className="mt-4 pt-3 border-t border-gray-800 text-[10px] font-mono text-gray-500 uppercase">
+          <div className="mt-4 pt-3 border-t border-(--color-border-dark) text-[10px] font-mono text-(--color-muted-text-dark) font-semibold uppercase">
             Evolution Stage {st.step}
           </div>
         </div>
@@ -471,9 +471,9 @@ const CaseStudiesSlide = ({ slide, isActive, isRezeMode }) => (
       {slide.items.map((item, idx) => (
         <div
           key={idx}
-          className="p-6 rounded-2xl bg-black/60 border backdrop-blur-md transition-all flex flex-col justify-between shadow-xl"
+          className="p-6 rounded-2xl bg-(--color-surface-dark)/80 border backdrop-blur-md transition-all flex flex-col justify-between shadow-xl"
           style={{
-            borderColor: isRezeMode ? "rgba(255, 0, 85, 0.3)" : "rgba(0, 255, 204, 0.25)",
+            borderColor: isRezeMode ? "rgba(255, 0, 85, 0.3)" : "var(--color-border-dark)",
             borderLeftWidth: "4px",
             borderLeftColor: isRezeMode ? "#ff0055" : "#00ffcc",
           }}
@@ -499,12 +499,12 @@ const CaseStudiesSlide = ({ slide, isActive, isRezeMode }) => (
                 <EmojiIcon name={item.icon || "box"} className="w-4 h-4" />
               </div>
             </div>
-            <h3 className="text-xl font-bold text-white mb-3 font-mono">{item.title}</h3>
+            <h3 className="text-xl font-bold text-(--color-text-dark) mb-3 font-mono">{item.title}</h3>
             <div className="space-y-2 text-xs">
-              <p className="text-gray-300">
+              <p className="text-(--color-muted-text-dark)">
                 <strong className="text-red-400 font-mono">Friction:</strong> {item.problem}
               </p>
-              <p className="text-gray-300">
+              <p className="text-(--color-muted-text-dark)">
                 <strong
                   className="font-mono"
                   style={{ color: isRezeMode ? "#c6ff00" : "#00ffcc" }}
@@ -515,7 +515,7 @@ const CaseStudiesSlide = ({ slide, isActive, isRezeMode }) => (
               </p>
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-gray-800 text-xs font-semibold text-gray-300 font-mono">
+          <div className="mt-4 pt-3 border-t border-(--color-border-dark) text-xs font-semibold text-(--color-muted-text-dark) font-mono">
             Impact: {item.impact}
           </div>
         </div>
@@ -561,9 +561,9 @@ const ProcessSlide = ({ slide, isActive, isRezeMode }) => (
       {slide.stages.map((st, i) => (
         <div
           key={i}
-          className="p-6 rounded-2xl bg-black/60 border backdrop-blur-md transition-all flex flex-col justify-between shadow-xl"
+          className="p-6 rounded-2xl bg-(--color-surface-dark)/80 border backdrop-blur-md transition-all flex flex-col justify-between shadow-xl"
           style={{
-            borderColor: isRezeMode ? "rgba(255, 0, 85, 0.3)" : "rgba(0, 255, 204, 0.25)",
+            borderColor: isRezeMode ? "rgba(255, 0, 85, 0.3)" : "var(--color-border-dark)",
             borderTopWidth: "4px",
             borderTopColor: isRezeMode ? "#ff0055" : "#00ffcc",
           }}
@@ -575,13 +575,13 @@ const ProcessSlide = ({ slide, isActive, isRezeMode }) => (
             >
               {st.num}
             </span>
-            <h4 className="text-lg font-bold text-white mb-2 uppercase font-mono">
+            <h4 className="text-lg font-bold text-(--color-text-dark) mb-2 uppercase font-mono">
               {st.name}
             </h4>
-            <p className="text-xs text-gray-300 leading-relaxed mb-4">{st.detail}</p>
+            <p className="text-xs text-(--color-muted-text-dark) leading-relaxed mb-4">{st.detail}</p>
           </div>
-          <div className="pt-3 border-t border-gray-800 flex justify-between items-center">
-            <span className="text-[10px] font-mono text-gray-400 uppercase">Protocol Rule</span>
+          <div className="pt-3 border-t border-(--color-border-dark) flex justify-between items-center">
+            <span className="text-[10px] font-mono text-(--color-text-dark) font-semibold uppercase">Protocol Rule</span>
             <span
               className="text-xs font-mono font-bold"
               style={{ color: isRezeMode ? "#ff0055" : "#00ffcc" }}
@@ -605,10 +605,11 @@ const BioSlide = ({ slide, isActive, isRezeMode }) => (
     <div className="w-full grid md:grid-cols-2 gap-8 items-center">
       {/* Left Details */}
       <div
-        className="p-8 rounded-3xl bg-black/60 border backdrop-blur-md shadow-2xl flex flex-col justify-between"
+        className="p-8 rounded-3xl bg-(--color-surface-dark)/80 border backdrop-blur-md shadow-2xl flex flex-col justify-between"
         style={{
-          borderColor: isRezeMode ? "#ff0055" : "#00ffcc",
+          borderColor: isRezeMode ? "#ff0055" : "var(--color-border-dark)",
           borderLeftWidth: "5px",
+          borderLeftColor: isRezeMode ? "#ff0055" : "#00ffcc",
         }}
       >
         <div>
@@ -630,10 +631,10 @@ const BioSlide = ({ slide, isActive, isRezeMode }) => (
           >
             {slide.name}
           </h3>
-          <p className="text-xs font-mono text-gray-300 mb-6">{slide.role}</p>
+          <p className="text-xs font-mono text-(--color-muted-text-dark) mb-6">{slide.role}</p>
           <ul className="space-y-3">
             {slide.details.map((d, i) => (
-              <li key={i} className="flex items-start gap-2.5 text-xs text-gray-300 leading-relaxed">
+              <li key={i} className="flex items-start gap-2.5 text-xs text-(--color-muted-text-dark) leading-relaxed">
                 <span
                   className="font-bold shrink-0"
                   style={{ color: isRezeMode ? "#ff0055" : "#00ffcc" }}
@@ -660,9 +661,9 @@ const BioSlide = ({ slide, isActive, isRezeMode }) => (
 
       {/* Right Photo Zone */}
       <div
-        className="p-4 rounded-3xl border-2 border-dashed flex flex-col items-center justify-center min-h-[380px] relative overflow-hidden bg-black/40 text-center shadow-2xl"
+        className="p-4 rounded-3xl border-2 border-dashed flex flex-col items-center justify-center min-h-[380px] relative overflow-hidden bg-(--color-surface-dark)/40 text-center shadow-2xl"
         style={{
-          borderColor: isRezeMode ? "#ff0055" : "#00ffcc",
+          borderColor: isRezeMode ? "#ff0055" : "var(--color-primary, #00ffcc)",
         }}
       >
         <img
@@ -673,8 +674,8 @@ const BioSlide = ({ slide, isActive, isRezeMode }) => (
             e.currentTarget.style.display = "none";
           }}
         />
-        <div className="z-10 flex flex-col items-center gap-2 text-gray-400 font-mono text-xs uppercase tracking-wider mt-3">
-          <EmojiIcon name="camera" className="w-5 h-5 opacity-70" />
+        <div className="z-10 flex flex-col items-center gap-2 text-(--color-text-dark) font-mono text-xs uppercase tracking-wider font-semibold mt-3">
+          <EmojiIcon name="camera" className="w-5 h-5 opacity-80" />
           <span>{slide.photoZoneText || "[ DROP PORTRAIT PHOTO HERE ]"}</span>
         </div>
       </div>
@@ -708,25 +709,25 @@ const LabSlide = ({ slide, isActive, isRezeMode }) => (
       >
         {slide.title}
       </h2>
-      <p className="text-base md:text-lg text-gray-300 mb-6 max-w-3xl leading-relaxed">
+      <p className="text-base md:text-lg text-(--color-muted-text-dark) mb-6 max-w-3xl leading-relaxed">
         {slide.description}
       </p>
 
       {/* Lab Terminal Box */}
       <div
-        className="rounded-2xl border bg-black/90 p-6 md:p-8 backdrop-blur-md shadow-2xl"
+        className="rounded-2xl border bg-(--color-surface-dark)/95 p-6 md:p-8 backdrop-blur-md shadow-2xl"
         style={{
-          borderColor: isRezeMode ? "rgba(255, 0, 85, 0.4)" : "rgba(0, 255, 204, 0.3)",
+          borderColor: isRezeMode ? "rgba(255, 0, 85, 0.4)" : "var(--color-border-dark)",
           borderLeftWidth: "5px",
-          borderLeftColor: isRezeMode ? "#ff0055" : "#00ffcc",
+          borderLeftColor: isRezeMode ? "#ff0055" : "var(--color-primary, #00ffcc)",
         }}
       >
-        <p className="text-white font-bold font-mono text-sm mb-4">
+        <p className="text-(--color-text-dark) font-bold font-mono text-sm mb-4">
           Objective: {slide.objective}
         </p>
         <div
-          className="p-4 rounded-xl font-mono text-xs md:text-sm bg-gray-950 border border-gray-800 space-y-2"
-          style={{ color: isRezeMode ? "#ff0055" : "#00ffcc" }}
+          className="p-4 rounded-xl font-mono text-xs md:text-sm bg-(--color-dark) border border-(--color-border-dark) space-y-2"
+          style={{ color: isRezeMode ? "#ff0055" : "var(--color-primary, #00ffcc)" }}
         >
           {slide.terminalLines.map((line, i) => (
             <div key={i} className="leading-relaxed">
@@ -765,12 +766,12 @@ const PollSlide = ({ slide, isActive }) => (
     <h2 className="text-3xl md:text-5xl font-bold mb-4 text-[#00ffcc] text-center">
       {slide.title}
     </h2>
-    <p className="text-sm text-gray-400 mb-8 text-center">{slide.subtitle}</p>
+    <p className="text-sm text-gray-200 mb-8 text-center font-medium">{slide.subtitle}</p>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
       {slide.polls?.map((poll) => (
-        <div key={poll.id} className="p-5 rounded-2xl bg-black/60 border border-gray-800 shadow-md">
-          <h4 className="text-base font-bold text-white mb-2">{poll.question}</h4>
-          <p className="text-xs text-blue-300 italic">{poll.followUp}</p>
+        <div key={poll.id} className="p-5 rounded-2xl bg-(--color-surface-dark)/80 border border-(--color-border-dark) shadow-md">
+          <h4 className="text-base font-bold text-(--color-text-dark) mb-2">{poll.question}</h4>
+          <p className="text-xs text-(--color-primary) italic">{poll.followUp}</p>
         </div>
       ))}
     </div>
@@ -813,8 +814,208 @@ const LaunchSlide = ({ slide, isActive }) => (
   </div>
 );
 
+// Slide: Statement (Massive bold typography, phase badge, narrative text)
+const StatementSlide = ({ slide, isActive, isRezeMode, deckMeta }) => {
+  const accent = isRezeMode ? "#ff0055" : (deckMeta?.accent || "#00e5ff");
+  const isCentered = slide.center ?? false;
+
+  return (
+    <div
+      className={`flex flex-col ${
+        isCentered ? "items-center text-center" : "items-start text-left"
+      } justify-center min-h-[70vh] transition-all duration-700 max-w-5xl mx-auto px-4 ${
+        isActive ? "opacity-100 scale-100" : "opacity-0 scale-95"
+      }`}
+    >
+      {slide.phase && (
+        <div
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full font-mono text-xs font-bold uppercase tracking-widest mb-6 border transition-all"
+          style={{
+            backgroundColor: `${accent}15`,
+            borderColor: accent,
+            color: accent,
+            boxShadow: `0 0 20px ${accent}25`,
+          }}
+        >
+          {slide.phase}
+        </div>
+      )}
+
+      <div className="relative w-full">
+        <h1
+          className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-6 uppercase whitespace-pre-line leading-none"
+          style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            color: "#ffffff",
+            textShadow: `0 0 35px ${accent}40`,
+          }}
+        >
+          {slide.title}
+        </h1>
+        <div
+          className="absolute -inset-4 opacity-20 blur-3xl -z-10 transition-colors pointer-events-none"
+          style={{ backgroundColor: accent }}
+        />
+      </div>
+
+      <p className="text-lg md:text-2xl mt-2 max-w-3xl text-gray-300 leading-relaxed font-sans font-normal">
+        {slide.description}
+      </p>
+
+      {slide.signature && (
+        <div className="mt-10 p-4 rounded-xl border border-gray-800 bg-black/60 backdrop-blur font-mono text-sm tracking-wide">
+          <div className="text-gray-300 whitespace-pre-line leading-relaxed font-semibold">
+            {slide.signature}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Slide: Comparison (Split-screen 2-column contrast for Prompts, Code Execution, and Squad Characters)
+const ComparisonSlide = ({ slide, isActive, isRezeMode, deckMeta }) => {
+  const accent = isRezeMode ? "#ff0055" : (deckMeta?.accent || "#00e5ff");
+  const accent2 = isRezeMode ? "#c6ff00" : (deckMeta?.accentAlt || "#ffaa00");
+
+  const cards = slide.columns || [
+    slide.bad && { ...slide.bad, type: "bad" },
+    slide.good && { ...slide.good, type: "good" },
+  ].filter(Boolean);
+
+  return (
+    <div
+      className={`flex flex-col justify-center min-h-[70vh] transition-all duration-700 max-w-6xl mx-auto px-4 ${
+        isActive ? "opacity-100 scale-100" : "opacity-0 scale-95"
+      }`}
+    >
+      {/* Header Info */}
+      <div className="mb-8">
+        {slide.phase && (
+          <div
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full font-mono text-xs font-bold uppercase tracking-widest mb-3 border transition-all"
+            style={{
+              backgroundColor: `${accent}15`,
+              borderColor: accent,
+              color: accent,
+            }}
+          >
+            {slide.phase}
+          </div>
+        )}
+        <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-white">
+          {slide.title}
+        </h2>
+        {slide.description && (
+          <p className="text-sm md:text-base text-gray-400 mt-2 max-w-2xl">
+            {slide.description}
+          </p>
+        )}
+      </div>
+
+      {/* 2-Column Side-by-Side Comparison */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+        {cards.map((card, idx) => {
+          const isBad = card.type === "bad";
+          const isGood = card.type === "good";
+
+          return (
+            <div
+              key={idx}
+              className={`flex flex-col justify-between p-6 rounded-2xl border transition-all ${
+                isBad
+                  ? "border-t-4 border-t-red-500 border-red-500/20 bg-red-950/10"
+                  : isGood
+                  ? "border-t-4 bg-black/40 backdrop-blur shadow-xl"
+                  : "border-gray-800 bg-(--color-surface-dark)/60 backdrop-blur"
+              }`}
+              style={{
+                borderTopColor: isGood ? accent : isBad ? "#ef4444" : undefined,
+                boxShadow: isGood ? `0 0 35px ${accent}20` : undefined,
+              }}
+            >
+              <div>
+                {/* Character Header */}
+                {card.character && (
+                  <div
+                    className="font-mono text-xs md:text-sm font-bold uppercase tracking-wider mb-2"
+                    style={{ color: accent2 }}
+                  >
+                    {card.character}
+                  </div>
+                )}
+
+                {/* Narrative / Description */}
+                {card.narrative && (
+                  <p className="text-xs md:text-sm text-gray-300 leading-relaxed mb-4">
+                    {card.narrative}
+                  </p>
+                )}
+
+                {/* Tag Badge */}
+                {card.tag && (
+                  <div
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md font-mono text-xs font-bold uppercase mb-3 border ${
+                      isBad
+                        ? "bg-red-500/20 text-red-400 border-red-500/30"
+                        : isGood
+                        ? "border"
+                        : "bg-gray-800 text-gray-300 border-gray-700"
+                    }`}
+                    style={
+                      isGood
+                        ? {
+                            backgroundColor: `${accent}20`,
+                            borderColor: `${accent}40`,
+                            color: accent,
+                          }
+                        : undefined
+                    }
+                  >
+                    {card.tag}
+                  </div>
+                )}
+
+                {/* Content Box or BoxContent */}
+                {(card.content || card.boxContent) && (
+                  <div
+                    className={`p-4 rounded-xl bg-black/60 border text-gray-200 font-mono text-xs md:text-sm leading-relaxed whitespace-pre-wrap overflow-x-auto ${
+                      isBad
+                        ? "border-red-900/40 text-gray-300"
+                        : isGood
+                        ? ""
+                        : "border-gray-800 text-gray-300"
+                    }`}
+                    style={isGood ? { borderColor: `${accent}30` } : undefined}
+                  >
+                    {card.content || card.boxContent}
+                  </div>
+                )}
+              </div>
+
+              {/* Result Footer */}
+              {card.result && (
+                <p
+                  className={`mt-4 text-xs font-mono italic ${
+                    isBad ? "text-red-400" : ""
+                  }`}
+                  style={isGood ? { color: accent } : undefined}
+                >
+                  {card.result}
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 const SlideComponents = {
   title: TitleSlide,
+  statement: StatementSlide,
+  comparison: ComparisonSlide,
   "reacher-intro": ReacherIntroSlide,
   energy: EnergySlide,
   "zero-bloat": ZeroBloatSlide,
@@ -835,7 +1036,21 @@ export const WorkshopSlides = () => {
   const { isDarkMode } = useTheme();
 
   // Active deck selection
-  const validDeckIds = ["lhm", "keynote", "master", "lightning", "workshop", "devfest", "pride"];
+  const validDeckIds = [
+    "nomad",
+    "ripcord",
+    "iron",
+    "combined",
+    "lhm",
+    "keynote",
+    "master",
+    "lightning",
+    "workshop",
+    "devfest",
+    "pride",
+    "reacher",
+    "chainsaw",
+  ];
   const activeDeckId = deckId && validDeckIds.includes(deckId) ? deckId : DEFAULT_DECK_ID;
   const currentDeck = getDeck(activeDeckId);
   const allDecks = getAllDecks();
@@ -951,6 +1166,14 @@ export const WorkshopSlides = () => {
       } else if ((e.key === "p" || e.key === "P") && !e.metaKey && !e.ctrlKey) {
         e.preventDefault();
         handlePrint();
+      } else if (!e.metaKey && !e.ctrlKey && !e.altKey && e.key === "1") {
+        navigate("/slides/nomad");
+      } else if (!e.metaKey && !e.ctrlKey && !e.altKey && e.key === "2") {
+        navigate("/slides/ripcord");
+      } else if (!e.metaKey && !e.ctrlKey && !e.altKey && e.key === "3") {
+        navigate("/slides/iron");
+      } else if (!e.metaKey && !e.ctrlKey && !e.altKey && (e.key === "4" || e.key === "c" || e.key === "C")) {
+        navigate("/slides/combined");
       } else if (e.key === "Home") {
         goToSlide(0);
       } else if (e.key === "End") {
@@ -962,7 +1185,7 @@ export const WorkshopSlides = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [nextSlide, prevSlide, toggleFullscreen, isFullscreen, goToSlide, slides.length, handlePrint]);
+  }, [nextSlide, prevSlide, toggleFullscreen, isFullscreen, goToSlide, slides.length, handlePrint, navigate]);
 
   // Touch/swipe support
   useEffect(() => {
@@ -990,10 +1213,11 @@ export const WorkshopSlides = () => {
   const SlideComponent = SlideComponents[slide.type] || TitleSlide;
   const progress = ((currentSlide + 1) / slides.length) * 100;
 
-  const accentColor = isRezeMode ? "#ff0055" : "#00ffcc";
+  const currentAccent = currentDeck.meta?.accent || "var(--color-primary, #00ffcc)";
+  const accentColor = isRezeMode ? "#ff0055" : currentAccent;
   const bgGrid = isRezeMode
     ? "linear-gradient(rgba(255, 0, 85, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 0, 85, 0.08) 1px, transparent 1px)"
-    : "linear-gradient(rgba(0, 255, 204, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 204, 0.05) 1px, transparent 1px)";
+    : "linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px)";
 
   return (
     <div
@@ -1002,8 +1226,8 @@ export const WorkshopSlides = () => {
         isRezeMode ? "reze-mode" : ""
       }`}
       style={{
-        backgroundColor: isRezeMode ? "#0a0004" : "#050606",
-        color: "#e0e0e0",
+        backgroundColor: isRezeMode ? "#0a0004" : "var(--color-dark, #050606)",
+        color: isRezeMode ? "#e0e0e0" : "var(--color-text-dark, #e0e0e0)",
         backgroundImage: bgGrid,
         backgroundSize: "40px 40px",
         fontFamily: "'Space Grotesk', sans-serif",
@@ -1039,47 +1263,80 @@ export const WorkshopSlides = () => {
       `}</style>
 
       {/* Top Deck Switcher & Reze Override Bar */}
-      <header className="fixed top-0 left-0 right-0 h-14 z-40 backdrop-blur-md bg-black/80 border-b border-gray-800/80 px-4 flex items-center justify-between text-xs">
+      <header className="fixed top-0 left-0 right-0 h-14 z-40 backdrop-blur-md bg-(--color-surface-dark)/90 border-b border-(--color-border-dark)/80 px-4 flex items-center justify-between text-xs">
         <div className="flex items-center gap-2">
           <Link
             to="/guide"
-            className="px-2.5 py-1 rounded-lg bg-gray-900 border border-gray-800 text-gray-300 hover:text-white transition-colors flex items-center gap-1.5"
+            className="px-2.5 py-1 rounded-lg bg-(--color-surface-dark) border border-(--color-border-dark) text-(--color-muted-text-dark) hover:text-(--color-text-dark) transition-colors flex items-center gap-1.5 font-mono"
             title="Return to Workshop Guide"
           >
             ← <span>Guide</span>
           </Link>
-          <div className="hidden sm:flex items-center gap-1 text-gray-400 font-mono">
+          <div className="hidden sm:flex items-center gap-1 text-(--color-muted-text-dark) font-mono">
             <span style={{ color: accentColor }} className="font-bold">
               Deck:
             </span>
-            <span className="text-gray-200">{currentDeck.meta.title}</span>
+            <span className="text-(--color-text-dark) font-semibold">{currentDeck.meta.title}</span>
           </div>
         </div>
 
         {/* Deck Selector Pills */}
-        <div className="flex items-center gap-1 bg-black/80 p-1 rounded-xl border border-gray-800 overflow-x-auto">
-          {allDecks.map((d) => {
+        <div className="flex items-center gap-1 bg-(--color-surface-dark)/80 p-1 rounded-xl border border-(--color-border-dark) overflow-x-auto max-w-2xl">
+          {/* Main Masterclass Variants */}
+          {[
+            { id: "nomad", label: "1: NOMAD", color: "#00e5ff" },
+            { id: "ripcord", label: "2: RIPCORD", color: "#ff0055" },
+            { id: "iron", label: "3: IRON", color: "#d32f2f" },
+            { id: "combined", label: "4: COMBINED", color: "#00e5ff" },
+          ].map((v) => {
             const isCurrent =
-              d.id === activeDeckId ||
-              (activeDeckId === "keynote" && d.id === "lhm") ||
-              (activeDeckId === "master" && d.id === "lhm");
+              activeDeckId === v.id ||
+              (v.id === "combined" && (activeDeckId === "keynote" || activeDeckId === "master")) ||
+              (v.id === "nomad" && activeDeckId === "reacher") ||
+              (v.id === "ripcord" && activeDeckId === "chainsaw");
             return (
               <button
-                key={d.id}
-                onClick={() => navigate(`/slides/${d.id}`)}
-                className={`px-3 py-1 rounded-lg font-mono text-[11px] font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                key={v.id}
+                onClick={() => navigate(`/slides/${v.id}`)}
+                className={`px-2.5 py-1 rounded-lg font-mono text-[11px] font-bold transition-all cursor-pointer whitespace-nowrap ${
                   isCurrent
-                    ? "text-black font-bold shadow-md"
-                    : "text-gray-400 hover:text-gray-200"
+                    ? "text-black font-black shadow-md"
+                    : "text-(--color-muted-text-dark) hover:text-white"
                 }`}
                 style={{
-                  backgroundColor: isCurrent ? accentColor : "transparent",
+                  backgroundColor: isCurrent ? v.color : "transparent",
                 }}
+                title={`Switch to ${v.label} (Hotkey ${v.label[0]})`}
               >
-                {d.id.toUpperCase()}
+                {v.label}
               </button>
             );
           })}
+
+          <div className="w-[1px] h-4 bg-(--color-border-dark) mx-1 shrink-0" />
+
+          {/* Additional workshop decks */}
+          {allDecks
+            .filter((d) => !["nomad", "ripcord", "iron", "combined"].includes(d.id))
+            .map((d) => {
+              const isCurrent = activeDeckId === d.id;
+              return (
+                <button
+                  key={d.id}
+                  onClick={() => navigate(`/slides/${d.id}`)}
+                  className={`px-2.5 py-1 rounded-lg font-mono text-[10px] font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                    isCurrent
+                      ? "text-(--color-primary-text) font-bold bg-(--color-surface-hover-dark)"
+                      : "text-(--color-muted-text-dark) hover:text-(--color-text-dark)"
+                  }`}
+                  style={{
+                    color: isCurrent ? accentColor : undefined,
+                  }}
+                >
+                  {d.id.toUpperCase()}
+                </button>
+              );
+            })}
         </div>
 
         {/* Reze Mode Switch Button */}
@@ -1090,19 +1347,19 @@ export const WorkshopSlides = () => {
             className="px-3 py-1.5 rounded-lg font-mono text-[11px] font-bold uppercase transition-all cursor-pointer border"
             style={{
               backgroundColor: isRezeMode ? "#ff0055" : "rgba(0,0,0,0.6)",
-              color: isRezeMode ? "#fff" : "#00ffcc",
-              borderColor: isRezeMode ? "#fff" : "#00ffcc",
+              color: isRezeMode ? "#fff" : accentColor,
+              borderColor: isRezeMode ? "#fff" : accentColor,
               animation: isRezeMode ? "reze-pulse 1.5s infinite alternate" : "none",
             }}
             title="Toggle between Reacher Deduction and Reze Overwhelming Velocity"
           >
-            {isRezeMode ? "💥 [ DANGER: REZE ACTIVE ]" : "⚡ [ SYSTEM NORMAL ]"}
+            {isRezeMode ? "[ DANGER: REZE ACTIVE ]" : "[ SYSTEM NORMAL ]"}
           </button>
 
           {/* Reacher Clock Easter Egg */}
-          <div className="hidden xl:flex items-center gap-1 font-mono text-[11px] text-gray-400">
+          <div className="hidden xl:flex items-center gap-1 font-mono text-[11px] text-(--color-muted-text-dark)">
             <span className="text-amber-400 font-bold">Clock:</span>
-            <span>{formatReacherClock(currentTime)}</span>
+            <span className="font-semibold text-(--color-text-dark)">{formatReacherClock(currentTime)}</span>
           </div>
         </div>
       </header>
@@ -1144,6 +1401,7 @@ export const WorkshopSlides = () => {
               isActive={true}
               isRezeMode={isRezeMode}
               onToggleReze={() => setIsRezeMode(!isRezeMode)}
+              deckMeta={currentDeck.meta}
             />
           )}
         </div>
@@ -1152,7 +1410,7 @@ export const WorkshopSlides = () => {
       {/* Presenter Notes Overlay */}
       {showNotes && (
         <div
-          className="fixed bottom-20 right-4 p-5 rounded-2xl shadow-2xl border max-w-md backdrop-blur-xl z-50 animate-fade-in bg-black/95 text-gray-200"
+          className="fixed bottom-20 right-4 p-5 rounded-2xl shadow-2xl border max-w-md backdrop-blur-xl z-50 animate-fade-in bg-(--color-surface-dark)/95 text-(--color-text-dark)"
           style={{
             borderColor: accentColor,
           }}
@@ -1167,38 +1425,38 @@ export const WorkshopSlides = () => {
             <button
               onClick={() => setShowNotes(false)}
               aria-label="Close notes"
-              className="p-1 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors cursor-pointer"
+              className="p-1 rounded-lg text-(--color-muted-text-dark) hover:text-(--color-text-dark) hover:bg-(--color-surface-hover-dark) transition-colors cursor-pointer"
             >
               <Close className="w-3.5 h-3.5" />
             </button>
           </div>
-          <p className="text-sm leading-relaxed opacity-95 font-sans">
-            {presenterNotes[slide.id] || "No speaker notes recorded for this slide."}
+          <p className="text-sm leading-relaxed opacity-95 font-sans whitespace-pre-line">
+            {slide.notes || presenterNotes[slide.id] || presenterNotes[currentSlide] || "No speaker notes recorded for this slide."}
           </p>
-          <div className="mt-3 pt-2 border-t border-gray-800 text-[10px] text-gray-400 font-mono">
-            Shortcuts: N toggle notes &bull; P print / PDF &bull; F fullscreen &bull; T timer
+          <div className="mt-3 pt-2 border-t border-(--color-border-dark) text-[10px] text-(--color-muted-text-dark) font-mono font-medium">
+            Shortcuts: 1/2/3/4 Switch Deck &bull; N Notes &bull; P PDF &bull; F Fullscreen &bull; T Timer
           </div>
         </div>
       )}
 
       {/* Bottom HUD Controls */}
-      <footer className="fixed bottom-0 left-0 right-0 p-4 flex items-center justify-between z-40 backdrop-blur-md bg-black/80 border-t border-gray-800/80">
+      <footer className="fixed bottom-0 left-0 right-0 p-4 flex items-center justify-between z-40 backdrop-blur-md bg-(--color-surface-dark)/80 border-t border-(--color-border-dark)/80">
         <div className="flex items-center gap-3">
           <button
             onClick={prevSlide}
             disabled={currentSlide === 0}
-            className="p-2.5 rounded-xl transition-all hover:scale-105 disabled:opacity-20 cursor-pointer bg-gray-900 text-white hover:bg-gray-800 border border-gray-700"
+            className="p-2.5 rounded-xl transition-all hover:scale-105 disabled:opacity-20 cursor-pointer bg-(--color-surface-dark) text-(--color-text-dark) hover:bg-(--color-surface-hover-dark) border border-(--color-border-dark)"
             aria-label="Previous slide"
           >
             ←
           </button>
-          <span className="text-xs font-mono text-gray-300">
+          <span className="text-xs font-mono text-(--color-muted-text-dark) font-bold">
             {(currentSlide + 1).toString().padStart(2, "0")} / {slides.length.toString().padStart(2, "0")}
           </span>
           <button
             onClick={nextSlide}
             disabled={currentSlide === slides.length - 1}
-            className="p-2.5 rounded-xl transition-all hover:scale-105 disabled:opacity-20 cursor-pointer text-black font-bold shadow-md"
+            className="p-2.5 rounded-xl transition-all hover:scale-105 disabled:opacity-20 cursor-pointer text-(--color-primary-text) font-bold shadow-md"
             style={{ backgroundColor: accentColor }}
             aria-label="Next slide"
           >
@@ -1206,7 +1464,7 @@ export const WorkshopSlides = () => {
           </button>
 
           <span
-            className="text-xs font-mono text-gray-400 cursor-pointer select-none hover:text-white transition-colors ml-2 inline-flex items-center gap-1"
+            className="text-xs font-mono text-(--color-muted-text-dark) cursor-pointer select-none hover:text-(--color-text-dark) transition-colors ml-2 inline-flex items-center gap-1 font-semibold"
             onClick={() => setIsTimerRunning(!isTimerRunning)}
             title="Click to Play/Pause timer. Press R to reset."
           >
@@ -1222,7 +1480,7 @@ export const WorkshopSlides = () => {
               onClick={() => goToSlide(i)}
               className="w-2.5 h-2.5 rounded-full transition-all cursor-pointer"
               style={{
-                backgroundColor: i === currentSlide ? accentColor : "#4b5563",
+                backgroundColor: i === currentSlide ? accentColor : "var(--color-border-dark, #4b5563)",
                 transform: i === currentSlide ? "scale(1.3)" : "scale(1)",
               }}
               title={s.title}
@@ -1235,7 +1493,7 @@ export const WorkshopSlides = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={handlePrint}
-            className="px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer border bg-gray-900 text-gray-300 border-gray-700 hover:text-white"
+            className="px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer border bg-(--color-surface-dark) text-(--color-muted-text-dark) border-(--color-border-dark) hover:text-(--color-text-dark)"
             title="Export / Print Slides to PDF (P)"
             aria-label="Export to PDF"
           >
@@ -1245,9 +1503,9 @@ export const WorkshopSlides = () => {
             onClick={() => setShowNotes(!showNotes)}
             className="px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer border"
             style={{
-              backgroundColor: showNotes ? accentColor : "#111827",
-              color: showNotes ? "#000" : "#d1d5db",
-              borderColor: showNotes ? accentColor : "#374151",
+              backgroundColor: showNotes ? accentColor : "var(--color-surface-dark)",
+              color: showNotes ? "var(--color-primary-text)" : "var(--color-muted-text-dark)",
+              borderColor: showNotes ? accentColor : "var(--color-border-dark)",
             }}
             title="Presenter Notes (N)"
             aria-label="Toggle presenter notes"
@@ -1256,7 +1514,7 @@ export const WorkshopSlides = () => {
           </button>
           <button
             onClick={toggleFullscreen}
-            className="p-2 rounded-xl bg-gray-900 text-gray-300 border border-gray-700 hover:text-white transition-all cursor-pointer text-xs font-mono"
+            className="p-2 rounded-xl bg-(--color-surface-dark) text-(--color-muted-text-dark) border border-(--color-border-dark) hover:text-(--color-text-dark) transition-all cursor-pointer text-xs font-mono"
             title="Fullscreen (F)"
             aria-label="Toggle fullscreen"
           >

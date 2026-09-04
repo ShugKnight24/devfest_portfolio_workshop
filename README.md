@@ -1,4 +1,4 @@
-# 🚀 DevFest Portfolio Workshop
+# DevFest Portfolio Workshop
 
 A **multi-track workshop platform** for building personal portfolio websites. Features 5 learning tracks, 31 hand-crafted themes, interactive lessons with live playgrounds, quizzes, coding challenges, and a cinematic slide presentation system — all in one monorepo.
 
@@ -6,7 +6,7 @@ A **multi-track workshop platform** for building personal portfolio websites. Fe
 
 ---
 
-## ✨ Highlights
+## Highlights
 
 - **5 learning tracks** — React 19, Vanilla JS, Vue 3, SvelteKit, and Agentic Dev
 - **31 themes** across 5 categories (Anime, Modern, Nature, Classic, DevFest)
@@ -20,7 +20,7 @@ A **multi-track workshop platform** for building personal portfolio websites. Fe
 
 ---
 
-## 🏁 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -49,11 +49,11 @@ For the vanilla starter, just open `apps/vanilla/index.html` in your browser —
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```mermaid
 graph TB
-    Root["📦 pnpm workspace + Turborepo"]
+    Root["pnpm workspace + Turborepo"]
 
     Root --> Apps["apps/"]
     Root --> Packages["packages/"]
@@ -113,37 +113,37 @@ devfest_portfolio_workshop/
 
 ---
 
-## 📚 Available Tracks
+## Available Tracks
 
 | Track | Lessons | Difficulty | Estimated Time |
 |-------|---------|------------|----------------|
-| ⚛️ **React 19** | 12 | Intermediate | 60–90 min |
-| 🟨 **Vanilla JS** | 10 | Beginner | 45–60 min |
-| 💚 **Vue 3** | 10 | Intermediate | 60 min |
-| 🔥 **SvelteKit** | 10 | Advanced | 45 min |
-| 🤖 **Agentic Dev** | 10 | All Levels | 60–90 min |
+| **React 19** | 12 | Intermediate | 60–90 min |
+| **Vanilla JS** | 10 | Beginner | 45–60 min |
+| **Vue 3** | 10 | Intermediate | 60 min |
+| **SvelteKit** | 10 | Advanced | 45 min |
+| **Agentic Dev** | 10 | All Levels | 60–90 min |
 
 Each track includes step-by-step lessons, interactive code playgrounds, quizzes at key checkpoints, and coding challenges to reinforce learning.
 
 ---
 
-## 🎨 Themes
+## Themes
 
 31 themes organized into 5 categories:
 
 | Category | Themes | Examples |
 |----------|--------|----------|
-| 🎌 **Anime** | 11 | Pochita, Six Eyes, Vegeta, Divergent Fist |
-| 🌆 **Modern** | 6 | Neon Night, Synthwave, Ocean Breeze, Midnight Purple |
-| 🌿 **Nature** | 1 | Forest Zen |
-| 🏛️ **Classic** | 8 | Monochrome, GitHub, Crimson Steel, Golden City |
-| 🎪 **DevFest** | 5 | Speed of Thought, Google I/O, DevFest Coral |
+| **Anime** | 11 | Pochita, Six Eyes, Vegeta, Divergent Fist |
+| **Modern** | 6 | Neon Night, Synthwave, Ocean Breeze, Midnight Purple |
+| **Nature** | 1 | Forest Zen |
+| **Classic** | 8 | Monochrome, GitHub, Crimson Steel, Golden City |
+| **DevFest** | 5 | Speed of Thought, Google I/O, DevFest Coral |
 
 All themes use CSS custom properties and support both light and dark modes.
 
 ---
 
-## 🎓 For Workshop Facilitators
+## For Workshop Facilitators
 
 | Route | Purpose |
 |-------|---------|
@@ -168,7 +168,7 @@ All themes use CSS custom properties and support both light and dark modes.
 
 ---
 
-## 🔧 Commands
+## Commands
 
 ### Root (Turborepo)
 
@@ -201,7 +201,7 @@ npm run preview         # Preview production build
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology | Version |
 |-------|------------|---------|
@@ -218,7 +218,7 @@ npm run preview         # Preview production build
 
 ---
 
-## ✅ Verification
+## Verification
 
 Every change must pass:
 
@@ -231,7 +231,7 @@ The vanilla starter must load correctly in the browser via `file://` protocol.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Please follow these guidelines:
 
@@ -267,6 +267,6 @@ chore: bump Vite to 7.1.12
 
 ---
 
-## 📄 License
+## License
 
 MIT © [Shug Knight](https://github.com/ShugKnight24)

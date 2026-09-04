@@ -9,7 +9,7 @@
  * PROPS TO USE:
  * @param {Object} personal - Contains name, title, email, github, linkedin
  *
- * 💡 TIP: Use Tailwind classes like:
+ * TIP: Use Tailwind classes like:
  * - text-4xl, font-bold for large text
  * - flex, items-center, justify-center for centering
  * - bg-gradient-to-r for gradient backgrounds

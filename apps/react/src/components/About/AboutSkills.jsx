@@ -32,12 +32,11 @@ export const AboutSkills = ({ avatar, bio }) => {
     "Git & GitHub",
   ];
 
-  // TODO: Find Icons for interests
   const interests = [
-    { icon: "💻", text: "Web Development" },
-    { icon: "📱", text: "Mobile Apps" },
-    { icon: "🎨", text: "UI/UX Design" },
-    { icon: "🤖", text: "AI & ML" },
+    { icon: "laptop", text: "Web Development" },
+    { icon: "phone", text: "Mobile Apps" },
+    { icon: "palette", text: "UI/UX Design" },
+    { icon: "robot", text: "AI & ML" },
   ];
 
   return (
@@ -126,7 +125,7 @@ export const AboutSkills = ({ avatar, bio }) => {
                     key={index}
                     className="flex items-center gap-3 p-4 bg-(--color-surface-highlight) rounded-lg hover:shadow-md transition-all duration-200"
                   >
-                    <EmojiIcon emoji={interest.icon} className="w-8 h-8 shrink-0 text-(--color-primary)" />
+                    <EmojiIcon name={interest.icon} className="w-8 h-8 shrink-0 text-(--color-primary)" />
                     <span className="font-medium text-(--color-text-primary)">
                       {interest.text}
                     </span>

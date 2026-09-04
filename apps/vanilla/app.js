@@ -163,10 +163,12 @@ const initThemeSwitcher = () => {
   // Close the dropdown when clicking anywhere else
   document.addEventListener('click', () => menu.classList.remove('open'));
 
-  // Restore saved theme on page load
+  // Restore saved theme on page load (default to reacher)
   const saved = localStorage.getItem('theme');
   if (saved && themes[saved]) {
     applyTheme(saved);
+  } else if (themes.reacher) {
+    applyTheme('reacher');
   }
 };
 
@@ -179,10 +181,14 @@ const applyTheme = (themeName) => {
 
   const root = document.documentElement;
   root.style.setProperty('--color-primary', theme.primary);
+  root.style.setProperty('--color-primary-text', theme.primaryText || '#FFFFFF');
   root.style.setProperty('--color-background', theme.background);
   root.style.setProperty('--color-text', theme.text);
   root.style.setProperty('--color-surface', theme.surface);
+  root.style.setProperty('--color-border', theme.border || '#E5E7EB');
+  root.style.setProperty('--color-muted-text', theme.mutedText || '#94A3B8');
   root.style.setProperty('--color-accent', theme.accent);
+  root.setAttribute('data-theme', themeName);
 
   // Persist the choice so it survives page reloads
   localStorage.setItem('theme', themeName);

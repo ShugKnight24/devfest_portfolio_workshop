@@ -33,10 +33,10 @@ class PreviewErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p className="text-red-600 dark:text-red-400 font-medium inline-flex items-center gap-1.5">
-            <EmojiIcon emoji="⚠️" className="w-5 h-5" /> Render Error
+          <p className="text-red-600 dark:text-red-300 font-medium inline-flex items-center gap-1.5">
+            <EmojiIcon name="warning" className="w-5 h-5" /> Render Error
           </p>
-          <p className="text-sm text-red-500 dark:text-red-400 mt-1">
+          <p className="text-sm text-red-600 dark:text-red-200 mt-1">
             {this.state.error?.message || "Something went wrong"}
           </p>
           <button
@@ -93,15 +93,15 @@ const PreviewComponents = {
   Card: ({ title, description, image, footer }) => (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden max-w-sm">
       {image && (
-        <div className="h-48 bg-linear-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-6xl">
-          {image}
+        <div className="h-48 bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white">
+          <EmojiIcon name={image} emoji={image} className="w-16 h-16 text-white" />
         </div>
       )}
       <div className="p-6">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
           {title}
         </h3>
-        <p className="text-gray-600 dark:text-gray-400">{description}</p>
+        <p className="text-gray-700 dark:text-gray-200">{description}</p>
       </div>
       {footer && (
         <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-600">
@@ -150,29 +150,29 @@ const PreviewComponents = {
         bg: "bg-blue-50 dark:bg-blue-900/20",
         border: "border-blue-200 dark:border-blue-800",
         text: "text-blue-700 dark:text-blue-300",
-        icon: "ℹ️",
+        icon: "question",
       },
       success: {
         bg: "bg-green-50 dark:bg-green-900/20",
         border: "border-green-200 dark:border-green-800",
         text: "text-green-700 dark:text-green-300",
-        icon: "✅",
+        icon: "check",
       },
       warning: {
         bg: "bg-yellow-50 dark:bg-yellow-900/20",
         border: "border-yellow-200 dark:border-yellow-800",
         text: "text-yellow-700 dark:text-yellow-300",
-        icon: "⚠️",
+        icon: "warning",
       },
       error: {
         bg: "bg-red-50 dark:bg-red-900/20",
         border: "border-red-200 dark:border-red-800",
         text: "text-red-700 dark:text-red-300",
-        icon: "❌",
+        icon: "cross",
       },
     };
 
-    const style = types[type];
+    const style = types[type] || types.info;
 
     return (
       <div
@@ -180,7 +180,7 @@ const PreviewComponents = {
       >
         <div className="flex items-start gap-3">
           <span className="text-xl">
-            <EmojiIcon emoji={style.icon} className="w-5 h-5" />
+            <EmojiIcon name={style.icon} className="w-5 h-5" />
           </span>
           <div className="flex-1">
             {title && <h4 className="font-semibold mb-1">{title}</h4>}
@@ -338,13 +338,13 @@ const COMPONENT_CONFIGS = {
     defaultProps: {
       title: "Card Title",
       description: "This is a description for the card component.",
-      image: "🎨",
+      image: "palette",
       footer: null,
     },
     propControls: [
       { name: "title", type: "text", label: "Title" },
       { name: "description", type: "text", label: "Description" },
-      { name: "image", type: "text", label: "Image Emoji" },
+      { name: "image", type: "text", label: "Icon Name" },
     ],
   },
   Badge: {

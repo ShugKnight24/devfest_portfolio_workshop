@@ -18,13 +18,17 @@
 
 import { useState } from "react";
 import { SkillBadge } from "../SkillBadge";
+import { EmojiIcon } from "@portfolio/icons/react";
 
 export const SkillsInteractive = ({ skills }) => {
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeLevel, setActiveLevel] = useState("all");
 
   // Get unique categories
-  const categories = ["all", ...new Set(skills.map((s) => s.category))];
+  const categories = [
+    "all",
+    ...new Set(skills.map((skill) => skill.category || "other")),
+  ];
   const levels = ["all", "beginner", "intermediate", "advanced"];
 
   // Filter skills based on active filters
@@ -36,11 +40,11 @@ export const SkillsInteractive = ({ skills }) => {
   });
 
   const categoryIcons = {
-    all: "🎯",
-    frontend: "🎨",
-    backend: "⚙️",
-    language: "💻",
-    tools: "🛠️",
+    all: "target",
+    frontend: "palette",
+    backend: "gear",
+    language: "laptop",
+    tools: "tools",
   };
 
   return (
@@ -60,15 +64,16 @@ export const SkillsInteractive = ({ skills }) => {
                 <button
                   key={category}
                   onClick={() => setActiveCategory(category)}
-                  className={`px-4 py-2 rounded-full font-medium transition-all duration-200 hover:cursor-pointer ${
+                  className={`px-4 py-2 rounded-full font-medium transition-all duration-200 hover:cursor-pointer inline-flex items-center gap-2 ${
                     activeCategory === category
                       ? "bg-(--color-primary) text-(--color-text-inverse) shadow-md scale-105"
                       : "bg-(--color-surface-highlight) text-(--color-text-secondary) hover:bg-(--color-border)"
                   }`}
                 >
-                  <span className="mr-2">
-                    {categoryIcons[category] || "📦"}
-                  </span>
+                  <EmojiIcon
+                    name={categoryIcons[category] || "box"}
+                    className="w-4 h-4"
+                  />
                   <span className="capitalize">{category}</span>
                 </button>
               ))}

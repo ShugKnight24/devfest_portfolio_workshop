@@ -64,10 +64,10 @@ export const AboutAnimated = ({ avatar, aboutImage, bio }) => {
   ];
 
   const highlights = [
-    { icon: "🎨", text: "Passionate about UI/UX" },
-    { icon: "⚡", text: "Performance enthusiast" },
-    { icon: "🌱", text: "Continuous learner" },
-    { icon: "🤝", text: "Team player" },
+    { icon: "palette", text: "Passionate about UI/UX" },
+    { icon: "lightning", text: "Performance enthusiast" },
+    { icon: "seedling", text: "Continuous learner" },
+    { icon: "handshake", text: "Team player" },
   ];
 
   return (
@@ -115,7 +115,7 @@ export const AboutAnimated = ({ avatar, aboutImage, bio }) => {
                   key={index}
                   className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
                 >
-                  <EmojiIcon emoji={highlight.icon} className="w-6 h-6 shrink-0 text-(--color-primary)" />
+                  <EmojiIcon name={highlight.icon} className="w-6 h-6 shrink-0 text-(--color-primary)" />
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     {highlight.text}
                   </span>
@@ -135,8 +135,9 @@ export const AboutAnimated = ({ avatar, aboutImage, bio }) => {
 
         {/* Journey Timeline */}
         <div className="mt-16">
-          <h3 className="text-2xl font-bold text-center mb-10 text-(--color-text) dark:text-(--color-textDark)">
-            My Journey 🚀
+          <h3 className="text-2xl font-bold text-center mb-10 text-(--color-text) dark:text-(--color-textDark) inline-flex items-center justify-center gap-2 w-full">
+            <span>My Journey</span>
+            <EmojiIcon name="rocket" className="w-6 h-6 text-(--color-primary)" />
           </h3>
 
           <div className="grid md:grid-cols-4 gap-6">

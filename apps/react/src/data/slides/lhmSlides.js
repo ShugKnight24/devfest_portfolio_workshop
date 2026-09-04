@@ -197,13 +197,13 @@ function reacherProtocol() {
       "Software Engineer & Founder @ Shumunov Solutions (Detroit, MI)",
       "Obsessed with web performance, developer sovereignty, and heavy deadlifts.",
       "Beyond the static portfolio: building bespoke software tools for an Audience of One.",
-      "github.com/shugknight24 • Datamoon.com",
+      "github.com/shugknight24",
     ],
     why: [
       "To teach developers how to replace passive resumes with sovereign, production-grade tools.",
       "To demonstrate surgical deduction before applying overwhelming force.",
     ],
-    jackpot: "😎 ¯\\_(ツ)_/¯ jackpot ¯\\_(ツ)_/¯ 😎",
+    jackpot: "¯\\_(ツ)_/¯ jackpot ¯\\_(ツ)_/¯ // VERIFIED",
     image: "/assets/images/shug_headshot.jpg",
     photoZoneText: "[ DROP PORTRAIT PHOTO HERE ]",
   },
@@ -227,5 +227,5 @@ export const lhmPresenterNotes = {
   process:
     "Emphasize the 3-step loop: Investigate, Deduce, Verify. The automated gate is non-negotiable.",
   bio:
-    "Wrap up with personal clearance profile, Datamoon link, and invite the room into the hands-on lab.",
+    "Wrap up with personal clearance profile, GitHub link, and invite the room into the hands-on lab.",
 };

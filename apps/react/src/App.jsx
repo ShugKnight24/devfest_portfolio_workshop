@@ -144,7 +144,7 @@ export const App = () => {
        */}
       <BrowserRouter>
         <TelemetryTracker />
-        <div className="font-sans antialiased text-gray-900 dark:text-gray-100">
+        <div className="font-sans antialiased text-(--color-text) dark:text-(--color-text-dark)">
           {/* Global Navigation for the Workshop */}
           <Navigation />
 

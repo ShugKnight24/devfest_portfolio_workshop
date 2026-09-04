@@ -68,10 +68,10 @@ export const Playground = ({
           {hints.length > 0 && (
             <button
               onClick={() => setShowHints(!showHints)}
-              className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 transition-colors"
+              className="px-4 py-2 bg-yellow-100 text-yellow-900 dark:bg-yellow-900/40 dark:text-yellow-200 font-medium rounded-lg hover:bg-yellow-200 dark:hover:bg-yellow-900/60 transition-colors inline-flex items-center gap-1.5"
             >
-              <EmojiIcon emoji="💡" className="w-4 h-4 inline" />{" "}
-              {showHints ? "Hide Hints" : "Show Hints"}
+              <EmojiIcon name="lightbulb" className="w-4 h-4" />
+              <span>{showHints ? "Hide Hints" : "Show Hints"}</span>
             </button>
           )}
         </div>

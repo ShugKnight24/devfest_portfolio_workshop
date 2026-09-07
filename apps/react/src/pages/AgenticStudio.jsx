@@ -147,6 +147,76 @@ Requirements:
 2. Real-time canvas drawing with auto-wrap text algorithm.
 3. HTML5 Canvas rendering engine that generates 1080x1080 social quote cards with downloadable PNG button.
 4. Color theme switcher for the social cards (Cyberpunk Dark, Clean Minimalist, Editorial Serif).`
+  },
+  {
+    id: "reacher-checkout",
+    title: "The Reacher Framework: Local High-Frequency Cart (next_shopping_cart)",
+    category: "E-Commerce & Performance",
+    tier: ["student", "experienced", "architect"],
+    description: "Speed via Deduction. Eliminate bloated Shopify backends and 45 tracking scripts. State, items, total: a localized, high-frequency checkout engine.",
+    tech: "React 19 + Tailwind CSS + LocalStorage",
+    scaffold: "npx create-vite next-cart --template react && cd next-cart && npm i lucide-react",
+    spec: `## Goal
+Build a zero-bloat, localized high-frequency shopping cart engine engineered for sub-millisecond mobile checkout.
+
+## Key Deductions
+- What is a cart? State, items, total. Eliminate 45 third-party tracking scripts and bulky SaaS middleware.
+- 100% offline-resilient: localStorage state sync, instant quantity toggles, and pure pure function totals.
+- Zero NPM bloat: 100 Lighthouse performance on mobile devices.`,
+    prompt: `Execute the Reacher Protocol on an e-commerce cart.
+I need a zero-bloat, high-frequency localized checkout component called "HighFrequencyCart".
+Requirements:
+1. Pure state management for cart items: { id, title, price, quantity, sku }.
+2. Sub-millisecond totals computation including discount codes and local tax deductions.
+3. Offline-first: syncs seamlessly with localStorage with zero external cloud dependencies.
+4. Brutalist, high-contrast dark theme with neon cyan borders and instantaneous keyboard navigation.
+5. Constraints: Output diff only, zero civilian apologies.`
+  },
+  {
+    id: "chainsaw-canvas",
+    title: "The Chainsaw Ripcord: Live Vibe-Coding Canvas (devfest_portfolio_workshop)",
+    category: "Rapid Prototyping & Live Demos",
+    tier: ["novice", "student", "experienced", "architect"],
+    description: "Speed via Momentum. A living sandbox canvas. Pull the ripcord on chaos, dump audience prompts into the engine, and curate live in 8 seconds.",
+    tech: "React 19 + Tailwind v4 + Component Switcher",
+    scaffold: "npx create-vite live-canvas --template react && cd live-canvas",
+    spec: `## Goal
+Build a dynamic living canvas that allows instant live mutation of UI components during a conference demo.
+
+## Key Momentum Rules
+- Denji Ripcord: Do not whiteboard for 3 weeks. Pull the cord and synthesize live.
+- Component Isolation: Data is pure; visual variants hot-swap instantaneously without page reload.
+- Resilient Error Boundary: Never white-screen if audience prompt is chaotic.`,
+    prompt: `Execute the Chainsaw Man Ripcord.
+Build a living canvas sandbox component called "LiveVibeCanvas".
+Requirements:
+1. Dynamic component variant switcher that hot-swaps Hero, Bio, and Project card layouts.
+2. Live interactive prompt input allowing instant theme and layout mutations.
+3. Wrapped in a resilient Error Boundary with "SYSTEM OFFLINE: CHECK YOUR CODE" fallback.
+4. Fluid CSS clamp() typography scaling seamlessly from 320px mobile to 4K monitor.`
+  },
+  {
+    id: "iron-timer",
+    title: "The Iron Micro-Loop: Isolated State Focus Timer (pomidor)",
+    category: "Audience of One & Productivity",
+    tier: ["student", "experienced", "architect"],
+    description: "Speed via Form & Architecture. An Audience of One app with strict state machine boundaries isolated from the UI, enabling instant precision AI targeting.",
+    tech: "React 19 + Custom State Reducer + Web Audio API",
+    scaffold: "npx create-vite pomidor --template react && cd pomidor",
+    spec: `## Goal
+Build an Audience of One productivity micro-loop (Pomidor) with strict mind-muscle form check and state machine isolation.
+
+## Architectural Boundaries
+- Strict State Machine: Decouple timer logic, work/break phases, and notification side effects from React rendering.
+- When you want to modify timer behavior, the AI knows exactly what muscle to target without touching UI code.
+- Pure Web Audio API synthesis for chimes (no audio file dependencies).`,
+    prompt: `Execute The Iron Protocol.
+Build a distraction-free Pomodoro micro-loop called "PomidorFocusEngine".
+Requirements:
+1. Decoupled state machine: { phase: 'work'|'short_break'|'long_break', remainingSeconds, isRunning, cyclesCompleted }.
+2. Web Audio API parametric oscillator beep on phase transition (zero mp3 assets).
+3. Minimalist brutalist display: huge fluid font countdown with keyboard shortcuts (Space to toggle, R to reset).
+4. Strict architectural isolation: state reducer in one module, UI renderer in another.`
   }
 ];
 
@@ -453,6 +523,16 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
             }`}
           >
             <EmojiIcon name="check" className="w-4 h-4 text-emerald-400" /> 4. Automated Gates Playground
+          </button>
+          <button
+            onClick={() => setActiveTab("speed-frameworks")}
+            className={`pb-4 text-sm font-bold font-mono tracking-wide transition-all border-b-2 flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+              activeTab === "speed-frameworks"
+                ? "border-amber-500 text-amber-400"
+                : "border-transparent text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark)"
+            }`}
+          >
+            <EmojiIcon name="lightning" className="w-4 h-4 text-amber-400" /> 5. Speed of Thought &amp; Stage Tactics
           </button>
         </div>
 
@@ -988,6 +1068,200 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                 <h4 className="text-sm font-bold text-(--color-text) dark:text-(--color-text-dark) mb-1">Edge Release</h4>
                 <div className="p-2 rounded bg-(--color-background) dark:bg-(--color-dark)/90 text-[11px] font-mono text-(--color-text) dark:text-(--color-text-dark) border border-(--color-border) dark:border-(--color-border-dark) min-h-[48px]">
                   {gateStep >= 4 ? currentGate.deploy : "Waiting..."}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 5: SPEED OF THOUGHT & STAGE TACTICS */}
+        {activeTab === "speed-frameworks" && (
+          <div className="space-y-10 animate-fade-in">
+            {/* Header Banner */}
+            <div className="p-8 rounded-3xl bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-cyan-500/10 border border-amber-500/30 backdrop-blur-xl">
+              <div className="max-w-3xl space-y-3">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-mono uppercase tracking-widest border border-amber-500/40">
+                  <EmojiIcon name="lightning" className="w-3.5 h-3.5" /> Keynote Engine • Live Stage Sovereignty
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black text-(--color-text) dark:text-(--color-text-dark) uppercase font-sans">
+                  The 3 "Speed of Thought" Frameworks
+                </h2>
+                <p className="text-sm md:text-base text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
+                  When you pull up your repositories on stage or build Audience of One apps, frame your work using these three analogies.
+                  Coding at the speed of thought isn't about typing fast—it is about eliminating civilian noise, riding momentum, and enforcing strict architectural boundaries.
+                </p>
+              </div>
+            </div>
+
+            {/* The 3 Frameworks Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Framework 1: Reacher */}
+              <div className="p-6 rounded-2xl bg-(--color-surface) dark:bg-(--color-surface-dark)/80 border border-cyan-500/40 backdrop-blur-md flex flex-col justify-between shadow-xl">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono font-bold uppercase px-2.5 py-1 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
+                      Framework 01
+                    </span>
+                    <span className="text-xs font-mono text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
+                      next_shopping_cart
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold text-(--color-text) dark:text-(--color-text-dark)">
+                    The Reacher Framework
+                  </h3>
+                  <div className="text-xs font-mono text-cyan-400 font-semibold">
+                    Speed via Deduction
+                  </div>
+                  <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
+                    <strong>The Angle:</strong> Reacher carries zero baggage. He looks at a crime scene and sees only root cause.
+                  </p>
+                  <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
+                    <strong>The Application:</strong> Speed comes from eliminating noise. Stop talking like a civilian. Investigator prompts isolate state, items, and totals without 45 tracking scripts.
+                  </p>
+                  <div className="p-3 bg-black/60 rounded-xl border border-gray-800 text-[11px] font-mono text-gray-300">
+                    <code>// Reacher Protocol: Zero NPM Bloat{"\n"}const cart = &#123; state, items, total &#125;;</code>
+                  </div>
+                </div>
+                <div className="pt-4 mt-4 border-t border-(--color-border) dark:border-(--color-border-dark)">
+                  <CopyButton
+                    text={`Execute Reacher Protocol on e-commerce cart. Target: zero-bloat localized checkout. Constraints: Vanilla JS/Tailwind, zero external dependencies, output diff only.`}
+                    label="Copy Reacher Prompt"
+                    className="w-full justify-center"
+                  />
+                </div>
+              </div>
+
+              {/* Framework 2: Chainsaw Man */}
+              <div className="p-6 rounded-2xl bg-(--color-surface) dark:bg-(--color-surface-dark)/80 border border-red-500/40 backdrop-blur-md flex flex-col justify-between shadow-xl">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono font-bold uppercase px-2.5 py-1 rounded bg-red-500/20 text-red-400 border border-red-500/40">
+                      Framework 02
+                    </span>
+                    <span className="text-xs font-mono text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
+                      devfest_portfolio_workshop
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold text-(--color-text) dark:text-(--color-text-dark)">
+                    The Chainsaw Man Framework
+                  </h3>
+                  <div className="text-xs font-mono text-red-400 font-semibold">
+                    Speed via Momentum
+                  </div>
+                  <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
+                    <strong>The Angle:</strong> Denji doesn't whiteboard a fight for three weeks. He pulls the cord and adapts in real time.
+                  </p>
+                  <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
+                    <strong>The Application:</strong> Vibe coding. Asking the audience for an idea, dumping it into the engine, and letting taste curate 500 lines of fast working code.
+                  </p>
+                  <div className="p-3 bg-black/60 rounded-xl border border-gray-800 text-[11px] font-mono text-gray-300">
+                    <code>// The Ripcord: Living Canvas{"\n"}promptEngine(audienceChaos) -&gt; 8s UI</code>
+                  </div>
+                </div>
+                <div className="pt-4 mt-4 border-t border-(--color-border) dark:border-(--color-border-dark)">
+                  <CopyButton
+                    text={`Execute Chainsaw Ripcord. Living canvas mode: Transform this header into a high-contrast cyberpunk terminal layout with animated scanlines. Render in 10 seconds.`}
+                    label="Copy Ripcord Prompt"
+                    className="w-full justify-center"
+                  />
+                </div>
+              </div>
+
+              {/* Framework 3: The Iron */}
+              <div className="p-6 rounded-2xl bg-(--color-surface) dark:bg-(--color-surface-dark)/80 border border-amber-500/40 backdrop-blur-md flex flex-col justify-between shadow-xl">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono font-bold uppercase px-2.5 py-1 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40">
+                      Framework 03
+                    </span>
+                    <span className="text-xs font-mono text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
+                      pomidor
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold text-(--color-text) dark:text-(--color-text-dark)">
+                    The Iron Framework
+                  </h3>
+                  <div className="text-xs font-mono text-amber-400 font-semibold">
+                    Speed via Form &amp; Architecture
+                  </div>
+                  <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
+                    <strong>The Angle:</strong> You can only lift heavy and fast when mind-muscle connection and form are flawless.
+                  </p>
+                  <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
+                    <strong>The Application:</strong> Strict isolation sets. Decouple state machines from UI components so the AI knows exactly what muscle to target when modifying logic.
+                  </p>
+                  <div className="p-3 bg-black/60 rounded-xl border border-gray-800 text-[11px] font-mono text-gray-300">
+                    <code>// Strict Isolation Set: State != UI{"\n"}const [state, send] = useMachine(timer);</code>
+                  </div>
+                </div>
+                <div className="pt-4 mt-4 border-t border-(--color-border) dark:border-(--color-border-dark)">
+                  <CopyButton
+                    text={`Execute The Iron Protocol. Build an isolated focus state machine in Pomidor. Decouple timer transitions from React rendering. Spot me on the form.`}
+                    label="Copy Iron Prompt"
+                    className="w-full justify-center"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Stage Tactics: Weaponize The Live Demo */}
+            <div className="space-y-6">
+              <div className="text-center space-y-2 max-w-2xl mx-auto">
+                <h3 className="text-2xl font-black text-(--color-text) dark:text-(--color-text-dark) uppercase font-sans">
+                  "Show, Don't Tell" Stage Tactics
+                </h3>
+                <p className="text-xs md:text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
+                  Do not show screenshots on stage. Weaponize the live demo with these 3 battlefield maneuvers:
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Tactic 1 */}
+                <div className="p-6 rounded-2xl bg-(--color-surface) dark:bg-(--color-surface-dark)/60 border border-(--color-border) dark:border-(--color-border-dark) space-y-4">
+                  <div className="flex items-center gap-2 text-amber-400 font-mono text-xs font-bold uppercase">
+                    <EmojiIcon name="flame" className="w-4 h-4" /> Tactic 01 • The 60s Feature
+                  </div>
+                  <h4 className="text-base font-bold text-(--color-text) dark:text-(--color-text-dark)">
+                    The Denji Ripcord Live
+                  </h4>
+                  <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
+                    Open the <code>pomidor</code> repo. Ask the room: <em>"Give me a wild condition when the timer hits zero!"</em> (e.g., "Flash magenta and shake the viewport!"). Speak it out loud. Compile and render live in under 60 seconds.
+                  </p>
+                  <div className="p-3 bg-black/60 rounded-xl border border-gray-800 text-[11px] font-mono text-cyan-300">
+                    &gt; "On timer zero: flash viewport magenta and trigger CSS screen shake."
+                  </div>
+                </div>
+
+                {/* Tactic 2 */}
+                <div className="p-6 rounded-2xl bg-(--color-surface) dark:bg-(--color-surface-dark)/60 border border-(--color-border) dark:border-(--color-border-dark) space-y-4">
+                  <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs font-bold uppercase">
+                    <EmojiIcon name="eye" className="w-4 h-4" /> Tactic 02 • Visual Teardown
+                  </div>
+                  <h4 className="text-base font-bold text-(--color-text) dark:text-(--color-text-dark)">
+                    The Reacher Deduction
+                  </h4>
+                  <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
+                    Take a screenshot of a bloated enterprise SaaS UI. Drop it into your agent tool on stage. Prompt: <em>"Strip the bloat. Rebuild this UI in Tailwind using only 3 colors."</em> Watch clean, semantic code emerge.
+                  </p>
+                  <div className="p-3 bg-black/60 rounded-xl border border-gray-800 text-[11px] font-mono text-cyan-300">
+                    &gt; "Strip bloat. 3 colors max. Tailwind v4 only. Eliminate all div soup."
+                  </div>
+                </div>
+
+                {/* Tactic 3 */}
+                <div className="p-6 rounded-2xl bg-(--color-surface) dark:bg-(--color-surface-dark)/60 border border-(--color-border) dark:border-(--color-border-dark) space-y-4">
+                  <div className="flex items-center gap-2 text-emerald-400 font-mono text-xs font-bold uppercase">
+                    <EmojiIcon name="hammer" className="w-4 h-4" /> Tactic 03 • The Intentional Snap
+                  </div>
+                  <h4 className="text-base font-bold text-(--color-text) dark:text-(--color-text-dark)">
+                    The Iron Form Check
+                  </h4>
+                  <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
+                    Intentionally break <code>next_shopping_cart</code> (invert the total calculation). Show the error. Speak a single prompt: <em>"The cart state is inverted. Deduce root cause and apply strict fix."</em> Watch instant forensic healing.
+                  </p>
+                  <div className="p-3 bg-black/60 rounded-xl border border-gray-800 text-[11px] font-mono text-cyan-300">
+                    &gt; "Cart state inverted. Deduce root cause from stack trace. Output diff only."
+                  </div>
                 </div>
               </div>
             </div>

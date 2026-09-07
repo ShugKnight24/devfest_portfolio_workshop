@@ -49,6 +49,38 @@ export const combinedSlides = [
     notes: combinedPresenterNotes[0],
   },
   {
+    id: "combined-speed-frameworks",
+    type: "process",
+    phase: "Prologue // The 3 Frameworks",
+    subtitle: "CODING AT THE SPEED OF THOUGHT",
+    title: "The 3 Speed Frameworks",
+    quote: "Speed comes from deductive isolation, live momentum, and strict architectural form.",
+    stages: [
+      {
+        num: "01",
+        name: "The Reacher Framework",
+        detail:
+          "Speed via Deduction. Zero baggage. Eliminate noise. Look at the problem and see only the root cause. Strip 45 tracking scripts for high-frequency localized checkout (next_shopping_cart / Criminal Cookies).",
+        rule: "Deductive Investigator",
+      },
+      {
+        num: "02",
+        name: "The Chainsaw Framework",
+        detail:
+          "Speed via Momentum. Don't whiteboard for three weeks. Pull the cord and adapt in real time. Living canvas sandbox: from audience prompt to live rendered UI in 8 seconds (devfest_portfolio_workshop).",
+        rule: "Denji Ripcord",
+      },
+      {
+        num: "03",
+        name: "The Iron Framework",
+        detail:
+          "Speed via Form & Architecture. Lift heavy and fast only with flawless mind-muscle connection. Strict isolation sets: state machine decoupled from UI for surgical AI targeting (pomidor / Pomodoro).",
+        rule: "Isolation Sets",
+      },
+    ],
+    notes: "NOTES: Frame the entire talk around these 3 Speed of Thought analogies. Reacher (deduction), Chainsaw Man (momentum), and The Iron (architectural form).",
+  },
+  {
     id: "combined-02",
     type: "comparison",
     phase: "Act I // Token Economics",
@@ -278,6 +310,38 @@ export const combinedSlides = [
       },
     ],
     notes: combinedPresenterNotes[10],
+  },
+  {
+    id: "combined-stage-tactics",
+    type: "process",
+    phase: "Interlude // Live Demonstration",
+    subtitle: "SHOW, DON'T TELL",
+    title: "Stage Tactics: Weaponize The Live Demo",
+    quote: "Never show static screenshots. Drop jaws by building, deducing, and healing live on stage.",
+    stages: [
+      {
+        num: "TACTIC 1",
+        name: "The 60-Second Feature",
+        detail:
+          "The Denji Ripcord: Open pomidor live. Ask audience: 'Give me a wild condition when the timer hits zero!' (e.g. flash screen magenta). Speak prompt out loud. Build and render in < 60s.",
+        rule: "Denji Ripcord Live",
+      },
+      {
+        num: "TACTIC 2",
+        name: "The Visual Teardown",
+        detail:
+          "The Reacher Deduction: Paste a bloated legacy enterprise dashboard screenshot into the AI. Prompt: 'Strip the bloat. Rebuild this UI in Tailwind using only 3 colors.' Watch clean code emerge.",
+        rule: "Reacher Teardown",
+      },
+      {
+        num: "TACTIC 3",
+        name: "The Intentional Snap",
+        detail:
+          "The Iron Form Check: Intentionally break next_shopping_cart calculations. Voice command: 'Cart state inverted. Deduce root cause and apply strict fix.' Watch instant forensic healing.",
+        rule: "Iron Form Check",
+      },
+    ],
+    notes: "NOTES: Stage Tactics. Transition from slides to terminal/browser live. Execute the 60-second feature or intentional snap to prove speed of thought.",
   },
   {
     id: "combined-12",

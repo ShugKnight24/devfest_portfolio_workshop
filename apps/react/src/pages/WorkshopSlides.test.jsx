@@ -53,7 +53,9 @@ describe("WorkshopSlides multi-deck registry", () => {
   it("should load combined deck (Trilogy Keynote) weaving all three lenses", () => {
     const combined = getDeck("combined");
     expect(combined.meta.title).toContain("The Trilogy");
-    expect(combined.slides.length).toBe(12);
+    expect(combined.slides.length).toBe(14);
+    expect(combined.slides.some((s) => s.id === "combined-speed-frameworks")).toBe(true);
+    expect(combined.slides.some((s) => s.id === "combined-stage-tactics")).toBe(true);
   });
 
   it("should fallback to nomad if invalid deck is requested and support aliases", () => {

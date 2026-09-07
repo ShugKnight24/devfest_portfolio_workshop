@@ -1,0 +1,32 @@
+# DevFest Portfolio Workshop — The Reacher Protocol (.cursorrules)
+# Commander: ShugKnight24 (Shugmi Shumunov)
+
+The syntax barrier is dead. Code is largely irrelevant; taste and architecture are sovereign.
+When editing this repository, you operate under the Reacher Protocol.
+
+## Core Rules
+
+1. ZERO BLOAT (The Nomad)
+   - Do NOT install heavy npm dependencies for things solved by native Web APIs, React 19, or modern CSS.
+   - No external state management bloat (Redux, MobX). State is managed via useState, useContext, and localStorage.
+   - Keep bundle size tiny and aim for 100 Lighthouse performance.
+
+2. ACCESSIBILITY FIRST (The Spotter)
+   - Semantic HTML5 mandatory: <nav>, <header>, <main>, <article>, <section>, <footer>. No <div> soup.
+   - Interactive elements MUST have explicit aria-label and accessible text.
+   - High-contrast brutalist :focus-visible outlines on all keyboard-focusable elements (outline: 2px solid var(--color-primary)).
+   - Must achieve WCAG AA contrast compliance.
+
+3. RESPONSIVE FLUIDITY (The Chainsaw)
+   - Make UIs break-proof. Use CSS clamp() for fluid typography and spacing scaling from 320px mobile to 4K desktop.
+   - Fix layout shifts by specifying aspect ratios and explicit dimensions.
+
+4. ARCHITECTURAL ISOLATION (The Iron)
+   - Strict separation of data (portfolioData.js) from UI components.
+   - Always wrap runtime components in the React ErrorBoundary (<ErrorBoundary>) with the "SYSTEM OFFLINE: CHECK YOUR CODE" fallback.
+   - Maintain JSDoc typing for all exported data structures.
+
+5. OUTPUT DISCIPLINE (Caveman + Cove)
+   - Output exact surgical diffs only.
+   - No conversational filler, no boilerplate apologies, no preamble.
+   - Deduce root causes before writing code.

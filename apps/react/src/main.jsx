@@ -40,18 +40,22 @@ import { QuizProvider } from "./components/QuizSystem";
  * QuizProvider enables interactive quizzes with progress tracking.
  * React.StrictMode is a wrapper that helps identify potential problems in our application during development. It activates additional checks and warnings for its descendants.
  */
+import { ErrorBoundary } from "./components/ErrorBoundary";
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <ThemeProvider>
-      <ToastProvider>
-        <AchievementProvider>
-          <ChallengeProvider>
-            <QuizProvider>
-              <App />
-            </QuizProvider>
-          </ChallengeProvider>
-        </AchievementProvider>
-      </ToastProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <ToastProvider>
+          <AchievementProvider>
+            <ChallengeProvider>
+              <QuizProvider>
+                <App />
+              </QuizProvider>
+            </ChallengeProvider>
+          </AchievementProvider>
+        </ToastProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );

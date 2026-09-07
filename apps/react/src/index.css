@@ -24,6 +24,35 @@
     --color-primary-text: #020304;
   }
 
+  /* Brutalist High-Contrast Keyboard Focus Visible Outline (WCAG AA Sovereignty) */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 4px rgba(0, 255, 204, 0.25);
+  }
+
+  /* Accessible Skip to Main Content Link */
+  .skip-link {
+    position: absolute;
+    top: -9999px;
+    left: 1rem;
+    z-index: 9999;
+    padding: 0.75rem 1.25rem;
+    background-color: var(--color-primary);
+    color: var(--color-primary-text);
+    font-weight: 800;
+    border-radius: 0.5rem;
+    text-transform: uppercase;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+    box-shadow: 0 0 25px rgba(0, 255, 204, 0.6);
+    transition: top 200ms ease;
+  }
+  .skip-link:focus {
+    top: 1rem;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-text);
@@ -43,7 +72,9 @@
   }
 
   .section-title {
-    @apply text-3xl font-bold mb-8 text-center;
+    font-size: clamp(1.75rem, 3vw + 0.75rem, 3.25rem);
+    line-height: 1.15;
+    @apply font-bold mb-8 text-center tracking-tight;
     color: var(--color-text);
   }
   .dark .section-title {
@@ -144,5 +175,31 @@
 
   .delay-2000 {
     animation-delay: 2s;
+  }
+
+  /* Fluid Typography Scaling via CSS clamp() */
+  .text-fluid-hero {
+    font-size: clamp(2.25rem, 5vw + 1rem, 5.5rem);
+    line-height: 1.05;
+  }
+
+  .text-fluid-title {
+    font-size: clamp(1.75rem, 3.2vw + 0.75rem, 3.25rem);
+    line-height: 1.15;
+  }
+
+  .text-fluid-subtitle {
+    font-size: clamp(1.15rem, 2vw + 0.4rem, 2rem);
+    line-height: 1.25;
+  }
+
+  .text-fluid-body {
+    font-size: clamp(0.95rem, 1vw + 0.4rem, 1.25rem);
+    line-height: 1.6;
+  }
+
+  .text-fluid-code {
+    font-size: clamp(0.8rem, 0.8vw + 0.3rem, 1rem);
+    line-height: 1.5;
   }
 }

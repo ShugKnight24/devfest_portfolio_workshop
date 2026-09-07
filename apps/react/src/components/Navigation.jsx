@@ -484,6 +484,8 @@ export const Navigation = () => {
                         : "text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark)"
                     }`}
                     aria-expanded={isOpen}
+                    aria-haspopup="true"
+                    aria-label={`${group.label} navigation menu`}
                   >
                     <span>{group.label}</span>
                     <ChevronDown

@@ -71,8 +71,8 @@ export const AboutAnimated = ({ avatar, aboutImage, bio }) => {
   ];
 
   return (
-    <section className="section-container bg-(--color-background) dark:bg-(--color-dark)">
-      <h2 className="section-title text-(--color-primary)">About Me</h2>
+    <section id="about" aria-labelledby="about-heading" className="section-container bg-(--color-background) dark:bg-(--color-dark)">
+      <h2 id="about-heading" className="section-title text-(--color-primary)">About Me</h2>
 
       <div className="max-w-6xl mx-auto">
         {/* Main About Section */}
@@ -103,7 +103,7 @@ export const AboutAnimated = ({ avatar, aboutImage, bio }) => {
               <span className="inline-flex items-center px-4 py-2 bg-(--color-primary)/10 text-(--color-primary) rounded-full text-sm font-semibold mb-4">
                 <EmojiIcon name="wave" className="w-4 h-4 inline-block mr-1.5" /> Hello!
               </span>
-              <p className="text-xl text-(--color-text) dark:text-(--color-textDark) leading-relaxed mb-4">
+              <p className="text-xl text-(--color-text) dark:text-(--color-text-dark) leading-relaxed mb-4">
                 {bio}
               </p>
             </div>

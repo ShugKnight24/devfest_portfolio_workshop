@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { EmojiIcon } from "../components/Icons/EmojiIcon";
+import { InteractiveLearningScene } from "../components/InteractiveLearningScene";
 
 export const LandingPage = () => {
   const courses = [
@@ -106,6 +107,9 @@ export const LandingPage = () => {
             </Link>
           </div>
         </div>
+
+        {/* Interactive Animated Learning Centerpiece */}
+        <InteractiveLearningScene />
 
         {/* Quick Platform Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-8 bg-(--color-surface)/70 dark:bg-(--color-surface-dark)/70 border border-(--color-border) dark:border-(--color-border-dark) rounded-2xl backdrop-blur-md shadow-sm">

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { EmojiIcon } from "./Icons/EmojiIcon";
+import { SpeakerOff, SpeakerOn } from "./Icons";
 import StudentBuildingScene from "./StudentBuildingScene";
 
 /**
@@ -20,7 +21,8 @@ const MODES = {
     color: "from-pink-500 to-cyan-400",
     accent: "#ff0055",
     glow: "rgba(255, 0, 85, 0.25)",
-    tag: "⚡ Speed via Momentum",
+    tagIcon: "lightning",
+    tag: "Speed via Momentum",
     tagline: "Don't let perfection stall your momentum. Pull the ripcord and build live.",
     audioTone: 520,
   },
@@ -31,7 +33,8 @@ const MODES = {
     color: "from-cyan-400 to-blue-500",
     accent: "#00e5ff",
     glow: "rgba(0, 229, 255, 0.25)",
-    tag: "🔍 Speed via Deduction",
+    tagIcon: "search",
+    tag: "Speed via Deduction",
     tagline: "Cut the civilian noise. Isolate root causes and master the fundamental core.",
     audioTone: 440,
   },
@@ -42,7 +45,8 @@ const MODES = {
     color: "from-amber-400 to-red-500",
     accent: "#f59e0b",
     glow: "rgba(245, 158, 11, 0.25)",
-    tag: "🏋️ Speed via Form",
+    tagIcon: "dumbbell",
+    tag: "Speed via Form",
     tagline: "Every tricky bug conquered builds permanent mental muscle. Strict form wins.",
     audioTone: 330,
   },
@@ -81,6 +85,18 @@ const DREAMS = [
     link: "/guide",
     icon: "sparkles",
   },
+];
+
+// Celebration particles: SVG icon names plus literal code-syntax fragments
+const PARTICLE_SYMBOLS = [
+  { icon: "lightning" },
+  { icon: "sparkles" },
+  { text: "</>" },
+  { text: "{}" },
+  { text: "=>" },
+  { icon: "trophy" },
+  { icon: "lightbulb" },
+  { icon: "brain" },
 ];
 
 const DEV_TRUTHS = [
@@ -155,12 +171,12 @@ export const InteractiveLearningScene = () => {
     playBeep(currentMode.audioTone, "triangle", 0.12);
 
     // Spawn floating celebration symbol
-    const symbols = ["⚡", "✨", "</>", "{}", "=>", "🚀", "💡", "🧠"];
-    const sym = symbols[Math.floor(Math.random() * symbols.length)];
+    const sym =
+      PARTICLE_SYMBOLS[Math.floor(Math.random() * PARTICLE_SYMBOLS.length)];
     const particleId = Date.now() + Math.random();
     const newParticle = {
       id: particleId,
-      symbol: sym,
+      ...sym,
       x: Math.floor(Math.random() * 60) + 20, // percentage
     };
     setFloatingParticles((prev) => [...prev.slice(-6), newParticle]);
@@ -189,7 +205,7 @@ export const InteractiveLearningScene = () => {
         {floatingParticles.map((p) => (
           <div
             key={p.id}
-            className="absolute text-lg font-mono font-bold animate-bounce transition-all duration-1000"
+            className="absolute flex items-center gap-1.5 text-lg font-mono font-bold animate-bounce transition-all duration-1000"
             style={{
               left: `${p.x}%`,
               bottom: "35%",
@@ -198,7 +214,12 @@ export const InteractiveLearningScene = () => {
               textShadow: `0 0 10px ${currentMode.accent}`,
             }}
           >
-            {p.symbol} +15 XP
+            {p.icon ? (
+              <EmojiIcon name={p.icon} className="w-5 h-5 shrink-0" />
+            ) : (
+              <span>{p.text}</span>
+            )}
+            <span>+15 XP</span>
           </div>
         ))}
       </div>
@@ -232,7 +253,7 @@ export const InteractiveLearningScene = () => {
         {/* Live Badges: XP, Streak, Audio */}
         <div className="flex items-center gap-3">
           <div className="px-3 py-1.5 rounded-xl bg-black/40 border border-gray-800 text-xs font-mono flex items-center gap-1.5 text-amber-400 shadow-inner">
-            <EmojiIcon name="flame" className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <EmojiIcon name="fire" className="w-3.5 h-3.5 text-amber-400 shrink-0" />
             <span>{streak} Day Streak</span>
           </div>
 
@@ -255,15 +276,21 @@ export const InteractiveLearningScene = () => {
             title={soundEnabled ? "Audio Effects Active" : "Enable Sound FX"}
             aria-label={soundEnabled ? "Sound enabled" : "Sound disabled"}
           >
-            <span>{soundEnabled ? "🔊 Sound: On" : "🔈 Sound: Off"}</span>
+            {soundEnabled ? (
+              <SpeakerOn className="w-3.5 h-3.5 shrink-0" />
+            ) : (
+              <SpeakerOff className="w-3.5 h-3.5 shrink-0" />
+            )}
+            <span>{soundEnabled ? "Sound: On" : "Sound: Off"}</span>
           </button>
         </div>
       </div>
 
       {/* Milestone Alert Banner */}
       {bannerNotice && (
-        <div className="bg-gradient-to-r from-purple-600 to-cyan-500 text-white text-xs font-mono font-bold text-center py-2 px-4 animate-fade-in relative z-20">
-          ✨ {bannerNotice}
+        <div className="bg-gradient-to-r from-purple-600 to-cyan-500 text-white text-xs font-mono font-bold text-center py-2 px-4 animate-fade-in relative z-20 flex items-center justify-center gap-2">
+          <EmojiIcon name="sparkles" className="w-4 h-4 shrink-0" />
+          <span>{bannerNotice}</span>
         </div>
       )}
 
@@ -281,7 +308,10 @@ export const InteractiveLearningScene = () => {
                 color: currentMode.accent,
               }}
             >
-              {currentMode.tag}
+              <span className="inline-flex items-center gap-1.5">
+                <EmojiIcon name={currentMode.tagIcon} className="w-3.5 h-3.5 shrink-0" />
+                {currentMode.tag}
+              </span>
             </span>
           </div>
 

@@ -1,4 +1,35 @@
 export const themes = {
+  // === THE SIGNATURE THEME ===
+  // Reacher's tactical precision fused with Chainsaw Man's visceral energy.
+  // Cyan is deduction: cold, exact, the read before the strike. Gold is Pochita.
+  // Crimson is overwhelming force. The canvas is obsidian with a blood
+  // undertone rather than clinical black, so it reads as a devil's dark, not a
+  // dashboard's. Every token is hand-authored and verified against WCAG AA —
+  // see tokens.test.js.
+  reacherChainsaw: {
+    name: "Reacher \u00d7 Chainsaw",
+    description: "Tactical deduction meets devil-hunter momentum. The house palette.",
+    colors: {
+      primary: "#00F0C0", // Tactical cyan-teal — deduction, precision
+      secondary: "#F0A830", // Pochita gold — the little devil dog
+      accent: "#FF1744", // Chainsaw blood crimson — overwhelming force
+      background: "#F4EFE8", // Bone/cream, Chainsaw Man's paper stock
+      dark: "#0A0509", // Obsidian with a blood undertone
+      surface: "#FFFDFA",
+      surfaceDark: "#140B12", // Faint plum-blood lift off the canvas
+      surfaceHover: "#F0E9E0",
+      surfaceHoverDark: "#1E1019",
+      border: "#D8CEC2",
+      borderDark: "#2A1A24",
+      borderSubtle: "#00F0C026",
+      text: "#1A1418", // Warm charcoal, not pure black
+      textDark: "#FFFFFF",
+      mutedText: "#5E5158",
+      mutedTextDark: "#A89BA4", // Warm steel grey
+      primaryText: "#05100D",
+    },
+  },
+
   // === THE REACHER PROTOCOL ===
   reacher: {
     name: "Reacher Protocol",
@@ -518,17 +549,18 @@ export const themes = {
   },
 };
 
-export const defaultTheme = "reacher";
+export const defaultTheme = "reacherChainsaw";
 
 // Theme categories for the theme switcher UI
 export const themeCategories = {
   tactical: {
     name: "Tactical & Keynote",
-    themes: ["reacher", "chainsawDark"],
+    themes: ["reacherChainsaw", "reacher", "chainsawDark"],
   },
   anime: {
     name: "Anime Inspired",
     themes: [
+      "reacherChainsaw",
       "pochita",
       "chainsaw",
       "chainsawDark",

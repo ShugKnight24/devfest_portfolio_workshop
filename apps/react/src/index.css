@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./styles/stage.css";
 
 /* Define the dark mode variant explicitly for v4 */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -22,6 +23,41 @@
     --color-muted-text: #64748B;
     --color-muted-text-dark: #94A3B8;
     --color-primary-text: #020304;
+
+    /*
+     * Semantic aliases.
+     *
+     * 140 references across ~30 components use these four names, but nothing
+     * ever defined them. An undefined custom property makes `color` compute to
+     * `unset`, which for colour means INHERIT — so those elements silently
+     * inherited white and rendered white-on-white. That is why /builder,
+     * /showcase and /whats-next measured around 1.02:1.
+     *
+     * They are aliases rather than new values so they inherit the contrast
+     * guarantees the theme resolver already enforces, and they are redeclared
+     * under .dark below so they flip with the mode without every call site
+     * needing a `dark:` variant.
+     */
+    /* Brand primary, chosen per mode — see ThemeContext. The dark-tuned cyan
+       measures ~1.3:1 as text on the light canvas, so light mode gets the
+       darker variant the resolver computed for exactly this. */
+    --color-primary: var(--brand-primary-light, #00a383);
+    --color-primary-text: var(--brand-primary-text-light, #ffffff);
+
+    --color-text-primary: var(--color-text);
+    --color-text-secondary: var(--color-muted-text);
+    --color-text-inverse: var(--color-primary-text);
+    --color-surface-highlight: var(--color-surface-hover);
+  }
+
+  .dark {
+    --color-primary: var(--brand-primary-dark, #00F0C0);
+    --color-primary-text: var(--brand-primary-text-dark, #05100D);
+
+    --color-text-primary: var(--color-text-dark);
+    --color-text-secondary: var(--color-muted-text-dark);
+    --color-text-inverse: var(--color-primary-text);
+    --color-surface-highlight: var(--color-surface-hover-dark);
   }
 
   /* Brutalist High-Contrast Keyboard Focus Visible Outline (WCAG AA Sovereignty) */

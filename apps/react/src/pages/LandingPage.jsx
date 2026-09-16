@@ -287,7 +287,7 @@ export const LandingPage = () => {
                   <th className="p-5">Feature Matrix</th>
                   <th className="p-5 text-amber-800 dark:text-amber-400">Vanilla HTML/JS</th>
                   <th className="p-5 text-(--color-primary)">React 19</th>
-                  <th className="p-5 text-emerald-400">Vue 3 (STUB)</th>
+                  <th className="p-5 text-emerald-800 dark:text-emerald-400">Vue 3 (STUB)</th>
                   <th className="p-5 text-red-700 dark:text-red-400">Svelte (STUB)</th>
                 </tr>
               </thead>

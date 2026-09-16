@@ -119,11 +119,6 @@ export const COMPANIONS = [
   { id: "luna", label: "Luna" },
 ];
 
-export const COMPANION_POSES = [
-  { id: "sitting", label: "Sitting up" },
-  { id: "curled", label: "Curled up asleep" },
-];
-
 export const AVATAR_CHOICES = [
   { id: "skinTone", label: "Skin tone", group: "character", swatch: "base", options: SKIN_TONES },
   { id: "hairStyle", label: "Hair style", group: "character", options: HAIR_STYLES },
@@ -135,7 +130,6 @@ export const AVATAR_CHOICES = [
   { id: "chairColor", label: "Chair colour", group: "desk", swatch: "base", options: CHAIR_COLORS },
   { id: "backdrop", label: "Time of day", group: "scene", options: BACKDROPS },
   { id: "companion", label: "Companion", group: "scene", options: COMPANIONS },
-  { id: "companionPose", label: "Companion pose", group: "scene", options: COMPANION_POSES },
 ];
 
 /** Boolean axes. */
@@ -193,7 +187,7 @@ export const SCENE_PROPS = Object.freeze([
   { id: "lamp", label: "Desk lamp", surface: "desk", depth: 10, x: 276, y: DESK_TOP, box: { dx: -21, dy: -96, w: 69, h: 96 } },
   { id: "plant", label: "Plant", surface: "desk", depth: 20, x: 135, y: DESK_TOP, box: { dx: -27, dy: -94, w: 64, h: 94 } },
   { id: "books", label: "Books", surface: "desk", depth: 30, x: 205, y: DESK_TOP, box: { dx: -33, dy: -32, w: 66, h: 32 } },
-  { id: "companion", label: "Luna", surface: "floor", depth: 40, x: 186, y: 480, box: { dx: -62, dy: -126, w: 130, h: 126 } },
+  { id: "companion", label: "Luna", surface: "floor", depth: 40, x: 186, y: 480, box: { dx: -40, dy: -126, w: 80, h: 126 } },
   { id: "keyboard", label: "Keyboard", surface: "desk", depth: 60, x: 400, y: DESK_TOP, box: { dx: -60, dy: -22, w: 120, h: 22 } },
   { id: "phone", label: "Phone", surface: "desk", depth: 70, x: 542, y: DESK_TOP, box: { dx: -18, dy: -40, w: 36, h: 40 } },
   { id: "mug", label: "Coffee mug", surface: "desk", depth: 80, x: 495, y: DESK_TOP, box: { dx: -17, dy: -34, w: 46, h: 34 } },
@@ -391,7 +385,6 @@ export const DEFAULT_AVATAR = Object.freeze({
   chairColor: "graphite",
   backdrop: "night",
   companion: "luna",
-  companionPose: "curled",
   mug: true,
   plant: true,
   books: false,
@@ -506,9 +499,7 @@ export const describeAvatar = (input) => {
     props.length ? `On the desk: ${listToText(props)}.` : "The desk is clear.",
     // The companion is part of the picture, so it belongs in the alt text too.
     avatar.companion === "luna"
-      ? `Luna, a fawn dog with a cream chest and dark markings around her eyes, is ${
-          avatar.companionPose === "curled" ? "curled up asleep" : "sitting up"
-        } beside the desk.`
+      ? "Luna, a fawn dog with a cream chest and dark markings around her eyes, sits beside the desk."
       : "",
   ];
 

@@ -82,7 +82,6 @@ describe("normalizeAvatar", () => {
       chairColor: "crimson",
       backdrop: "day",
       companion: "luna",
-      companionPose: "curled",
       mug: false,
       plant: false,
       books: true,

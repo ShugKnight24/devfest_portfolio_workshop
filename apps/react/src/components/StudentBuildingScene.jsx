@@ -573,6 +573,67 @@ const Arm = ({ skin, topColor, flip }) => (
   </g>
 );
 
+/**
+ * A seated leg, seen from the front.
+ *
+ * The figure used to stop at the desk edge, so nothing of a person existed below
+ * the desktop: the scene read as a torso floating over an empty floor. From the
+ * front, a seated person's thighs run toward the viewer and are hidden by the
+ * desk's apron; what shows below it is the shin, dropping to a shoe on the
+ * floor. The knee is drawn slightly above the apron's lower edge so the apron
+ * overlaps it, which is what makes the leg read as continuing up to the seat.
+ *
+ * Drawn for the viewer's left and mirrored for the right, like Arm, so the pair
+ * is symmetric by construction rather than by hand.
+ */
+const TROUSER = { base: "#2B3242", shadow: "#1B2030", light: "#3B4660" };
+const SHOE = { base: "#15171C", sole: "#2A2D34" };
+
+const Leg = ({ flip }) => (
+  <g transform={flip ? mirror : undefined}>
+    {/* shin, tapering from knee to ankle */}
+    <path d="M355 360 L393 360 L388 452 L360 452 Z" fill={TROUSER.base} />
+    {/* inner edge falls away from the screen light */}
+    <path d="M387 360 L393 360 L388 452 L383 452 Z" fill={TROUSER.shadow} opacity={0.85} />
+    {/* knee catching the light spilling under the desk */}
+    <ellipse cx={373} cy={368} rx={13} ry={6} fill={TROUSER.light} opacity={0.55} />
+    {/* trouser crease */}
+    <path d="M373 374 L374 450" stroke={TROUSER.shadow} strokeWidth={1.5} opacity={0.6} />
+    {/* hem break over the shoe */}
+    <path d="M359 448 C366 452 382 452 389 448" stroke={TROUSER.shadow} strokeWidth={2} fill="none" opacity={0.8} />
+    {/* contact shadow under the shoe */}
+    <ellipse cx={374} cy={473} rx={27} ry={4} fill="#000000" opacity={0.35} />
+    {/* shoe, toe toward the viewer */}
+    <path
+      d="M352 453 C352 447 358 444 364 444 L384 444 C392 444 398 448 398 456 L398 466 C398 470 395 472 391 472 L357 472 C353 472 350 469 350 465 Z"
+      fill={SHOE.base}
+    />
+    <rect x={350} y={467} width={48} height={5} rx={2.5} fill={SHOE.sole} />
+    <ellipse cx={372} cy={452} rx={12} ry={3.5} fill="#FFFFFF" opacity={0.1} />
+  </g>
+);
+
+/** The chair's gas lift and star base, visible under the desk between the legs. */
+const ChairBase = ({ color }) => (
+  <g>
+    <rect x={395} y={362} width={10} height={80} rx={3} fill={color} />
+    <path
+      d="M400 440 L340 456 M400 440 L368 462 M400 440 L432 462 M400 440 L460 456"
+      stroke={color}
+      strokeWidth={7}
+      strokeLinecap="round"
+    />
+    {[
+      [340, 459],
+      [368, 465],
+      [432, 465],
+      [460, 459],
+    ].map(([cx, cy]) => (
+      <circle key={cx} cx={cx} cy={cy} r={4.5} fill="#0B0D12" />
+    ))}
+  </g>
+);
+
 /* --------------------------------------------------------------------------
  * Displays
  * ------------------------------------------------------------------------ */
@@ -859,226 +920,62 @@ const Keyboard = ({ mech, accent }) => {
 /* --------------------------------------------------------------------------
  * Luna
  *
- * Drawn from photographs rather than from a generic dog: a big lean fawn mix
- * with a cream chest, throat and legs, a grey muzzle with a black nose, large
- * soft ears that fold over, and the dark "mascara" markings ringing her eyes
- * that were the first thing anyone noticed about her.
+ * Traced from a photograph of her, not drawn from memory. Two hand-drawn
+ * attempts both missed: one read as a generic beagle, the other as a Borzoi.
  *
- * She sits at the left of the desk so she never collides with the figure, the
- * chair or the props, and her contact shadow uses the same treatment as every
- * other object on the floor so she reads as part of the scene.
+ * The trace is generated, not hand-tuned, so it can be regenerated:
+ *   1. GrabCut separates her from the floor. The dark tile leaked into the
+ *      mask, so a brightness floor (her coat reads ~139, the tile ~41) removes
+ *      it; enclosed dark regions (nose, eye markings) are restored by filling
+ *      holes, because they sit INSIDE her silhouette and the floor does not.
+ *   2. The photo is dim, so lightness is stretched over her own range and warmth
+ *      restored before k-means picks the palette. Unchecked, the lightest colour
+ *      came out a muddy #a08a7d instead of her cream chest.
+ *   3. Side lighting had put half her face in shadow, which clustering read as
+ *      dark fur. Lightness is divided by a heavy blur of itself to cancel the
+ *      slow lighting gradient — on her HEAD only, because down the body it also
+ *      flattened her cream chest, and that contrast is real.
+ *   4. Each of five colour bands becomes nested contours, smoothed (Chaikin)
+ *      and emitted as Bezier curves, so she matches the flat vector scene
+ *      instead of reading as a posterised photo cutout.
+ *
+ * There is one pose, because there is one photo of her sitting. A second,
+ * hand-drawn "curled" pose used a different footprint from the one the drag
+ * system reserves for her, so toggling between them corrupted placement.
  * ------------------------------------------------------------------------ */
-const LUNA = {
-  tan: "#C9A06A",
-  tanShadow: "#A87F4B",
-  tanLight: "#DDBE8C",
-  cream: "#F0E6D2",
-  creamShadow: "#D6C7AC",
-  muzzle: "#8C837B",
-  muzzleDark: "#6E655E",
-  nose: "#2B2522",
-  earInner: "#CFA098",
-  eye: "#A96F33",
-  mask: "#3E3228",
-  whisker: "#EDE5D6",
-};
+const LUNA_LAYERS = [
+  ["#e8c5ae", "M419 173C412 172 403 172 395 171C388 171 381 171 374 172C367 172 360 173 354 173C347 172 342 171 336 170C330 169 325 166 319 165C313 163 306 162 298 160C290 159 282 158 274 158C266 158 258 159 250 161C242 162 233 165 227 167C220 170 215 172 209 174C204 176 201 178 194 179C188 180 180 181 172 181C164 181 154 180 147 181C140 182 134 184 129 187C124 190 121 194 119 197C116 200 115 203 114 206C114 209 115 212 114 215C113 218 112 221 110 224C109 227 106 230 105 232C104 235 104 238 104 240C104 243 104 245 106 248C107 250 109 254 112 256C114 260 118 263 122 266C126 268 132 270 137 272C142 274 149 275 154 278C158 281 162 285 164 290C167 295 168 302 169 306C170 311 170 314 170 316C170 319 170 320 168 323C166 326 164 328 161 332C158 335 153 338 150 342C146 346 143 350 140 354C137 359 134 364 130 371C127 378 123 387 120 396C116 406 112 418 111 427C109 437 109 445 110 452C110 459 113 465 114 471C115 477 115 482 115 486C115 491 115 495 115 500C115 504 116 510 117 516C117 522 119 528 119 536C120 544 119 554 118 564C118 573 116 586 116 594C116 602 116 608 117 614C118 620 120 622 120 627C121 632 121 637 122 644C122 651 121 657 124 668C126 679 131 695 136 710C142 725 150 747 157 758C163 770 170 776 176 779C181 782 188 779 192 778C196 777 198 775 200 773C202 770 202 767 203 763C203 760 203 756 203 752C202 747 202 742 200 738C198 734 194 729 190 725C187 721 181 718 178 714C174 710 171 707 169 704C167 700 165 697 164 693C163 689 162 685 162 681C162 677 163 673 164 669C164 666 165 663 167 661C169 658 171 657 177 655C183 653 193 651 203 649C213 647 229 644 238 643C246 642 251 642 255 643C258 643 257 645 258 647C259 650 260 653 261 657C262 661 263 665 265 670C268 675 271 681 274 686C277 692 282 698 286 702C289 706 292 709 295 710C298 712 301 711 304 711C307 711 310 710 314 709C316 707 320 706 322 704C324 702 326 700 326 698C327 696 327 693 326 690C326 688 326 684 324 681C323 678 322 674 320 671C318 668 314 665 311 662C307 659 302 657 299 654C296 652 294 650 293 648C291 645 291 644 290 642C290 640 290 639 291 637C292 635 293 634 298 630C302 626 310 621 319 614C327 608 340 600 348 592C357 585 364 577 370 569C376 561 381 553 385 544C389 535 392 526 394 515C396 505 397 494 398 483C398 472 398 460 398 449C397 437 396 424 394 415C393 406 390 400 388 395C386 390 383 387 382 384C380 380 379 376 378 372C377 367 377 363 378 356C378 349 380 340 382 330C384 320 387 306 390 298C392 289 396 283 399 277C402 272 406 270 410 266C414 263 418 260 422 257C426 254 430 251 434 248C437 245 440 241 441 238C443 234 444 230 445 227C446 224 445 220 445 217C444 214 443 211 442 208C442 204 442 201 442 197C443 193 444 189 444 186C444 183 443 181 442 179C441 178 439 177 436 176C432 175 426 174 419 173Z"],
+  ["#bf9875", "M419 173C412 172 403 172 395 171C388 171 381 171 374 172C367 172 360 173 354 173C347 172 342 171 336 170C330 169 325 166 319 165C313 163 306 162 298 160C290 159 282 158 274 158C266 158 258 159 250 161C242 162 233 165 227 167C220 170 215 172 209 174C204 176 201 178 194 179C188 180 180 181 172 181C164 181 154 180 147 181C140 182 134 184 129 187C124 190 121 194 119 197C116 200 115 203 114 206C114 209 115 212 114 215C113 218 112 221 110 224C109 227 106 230 105 232C104 235 104 238 104 240C104 243 104 245 106 248C107 250 109 254 112 256C114 260 118 263 122 266C126 268 132 270 137 272C142 274 149 275 154 278C158 281 162 285 164 290C167 295 168 302 169 306C170 311 170 314 170 316C170 319 170 320 168 323C166 326 164 328 161 332C158 335 153 338 150 342C146 346 143 350 140 354C137 359 134 364 130 371C127 378 123 387 120 396C116 406 112 418 111 427C109 437 109 445 110 452C110 459 113 465 114 471C115 477 115 482 115 486C115 491 115 495 115 500C115 504 116 510 117 516C117 522 119 528 119 536C120 544 119 554 118 564C118 573 116 586 116 594C116 602 116 608 117 614C118 620 120 622 120 627C121 632 121 637 122 644C122 651 121 657 124 668C126 679 131 695 136 710C142 725 150 747 157 758C163 770 170 776 176 779C181 782 188 779 192 778C196 777 198 775 200 773C202 770 202 767 203 763C203 760 203 756 203 752C202 747 202 742 200 738C198 734 194 729 190 725C187 721 181 718 178 714C174 710 171 707 169 704C167 700 165 697 164 693C163 690 162 686 162 683C162 679 162 675 162 672C163 669 163 667 165 664C167 662 168 660 173 657C179 655 189 652 199 650C209 647 225 644 234 643C243 641 248 641 252 642C256 643 256 645 257 647C258 649 259 651 260 654C261 658 261 661 263 666C265 671 268 677 272 683C276 689 281 697 285 701C289 706 292 708 295 710C298 712 301 711 304 711C307 711 309 711 312 710C315 709 317 708 319 707C321 705 323 703 324 700C325 698 326 694 326 691C326 688 325 684 324 681C323 678 322 674 319 671C317 667 313 663 309 660C305 656 299 652 296 649C293 646 291 644 290 642C290 640 291 638 292 636C293 634 296 632 298 630C300 628 304 625 305 623C307 621 308 619 308 617C308 616 307 614 306 613C305 612 304 611 302 610C299 610 298 610 294 610C290 610 284 611 278 612C271 612 263 614 256 614C249 615 242 615 235 614C228 614 222 613 217 612C212 611 208 610 206 609C203 607 202 606 200 604C199 602 198 599 198 597C198 595 198 592 199 589C200 587 202 585 205 582C207 580 211 578 213 577C215 575 216 573 217 571C217 568 217 567 214 562C212 558 205 550 199 543C192 535 182 524 176 517C170 510 167 505 164 502C161 498 161 497 160 495C160 492 159 490 159 488C158 486 158 484 159 482C160 480 161 479 163 478C166 477 168 476 174 477C181 478 191 481 202 483C212 485 228 490 238 491C248 492 255 490 261 488C267 487 270 482 274 480C278 477 281 476 284 475C287 474 289 474 292 474C294 474 296 475 298 476C300 477 301 478 303 480C305 483 308 486 310 490C312 493 315 498 318 501C320 504 323 506 325 507C327 508 329 508 331 508C333 508 334 507 336 506C337 505 338 504 339 502C340 500 340 497 341 494C342 491 342 487 343 483C345 480 347 476 349 472C351 468 354 464 357 461C359 459 361 457 363 456C365 455 367 456 369 456C371 457 374 458 376 460C378 461 381 464 384 465C386 466 388 466 390 466C392 465 393 465 394 461C395 457 395 449 395 441C395 433 395 421 393 413C392 405 390 400 388 395C386 390 383 387 382 384C380 380 379 376 378 372C377 367 377 363 378 356C378 349 380 340 382 330C384 320 387 306 390 298C392 289 396 283 399 277C402 272 406 270 410 266C414 263 418 260 422 257C426 254 430 251 434 248C437 245 440 241 441 238C443 234 444 230 445 227C446 224 445 220 445 217C444 214 443 211 442 208C442 204 442 201 442 197C443 193 444 189 444 186C444 183 443 181 442 179C441 178 439 177 436 176C432 175 426 174 419 173Z"],
+  ["#966d48", "M322 690C320 690 318 689 316 689C313 690 310 691 306 692C303 694 299 696 296 697C294 699 292 701 291 702C290 703 291 705 291 706C291 707 291 708 292 708C293 709 294 710 296 710C298 710 301 711 304 711C306 711 310 710 313 710C316 709 318 708 320 707C322 706 323 705 324 704C325 702 326 700 326 699C326 697 326 695 325 694C325 692 324 691 322 690ZM277 626C275 626 272 626 269 626C267 627 265 628 263 629C261 630 259 632 259 635C258 638 259 643 260 648C261 652 263 660 265 663C266 667 268 669 269 670C270 670 272 669 273 668C275 667 278 665 280 662C282 660 285 656 286 653C288 650 288 647 289 644C289 641 288 638 288 635C288 633 287 631 286 630C285 628 284 628 283 627C281 626 279 626 277 626ZM419 173C412 172 403 172 396 171C390 171 384 171 380 171C376 171 372 172 369 173C366 174 365 175 364 177C362 178 362 180 362 183C362 185 363 188 364 192C365 195 366 199 368 203C370 207 372 211 374 215C377 219 380 224 382 227C384 231 385 234 386 236C387 239 387 241 387 243C386 245 385 246 384 248C382 249 380 250 376 250C372 249 368 247 362 245C357 243 350 238 346 237C340 235 336 234 332 234C329 234 326 234 323 237C319 239 316 243 313 247C310 251 306 258 304 263C302 268 300 273 299 278C298 283 298 288 296 291C295 295 294 297 293 299C292 301 290 302 289 303C287 304 286 305 284 305C283 305 281 304 279 303C277 302 276 300 274 297C272 294 270 290 267 287C264 284 262 281 258 278C256 275 252 272 249 269C246 266 244 262 242 258C240 254 238 250 236 247C234 243 232 240 229 238C227 235 224 233 223 231C221 229 220 227 220 225C220 223 220 222 221 220C222 218 223 216 225 214C227 213 229 210 232 209C234 208 237 207 239 206C242 206 245 206 248 206C251 207 254 208 257 210C260 212 264 215 266 217C269 218 272 220 274 220C277 221 279 221 282 220C284 219 288 217 291 214C294 212 298 208 302 205C306 202 311 199 315 197C320 194 325 192 329 190C332 188 334 187 336 185C337 183 338 182 338 181C338 179 338 178 337 176C336 174 336 172 331 170C326 168 318 166 309 164C300 162 287 160 277 159C267 159 258 160 250 161C241 162 233 165 227 168C220 170 214 173 210 175C205 177 201 180 198 182C194 183 191 183 187 183C184 183 181 182 177 181C173 180 167 180 162 180C156 180 149 179 144 180C138 182 133 184 129 187C125 190 121 194 119 197C116 200 115 203 114 206C114 209 115 212 114 215C113 218 112 221 110 224C109 227 106 230 105 232C104 235 103 237 103 240C103 242 104 244 106 246C108 249 112 253 116 257C120 260 126 265 131 268C136 271 140 273 144 274C149 276 153 276 156 278C159 281 162 286 164 290C166 295 168 302 169 306C170 311 170 314 170 316C170 319 170 320 168 323C166 326 164 328 161 332C158 335 153 338 150 342C146 346 143 350 140 354C137 359 134 364 130 371C127 378 123 387 120 396C116 406 112 418 111 427C109 437 109 445 110 452C110 459 113 465 114 471C115 477 115 482 115 486C115 491 115 495 115 500C115 504 116 510 117 516C117 522 119 528 119 536C120 544 119 554 118 564C118 573 116 586 116 594C116 602 116 608 117 614C118 620 120 622 120 627C121 632 121 637 122 644C122 651 121 657 124 668C126 679 131 695 136 710C142 725 150 747 157 758C163 770 170 776 176 779C181 782 188 779 192 778C196 777 198 775 200 773C202 770 202 767 203 763C203 760 203 756 203 752C202 747 202 742 200 738C199 734 196 731 194 728C191 725 187 723 184 720C180 718 177 714 175 711C172 707 169 703 167 699C165 695 164 690 164 685C163 680 163 674 164 670C164 666 165 663 167 661C169 658 171 657 174 656C178 654 183 653 188 652C193 651 200 650 204 649C208 647 211 646 213 645C214 643 214 642 214 640C213 638 211 636 209 634C206 632 202 630 200 628C197 626 194 623 192 620C189 617 187 614 184 608C182 603 179 595 176 587C174 580 170 569 168 561C166 553 164 547 163 540C161 534 161 529 159 523C157 517 154 511 151 505C148 499 143 492 140 486C137 480 135 474 132 468C130 463 128 457 127 452C126 447 125 442 125 438C124 433 124 429 125 426C126 422 127 419 128 417C130 414 132 412 134 411C136 409 139 408 140 408C142 407 144 407 146 408C148 408 149 408 150 409C151 410 152 411 153 413C154 415 154 418 155 421C156 424 156 428 157 431C158 434 159 437 160 440C161 443 163 445 166 448C168 451 172 454 177 457C182 460 188 464 194 466C201 469 209 471 218 473C226 475 236 477 244 477C252 478 259 478 266 477C272 476 278 474 284 474C290 473 297 473 303 473C309 473 316 474 321 474C325 474 328 474 330 472C332 470 332 469 332 463C332 456 331 446 330 435C328 425 326 408 323 399C320 390 318 385 314 381C311 378 307 379 302 379C297 378 290 379 284 379C277 380 268 381 263 381C258 382 254 381 252 380C250 380 249 378 249 377C248 376 247 374 247 373C247 372 248 370 249 368C250 366 252 363 254 360C257 357 260 353 264 350C267 347 271 343 276 341C280 338 285 335 288 333C292 331 294 330 296 330C299 329 299 329 302 330C304 331 306 332 310 334C312 336 316 339 320 343C323 346 327 351 331 356C334 361 338 368 341 371C344 375 347 377 349 378C351 378 353 377 354 376C356 375 358 374 359 372C360 370 361 367 361 364C361 361 360 357 360 352C359 348 357 343 356 338C355 334 355 329 356 324C356 320 358 315 359 312C360 308 361 306 362 304C364 302 365 301 367 300C369 300 372 299 374 299C376 299 379 299 382 298C384 297 386 295 388 292C390 289 392 286 396 281C400 277 406 271 412 266C418 260 427 253 432 248C437 242 440 237 443 233C445 228 445 224 445 221C446 218 445 215 445 213C444 210 443 209 442 207C442 204 442 200 442 197C443 194 444 189 444 186C444 183 443 181 442 179C441 178 439 177 436 176C432 175 426 174 419 173Z"],
+  ["#68492e", "M199 757C198 756 196 756 194 755C192 755 190 756 188 756C186 757 184 758 181 759C179 760 176 760 174 760C172 760 169 760 167 760C165 761 163 761 162 762C161 763 160 764 160 766C160 767 160 769 160 771C161 773 161 775 164 777C166 778 171 779 176 779C180 779 188 779 192 778C196 776 198 774 200 772C202 769 202 765 201 762C201 760 200 758 199 757ZM118 491C117 492 116 494 116 498C115 501 116 506 117 513C117 519 119 527 119 535C120 544 119 554 118 564C118 574 116 586 116 594C116 602 116 608 117 614C118 620 120 622 120 627C121 632 121 638 122 644C122 650 121 657 122 664C123 672 125 679 127 687C128 694 132 702 134 708C136 713 137 717 139 719C140 722 141 722 142 724C144 725 145 726 147 726C148 727 150 727 152 727C154 726 157 725 159 723C162 721 165 719 166 715C168 711 167 705 167 700C166 694 164 686 164 680C163 674 165 668 166 664C167 658 170 654 170 650C170 646 169 643 167 639C165 636 160 633 158 630C156 627 154 624 152 621C150 618 149 615 149 611C149 607 150 602 151 596C152 590 154 584 154 576C155 568 154 559 152 550C151 541 148 530 146 522C144 514 142 508 140 504C138 499 135 496 133 494C131 492 129 490 127 489C125 488 123 488 122 488C120 488 119 489 118 491ZM148 348C148 350 147 352 149 355C151 358 156 361 160 365C164 369 171 373 174 379C177 384 178 392 179 400C179 407 177 417 177 423C177 430 177 434 179 438C180 441 182 443 185 445C188 448 192 450 197 453C201 456 207 458 213 461C219 463 226 466 234 468C242 470 250 472 258 473C266 474 275 474 283 474C291 474 299 473 305 472C311 471 315 471 318 469C322 468 322 467 324 463C325 459 326 452 327 444C328 436 328 425 328 418C328 411 327 405 325 400C324 395 322 392 319 389C316 386 312 384 307 382C302 381 296 380 290 380C284 381 276 383 269 385C262 387 253 392 248 393C242 394 239 394 237 392C235 391 236 388 236 386C236 383 237 379 238 375C240 371 242 366 244 362C245 359 245 356 245 353C244 351 244 349 242 348C239 348 235 348 231 350C227 351 220 354 215 354C210 356 206 356 201 356C197 355 193 354 189 352C185 351 182 348 179 345C176 342 173 337 170 335C168 333 166 332 164 332C162 332 160 333 158 334C157 335 155 336 154 337C152 339 151 340 150 342C149 344 148 346 148 348ZM247 276C244 271 240 263 237 258C234 254 232 251 230 249C229 247 228 248 227 247C225 247 224 247 222 247C220 248 218 248 214 250C210 253 203 257 197 261C190 266 180 272 175 276C170 281 168 284 166 286C164 289 166 290 166 292C167 293 167 295 168 296C169 298 170 299 172 300C175 301 178 301 182 301C186 301 190 300 195 301C200 301 206 303 211 305C216 307 222 310 227 312C231 313 235 314 238 314C241 314 243 313 245 312C247 311 248 310 250 308C252 307 253 305 254 303C254 302 255 300 255 298C256 296 256 294 254 291C253 287 250 281 247 276ZM332 244C329 244 327 245 325 247C322 250 320 254 318 258C316 262 313 269 312 273C310 278 310 281 310 285C310 288 310 291 311 293C312 296 314 298 316 300C317 302 320 304 322 305C325 306 328 306 331 306C335 305 339 304 343 301C346 299 351 295 355 292C359 288 364 282 367 279C370 275 371 273 372 271C372 268 371 268 371 266C370 265 369 263 368 262C367 261 365 259 363 258C360 256 357 254 353 251C350 249 345 246 341 245C337 244 334 243 332 244ZM116 207C116 210 117 213 119 216C121 220 124 223 128 227C132 230 137 234 141 236C145 239 148 240 151 240C154 240 157 239 160 238C162 237 165 235 167 233C169 231 171 229 173 227C174 225 175 223 175 221C176 219 176 217 175 216C175 214 174 212 173 211C172 210 170 208 168 208C165 207 161 206 157 206C153 206 147 206 143 205C138 205 135 203 132 202C129 201 127 199 124 198C122 198 120 197 119 198C118 198 116 200 116 201C115 203 115 205 116 207ZM436 176C434 175 431 174 429 174C426 174 424 174 421 174C418 175 416 175 412 177C409 178 404 181 400 184C396 187 390 191 387 194C384 197 382 200 381 203C381 205 382 208 383 211C385 214 388 217 391 220C395 223 400 228 404 229C409 231 414 231 419 230C423 229 429 226 432 225C436 223 438 222 440 221C441 220 442 219 442 217C442 215 442 213 442 210C442 208 442 204 442 202C442 199 442 197 442 196C443 194 444 193 444 191C444 189 444 187 444 185C443 183 442 181 441 179C440 178 438 176 436 176ZM229 173C228 175 230 176 232 178C234 179 237 180 240 181C244 182 249 183 252 185C256 186 259 189 262 191C265 193 268 196 270 197C272 199 274 200 276 200C277 200 278 200 280 198C282 196 284 192 286 188C289 183 292 177 293 173C295 169 295 166 294 164C294 162 292 162 290 161C288 160 285 159 282 158C278 158 274 157 270 158C265 158 259 160 253 161C247 163 240 166 236 168C232 170 230 172 229 173Z"],
+  ["#291d16", "M291 381C288 381 286 382 282 383C279 384 275 387 271 389C267 392 262 396 259 398C256 401 254 403 252 405C251 408 251 409 251 413C252 417 253 423 254 429C256 435 258 444 260 450C262 455 264 459 267 463C270 466 272 468 275 469C278 471 281 471 284 472C288 472 291 471 294 471C297 470 300 469 303 468C306 467 308 466 310 465C312 464 314 462 316 461C317 459 318 458 319 455C320 452 322 448 323 444C324 439 326 434 326 429C327 424 327 419 326 414C326 409 325 404 323 400C321 396 318 392 314 390C310 387 305 385 301 384C297 382 294 382 291 381ZM204 381C203 382 202 383 201 385C200 386 200 389 200 391C199 393 199 396 200 399C200 402 201 406 202 409C203 412 204 417 205 419C207 422 208 423 210 424C211 425 213 425 215 425C216 424 218 423 219 421C220 419 222 417 223 414C224 411 224 408 225 404C225 400 225 396 225 393C225 390 225 388 224 386C223 384 222 383 220 382C219 381 217 380 215 380C213 379 211 379 209 380C207 380 206 380 204 381ZM198 275C197 277 197 279 198 281C199 283 201 286 204 288C206 290 210 293 213 295C216 297 219 299 222 300C225 300 228 301 230 301C233 301 235 300 236 299C238 298 239 297 240 295C241 294 242 292 242 290C242 288 241 285 240 282C239 279 238 276 236 273C234 270 231 265 229 263C227 261 225 259 223 259C221 258 220 258 218 259C216 260 213 261 210 263C207 265 204 267 202 269C200 271 198 273 198 275ZM330 257C328 258 327 260 325 262C324 265 323 268 322 271C321 274 320 278 320 281C320 283 320 285 321 287C322 289 322 290 324 291C325 292 327 293 329 293C331 294 334 294 336 294C339 293 342 292 344 290C347 288 350 286 352 283C354 281 356 278 357 276C358 274 358 271 358 268C358 266 357 264 356 262C354 260 352 259 349 258C347 256 345 256 342 255C340 254 337 254 335 254C333 254 331 255 330 257Z"],
+];
+
+/** Her feet in trace space, and the scale that fits her into her floor slot. */
+const LUNA_FEET = { x: 274.5, y: 782 };
+const LUNA_SCALE = 0.2016;
 
 /**
- * Her eyes: wide-set, soft and almond, ringed by the smudged dark markings that
- * were the first thing anyone noticed. Deliberately NOT symmetric circles — a
- * matched pair of rings reads as a raccoon, not as her.
+ * Authored at the companion's default anchor (186, 480), as every movable prop
+ * is — MovableProp only translates by the distance she has been dragged.
  */
-const LunaEyes = () => (
+const Luna = () => (
   <g>
-    {[-12.5, 12.5].map((dx) => (
-      <g key={dx} transform={`translate(${dx}, 0)`}>
-        {/* smudge: heavier above and toward the outside of the face */}
-        <ellipse cx={176} cy={336} rx={11} ry={8.5} fill={LUNA.mask} opacity={0.5}
-          transform={`rotate(${dx < 0 ? -14 : 14} 176 336)`} />
-        <ellipse cx={176 + (dx < 0 ? -2 : 2)} cy={332} rx={8} ry={5} fill={LUNA.mask} opacity={0.34} />
-        {/* almond eye */}
-        <path d="M169.5 337 C171.5 332.5 180.5 332.5 182.5 337 C180.5 341 171.5 341 169.5 337 Z"
-          fill="#F3EAD9" opacity={0.9} />
-        <circle cx={176} cy={337} r={3.5} fill={LUNA.eye} />
-        <circle cx={176} cy={337} r={1.9} fill="#1E1815" />
-        <circle cx={177.2} cy={335.7} r={1} fill="#FFFFFF" opacity={0.95} />
-        {/* the pink lower lid she always showed */}
-        <path d="M170.5 339.5 C173 341.8 179 341.8 181.5 339.5" stroke="#C98D86" strokeWidth={1.1}
-          fill="none" strokeLinecap="round" opacity={0.75} />
-        <path d="M169.5 336 C171.5 332 180.5 332 182.5 336" stroke={LUNA.mask} strokeWidth={1.2}
-          fill="none" strokeLinecap="round" opacity={0.8} />
-      </g>
-    ))}
-    {/* the furrow between the brows that gave her that earnest, worried look */}
-    <path d="M176 328 L176 320" stroke={LUNA.tanShadow} strokeWidth={1.5} strokeLinecap="round" opacity={0.6} />
-  </g>
-);
-
-/**
- * One ear. Hers were big — set wide and high, folding over near the base and
- * hanging well below the jaw, with the pink inner ear showing on the fold.
- */
-const LunaEar = ({ flip }) => (
-  <g transform={flip ? "translate(352, 0) scale(-1, 1)" : undefined}>
-    <path
-      d="M157 320 C141 310 124 320 121 338 C118 356 129 371 143 374 C153 376 159 368 159 352 C159 336 163 326 157 320 Z"
-      fill={LUNA.tan}
-      stroke={LUNA.tanShadow}
-      strokeWidth={1.1}
-    />
-    {/* inner ear, only visible on the folded-back part */}
-    <path
-      d="M153 328 C142 322 131 330 128 344 C125 358 134 367 143 369 C149 370 152 363 152 350 C152 337 155 331 153 328 Z"
-      fill={LUNA.earInner}
-      opacity={0.5}
-    />
-    {/* the fold crease near the base */}
-    <path d="M154 323 C144 326 135 334 131 345" stroke={LUNA.tanShadow} strokeWidth={1.1}
-      fill="none" opacity={0.85} strokeLinecap="round" />
-  </g>
-);
-
-const LunaSitting = ({ accent }) => (
-  <g>
-    {/* ---- hindquarters, behind everything ---- */}
-    <ellipse cx={216} cy={438} rx={32} ry={38} fill={LUNA.tanShadow} />
-    <ellipse cx={212} cy={436} rx={29} ry={35} fill={LUNA.tan} />
-
-    {/* long thin tail, off the rump and curling up */}
-    <path d="M238 456 C264 452 280 432 280 408" stroke={LUNA.tanShadow} strokeWidth={9}
-      strokeLinecap="round" fill="none" />
-    <path d="M238 456 C264 452 280 432 280 408" stroke={LUNA.tan} strokeWidth={6.5}
-      strokeLinecap="round" fill="none" />
-
-    {/* ---- neck: tan at the nape, cream down the throat ---- */}
-    <path d="M163 352 C163 340 189 340 189 352 L192 402 L160 402 Z" fill={LUNA.tan} />
-    <path d="M168 360 C168 352 184 352 184 360 L188 402 L164 402 Z" fill={LUNA.cream} />
-
-    {/* ---- torso: lean, tan back rolling into a broad cream chest ---- */}
-    <path d="M148 410 C148 384 162 396 176 396 C196 396 210 410 212 436 C214 458 204 468 196 470 L158 470 C148 460 148 430 148 410 Z"
-      fill={LUNA.tan} />
-    <path d="M153 410 C153 390 166 400 178 400 C192 400 199 414 200 436 C201 456 193 466 186 468 L162 468 C153 458 153 430 153 410 Z"
-      fill={LUNA.cream} />
-    {/* a little shadow where the foreleg meets the chest */}
-    <path d="M176 402 C174 422 174 446 176 466" stroke={LUNA.creamShadow} strokeWidth={2}
-      fill="none" opacity={0.6} />
-
-    {/* ---- front legs: long and straight, the way she sat ---- */}
-    {[
-      { x: 162, shade: LUNA.creamShadow },
-      { x: 188, shade: LUNA.cream },
-    ].map(({ x, shade }) => (
-      <g key={x}>
-        <rect x={x} y={430} width={13} height={44} rx={6.5} fill={shade} />
-        <ellipse cx={x + 6.5} cy={474} rx={9.5} ry={5} fill={LUNA.cream} />
-        <path d={`M${x + 2.5} 475 L${x + 2.5} 471 M${x + 6.5} 476 L${x + 6.5} 471 M${x + 10.5} 475 L${x + 10.5} 471`}
-          stroke={LUNA.creamShadow} strokeWidth={1} strokeLinecap="round" />
-      </g>
-    ))}
-
-    {/* ---- collar, on the NECK, well clear of the muzzle ---- */}
-    <path d="M161 392 C168 400 184 400 191 392 L192 400 C184 408 168 408 160 400 Z"
-      fill={accent} opacity={0.9} />
-    <circle cx={176} cy={406} r={4} fill={accent} />
-    <circle cx={176} cy={406} r={4} fill="#000000" opacity={0.18} />
-
-    {/* ---- ears sit behind the skull ---- */}
-    <LunaEar />
-    <LunaEar flip />
-
-    {/* ---- skull ---- */}
-    <ellipse cx={176} cy={332} rx={25} ry={23} fill={LUNA.tan} />
-    <ellipse cx={176} cy={325} rx={20} ry={14} fill={LUNA.tanLight} opacity={0.4} />
-
-    {/* ---- long tapered grey muzzle, nose at the tip ---- */}
-    <path d="M165 344 C165 337 187 337 187 344 C188 353 186 363 183 369 C181 373 171 373 169 369 C166 363 164 353 165 344 Z"
-      fill={LUNA.muzzle} />
-    {/* tan fading down the bridge */}
-    <path d="M168 344 C169 340 183 340 184 344 C184 350 183 356 182 360 L170 360 C169 356 168 350 168 344 Z"
-      fill={LUNA.tan} opacity={0.4} />
-    {/* the pale patch on the bridge just above the nose */}
-    <ellipse cx={176} cy={362} rx={4.2} ry={2.4} fill={LUNA.earInner} opacity={0.45} />
-    <ellipse cx={176} cy={368} rx={7.6} ry={5.4} fill={LUNA.nose} />
-    <ellipse cx={173.6} cy={366.6} rx={2} ry={1.3} fill="#FFFFFF" opacity={0.3} />
-    {/* mouth + jowls */}
-    <path d="M176 385.5 L176 388 M176 388 C172 391 167.5 390 165.5 386.5 M176 388 C180 391 184.5 390 186.5 386.5"
-      stroke={LUNA.muzzleDark} strokeWidth={1.3} fill="none" strokeLinecap="round" />
-    {[-1, 1].map((side) => (
-      <g key={side} opacity={0.3}>
-        <path d={`M${176 + side * 6} 364 L${176 + side * 14} 361`} stroke={LUNA.whisker} strokeWidth={0.7} strokeLinecap="round" />
-        <path d={`M${176 + side * 6} 367 L${176 + side * 15} 367`} stroke={LUNA.whisker} strokeWidth={0.7} strokeLinecap="round" />
-      </g>
-    ))}
-
-    <LunaEyes />
-  </g>
-);
-
-const LunaCurled = ({ accent }) => (
-  <g>
-    {/* a nose-to-tail curl, the way she slept under the desk */}
-    <ellipse cx={186} cy={452} rx={58} ry={28} fill={LUNA.tanShadow} />
-    <ellipse cx={186} cy={449} rx={55} ry={25} fill={LUNA.tan} />
-    <ellipse cx={186} cy={456} rx={44} ry={16} fill={LUNA.cream} opacity={0.75} />
-    <path
-      d="M236 444 C252 436 254 424 246 418"
-      stroke={LUNA.tan}
-      strokeWidth={9}
-      strokeLinecap="round"
-      fill="none"
-    />
-    {/* head laid on her own flank */}
-    <ellipse cx={142} cy={444} rx={23} ry={20} fill={LUNA.tan} />
-    <path d="M124 448 C120 442 122 434 128 432 C134 430 136 438 135 446 C134 452 128 454 124 448 Z" fill={LUNA.tan} stroke={LUNA.tanShadow} strokeWidth={1} />
-    <path d="M127 446 C124 441 125 436 129 435 C133 434 133 440 132 445 C131 449 129 450 127 446 Z" fill={LUNA.earInner} opacity={0.5} />
-    <path d="M134 452 C134 446 152 446 152 452 C153 460 149 466 143 466 C137 466 133 460 134 452 Z" fill={LUNA.muzzle} />
-    <ellipse cx={143} cy={464} rx={6} ry={4.4} fill={LUNA.nose} />
-    {/* eyes closed — two soft arcs */}
-    {[-9, 5].map((dx) => (
-      <path key={dx} d={`M${142 + dx} 442 C${144 + dx} 439 ${148 + dx} 439 ${150 + dx} 442`}
-        stroke={LUNA.mask} strokeWidth={1.8} fill="none" strokeLinecap="round" />
-    ))}
-    <ellipse cx={136} cy={441} rx={8} ry={6} fill={LUNA.mask} opacity={0.3} />
-    <ellipse cx={152} cy={441} rx={8} ry={6} fill={LUNA.mask} opacity={0.3} />
-    <circle cx={150} cy={458} r={3} fill={accent} opacity={0.85} />
-  </g>
-);
-
-/**
- * Placement.
- *
- * Sitting, Luna is drawn ~165px wide with her head at y=305 — above the desk
- * top (y=344) and straight over the plant (x=114) and books (x=172). So the
- * sitting pose is scaled and moved to the clear floor right of the desk leg,
- * where her head sits just below the desk line and clears every prop.
- *
- * Curled needs no transform: it already lives at y=418-480, entirely under the
- * desk edge. That is why it is the default — a dog asleep under the desk is
- * both the truer picture and the one that never occludes anything.
- *
- * Both poses are now re-anchored onto the SAME contact point (the `companion`
- * entry in SCENE_PROPS) so that one stored position places either of them, and
- * dragging her does not mean two sets of coordinates to keep in step.
- */
-const LUNA_ANCHOR = { x: 186, y: 480 };
-/** Where the sitting artwork's feet actually are, before it is re-anchored. */
-const SITTING_FEET = { x: 176, y: 479 };
-const SITTING_PLACEMENT =
-  `translate(${LUNA_ANCHOR.x} ${LUNA_ANCHOR.y}) scale(0.72) ` +
-  `translate(${-SITTING_FEET.x} ${-SITTING_FEET.y})`;
-
-const Luna = ({ pose, accent }) => (
-  <g transform={pose === "curled" ? undefined : SITTING_PLACEMENT}>
-    {/* contact shadow, matching every other object on this floor */}
-    <ellipse
-      cx={pose === "curled" ? 186 : 182}
-      cy={pose === "curled" ? 476 : 477}
-      rx={pose === "curled" ? 62 : 54}
-      ry={8}
-      fill="#000000"
-      opacity={0.32}
-    />
-    {pose === "curled" ? <LunaCurled accent={accent} /> : <LunaSitting accent={accent} />}
+    <ellipse cx={186} cy={479} rx={38} ry={6} fill="#000000" opacity={0.32} />
+    <g transform={`translate(186 480) scale(${LUNA_SCALE}) translate(${-LUNA_FEET.x} ${-LUNA_FEET.y})`}>
+      {/* Her tail, which is too thin and too shadowed to survive segmentation. */}
+      <path
+        d="M140 610 C96 596 58 556 44 500"
+        fill="none"
+        stroke="#bf9060"
+        strokeWidth={24}
+        strokeLinecap="round"
+      />
+      <path d="M58 530 C50 514 46 506 44 500" fill="none" stroke="#f0d0ba" strokeWidth={24} strokeLinecap="round" />
+      {LUNA_LAYERS.map(([fill, d], i) => (
+        <path key={i} fill={fill} fillRule="evenodd" d={d} />
+      ))}
+    </g>
   </g>
 );
 
@@ -1296,7 +1193,7 @@ export const StudentBuildingScene = ({
     lamp: <Lamp accent={isNight ? "#FDE68A" : "#FFFFFF"} lit={isNight} />,
     plant: <Plant />,
     books: <Books />,
-    companion: <Luna pose={avatar.companionPose} accent={accent} />,
+    companion: <Luna />,
     keyboard: <Keyboard mech={avatar.mechKeyboard} accent={accent} />,
     phone: <Phone accent={accent} />,
     mug: <Mug accent={accent} />,
@@ -1874,6 +1771,14 @@ export const StudentBuildingScene = ({
                 </g>
               )}
             </g>
+
+            {/* ---------- LEGS ----------
+                Drawn before the desk so its apron overlaps the knees, which is
+                what makes the legs read as running up to the seat. The chair
+                base goes first so the shins stand in front of it. */}
+            <ChairBase color={chair.shadow} />
+            <Leg />
+            <Leg flip />
 
             {/* ---------- DESK ---------- */}
             <g filter={`url(#${gid("soft")})`}>

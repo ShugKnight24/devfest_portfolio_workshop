@@ -4,7 +4,8 @@
  * The speaker drives this live, so the contract under test is the one they will
  * actually lean on: Cmd+K anywhere, arrows, Enter, Escape, and an app bar that
  * shows the same five section headings on every single route — including
- * /slides — so the app's structure is readable without opening anything.
+ * app route, so the structure is readable without opening anything. On /slides
+ * the deck owns the screen and the bar does not render at all.
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
@@ -144,9 +145,9 @@ describe("app bar", () => {
     expect(within(bar).getAllByRole("link")).toHaveLength(1);
   });
 
-  it("renders the identical section set on every route, /slides included", () => {
+  it("renders the identical section set on every app route", () => {
     const expected = barSections().map((s) => s.section);
-    for (const path of ["/", "/resources", "/dashboard/telemetry", "/slides"]) {
+    for (const path of ["/", "/resources", "/dashboard/telemetry", "/guide"]) {
       const { unmount } = render(<Shell initialPath={path} />);
       const bar = getBar();
       for (const section of expected) {
@@ -205,13 +206,14 @@ describe("app bar", () => {
   });
 
   it("marks the active route with aria-current inside its section", () => {
-    const target = barSections()[0].items[0];
+    // Any app route will do, but NOT /slides: the deck owns that screen and the
+    // bar deliberately does not render there.
+    const section = barSections().find((sec) => sec.items.some((r) => !r.to.startsWith("/slides")));
+    const target = section.items.find((r) => !r.to.startsWith("/slides"));
     render(<Shell initialPath={target.to} />);
     const bar = getBar();
 
-    fireEvent.click(
-      within(bar).getByRole("button", { name: new RegExp(`^${barSections()[0].section}`) })
-    );
+    fireEvent.click(within(bar).getByRole("button", { name: new RegExp(`^${section.section}`) }));
     const link = screen.getByRole("link", { name: new RegExp(target.label, "i") });
     expect(link).toHaveAttribute("aria-current", "page");
   });
@@ -239,48 +241,54 @@ describe("workshop spine stepper", () => {
   });
 });
 
-describe("presenting variant", () => {
+describe("active row contrast", () => {
   beforeEach(() => {
     localStorage.clear();
-    vi.useFakeTimers({ shouldAdvanceTime: true });
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
+  // The active row's description once kept a fixed muted-grey class, so it sat
+  // on the brand fill at 1.08:1 (light) / 1.80:1 (dark). Colour is not
+  // computable in this DOM, so assert the class the text actually carries.
+  it("colours the active row's description with the on-brand text colour", () => {
+    render(<Shell initialPath="/guide" />);
+    fireEvent.click(within(getBar()).getByRole("button", { name: /^Learn/ }));
+
+    const active = screen.getByRole("link", { name: /^Guide/, current: "page" });
+    const [, desc] = active.querySelectorAll("span");
+    expect(desc.className).toContain("text-(--color-primary-text)");
+    expect(desc.className).not.toContain("--color-muted-text");
   });
 
-  it("auto-hides on /slides after the pointer goes still", async () => {
+  it("keeps inactive descriptions muted", () => {
+    render(<Shell initialPath="/guide" />);
+    fireEvent.click(within(getBar()).getByRole("button", { name: /^Learn/ }));
+
+    const inactive = screen.getByRole("link", { name: /^Lessons/ });
+    const [, desc] = inactive.querySelectorAll("span");
+    expect(desc.className).toContain("--color-muted-text");
+  });
+});
+
+describe("on the slides", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  // The bar used to park bottom-left on /slides. Its dropdowns open downward, so
+  // they fell off-screen, and the deck already has its own header and Cmd+K.
+  it("does not render the app bar while presenting", () => {
     render(<Shell initialPath="/slides" />);
-    const bar = getBar();
-    expect(bar).not.toHaveAttribute("inert");
-
-    await act(async () => {
-      vi.advanceTimersByTime(3500);
-    });
-    expect(bar).toHaveAttribute("inert");
-
-    await act(async () => {
-      fireEvent.mouseMove(window);
-    });
-    expect(bar).not.toHaveAttribute("inert");
+    expect(screen.queryByRole("navigation", { name: "Primary" })).not.toBeInTheDocument();
   });
 
-  it("never hides while it holds focus", async () => {
+  it("does not render the workshop stepper while presenting", () => {
     render(<Shell initialPath="/slides" />);
-    const bar = getBar();
-    within(bar).getByRole("button", { name: /Search/ }).focus();
-
-    await act(async () => {
-      vi.advanceTimersByTime(6000);
-    });
-    expect(bar).not.toHaveAttribute("inert");
+    expect(screen.queryByRole("navigation", { name: "Workshop steps" })).not.toBeInTheDocument();
   });
 
-  it("stays put on a normal route", async () => {
-    render(<Shell initialPath="/resources" />);
-    await act(async () => {
-      vi.advanceTimersByTime(6000);
-    });
-    expect(getBar()).not.toHaveAttribute("inert");
+  it("still reaches the command palette with Cmd+K while presenting", () => {
+    render(<Shell initialPath="/slides" />);
+    openPalette();
+    expect(screen.getByRole("dialog", { name: /command palette/i })).toBeInTheDocument();
   });
 });

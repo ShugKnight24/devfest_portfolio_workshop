@@ -332,6 +332,16 @@ export const AchievementNotification = () => {
 
   if (!notification) return null;
 
+  /*
+   * Never over a slide. This mounts outside the router (App.jsx), so it has no
+   * route context and read the whole app as fair game — on a fresh load it
+   * dropped "Achievement Unlocked!" straight across the title slide. The unlock
+   * and its points still count; only the popup is withheld while presenting.
+   */
+  if (typeof window !== "undefined" && window.location.pathname.startsWith("/slides")) {
+    return null;
+  }
+
   return (
     <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-200 animate-slide-down">
       <div className="bg-linear-to-r from-yellow-400 via-orange-500 to-pink-500 p-1 rounded-2xl shadow-2xl">

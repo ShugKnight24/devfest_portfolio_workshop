@@ -32,8 +32,6 @@ import { ChevronDown, ChevronLeft, ChevronRight, Close, Menu } from "./Icons";
  *     rather than a different bar or no bar at all
  */
 
-/** Presenting: how long the pointer may rest before the bar gets out of the way. */
-const PRESENTING_HIDE_MS = 3000;
 
 const slug = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
@@ -47,9 +45,16 @@ const CONTROL =
 const CONTROL_ACTIVE =
   "px-2.5 py-1.5 rounded-[2px] text-[11px] font-mono font-bold uppercase tracking-wider " +
   "flex items-center gap-1 whitespace-nowrap cursor-pointer transition-colors " +
-  "bg-(--color-primary) text-(--color-primary-text,white)";
+  "bg-(--color-primary) text-(--color-primary-text)";
 
-/** One route row, shared by the dropdowns and the mobile sheet. */
+/**
+ * One route row, shared by the dropdowns and the mobile sheet.
+ *
+ * The description is coloured by the SAME active state as the row. It used to
+ * carry a fixed muted-grey class, so on the active row it sat on the brand fill
+ * at 1.08:1 in light mode and 1.80:1 in dark — invisible. The page-load audit
+ * never caught it because dropdowns are closed on load.
+ */
 const RouteRow = ({ route, idPrefix }) => (
   <li>
     <NavLink
@@ -59,15 +64,25 @@ const RouteRow = ({ route, idPrefix }) => (
       className={({ isActive }) =>
         `block px-3 py-2 rounded-[2px] no-underline transition-colors ${
           isActive
-            ? "bg-(--color-primary) text-(--color-primary-text,white)"
+            ? "bg-(--color-primary) text-(--color-primary-text)"
             : "text-(--color-text) dark:text-(--color-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark)"
         }`
       }
     >
-      <span className="block text-xs font-bold">{route.label}</span>
-      <span className="block text-[11px] leading-snug text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
-        {route.desc}
-      </span>
+      {({ isActive }) => (
+        <>
+          <span className="block text-xs font-bold">{route.label}</span>
+          <span
+            className={`block text-[11px] leading-snug ${
+              isActive
+                ? "text-(--color-primary-text)"
+                : "text-(--color-muted-text) dark:text-(--color-muted-text-dark)"
+            }`}
+          >
+            {route.desc}
+          </span>
+        </>
+      )}
     </NavLink>
   </li>
 );
@@ -81,7 +96,6 @@ export const Navigation = () => {
 
   const [openSection, setOpenSection] = useState(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [isBarVisible, setIsBarVisible] = useState(true);
 
   const sections = useMemo(() => barSections(), []);
   const brand = useMemo(() => brandRoute(), []);
@@ -119,39 +133,6 @@ export const Navigation = () => {
     };
   }, [openSection, isSheetOpen, closeAll]);
 
-  /*
-   * Presenting: the deck owns the screen, so the bar fades after a still
-   * pointer and returns on movement or focus. It must never vanish while it
-   * holds focus or has something open, or keyboard users lose their place.
-   */
-  useEffect(() => {
-    if (!isPresenting) {
-      setIsBarVisible(true);
-      return undefined;
-    }
-    let timer;
-    const schedule = () => {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        const holdsFocus = barRef.current?.contains(document.activeElement);
-        if (holdsFocus || openSection || isSheetOpen) return;
-        setIsBarVisible(false);
-      }, PRESENTING_HIDE_MS);
-    };
-    const reveal = () => {
-      setIsBarVisible(true);
-      schedule();
-    };
-    schedule();
-    window.addEventListener("mousemove", reveal);
-    window.addEventListener("focusin", reveal);
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener("mousemove", reveal);
-      window.removeEventListener("focusin", reveal);
-    };
-  }, [isPresenting, openSection, isSheetOpen]);
-
   const toggleSection = (name, event) => {
     openButtonRef.current = event.currentTarget;
     setOpenSection((prev) => (prev === name ? null : name));
@@ -174,11 +155,13 @@ export const Navigation = () => {
 
   const sectionHasActive = (items) => items.some((r) => r.to === location.pathname);
 
-  const barPlacement = isPresenting
-    ? `fixed bottom-24 left-4 z-30 transition-opacity duration-300 ${
-        isBarVisible ? "opacity-100" : "opacity-0 pointer-events-none"
-      }`
-    : "fixed top-3 left-1/2 -translate-x-1/2 z-60";
+  /*
+   * The deck owns /slides. This bar used to park at the bottom-left there, but
+   * its dropdowns open downward, so they fell off the bottom of the screen — and
+   * the deck already has its own header with a way back out, plus Cmd+K. A
+   * second bar only competed with the slide, so on /slides it does not render.
+   */
+  if (isPresenting) return null;
 
   return (
     <>
@@ -186,10 +169,9 @@ export const Navigation = () => {
         ref={barRef}
         id="app-bar"
         aria-label="Primary"
-        className={`${barPlacement} flex items-center gap-1 p-1 max-w-[96vw]
+        className={`fixed top-3 left-1/2 -translate-x-1/2 z-60 flex items-center gap-1 p-1 max-w-[96vw]
           bg-(--color-surface)/95 dark:bg-(--color-surface-dark)/95 backdrop-blur-xl
           rounded-[2px] shadow-xl border border-(--color-border) dark:border-(--color-border-dark)`}
-        inert={isPresenting && !isBarVisible}
       >
         <NavLink
           id="app-bar-home"
@@ -328,7 +310,7 @@ export const Navigation = () => {
        * The workshop stepper. Bottom-anchored and only on spine routes, so the
        * top chrome stays identical whether or not you are on the guided path.
        */}
-      {spine.index !== -1 && !isPresenting && (
+      {spine.index !== -1 && (
         <nav
           aria-label="Workshop steps"
           className="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 p-1

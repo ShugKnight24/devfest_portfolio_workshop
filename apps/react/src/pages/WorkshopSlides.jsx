@@ -5,10 +5,13 @@ import { EmojiIcon } from "@portfolio/icons/react";
 import { Checkmark, Close, ChevronLeft, ChevronRight } from "../components/Icons";
 import { EMBLEMS } from "../components/Icons/CharacterEmblems";
 import { trackEvent } from "@portfolio/telemetry";
-import { getDeck, getAllDecks, DEFAULT_DECK_ID } from "../data/slides";
+import { getDeck, getLiveDecks, getShelvedDecks, DEFAULT_DECK_ID } from "../data/slides";
+import { StageSidebar } from "../components/StageSidebar";
 import { getCharacters } from "../data/slides/characters";
 import {
   RUNTIMES,
+  RUNTIME_ORDER,
+  formatRuntimeLength,
   DEFAULT_RUNTIME,
   getRuntime,
   selectSlides,
@@ -1157,182 +1160,6 @@ const SlideComponents = {
   launch: LaunchSlide,
 };
 
-// Integrated Deck Directory & Switcher Modal
-const DeckDirectoryModal = ({ isOpen, onClose, activeDeckId, onSelectDeck, allDecks }) => {
-  if (!isOpen) return null;
-
-  // Two decks you would actually stand up and give, then the source material.
-  // The old four-category split presented nine equal options, which is a
-  // reading exercise you do not want with the lights in your eyes.
-  const categories = [
-    {
-      name: "Live — decks you present",
-      decks: allDecks.filter((d) => !d.shelf).map((d) => d.id),
-    },
-    {
-      name: "Shelf — source material & archives",
-      decks: allDecks.filter((d) => d.shelf).map((d) => d.id),
-    },
-  ];
-
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Slide Deck Directory"
-      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 md:p-8 font-sans"
-      onClick={onClose}
-    >
-      <div
-        className="border-2 rounded-[2px] max-w-5xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8 space-y-6 shadow-[0_0_50px_rgba(0,0,0,0.9)]"
-        style={{
-          backgroundColor: "var(--stage-surface)",
-          borderColor: "var(--stage-border)",
-          color: "var(--stage-text)",
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div
-          className="flex items-center justify-between border-b pb-4"
-          style={{ borderColor: "var(--stage-border)" }}
-        >
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="stage-kicker">Elastic Keynote</span>
-              <span className="text-xs font-mono" style={{ color: "var(--stage-text-muted)" }}>
-                {allDecks.filter((d) => !d.shelf).length} live &bull; {allDecks.filter((d) => d.shelf).length} shelved
-              </span>
-            </div>
-            <h2
-              className="text-2xl font-black uppercase font-mono mt-1"
-              style={{ color: "var(--stage-text)" }}
-            >
-              Slide Deck &amp; Keynote Hub
-            </h2>
-            <p className="text-xs font-mono mt-1" style={{ color: "var(--stage-text-muted)" }}>
-              Length is set by runtime (1-4), not by deck &bull; [D] toggles this directory &bull; [Esc] closes
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close Deck Directory"
-            className="stage-btn"
-          >
-            [ ESC ]
-          </button>
-        </div>
-
-        <div className="space-y-6">
-          {categories.map((cat) => (
-            <div key={cat.name} className="space-y-3">
-              <h3
-                className="text-xs font-mono uppercase tracking-widest font-bold"
-                style={{ color: "var(--stage-accent)" }}
-              >
-                // {cat.name}
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {cat.decks.map((id) => {
-                  const deckMeta = allDecks.find((d) => d.id === id);
-                  if (!deckMeta) return null;
-                  const isCurrent =
-                    activeDeckId === id ||
-                    (id === "combined" && (activeDeckId === "keynote" || activeDeckId === "master" || activeDeckId === "unified")) ||
-                    (id === "nomad" && activeDeckId === "reacher") ||
-                    (id === "ripcord" && activeDeckId === "chainsaw");
-
-                  return (
-                    <button
-                      key={id}
-                      type="button"
-                      onClick={() => {
-                        onSelectDeck(id);
-                        onClose();
-                      }}
-                      className="text-left p-4 rounded-[2px] border transition-all cursor-pointer flex flex-col justify-between space-y-3"
-                      style={{
-                        backgroundColor: isCurrent
-                          ? "var(--stage-surface-raised)"
-                          : "var(--stage-bg)",
-                        borderColor: isCurrent
-                          ? "var(--stage-accent)"
-                          : "var(--stage-border)",
-                        boxShadow: isCurrent ? "var(--stage-glow-md)" : undefined,
-                      }}
-                    >
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <span
-                            className="text-[10px] font-mono px-2 py-0.5 rounded-[2px] font-bold uppercase"
-                            style={{
-                              backgroundColor: isCurrent
-                                ? "var(--stage-accent)"
-                                : "rgb(var(--stage-accent-rgb) / 0.1)",
-                              color: isCurrent
-                                ? "var(--stage-on-accent)"
-                                : "var(--stage-text-muted)",
-                            }}
-                          >
-                            {deckMeta.duration || "Deck"}
-                          </span>
-                          {isCurrent && (
-                            <span
-                              className="text-[10px] font-mono font-bold"
-                              style={{ color: "var(--stage-accent)" }}
-                            >
-                              ● ACTIVE
-                            </span>
-                          )}
-                        </div>
-                        <div
-                          className="font-bold text-sm font-mono leading-snug"
-                          style={{ color: "var(--stage-text)" }}
-                        >
-                          {deckMeta.title}
-                        </div>
-                        <div
-                          className="text-xs line-clamp-2"
-                          style={{ color: "var(--stage-text-muted)" }}
-                        >
-                          {deckMeta.subtitle}
-                        </div>
-                        {/* A shelved deck says why it is shelved, so nobody
-                            wonders whether they picked the wrong one. */}
-                        {deckMeta.shelfReason && (
-                          <p
-                            className="text-[11px] italic leading-snug m-0"
-                            style={{ color: "var(--stage-text-dim)" }}
-                          >
-                            {deckMeta.shelfReason}
-                          </p>
-                        )}
-                      </div>
-
-                      <div
-                        className="pt-2 border-t flex items-center justify-between text-[11px] font-mono"
-                        style={{
-                          borderColor: "var(--stage-border)",
-                          color: "var(--stage-text-dim)",
-                        }}
-                      >
-                        <span>{deckMeta.slideCount ? `${deckMeta.slideCount} slides` : "Ready"}</span>
-                        <span className="font-bold" style={{ color: "var(--stage-accent)" }}>
-                          Launch &rarr;
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 export const WorkshopSlides = () => {
   const { deckId } = useParams();
   const navigate = useNavigate();
@@ -1361,7 +1188,6 @@ export const WorkshopSlides = () => {
   ];
   const activeDeckId = deckId && validDeckIds.includes(deckId) ? deckId : DEFAULT_DECK_ID;
   const currentDeck = getDeck(activeDeckId);
-  const allDecks = getAllDecks();
 
   const allSlides = currentDeck.slides;
   const presenterNotes = currentDeck.presenterNotes || {};
@@ -1387,7 +1213,8 @@ export const WorkshopSlides = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
-  const [showDeckModal, setShowDeckModal] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
+  const closeSidebar = useCallback(() => setShowSidebar(false), []);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -1534,6 +1361,19 @@ export const WorkshopSlides = () => {
   // Keyboard navigation & shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
+      /*
+       * While the sidebar is open it owns the keyboard. Its runtime choices are
+       * native radios, which move on arrow keys — without this guard the same
+       * keypress would ALSO advance the slide behind it. The sidebar handles its
+       * own Escape; S still closes it.
+       */
+      if (showSidebar) {
+        if ((e.key === "s" || e.key === "S") && !e.metaKey && !e.ctrlKey && !e.altKey) {
+          e.preventDefault();
+          setShowSidebar(false);
+        }
+        return;
+      }
       if (e.key === "ArrowRight" || e.key === " ") {
         e.preventDefault();
         nextSlide();
@@ -1551,24 +1391,30 @@ export const WorkshopSlides = () => {
       } else if ((e.key === "p" || e.key === "P") && !e.metaKey && !e.ctrlKey) {
         e.preventDefault();
         handlePrint();
-      } else if (!e.metaKey && !e.ctrlKey && !e.altKey && (e.key === "d" || e.key === "D")) {
-        setShowDeckModal((prev) => !prev);
+      } else if (
+        !e.metaKey && !e.ctrlKey && !e.altKey &&
+        (e.key === "s" || e.key === "S" || e.key === "d" || e.key === "D")
+      ) {
+        // S (sidebar) and D (decks) both open the presenter sidebar.
+        e.preventDefault();
+        setShowSidebar(true);
       } else if (!e.metaKey && !e.ctrlKey && !e.altKey && e.key === "z") {
         // Z pulls the first flex zone in or drops it. The one-key move you make
         // on stage while an agent is still working.
         if (flexZones[0]) toggleZone(flexZones[0].id);
-      } else if (!e.metaKey && !e.ctrlKey && !e.altKey && ["1", "2", "3", "4"].includes(e.key)) {
-        // Runtime switching: contract or expand the deck mid-talk.
-        const order = ["lightning", "standard", "keynote", "workshop"];
-        changeRuntime(order[Number(e.key) - 1]);
+      } else if (
+        !e.metaKey && !e.ctrlKey && !e.altKey &&
+        /^[1-9]$/.test(e.key) && Number(e.key) <= RUNTIME_ORDER.length
+      ) {
+        // Runtime switching, shortest to longest. Order comes from the model so
+        // adding a runtime never desyncs the hotkeys.
+        changeRuntime(RUNTIME_ORDER[Number(e.key) - 1]);
       } else if (e.key === "Home") {
         goToSlide(0);
       } else if (e.key === "End") {
         goToSlide(slides.length - 1);
       } else if (e.key === "Escape") {
-        if (showDeckModal) {
-          setShowDeckModal(false);
-        } else if (isFullscreen) {
+        if (isFullscreen) {
           setIsFullscreen(false);
         }
       }
@@ -1576,7 +1422,7 @@ export const WorkshopSlides = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [nextSlide, prevSlide, toggleFullscreen, isFullscreen, goToSlide, slides.length, handlePrint, navigate, showDeckModal, flexZones, toggleZone, changeRuntime]);
+  }, [nextSlide, prevSlide, toggleFullscreen, isFullscreen, goToSlide, slides.length, handlePrint, navigate, showSidebar, flexZones, toggleZone, changeRuntime]);
 
   // Touch/swipe support
   useEffect(() => {
@@ -1682,68 +1528,35 @@ export const WorkshopSlides = () => {
           </div>
         </div>
 
-        {/* Runtime + flex-zone controls.
-            This bar used to switch between six decks, which is not a decision
-            you make on stage. What you DO decide live is how long you have and
-            whether the build gave you time to fill — so the bar controls that. */}
-        <nav
-          aria-label="Stage controls"
-          className="flex items-center gap-1 bg-(--color-surface-dark)/80 p-1 rounded-[2px] border border-(--color-border-dark) overflow-x-auto max-w-3xl"
+        {/*
+         * Deck, runtime and flex zones used to be a strip across the top of the
+         * slide — prime real estate spent on choices made once, before speaking.
+         * They live in the presenter sidebar now; this is the only trace of them.
+         */}
+        <button
+          type="button"
+          id="stage-sidebar-toggle"
+          onClick={() => setShowSidebar(true)}
+          aria-expanded={showSidebar}
+          aria-controls="stage-sidebar"
+          aria-haspopup="dialog"
+          className="stage-btn whitespace-nowrap flex items-center gap-2"
+          style={{ fontSize: "11px", padding: "0.35em 0.75em" }}
+          title="Deck, runtime and flex zones (S)"
         >
-          <ul className="flex items-center gap-1 list-none m-0 p-0">
-            {Object.values(RUNTIMES).map((rt, i) => (
-              <li key={rt.id}>
-                <button
-                  type="button"
-                  id={`stage-runtime-${rt.id}`}
-                  onClick={() => changeRuntime(rt.id)}
-                  aria-pressed={rt.id === runtimeId}
-                  className="stage-btn whitespace-nowrap"
-                  style={{ fontSize: "11px", padding: "0.25em 0.6em" }}
-                  title={`${rt.blurb} (Hotkey ${i + 1})`}
-                >
-                  {rt.label} · {rt.minutes >= 240 ? "Lab" : `${rt.minutes}m`}
-                </button>
-              </li>
-            ))}
-          </ul>
-
-          {flexZones.length > 0 && (
-            <>
-              <div className="w-px h-4 bg-(--color-border-dark) mx-1 shrink-0" />
-              <ul className="flex items-center gap-1 list-none m-0 p-0">
-                {flexZones.map((zone) => (
-                  <li key={zone.id}>
-                    <button
-                      type="button"
-                      id={`stage-zone-${zone.id}`}
-                      onClick={() => toggleZone(zone.id)}
-                      aria-pressed={openZones.includes(zone.id)}
-                      className="stage-btn whitespace-nowrap"
-                      style={{ fontSize: "11px", padding: "0.25em 0.6em" }}
-                      title={`${zone.label} — ${zone.slides.length} slides, ${formatClock(zone.seconds)} of material (Hotkey Z)`}
-                    >
-                      Flex {formatClock(zone.seconds)} (Z)
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </>
+          <span>{runtime.label}</span>
+          <span aria-hidden="true" style={{ color: "var(--stage-text-muted)" }}>
+            {formatRuntimeLength(runtime.minutes)}
+          </span>
+          {openZones.length > 0 && (
+            <span aria-label="flex zone open" style={{ color: "var(--stage-accent-alt)" }}>
+              + flex
+            </span>
           )}
-
-          <div className="w-px h-4 bg-(--color-border-dark) mx-1 shrink-0" />
-
-          <button
-            type="button"
-            id="deck-directory-btn"
-            onClick={() => setShowDeckModal(true)}
-            className="stage-btn whitespace-nowrap"
-            style={{ fontSize: "11px", padding: "0.25em 0.6em" }}
-            title="Open the deck directory (Hotkey D)"
-          >
-            Decks (D)
-          </button>
-        </nav>
+          <kbd aria-hidden="true" className="font-mono" style={{ color: "var(--stage-text-muted)" }}>
+            S
+          </kbd>
+        </button>
 
         {/* Reze Mode Switch Button */}
         <div className="flex items-center gap-2">
@@ -1770,13 +1583,24 @@ export const WorkshopSlides = () => {
         </div>
       </header>
 
-      {/* Integrated Deck Directory Modal */}
-      <DeckDirectoryModal
-        isOpen={showDeckModal}
-        onClose={() => setShowDeckModal(false)}
+      {/* Presenter sidebar: deck, runtime and flex zones, out of the slide's way. */}
+      <StageSidebar
+        isOpen={showSidebar}
+        onClose={closeSidebar}
+        deckTitle={currentDeck.meta.title}
+        allSlides={allSlides}
+        runtimeId={runtimeId}
+        onRuntimeChange={changeRuntime}
+        flexZones={flexZones}
+        openZones={openZones}
+        onToggleZone={toggleZone}
+        liveDecks={getLiveDecks()}
+        shelvedDecks={getShelvedDecks()}
         activeDeckId={activeDeckId}
-        onSelectDeck={(id) => navigate(`/slides/${id}`)}
-        allDecks={allDecks}
+        onSelectDeck={(id) => {
+          setShowSidebar(false);
+          navigate(`/slides/${id}`);
+        }}
       />
 
       {/* Ambient background glow */}
@@ -1867,57 +1691,8 @@ export const WorkshopSlides = () => {
             </div>
           </dl>
 
-          {/* Runtime: contract or expand the deck mid-talk. */}
-          <div className="mt-3 pt-3 border-t border-(--color-border-dark)">
-            <p className="text-[9px] uppercase tracking-widest text-(--color-muted-text-dark) font-mono mb-1.5 m-0">
-              Runtime — {slides.length} slides / {formatClock(pacing.totalSeconds)} planned
-            </p>
-            <ul className="flex flex-wrap gap-1 list-none m-0 p-0">
-              {Object.values(RUNTIMES).map((rt, i) => (
-                <li key={rt.id}>
-                  <button
-                    type="button"
-                    id={`runtime-${rt.id}`}
-                    onClick={() => changeRuntime(rt.id)}
-                    aria-pressed={rt.id === runtimeId}
-                    title={rt.blurb}
-                    className="stage-btn"
-                    style={{ fontSize: "10px", padding: "0.3em 0.6em" }}
-                  >
-                    {i + 1} {rt.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Flex zones: standing room, pulled in on demand. */}
-          {flexZones.length > 0 && (
-            <div className="mt-3 pt-3 border-t border-(--color-border-dark)">
-              <p className="text-[9px] uppercase tracking-widest text-(--color-muted-text-dark) font-mono mb-1.5 m-0">
-                Flex Zones — pull in while a build runs
-              </p>
-              <ul className="flex flex-wrap gap-1 list-none m-0 p-0">
-                {flexZones.map((zone) => (
-                  <li key={zone.id}>
-                    <button
-                      type="button"
-                      id={`zone-${zone.id}`}
-                      onClick={() => toggleZone(zone.id)}
-                      aria-pressed={openZones.includes(zone.id)}
-                      className="stage-btn"
-                      style={{ fontSize: "10px", padding: "0.3em 0.6em" }}
-                    >
-                      {zone.label} · {zone.slides.length} · {formatClock(zone.seconds)}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
           <div className="mt-3 pt-2 border-t border-(--color-border-dark) text-[10px] text-(--color-muted-text-dark) font-mono font-medium">
-            1-4 Runtime &bull; Z Flex Zone &bull; N Notes &bull; P PDF &bull; F Fullscreen &bull; T Timer &bull; R Reset
+            S Sidebar &bull; 1-5 Runtime &bull; Z Flex &bull; N Notes &bull; P PDF &bull; F Fullscreen &bull; T Timer &bull; R Reset
           </div>
         </div>
       )}

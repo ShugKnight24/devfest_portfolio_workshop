@@ -4,65 +4,68 @@ import {
   AVATAR_GROUPS,
   AVATAR_TOGGLES,
 } from "../config/avatar";
+import { Checkmark, Close, Info, Refresh, Settings, Swap } from "./Icons";
 
 /**
  * SceneCustomizer — the "make it look like my desk" panel.
  *
- * Collapsed to a single button by default so the landing page stays calm.
+ * It is a COLUMN, not an overlay. The scene puts it beside the illustration
+ * when there is room and underneath when there is not, so you can always see
+ * the thing you are changing while you change it.
+ *
  * Single-select axes are real radio groups (arrow-key navigable, unique ids,
  * `<fieldset>`/`<legend>`/`<label>`); boolean props are buttons with
  * `aria-pressed`. Every colour swatch is paired with its name — colour is
  * never the only signal.
+ *
+ * Every colour here comes from a design token, so the panel keeps its contrast
+ * in both modes and under every theme: the `--color-primary` /
+ * `--color-primary-text` pair is contrast-checked by the theme resolver, and
+ * text/muted/border/surface flip with `.dark`.
  */
 
-const SlidersIcon = (props) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true" {...props}>
-    <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" />
-    <circle cx="16" cy="6" r="2" />
-    <circle cx="10" cy="12" r="2" />
-    <circle cx="18" cy="18" r="2" />
-  </svg>
-);
+/** One height for every control in the panel, so the density reads as designed. */
+const CONTROL = "h-8 rounded-lg border px-2.5 text-[11px] font-mono leading-none";
 
-const CloseIcon = (props) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true" {...props}>
-    <path d="M6 6l12 12M18 6L6 18" />
-  </svg>
-);
+const FOCUS =
+  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--color-primary)";
 
-const DiceIcon = (props) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinejoin="round" aria-hidden="true" {...props}>
-    <rect x="3" y="3" width="18" height="18" rx="4" />
-    <circle cx="8.5" cy="8.5" r="1.3" fill="currentColor" stroke="none" />
-    <circle cx="15.5" cy="15.5" r="1.3" fill="currentColor" stroke="none" />
-    <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none" />
-  </svg>
-);
+const PEER_FOCUS =
+  "peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-(--color-primary)";
 
-const ResetIcon = (props) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
-    <path d="M3 12a9 9 0 1 0 3-6.7" />
-    <path d="M3 4v5h5" />
-  </svg>
-);
+/** Resting state: surface + border + body text, i.e. the same as a card. */
+const CHIP_OFF =
+  "border-(--color-border) bg-(--color-surface) text-(--color-text) hover:border-(--color-primary) " +
+  "dark:border-(--color-border-dark) dark:bg-(--color-surface-hover-dark) dark:text-(--color-text-dark)";
 
-const CheckIcon = (props) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
-    <path d="M5 13l4 4L19 7" />
-  </svg>
-);
+/** Selected state: the contrast-checked brand pair, identical in both modes. */
+const CHIP_ON = "border-(--color-primary) bg-(--color-primary) text-(--color-primary-text)";
 
-const chipBase =
-  "flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[11px] font-mono leading-tight transition-colors cursor-pointer";
+const CHIP_BASE = `${CONTROL} inline-flex cursor-pointer select-none items-center gap-2 transition-colors`;
+
+const SECONDARY_BUTTON =
+  `${CONTROL} ${FOCUS} inline-flex cursor-pointer items-center gap-1.5 uppercase tracking-wider transition-colors ` +
+  "border-(--color-border) bg-(--color-surface) text-(--color-text) hover:border-(--color-primary) " +
+  "dark:border-(--color-border-dark) dark:bg-(--color-surface-hover-dark) dark:text-(--color-text-dark)";
+
+const LEGEND =
+  "mb-1.5 text-[10px] font-mono font-bold uppercase tracking-widest " +
+  "text-(--color-muted-text) dark:text-(--color-muted-text-dark)";
+
+const Swatch = ({ color }) => (
+  <span
+    className="h-4 w-4 shrink-0 rounded-full border border-(--color-border) dark:border-(--color-border-dark)"
+    style={{ backgroundColor: color }}
+    aria-hidden="true"
+  />
+);
 
 const ChoiceGroup = ({ choice, value, onChange, idPrefix }) => {
   const groupName = `${idPrefix}-${choice.id}`;
 
   return (
-    <fieldset className="border-0 p-0 m-0">
-      <legend className="mb-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-gray-400">
-        {choice.label}
-      </legend>
+    <fieldset className="m-0 border-0 p-0">
+      <legend className={LEGEND}>{choice.label}</legend>
       <div className="flex flex-wrap gap-1.5">
         {choice.options.map((option) => {
           const optionId = `${groupName}-${option.id}`;
@@ -81,15 +84,9 @@ const ChoiceGroup = ({ choice, value, onChange, idPrefix }) => {
               />
               <label
                 htmlFor={optionId}
-                className={`${chipBase} border-gray-700 bg-black/40 text-gray-300 hover:border-gray-500 hover:text-white peer-checked:border-(--color-primary) peer-checked:bg-white/10 peer-checked:text-white peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-(--color-primary)`}
+                className={`${CHIP_BASE} ${PEER_FOCUS} ${selected ? CHIP_ON : CHIP_OFF}`}
               >
-                {choice.swatch && (
-                  <span
-                    className="h-3.5 w-3.5 shrink-0 rounded-full border border-white/25"
-                    style={{ backgroundColor: option[choice.swatch] }}
-                    aria-hidden="true"
-                  />
-                )}
+                {choice.swatch && <Swatch color={option[choice.swatch]} />}
                 <span>{option.label}</span>
               </label>
             </span>
@@ -101,10 +98,8 @@ const ChoiceGroup = ({ choice, value, onChange, idPrefix }) => {
 };
 
 const ToggleGroup = ({ toggles, avatar, onChange, legend }) => (
-  <fieldset className="border-0 p-0 m-0">
-    <legend className="mb-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-gray-400">
-      {legend}
-    </legend>
+  <fieldset className="m-0 border-0 p-0">
+    <legend className={LEGEND}>{legend}</legend>
     <div className="flex flex-wrap gap-1.5">
       {toggles.map((toggle) => {
         const on = Boolean(avatar[toggle.id]);
@@ -114,19 +109,17 @@ const ToggleGroup = ({ toggles, avatar, onChange, legend }) => (
             type="button"
             aria-pressed={on}
             onClick={() => onChange(toggle.id, !on)}
-            className={`${chipBase} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--color-primary) ${
-              on
-                ? "border-(--color-primary) bg-white/10 text-white"
-                : "border-gray-700 bg-black/40 text-gray-400 hover:border-gray-500 hover:text-white"
-            }`}
+            className={`${CHIP_BASE} ${FOCUS} ${on ? CHIP_ON : CHIP_OFF}`}
           >
             <span
-              className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border ${
-                on ? "border-(--color-primary) text-(--color-primary)" : "border-gray-600 text-transparent"
+              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                on
+                  ? "border-current"
+                  : "border-(--color-muted-text) dark:border-(--color-muted-text-dark)"
               }`}
               aria-hidden="true"
             >
-              <CheckIcon className="h-2.5 w-2.5" />
+              {on && <Checkmark className="h-3 w-3" />}
             </span>
             <span>{toggle.label}</span>
           </button>
@@ -149,63 +142,76 @@ export const SceneCustomizer = ({
   const idPrefix = rawId.replace(/[^a-zA-Z0-9]/g, "");
   const panelId = `${idPrefix}-scene-customizer`;
   const headingId = `${idPrefix}-scene-customizer-heading`;
+  const hintId = `${idPrefix}-scene-customizer-hint`;
 
   return (
-    <div className="absolute right-2 top-2 z-30 flex flex-col items-end gap-2">
+    <div className={`flex shrink-0 flex-col gap-2 ${open ? "@3xl:w-[21rem]" : ""}`}>
       <button
         type="button"
         onClick={onToggle}
         aria-expanded={open}
         aria-controls={panelId}
-        className="flex cursor-pointer items-center gap-1.5 rounded-xl border border-gray-700 bg-black/70 px-3 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-gray-200 backdrop-blur-md transition-colors hover:border-(--color-primary) hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--color-primary)"
+        className={
+          `${CONTROL} ${FOCUS} inline-flex cursor-pointer items-center justify-center gap-1.5 self-start ` +
+          "border-(--color-primary) bg-(--color-primary) font-bold uppercase tracking-wider " +
+          "text-(--color-primary-text) transition-opacity hover:opacity-90"
+        }
       >
-        {open ? <CloseIcon className="h-3.5 w-3.5" /> : <SlidersIcon className="h-3.5 w-3.5" />}
-        <span>{open ? "Close" : "Customize"}</span>
+        {open ? <Close className="h-3.5 w-3.5" /> : <Settings className="h-3.5 w-3.5" />}
+        <span>{open ? "Close" : "Customize scene"}</span>
       </button>
 
       <div
         id={panelId}
         role="group"
         aria-labelledby={headingId}
+        aria-describedby={hintId}
         hidden={!open}
-        className="max-h-[22rem] w-[min(88vw,21rem)] overflow-y-auto rounded-2xl border border-gray-700 bg-black/90 p-3 shadow-2xl backdrop-blur-xl"
+        className={
+          "rounded-2xl border border-(--color-border) bg-(--color-surface) shadow-lg " +
+          "dark:border-(--color-border-dark) dark:bg-(--color-surface-dark) " +
+          "@3xl:max-h-[34rem] @3xl:overflow-y-auto"
+        }
       >
-        <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-(--color-border) px-3 py-2.5 dark:border-(--color-border-dark)">
           <h3
             id={headingId}
-            className="text-[11px] font-mono font-bold uppercase tracking-widest text-(--color-primary)"
+            className="text-[11px] font-mono font-bold uppercase tracking-widest text-(--color-text) dark:text-(--color-text-dark)"
           >
             Make it your desk
           </h3>
           <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={onRandomize}
-              className="flex cursor-pointer items-center gap-1 rounded-lg border border-gray-700 bg-black/60 px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-gray-300 transition-colors hover:border-(--color-primary) hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--color-primary)"
-            >
-              <DiceIcon className="h-3 w-3" />
+            <button type="button" onClick={onRandomize} className={SECONDARY_BUTTON}>
+              <Swap className="h-3 w-3" />
               <span>Randomize</span>
             </button>
-            <button
-              type="button"
-              onClick={onReset}
-              className="flex cursor-pointer items-center gap-1 rounded-lg border border-gray-700 bg-black/60 px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-gray-300 transition-colors hover:border-(--color-primary) hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--color-primary)"
-            >
-              <ResetIcon className="h-3 w-3" />
+            <button type="button" onClick={onReset} className={SECONDARY_BUTTON}>
+              <Refresh className="h-3 w-3" />
               <span>Reset</span>
             </button>
           </div>
         </div>
 
-        <div className="space-y-4">
+        <p
+          id={hintId}
+          className="flex items-start gap-2 border-b border-(--color-border) px-3 py-2.5 text-[11px] leading-relaxed text-(--color-muted-text) dark:border-(--color-border-dark) dark:text-(--color-muted-text-dark)"
+        >
+          <Info className="mt-px h-3.5 w-3.5 shrink-0" />
+          <span>
+            Props can be moved. Drag one in the scene, or tab to it and nudge it with the
+            arrow keys — hold shift for larger steps.
+          </span>
+        </p>
+
+        <div className="divide-y divide-(--color-border) dark:divide-(--color-border-dark)">
           {AVATAR_GROUPS.map((group) => {
             const choices = AVATAR_CHOICES.filter((choice) => choice.group === group.id);
             const toggles = AVATAR_TOGGLES.filter((toggle) => toggle.group === group.id);
             if (!choices.length && !toggles.length) return null;
 
             return (
-              <section key={group.id} className="space-y-3">
-                <h4 className="text-[10px] font-mono font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
+              <section key={group.id} className="space-y-3 px-3 py-3">
+                <h4 className="text-[10px] font-mono font-bold uppercase tracking-widest text-(--color-text) dark:text-(--color-text-dark)">
                   {group.label}
                 </h4>
                 {choices.map((choice) => (

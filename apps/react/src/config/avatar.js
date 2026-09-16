@@ -156,6 +156,222 @@ export const AVATAR_GROUPS = [
   { id: "scene", label: "Scene" },
 ];
 
+/* --------------------------------------------------------------------------
+ * Placeable props
+ *
+ * Everything on the desk (and Luna) used to be nailed to a literal in the SVG,
+ * so two props enabled at once could land on top of each other and there was no
+ * way to move either. Each one now carries an anchor — the point where it meets
+ * the surface it stands on — plus the bounding box it occupies relative to that
+ * anchor. The SVG art itself is unchanged: it is drawn at the default anchor and
+ * translated by the delta, which keeps this file the single source of truth for
+ * where things are.
+ * ------------------------------------------------------------------------ */
+
+/** Desk surface line. The SVG imports this so the two can never drift. */
+export const DESK_TOP = 344;
+
+/**
+ * Legal regions, expressed as the box a prop's FOOTPRINT must stay inside.
+ * Desk props keep a shallow vertical band around the desk top so the arrow
+ * keys can push something a little further back or forward without letting it
+ * float off the surface; floor items live below the desk line (y=366).
+ */
+export const SCENE_SURFACES = Object.freeze({
+  desk: Object.freeze({ minX: 104, maxX: 708, minY: DESK_TOP - 10, maxY: DESK_TOP + 8 }),
+  floor: Object.freeze({ minX: 40, maxX: 780, minY: 436, maxY: 488 }),
+});
+
+/**
+ * `depth` is the paint order: lower numbers are further back and draw first.
+ * The display plane sits at DISPLAY_DEPTH, so a prop with a smaller depth is
+ * painted behind the screen and a larger one in front of it.
+ */
+export const DISPLAY_DEPTH = 50;
+
+export const SCENE_PROPS = Object.freeze([
+  { id: "lamp", label: "Desk lamp", surface: "desk", depth: 10, x: 276, y: DESK_TOP, box: { dx: -21, dy: -96, w: 69, h: 96 } },
+  { id: "plant", label: "Plant", surface: "desk", depth: 20, x: 135, y: DESK_TOP, box: { dx: -27, dy: -94, w: 64, h: 94 } },
+  { id: "books", label: "Books", surface: "desk", depth: 30, x: 205, y: DESK_TOP, box: { dx: -33, dy: -32, w: 66, h: 32 } },
+  { id: "companion", label: "Luna", surface: "floor", depth: 40, x: 186, y: 480, box: { dx: -62, dy: -126, w: 130, h: 126 } },
+  { id: "keyboard", label: "Keyboard", surface: "desk", depth: 60, x: 400, y: DESK_TOP, box: { dx: -60, dy: -22, w: 120, h: 22 } },
+  { id: "phone", label: "Phone", surface: "desk", depth: 70, x: 542, y: DESK_TOP, box: { dx: -18, dy: -40, w: 36, h: 40 } },
+  { id: "mug", label: "Coffee mug", surface: "desk", depth: 80, x: 495, y: DESK_TOP, box: { dx: -17, dy: -34, w: 46, h: 34 } },
+].map(Object.freeze));
+
+export const PROP_IDS = SCENE_PROPS.map((prop) => prop.id);
+
+export const findProp = (id) => SCENE_PROPS.find((prop) => prop.id === id);
+
+/** Ordered back-to-front, the order the SVG paints them in. */
+export const propsByDepth = () => [...SCENE_PROPS].sort((a, b) => a.depth - b.depth);
+
+/**
+ * Which avatar key switches each prop on. The keyboard is the odd one out: it
+ * appears for a mechanical board OR for any non-laptop display, and the
+ * companion is a single-select axis rather than a boolean.
+ */
+export const isPropEnabled = (avatar, id) => {
+  if (!avatar) return false;
+  if (id === "companion") return avatar.companion === "luna";
+  if (id === "keyboard") return Boolean(avatar.mechKeyboard) || avatar.display !== "laptop";
+  return Boolean(avatar[id]);
+};
+
+/** The avatar key a toggle in the panel maps to, for re-slotting on enable. */
+export const PROP_FOR_TOGGLE = Object.freeze({
+  mug: "mug",
+  plant: "plant",
+  books: "books",
+  lamp: "lamp",
+  phone: "phone",
+  mechKeyboard: "keyboard",
+  display: "keyboard",
+  companion: "companion",
+});
+
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+/** The anchor range that keeps a prop's whole footprint inside its surface. */
+export const propBounds = (prop) => {
+  const surface = SCENE_SURFACES[prop.surface] || SCENE_SURFACES.desk;
+  const minX = surface.minX - prop.box.dx;
+  const maxX = surface.maxX - (prop.box.dx + prop.box.w);
+  return {
+    minX,
+    maxX: Math.max(minX, maxX),
+    minY: surface.minY,
+    maxY: surface.maxY,
+  };
+};
+
+/** Absolute bounding box for a prop sitting at `position`. */
+export const propFootprint = (prop, position) => ({
+  x: position.x + prop.box.dx,
+  y: position.y + prop.box.dy,
+  w: prop.box.w,
+  h: prop.box.h,
+});
+
+const boxesOverlap = (a, b, pad = 0) =>
+  a.x < b.x + b.w + pad &&
+  b.x < a.x + a.w + pad &&
+  a.y < b.y + b.h + pad &&
+  b.y < a.y + a.h + pad;
+
+/**
+ * The display is furniture, not a prop, but it still owns desk space. The
+ * keyboard is exempt: it is *meant* to sit in front of the screen.
+ */
+const displayFootprint = (avatar) => {
+  if (avatar.display === "laptop") return [{ x: 328, y: 242, w: 144, h: 102 }];
+  if (avatar.display === "dual") {
+    return [
+      { x: 330, y: 232, w: 140, h: 112 },
+      { x: 556, y: 236, w: 160, h: 110 },
+    ];
+  }
+  return [{ x: 330, y: 232, w: 140, h: 112 }];
+};
+
+/** Every box a prop has to avoid, excluding the prop itself. */
+export const occupiedBoxes = (avatar, id) => {
+  const prop = findProp(id);
+  if (!prop) return [];
+  const boxes = [];
+
+  SCENE_PROPS.forEach((other) => {
+    if (other.id === id) return;
+    if (other.surface !== prop.surface) return;
+    if (!isPropEnabled(avatar, other.id)) return;
+    const position = readPosition(avatar, other.id);
+    boxes.push(propFootprint(other, position));
+  });
+
+  if (prop.surface === "desk" && id !== "keyboard") {
+    boxes.push(...displayFootprint(avatar));
+  }
+
+  return boxes;
+};
+
+/** Does `position` put `id` on top of anything currently in the scene? */
+export const propCollides = (avatar, id, position) => {
+  const prop = findProp(id);
+  if (!prop) return false;
+  const box = propFootprint(prop, position);
+  return occupiedBoxes(avatar, id).some((other) => boxesOverlap(box, other, 2));
+};
+
+/** Clamp an arbitrary value into a prop's legal region, repairing garbage. */
+export const clampPropPosition = (id, position) => {
+  const prop = findProp(id);
+  if (!prop) return null;
+  const bounds = propBounds(prop);
+  const source = position && typeof position === "object" && !Array.isArray(position) ? position : {};
+  const x = Number.isFinite(source.x) ? source.x : prop.x;
+  const y = Number.isFinite(source.y) ? source.y : prop.y;
+  return {
+    x: clamp(x, bounds.minX, bounds.maxX),
+    y: clamp(y, bounds.minY, bounds.maxY),
+  };
+};
+
+export const readPosition = (avatar, id) => {
+  const stored = avatar && avatar.positions ? avatar.positions[id] : null;
+  return clampPropPosition(id, stored);
+};
+
+export const DEFAULT_PROP_POSITIONS = Object.freeze(
+  Object.fromEntries(SCENE_PROPS.map((prop) => [prop.id, Object.freeze({ x: prop.x, y: prop.y })])),
+);
+
+/**
+ * First free slot for a prop being switched on.
+ *
+ * Starts where the prop already is (so toggling something off and back on puts
+ * it where you left it), then walks outwards along the surface in both
+ * directions until the footprint stops overlapping anything. Falls back to the
+ * starting point if the surface is genuinely full — better a stacked prop than
+ * a prop that refuses to appear.
+ */
+export const findFreeSlot = (avatar, id, from) => {
+  const prop = findProp(id);
+  if (!prop) return null;
+
+  const start = clampPropPosition(id, from || readPosition(avatar, id));
+  if (!propCollides(avatar, id, start)) return start;
+
+  const bounds = propBounds(prop);
+  const STEP = 8;
+  const span = bounds.maxX - bounds.minX;
+
+  for (let offset = STEP; offset <= span; offset += STEP) {
+    for (const direction of [1, -1]) {
+      const candidate = clampPropPosition(id, { x: start.x + offset * direction, y: start.y });
+      if (!propCollides(avatar, id, candidate)) return candidate;
+    }
+  }
+
+  return start;
+};
+
+/** Lay every enabled prop out so nothing starts the scene stacked. */
+export const arrangeProps = (avatar) => {
+  const positions = {};
+  SCENE_PROPS.forEach((prop) => {
+    positions[prop.id] = { ...DEFAULT_PROP_POSITIONS[prop.id] };
+  });
+
+  const working = { ...avatar, positions };
+  propsByDepth().forEach((prop) => {
+    if (!isPropEnabled(working, prop.id)) return;
+    positions[prop.id] = findFreeSlot(working, prop.id, DEFAULT_PROP_POSITIONS[prop.id]);
+  });
+
+  return positions;
+};
+
 /**
  * The default is Shug — this is his workshop, so the scene opens as him.
  * Matched from apps/react/public/assets/images/shug_headshot.jpg: shaved head,
@@ -182,6 +398,7 @@ export const DEFAULT_AVATAR = Object.freeze({
   lamp: true,
   mechKeyboard: false,
   phone: false,
+  positions: DEFAULT_PROP_POSITIONS,
 });
 
 /** Resolve an option object by id, falling back to the list's first entry. */
@@ -211,6 +428,21 @@ export const normalizeAvatar = (input) => {
     }
   });
 
+  /*
+   * Positions are rebuilt key by key rather than spread, so a stale blob can
+   * neither smuggle in an unknown prop nor hand back a shared reference to the
+   * frozen defaults. `clampPropPosition` repairs NaN, strings, nulls, missing
+   * axes and anything outside the legal region.
+   */
+  const rawPositions =
+    source.positions && typeof source.positions === "object" && !Array.isArray(source.positions)
+      ? source.positions
+      : {};
+
+  result.positions = Object.fromEntries(
+    SCENE_PROPS.map((prop) => [prop.id, clampPropPosition(prop.id, rawPositions[prop.id])]),
+  );
+
   return result;
 };
 
@@ -227,6 +459,10 @@ export const randomAvatar = () => {
   AVATAR_TOGGLES.forEach(({ id }) => {
     result[id] = Math.random() < 0.5;
   });
+
+  // A random scene still has to be a legible one: lay the props out rather
+  // than dropping them all on their defaults where several would collide.
+  result.positions = arrangeProps(result);
 
   return result;
 };

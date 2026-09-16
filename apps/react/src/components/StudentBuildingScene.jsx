@@ -1,16 +1,28 @@
-import { useCallback, useId, useMemo, useState } from "react";
+import { useCallback, useId, useMemo, useRef, useState } from "react";
 import {
   CHAIR_COLORS,
   DEFAULT_AVATAR,
   DESK_SURFACES,
+  DESK_TOP,
+  DISPLAY_DEPTH,
   HAIR_COLORS,
+  PROP_FOR_TOGGLE,
   SKIN_TONES,
   TOP_COLORS,
+  clampPropPosition,
   describeAvatar,
   findOption,
+  findFreeSlot,
+  findProp,
+  isPropEnabled,
   loadAvatar,
   normalizeAvatar,
+  propBounds,
+  propCollides,
+  propFootprint,
+  propsByDepth,
   randomAvatar,
+  readPosition,
   saveAvatar,
 } from "../config/avatar";
 import { SceneCustomizer } from "./SceneCustomizer";
@@ -35,7 +47,6 @@ import { SceneCustomizer } from "./SceneCustomizer";
 const CENTER = 400;
 /** Monitors emit a cool blue-white, not the brand hue. */
 const SCREEN_LIGHT = "#BFE6FF";
-const DESK_TOP = 344;
 const HEAD_PATH =
   "M373 168 C373 145, 384 133, 400 133 C416 133, 427 145, 427 168 " +
   "C427 181, 424 191, 416 197 C410 202, 405 204, 400 204 " +
@@ -620,6 +631,106 @@ const ScreenPanel = ({ x, y, width, height, screenGradId, glowGradId, children }
 );
 
 /* --------------------------------------------------------------------------
+ * Movable props
+ *
+ * Each prop's art is still drawn at the coordinates it was authored at; the
+ * wrapper translates it by the delta between that anchor and the position held
+ * in the avatar config. Pointer drags and arrow-key nudges both write to the
+ * same place, so the two input methods can never disagree.
+ * ------------------------------------------------------------------------ */
+const NUDGE = 4;
+const NUDGE_FAST = 16;
+const RING_PAD = 5;
+const ARROW_DELTAS = {
+  ArrowLeft: [-1, 0],
+  ArrowRight: [1, 0],
+  ArrowUp: [0, -1],
+  ArrowDown: [0, 1],
+};
+
+/** A focus/drag ring that survives both backdrops: dark halo, accent core. */
+const PropRing = ({ box, invalid }) => (
+  <g pointerEvents="none">
+    <rect
+      x={box.x - RING_PAD}
+      y={box.y - RING_PAD}
+      width={box.w + RING_PAD * 2}
+      height={box.h + RING_PAD * 2}
+      rx={7}
+      fill={invalid ? "#F97316" : "#FFFFFF"}
+      fillOpacity={invalid ? 0.16 : 0.07}
+      stroke="#05070B"
+      strokeOpacity={0.55}
+      strokeWidth={5}
+    />
+    <rect
+      x={box.x - RING_PAD}
+      y={box.y - RING_PAD}
+      width={box.w + RING_PAD * 2}
+      height={box.h + RING_PAD * 2}
+      rx={7}
+      fill="none"
+      stroke={invalid ? "#FDBA74" : "var(--color-primary, #00FFCC)"}
+      strokeWidth={2}
+      strokeDasharray={invalid ? "6 4" : "5 4"}
+    />
+  </g>
+);
+
+const MovableProp = ({
+  prop,
+  position,
+  interactive = true,
+  active,
+  invalid,
+  label,
+  onPointerDown,
+  onPointerMove,
+  onPointerUp,
+  onKeyDown,
+  onFocus,
+  onBlur,
+  children,
+}) => {
+  // The art was authored at the prop's default anchor, so only the delta moves.
+  const dx = Math.round((position.x - prop.x) * 100) / 100;
+  const dy = Math.round((position.y - prop.y) * 100) / 100;
+  const box = propFootprint(prop, { x: prop.x, y: prop.y });
+  const transform = dx || dy ? `translate(${dx} ${dy})` : undefined;
+
+  if (!interactive) {
+    return <g transform={transform}>{children}</g>;
+  }
+
+  return (
+    <g
+      className="scene-prop"
+      transform={transform}
+      tabIndex={0}
+      role="button"
+      aria-label={label}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
+      onKeyDown={onKeyDown}
+      onFocus={onFocus}
+      onBlur={onBlur}
+      style={{
+        cursor: active === "drag" ? "grabbing" : "grab",
+        touchAction: "none",
+        outline: "none",
+      }}
+    >
+      {/* Generous hit area — a lamp arm is 5px wide and impossible to grab. */}
+      <rect x={box.x} y={box.y} width={box.w} height={box.h} fill="transparent" />
+      {children}
+      {active && <PropRing box={box} invalid={invalid} />}
+    </g>
+  );
+};
+
+/* --------------------------------------------------------------------------
  * Desk props
  * ------------------------------------------------------------------------ */
 const Plant = () => (
@@ -944,8 +1055,17 @@ const LunaCurled = ({ accent }) => (
  * Curled needs no transform: it already lives at y=418-480, entirely under the
  * desk edge. That is why it is the default — a dog asleep under the desk is
  * both the truer picture and the one that never occludes anything.
+ *
+ * Both poses are now re-anchored onto the SAME contact point (the `companion`
+ * entry in SCENE_PROPS) so that one stored position places either of them, and
+ * dragging her does not mean two sets of coordinates to keep in step.
  */
-const SITTING_PLACEMENT = "translate(570, 131) scale(0.72)";
+const LUNA_ANCHOR = { x: 186, y: 480 };
+/** Where the sitting artwork's feet actually are, before it is re-anchored. */
+const SITTING_FEET = { x: 176, y: 479 };
+const SITTING_PLACEMENT =
+  `translate(${LUNA_ANCHOR.x} ${LUNA_ANCHOR.y}) scale(0.72) ` +
+  `translate(${-SITTING_FEET.x} ${-SITTING_FEET.y})`;
 
 const Luna = ({ pose, accent }) => (
   <g transform={pose === "curled" ? undefined : SITTING_PLACEMENT}>
@@ -978,6 +1098,12 @@ export const StudentBuildingScene = ({
     avatarProp ? normalizeAvatar(avatarProp) : loadAvatar(),
   );
   const [panelOpen, setPanelOpen] = useState(false);
+  /** Live drag state. `null` whenever nothing is being dragged. */
+  const [drag, setDrag] = useState(null);
+  const [focusedProp, setFocusedProp] = useState(null);
+  /** Spoken, not drawn: every move and every addition is announced. */
+  const [status, setStatus] = useState("");
+  const svgRef = useRef(null);
 
   const avatar = useMemo(
     () => normalizeAvatar(avatarProp ?? storedAvatar),
@@ -988,14 +1114,167 @@ export const StudentBuildingScene = ({
     const normalized = normalizeAvatar(next);
     setStoredAvatar(normalized);
     saveAvatar(normalized);
+    return normalized;
   }, []);
 
+  /**
+   * Turning a prop on puts it in the first free slot rather than on a fixed
+   * literal that something else may already occupy.
+   */
   const handleChange = useCallback(
-    (key, value) => commit({ ...avatar, [key]: value }),
+    (key, value) => {
+      const next = { ...avatar, [key]: value };
+      const propId = PROP_FOR_TOGGLE[key];
+
+      if (propId && !isPropEnabled(avatar, propId) && isPropEnabled(next, propId)) {
+        const slot = findFreeSlot(next, propId);
+        next.positions = { ...avatar.positions, [propId]: slot };
+        const prop = findProp(propId);
+        const moved = Math.round(slot.x) !== Math.round(readPosition(avatar, propId).x);
+        setStatus(
+          `${prop.label} added${moved ? " in the nearest free space" : ""}. ` +
+            "Drag it, or focus it and use the arrow keys, to move it.",
+        );
+      } else if (propId && isPropEnabled(avatar, propId) && !isPropEnabled(next, propId)) {
+        setStatus(`${findProp(propId).label} removed.`);
+      }
+
+      commit(next);
+    },
     [avatar, commit],
   );
-  const handleRandomize = useCallback(() => commit(randomAvatar()), [commit]);
-  const handleReset = useCallback(() => commit(DEFAULT_AVATAR), [commit]);
+
+  const handleRandomize = useCallback(() => {
+    commit(randomAvatar());
+    setStatus("Scene randomized. Every prop was laid out in free space.");
+  }, [commit]);
+
+  const handleReset = useCallback(() => {
+    commit(DEFAULT_AVATAR);
+    setStatus("Scene reset to its starting layout.");
+  }, [commit]);
+
+  /* ---------------- moving props ---------------- */
+
+  /**
+   * Client pixels to SVG user units. The viewBox is 800x500 but the element is
+   * fluid, so the two are never 1:1 — the screen CTM is the only honest way to
+   * convert, and it also handles page zoom and any ancestor transform.
+   */
+  const toSvgPoint = useCallback((event) => {
+    const svg = svgRef.current;
+    if (!svg || typeof svg.getScreenCTM !== "function") return null;
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return null;
+    const point = svg.createSVGPoint();
+    point.x = event.clientX;
+    point.y = event.clientY;
+    const local = point.matrixTransform(ctm.inverse());
+    return { x: local.x, y: local.y };
+  }, []);
+
+  const positionOf = useCallback(
+    (id) => (drag && drag.id === id ? { x: drag.x, y: drag.y } : readPosition(avatar, id)),
+    [avatar, drag],
+  );
+
+  const movePropTo = useCallback(
+    (id, next) => {
+      // Whole units: the CTM inverse leaves float noise that nobody can see
+      // but everybody would read in the stored config.
+      const clamped = clampPropPosition(id, {
+        x: Math.round(next.x),
+        y: Math.round(next.y),
+      });
+      commit({ ...avatar, positions: { ...avatar.positions, [id]: clamped } });
+      const prop = findProp(id);
+      const overlapping = propCollides(avatar, id, clamped);
+      setStatus(
+        `${prop.label} moved to x ${Math.round(clamped.x)}, y ${Math.round(clamped.y)}` +
+          `${overlapping ? ", overlapping another item" : ""}.`,
+      );
+      return clamped;
+    },
+    [avatar, commit],
+  );
+
+  const handlePropPointerDown = useCallback(
+    (id) => (event) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      const point = toSvgPoint(event);
+      if (!point) return;
+      event.preventDefault();
+      const target = event.currentTarget;
+      try {
+        // Throws for a pointer id the UA no longer considers active.
+        target.setPointerCapture?.(event.pointerId);
+      } catch {
+        // Capture is an optimisation; the move handler works without it.
+      }
+      // preventScroll: focusing must not yank the page mid-drag.
+      if (typeof target.focus === "function") target.focus({ preventScroll: true });
+      const start = readPosition(avatar, id);
+      setDrag({
+        id,
+        pointerId: event.pointerId,
+        grabX: point.x - start.x,
+        grabY: point.y - start.y,
+        x: start.x,
+        y: start.y,
+        invalid: false,
+      });
+    },
+    [avatar, toSvgPoint],
+  );
+
+  const handlePropPointerMove = useCallback(
+    (id) => (event) => {
+      if (!drag || drag.id !== id) return;
+      const point = toSvgPoint(event);
+      if (!point) return;
+      const next = clampPropPosition(id, {
+        x: point.x - drag.grabX,
+        y: point.y - drag.grabY,
+      });
+      setDrag((prev) =>
+        prev && prev.id === id
+          ? { ...prev, ...next, invalid: propCollides(avatar, id, next) }
+          : prev,
+      );
+    },
+    [avatar, drag, toSvgPoint],
+  );
+
+  const handlePropPointerUp = useCallback(
+    (id) => (event) => {
+      if (!drag || drag.id !== id) return;
+      const target = event.currentTarget;
+      try {
+        if (target.hasPointerCapture?.(event.pointerId)) {
+          target.releasePointerCapture(event.pointerId);
+        }
+      } catch {
+        // Already released, or never captured.
+      }
+      movePropTo(id, { x: drag.x, y: drag.y });
+      setDrag(null);
+    },
+    [drag, movePropTo],
+  );
+
+  /** Drag is a mouse affordance; the arrow keys are the real contract. */
+  const handlePropKeyDown = useCallback(
+    (id) => (event) => {
+      const delta = ARROW_DELTAS[event.key];
+      if (!delta) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const step = event.shiftKey ? NUDGE_FAST : NUDGE;
+      const from = readPosition(avatar, id);
+      movePropTo(id, { x: from.x + delta[0] * step, y: from.y + delta[1] * step });
+    },
+    [avatar, movePropTo],
+  );
 
   const skin = findOption(SKIN_TONES, avatar.skinTone);
   const hair = findOption(HAIR_COLORS, avatar.hairColor);
@@ -1009,10 +1288,68 @@ export const StudentBuildingScene = ({
   const motifInk = isNight ? accent : "#0E7490";
   const label = describeAvatar(avatar);
 
-  const hasSeparateKeyboard = avatar.mechKeyboard || avatar.display !== "laptop";
+  /** A scene driven by a fixed `avatar` prop is a picture, not a workspace. */
+  const interactive = customizable && !avatarProp;
+
+  /* The art for each prop, drawn at its authored anchor. */
+  const propArt = {
+    lamp: <Lamp accent={isNight ? "#FDE68A" : "#FFFFFF"} lit={isNight} />,
+    plant: <Plant />,
+    books: <Books />,
+    companion: <Luna pose={avatar.companionPose} accent={accent} />,
+    keyboard: <Keyboard mech={avatar.mechKeyboard} accent={accent} />,
+    phone: <Phone accent={accent} />,
+    mug: <Mug accent={accent} />,
+  };
+
+  /**
+   * Paint order: back to front, by the depth declared in the config — a lamp
+   * belongs behind the books whatever the two are dragged to.
+   *
+   * Deliberately NOT re-sorted by the live y of each anchor: that reorders the
+   * DOM mid-nudge, and moving a focused <g> blurs it, which would break the
+   * arrow keys for exactly the people who depend on them.
+   */
+  const visibleProps = propsByDepth().filter((prop) => isPropEnabled(avatar, prop.id));
+
+  const renderProp = (prop) => {
+    const position = positionOf(prop.id);
+    const dragging = drag?.id === prop.id;
+    const bounds = propBounds(prop);
+
+    return (
+      <MovableProp
+        key={prop.id}
+        prop={prop}
+        position={position}
+        interactive={interactive}
+        active={dragging ? "drag" : focusedProp === prop.id ? "focus" : null}
+        invalid={dragging ? drag.invalid : false}
+        label={
+          `${prop.label}, movable. Position ${Math.round(position.x)}, ${Math.round(position.y)} ` +
+          `of ${Math.round(bounds.minX)} to ${Math.round(bounds.maxX)} across. ` +
+          "Arrow keys move it, shift and arrow moves further."
+        }
+        onPointerDown={handlePropPointerDown(prop.id)}
+        onPointerMove={handlePropPointerMove(prop.id)}
+        onPointerUp={handlePropPointerUp(prop.id)}
+        onKeyDown={handlePropKeyDown(prop.id)}
+        onFocus={() => {
+          setFocusedProp(prop.id);
+          setStatus(`${prop.label} selected. Use the arrow keys to move it.`);
+        }}
+        onBlur={() => setFocusedProp((current) => (current === prop.id ? null : current))}
+      >
+        {propArt[prop.id]}
+      </MovableProp>
+    );
+  };
+
+  const propsBehindDisplay = visibleProps.filter((prop) => prop.depth < DISPLAY_DEPTH);
+  const propsInFrontOfDisplay = visibleProps.filter((prop) => prop.depth >= DISPLAY_DEPTH);
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`@container ${className}`}>
       <style>{`
         @keyframes scene-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         @keyframes scene-float-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
@@ -1039,594 +1376,603 @@ export const StudentBuildingScene = ({
         }
       `}</style>
 
-      <svg
-        viewBox="0 0 800 500"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-full h-auto"
-        role="img"
-        aria-label={label}
-      >
-        <defs>
-          <linearGradient id={gid("bg")} x1="0" y1="0" x2="800" y2="500" gradientUnits="userSpaceOnUse">
-            {isNight ? (
-              <>
-                <stop offset="0%" stopColor="#0B1020" />
-                <stop offset="55%" stopColor="#0A0D14" />
-                <stop offset="100%" stopColor="#12101E" />
-              </>
-            ) : (
-              <>
-                <stop offset="0%" stopColor="#CFE3F2" />
-                <stop offset="55%" stopColor="#E9EEF3" />
-                <stop offset="100%" stopColor="#F3E7DA" />
-              </>
-            )}
-          </linearGradient>
+      {/*
+       * Scene and panel share a row once the container is wide enough and
+       * stack — panel underneath — when it is not. The panel is a sibling of
+       * the illustration, never an overlay on it.
+       */}
+      <div className="flex flex-col gap-4 @3xl:flex-row @3xl:items-start">
+        <div className="relative min-w-0 flex-1">
+          <svg
+            ref={svgRef}
+            viewBox="0 0 800 500"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-auto"
+            role="img"
+            aria-label={label}
+          >
+            <defs>
+              <linearGradient id={gid("bg")} x1="0" y1="0" x2="800" y2="500" gradientUnits="userSpaceOnUse">
+                {isNight ? (
+                  <>
+                    <stop offset="0%" stopColor="#0B1020" />
+                    <stop offset="55%" stopColor="#0A0D14" />
+                    <stop offset="100%" stopColor="#12101E" />
+                  </>
+                ) : (
+                  <>
+                    <stop offset="0%" stopColor="#CFE3F2" />
+                    <stop offset="55%" stopColor="#E9EEF3" />
+                    <stop offset="100%" stopColor="#F3E7DA" />
+                  </>
+                )}
+              </linearGradient>
 
-          <radialGradient id={gid("ambient")} cx="0.5" cy="0.62" r="0.55">
-            <stop offset="0%" stopColor={accent} stopOpacity={isNight ? 0.22 : 0.12} />
-            <stop offset="100%" stopColor={accent} stopOpacity="0" />
-          </radialGradient>
+              <radialGradient id={gid("ambient")} cx="0.5" cy="0.62" r="0.55">
+                <stop offset="0%" stopColor={accent} stopOpacity={isNight ? 0.22 : 0.12} />
+                <stop offset="100%" stopColor={accent} stopOpacity="0" />
+              </radialGradient>
 
-          {/* Skin: base with a soft falloff to shadow at the silhouette edge. */}
-          <radialGradient id={gid("skin")} cx="0.44" cy="0.42" r="0.68">
-            <stop offset="0%" stopColor={skin.highlight} />
-            <stop offset="45%" stopColor={skin.base} />
-            <stop offset="100%" stopColor={skin.shadow} />
-          </radialGradient>
+              {/* Skin: base with a soft falloff to shadow at the silhouette edge. */}
+              <radialGradient id={gid("skin")} cx="0.44" cy="0.42" r="0.68">
+                <stop offset="0%" stopColor={skin.highlight} />
+                <stop offset="45%" stopColor={skin.base} />
+                <stop offset="100%" stopColor={skin.shadow} />
+              </radialGradient>
 
-          {/* The display is the key light: it rakes UP from below the chin.
-              Screen light is blue-white, not the accent hue — a saturated wash
-              reads as illness, a cool desaturated one reads as a monitor. */}
-          <linearGradient id={gid("keyLight")} x1="0" y1="208" x2="0" y2="158" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor={SCREEN_LIGHT} stopOpacity="0.34" />
-            <stop offset="35%" stopColor={SCREEN_LIGHT} stopOpacity="0.1" />
-            <stop offset="100%" stopColor={SCREEN_LIGHT} stopOpacity="0" />
-          </linearGradient>
+              {/* The display is the key light: it rakes UP from below the chin.
+                  Screen light is blue-white, not the accent hue — a saturated wash
+                  reads as illness, a cool desaturated one reads as a monitor. */}
+              <linearGradient id={gid("keyLight")} x1="0" y1="208" x2="0" y2="158" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor={SCREEN_LIGHT} stopOpacity="0.34" />
+                <stop offset="35%" stopColor={SCREEN_LIGHT} stopOpacity="0.1" />
+                <stop offset="100%" stopColor={SCREEN_LIGHT} stopOpacity="0" />
+              </linearGradient>
 
-          <radialGradient id={gid("chestLight")} cx="0.5" cy="0.18" r="0.6">
-            <stop offset="0%" stopColor={SCREEN_LIGHT} stopOpacity="0.22" />
-            <stop offset="100%" stopColor={SCREEN_LIGHT} stopOpacity="0" />
-          </radialGradient>
+              <radialGradient id={gid("chestLight")} cx="0.5" cy="0.18" r="0.6">
+                <stop offset="0%" stopColor={SCREEN_LIGHT} stopOpacity="0.22" />
+                <stop offset="100%" stopColor={SCREEN_LIGHT} stopOpacity="0" />
+              </radialGradient>
 
-          {/* neck: deep in the chin's occlusion at the top, lit at the base */}
-          <linearGradient id={gid("neck")} x1="0" y1="188" x2="0" y2="228" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#000000" stopOpacity="0.45" />
-            <stop offset="60%" stopColor="#000000" stopOpacity="0.16" />
-            <stop offset="100%" stopColor={SCREEN_LIGHT} stopOpacity="0.14" />
-          </linearGradient>
+              {/* neck: deep in the chin's occlusion at the top, lit at the base */}
+              <linearGradient id={gid("neck")} x1="0" y1="188" x2="0" y2="228" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#000000" stopOpacity="0.45" />
+                <stop offset="60%" stopColor="#000000" stopOpacity="0.16" />
+                <stop offset="100%" stopColor={SCREEN_LIGHT} stopOpacity="0.14" />
+              </linearGradient>
 
-          <radialGradient id={gid("chinShadow")} cx="0.5" cy="0.5" r="0.5">
-            <stop offset="0%" stopColor="#000000" stopOpacity="0.42" />
-            <stop offset="100%" stopColor="#000000" stopOpacity="0" />
-          </radialGradient>
+              <radialGradient id={gid("chinShadow")} cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0%" stopColor="#000000" stopOpacity="0.42" />
+                <stop offset="100%" stopColor="#000000" stopOpacity="0" />
+              </radialGradient>
 
-          {/* separates the figure from the backdrop: a lift at night, a
-              soft cast shadow in daylight */}
-          <radialGradient id={gid("figureHalo")} cx="0.5" cy="0.5" r="0.5">
-            <stop offset="0%" stopColor={isNight ? accent : "#0F172A"} stopOpacity={isNight ? 0.16 : 0.08} />
-            <stop offset="100%" stopColor={isNight ? accent : "#0F172A"} stopOpacity="0" />
-          </radialGradient>
+              {/* separates the figure from the backdrop: a lift at night, a
+                  soft cast shadow in daylight */}
+              <radialGradient id={gid("figureHalo")} cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0%" stopColor={isNight ? accent : "#0F172A"} stopOpacity={isNight ? 0.16 : 0.08} />
+                <stop offset="100%" stopColor={isNight ? accent : "#0F172A"} stopOpacity="0" />
+              </radialGradient>
 
-          {/* Far side of the figure falls away from the key light. */}
-          <linearGradient id={gid("farSide")} x1="373" y1="0" x2="427" y2="0" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#000000" stopOpacity="0.06" />
-            <stop offset="55%" stopColor="#000000" stopOpacity="0" />
-            <stop offset="100%" stopColor="#000000" stopOpacity="0.3" />
-          </linearGradient>
+              {/* Far side of the figure falls away from the key light. */}
+              <linearGradient id={gid("farSide")} x1="373" y1="0" x2="427" y2="0" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#000000" stopOpacity="0.06" />
+                <stop offset="55%" stopColor="#000000" stopOpacity="0" />
+                <stop offset="100%" stopColor="#000000" stopOpacity="0.3" />
+              </linearGradient>
 
-          <linearGradient id={gid("torsoForm")} x1="333" y1="0" x2="467" y2="0" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#000000" stopOpacity="0.28" />
-            <stop offset="18%" stopColor="#000000" stopOpacity="0.04" />
-            <stop offset="55%" stopColor="#FFFFFF" stopOpacity="0.1" />
-            <stop offset="100%" stopColor="#000000" stopOpacity="0.34" />
-          </linearGradient>
+              <linearGradient id={gid("torsoForm")} x1="333" y1="0" x2="467" y2="0" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#000000" stopOpacity="0.28" />
+                <stop offset="18%" stopColor="#000000" stopOpacity="0.04" />
+                <stop offset="55%" stopColor="#FFFFFF" stopOpacity="0.1" />
+                <stop offset="100%" stopColor="#000000" stopOpacity="0.34" />
+              </linearGradient>
 
-          <linearGradient id={gid("desk")} x1="0" y1="344" x2="0" y2="366" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor={desk.base} />
-            <stop offset="100%" stopColor={desk.shadow} />
-          </linearGradient>
+              <linearGradient id={gid("desk")} x1="0" y1="344" x2="0" y2="366" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor={desk.base} />
+                <stop offset="100%" stopColor={desk.shadow} />
+              </linearGradient>
 
-          <linearGradient id={gid("chair")} x1="0" y1="220" x2="0" y2="348" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor={chair.base} />
-            <stop offset="100%" stopColor={chair.shadow} />
-          </linearGradient>
+              <linearGradient id={gid("chair")} x1="0" y1="220" x2="0" y2="348" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor={chair.base} />
+                <stop offset="100%" stopColor={chair.shadow} />
+              </linearGradient>
 
-          <linearGradient id={gid("screen")} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#141A2E" />
-            <stop offset="100%" stopColor="#1F1B44" />
-          </linearGradient>
+              <linearGradient id={gid("screen")} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#141A2E" />
+                <stop offset="100%" stopColor="#1F1B44" />
+              </linearGradient>
 
-          <linearGradient id={gid("screenGlow")} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={accent} stopOpacity="0.16" />
-            <stop offset="100%" stopColor="#6366F1" stopOpacity="0.05" />
-          </linearGradient>
+              <linearGradient id={gid("screenGlow")} x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor={accent} stopOpacity="0.16" />
+                <stop offset="100%" stopColor="#6366F1" stopOpacity="0.05" />
+              </linearGradient>
 
-          <radialGradient id={gid("spill")} cx="0.5" cy="0.5" r="0.5">
-            <stop offset="0%" stopColor={accent} stopOpacity="0.35" />
-            <stop offset="100%" stopColor={accent} stopOpacity="0" />
-          </radialGradient>
+              <radialGradient id={gid("spill")} cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0%" stopColor={accent} stopOpacity="0.35" />
+                <stop offset="100%" stopColor={accent} stopOpacity="0" />
+              </radialGradient>
 
-          <clipPath id={gid("headClip")}>
-            <path d={HEAD_PATH} />
-          </clipPath>
-          <clipPath id={gid("torsoClip")}>
-            <path d={TORSO_PATH} />
-          </clipPath>
+              <clipPath id={gid("headClip")}>
+                <path d={HEAD_PATH} />
+              </clipPath>
+              <clipPath id={gid("torsoClip")}>
+                <path d={TORSO_PATH} />
+              </clipPath>
 
-          <filter id={gid("soft")} x="-20%" y="-20%" width="140%" height="150%">
-            <feDropShadow dx="0" dy="6" stdDeviation="8" floodOpacity="0.35" />
-          </filter>
-        </defs>
+              <filter id={gid("soft")} x="-20%" y="-20%" width="140%" height="150%">
+                <feDropShadow dx="0" dy="6" stdDeviation="8" floodOpacity="0.35" />
+              </filter>
+            </defs>
 
-        <rect width="800" height="500" rx="16" fill={`url(#${gid("bg")})`} />
-        <rect width="800" height="500" rx="16" fill={`url(#${gid("ambient")})`} />
+            <rect width="800" height="500" rx="16" fill={`url(#${gid("bg")})`} />
+            <rect width="800" height="500" rx="16" fill={`url(#${gid("ambient")})`} />
 
-        {/* ---------- BACKDROP: sun or moon + stars ---------- */}
-        <g className="scene-float-slow">
-          <circle cx={664} cy={90} r={40} fill={isNight ? "#CBD5E1" : "#FBBF24"} opacity={0.1} />
-          <circle cx={664} cy={90} r={24} fill={isNight ? "#E2E8F0" : "#FCD34D"} opacity={isNight ? 0.85 : 0.95} />
-          {isNight && <circle cx={654} cy={83} r={22} fill="#0A0D14" opacity="0.9" />}
-        </g>
-        {isNight &&
-          [
-            [92, 64],
-            [180, 108],
-            [268, 56],
-            [556, 72],
-            [730, 168],
-            [620, 46],
-            [120, 148],
-          ].map(([cx, cy], i) => (
-            <circle key={`star-${i}`} cx={cx} cy={cy} r={i % 2 ? 1.4 : 2} fill="#E2E8F0" opacity={0.55} />
-          ))}
-        {!isNight &&
-          [
-            [140, 96, 26],
-            [236, 74, 18],
-            [548, 118, 22],
-          ].map(([cx, cy, r], i) => (
-            <g key={`cloud-${i}`} opacity={0.5}>
-              <ellipse cx={cx} cy={cy} rx={r} ry={r * 0.5} fill="#FFFFFF" />
-              <ellipse cx={cx + r * 0.6} cy={cy + 3} rx={r * 0.7} ry={r * 0.4} fill="#FFFFFF" />
+            {/* ---------- BACKDROP: sun or moon + stars ---------- */}
+            <g className="scene-float-slow">
+              <circle cx={664} cy={90} r={40} fill={isNight ? "#CBD5E1" : "#FBBF24"} opacity={0.1} />
+              <circle cx={664} cy={90} r={24} fill={isNight ? "#E2E8F0" : "#FCD34D"} opacity={isNight ? 0.85 : 0.95} />
+              {isNight && <circle cx={654} cy={83} r={22} fill="#0A0D14" opacity="0.9" />}
             </g>
-          ))}
-
-        {/* ---------- FLOATING CODE MOTIFS (background layer) ---------- */}
-        <g opacity={isNight ? 0.85 : 0.9}>
-          <g className="scene-float" style={{ transformOrigin: "138px 116px" }}>
-            <g className="scene-spin" style={{ transformOrigin: "138px 116px" }}>
-              {[0, 60, 120].map((deg) => (
-                <ellipse
-                  key={`atom-${deg}`}
-                  cx={138}
-                  cy={116}
-                  rx={22}
-                  ry={8}
-                  fill="none"
-                  stroke={isNight ? "#61DAFB" : "#0E7490"}
-                  strokeWidth={1.5}
-                  opacity={0.6}
-                  transform={`rotate(${deg} 138 116)`}
-                />
+            {isNight &&
+              [
+                [92, 64],
+                [180, 108],
+                [268, 56],
+                [556, 72],
+                [730, 168],
+                [620, 46],
+                [120, 148],
+              ].map(([cx, cy], i) => (
+                <circle key={`star-${i}`} cx={cx} cy={cy} r={i % 2 ? 1.4 : 2} fill="#E2E8F0" opacity={0.55} />
               ))}
+            {!isNight &&
+              [
+                [140, 96, 26],
+                [236, 74, 18],
+                [548, 118, 22],
+              ].map(([cx, cy, r], i) => (
+                <g key={`cloud-${i}`} opacity={0.5}>
+                  <ellipse cx={cx} cy={cy} rx={r} ry={r * 0.5} fill="#FFFFFF" />
+                  <ellipse cx={cx + r * 0.6} cy={cy + 3} rx={r * 0.7} ry={r * 0.4} fill="#FFFFFF" />
+                </g>
+              ))}
+
+            {/* ---------- FLOATING CODE MOTIFS (background layer) ---------- */}
+            <g opacity={isNight ? 0.85 : 0.9}>
+              <g className="scene-float" style={{ transformOrigin: "138px 116px" }}>
+                <g className="scene-spin" style={{ transformOrigin: "138px 116px" }}>
+                  {[0, 60, 120].map((deg) => (
+                    <ellipse
+                      key={`atom-${deg}`}
+                      cx={138}
+                      cy={116}
+                      rx={22}
+                      ry={8}
+                      fill="none"
+                      stroke={isNight ? "#61DAFB" : "#0E7490"}
+                      strokeWidth={1.5}
+                      opacity={0.6}
+                      transform={`rotate(${deg} 138 116)`}
+                    />
+                  ))}
+                </g>
+                <circle cx={138} cy={116} r={3} fill={isNight ? "#61DAFB" : "#0E7490"} />
+              </g>
+
+              <g className="scene-float-delay">
+                <text x={690} y={226} fontSize={28} fill={motifInk} opacity={0.5} fontFamily="monospace" fontWeight="bold">
+                  {"{ }"}
+                </text>
+              </g>
+              <g className="scene-float-slow">
+                <text x={78} y={236} fontSize={22} fill={motifInk} opacity={0.45} fontFamily="monospace" fontWeight="bold">
+                  {"</>"}
+                </text>
+              </g>
+              <g className="scene-float">
+                <path d="M234 168 l3 8 8 3 -8 3 -3 8 -3-8 -8-3 8-3z" fill="#FBBF24" opacity={0.5} />
+              </g>
+              <g className="scene-float-delay">
+                <path d="M614 292 l2 6 6 2 -6 2 -2 6 -2-6 -6-2 6-2z" fill="#818CF8" opacity={0.45} />
+              </g>
+              <g className="scene-float-slow" style={{ transformOrigin: "724px 112px" }}>
+                <circle cx={724} cy={112} r={12} fill="#FBBF24" opacity={0.2} className="scene-glow" />
+                <path
+                  d="M719 108 Q719 100 724 98 Q729 100 729 108 Q729 111 727 112 L721 112 Q719 111 719 108Z"
+                  fill="none"
+                  stroke="#FBBF24"
+                  strokeWidth={1.5}
+                  opacity={0.75}
+                />
+                <rect x={721} y={112} width={6} height={3} rx={1} fill="#FBBF24" opacity={0.75} />
+              </g>
             </g>
-            <circle cx={138} cy={116} r={3} fill={isNight ? "#61DAFB" : "#0E7490"} />
-          </g>
 
-          <g className="scene-float-delay">
-            <text x={690} y={226} fontSize={28} fill={motifInk} opacity={0.5} fontFamily="monospace" fontWeight="bold">
-              {"{ }"}
-            </text>
-          </g>
-          <g className="scene-float-slow">
-            <text x={78} y={236} fontSize={22} fill={motifInk} opacity={0.45} fontFamily="monospace" fontWeight="bold">
-              {"</>"}
-            </text>
-          </g>
-          <g className="scene-float">
-            <path d="M234 168 l3 8 8 3 -8 3 -3 8 -3-8 -8-3 8-3z" fill="#FBBF24" opacity={0.5} />
-          </g>
-          <g className="scene-float-delay">
-            <path d="M614 292 l2 6 6 2 -6 2 -2 6 -2-6 -6-2 6-2z" fill="#818CF8" opacity={0.45} />
-          </g>
-          <g className="scene-float-slow" style={{ transformOrigin: "724px 112px" }}>
-            <circle cx={724} cy={112} r={12} fill="#FBBF24" opacity={0.2} className="scene-glow" />
-            <path
-              d="M719 108 Q719 100 724 98 Q729 100 729 108 Q729 111 727 112 L721 112 Q719 111 719 108Z"
-              fill="none"
-              stroke="#FBBF24"
-              strokeWidth={1.5}
-              opacity={0.75}
-            />
-            <rect x={721} y={112} width={6} height={3} rx={1} fill="#FBBF24" opacity={0.75} />
-          </g>
-        </g>
+            {/* separates the figure from the backdrop */}
+            <ellipse cx={CENTER} cy={268} rx={190} ry={150} fill={`url(#${gid("figureHalo")})`} />
 
-        {/* separates the figure from the backdrop */}
-        <ellipse cx={CENTER} cy={268} rx={190} ry={150} fill={`url(#${gid("figureHalo")})`} />
-
-        {/* ---------- CHAIR ---------- */}
-        <g>
-          <path
-            d="M308 246 C308 226, 320 216, 340 216 L460 216 C480 216, 492 226, 492 246 L492 330
-               C492 342, 484 348, 470 348 L330 348 C316 348, 308 342, 308 330 Z"
-            fill={`url(#${gid("chair")})`}
-          />
-          {/* lumbar seam + edge light so the chair reads behind the figure */}
-          <path
-            d="M316 248 C316 234, 326 226, 342 226 L458 226 C474 226, 484 234, 484 248"
-            fill="none"
-            stroke="#FFFFFF"
-            strokeWidth={2}
-            opacity={0.1}
-          />
-          <path
-            d="M308 246 C308 226, 320 216, 340 216 L460 216 C480 216, 492 226, 492 246"
-            fill="none"
-            stroke={SCREEN_LIGHT}
-            strokeWidth={2}
-            opacity={0.14}
-          />
-          {/* armrests */}
-          <rect x={286} y={306} width={34} height={12} rx={6} fill={chair.shadow} />
-          <rect x={480} y={306} width={34} height={12} rx={6} fill={chair.shadow} />
-        </g>
-
-        {/* ---------- FIGURE ---------- */}
-        {/* hair volume that sits behind the skull */}
-        <HairBack style={avatar.hairStyle} base={hair.base} shadow={hair.shadow} />
-
-        {/* torso */}
-        <g>
-          <path d={TORSO_PATH} fill={top.base} />
-          <g clipPath={`url(#${gid("torsoClip")})`}>
-            <rect x={320} y={210} width={160} height={150} fill={`url(#${gid("torsoForm")})`} />
-            <rect x={320} y={210} width={160} height={150} fill={`url(#${gid("chestLight")})`} />
-            {/* collar + placket, so the top reads as a garment */}
-            <path
-              d="M378 218 C386 234, 414 234, 422 218 L432 224 C424 246, 376 246, 368 224 Z"
-              fill="#000000"
-              opacity={0.22}
-            />
-            <rect x={398} y={240} width={3} height={108} fill="#000000" opacity={0.16} />
-            {/* trapezius line into the shoulders */}
-            <path
-              d="M368 226 C380 238, 420 238, 432 226"
-              fill="none"
-              stroke="#FFFFFF"
-              strokeWidth={2}
-              opacity={0.12}
-            />
-          </g>
-          {/* rim light along the shoulder line, facing the screen */}
-          <path
-            d="M356 231 C346 238, 340 252, 337 272"
-            fill="none"
-            stroke={SCREEN_LIGHT}
-            strokeWidth={2.2}
-            opacity={0.28}
-            strokeLinecap="round"
-          />
-          <path
-            d="M444 231 C454 238, 460 252, 463 272"
-            fill="none"
-            stroke={SCREEN_LIGHT}
-            strokeWidth={2.2}
-            opacity={0.28}
-            strokeLinecap="round"
-          />
-        </g>
-
-        {/* arms */}
-        <Arm skin={skin} topColor={top.base} />
-        <Arm skin={skin} topColor={top.base} flip />
-
-        {/* neck + the occlusion shadow the chin casts on it */}
-        <g>
-          <path d={NECK_PATH} fill={skin.base} />
-          <path d={NECK_PATH} fill={`url(#${gid("neck")})`} />
-          <ellipse cx={CENTER} cy={196} rx={22} ry={12} fill={`url(#${gid("chinShadow")})`} />
-          {/* sternocleidomastoid, so the neck has structure */}
-          <path
-            d="M390 196 C389 206, 386 214, 383 220"
-            fill="none"
-            stroke="#000000"
-            strokeWidth={1.4}
-            opacity={0.18}
-            strokeLinecap="round"
-          />
-          <path
-            d="M410 196 C411 206, 414 214, 417 220"
-            fill="none"
-            stroke="#000000"
-            strokeWidth={1.4}
-            opacity={0.18}
-            strokeLinecap="round"
-          />
-          <path
-            d="M388 215 C394 222, 406 222, 412 215"
-            fill="none"
-            stroke={SCREEN_LIGHT}
-            strokeWidth={2}
-            opacity={0.22}
-            strokeLinecap="round"
-          />
-        </g>
-
-        {/* head */}
-        <g>
-          <ellipse cx={371} cy={174} rx={5.5} ry={9} fill={skin.base} />
-          <ellipse cx={429} cy={174} rx={5.5} ry={9} fill={skin.base} />
-          <ellipse cx={371} cy={175} rx={2.6} ry={4.4} fill={skin.shadow} opacity={0.6} />
-          <ellipse cx={429} cy={175} rx={2.6} ry={4.4} fill={skin.shadow} opacity={0.6} />
-
-          <path d={HEAD_PATH} fill={`url(#${gid("skin")})`} />
-
-          <g clipPath={`url(#${gid("headClip")})`}>
-            {/* far side falls into shadow */}
-            <rect x={370} y={128} width={60} height={80} fill={`url(#${gid("farSide")})`} />
-            {/* screen light raking up from under the jaw */}
-            <rect x={370} y={128} width={60} height={80} fill={`url(#${gid("keyLight")})`} />
-            {/* cheekbone + temple shading */}
-            <ellipse cx={382} cy={182} rx={9} ry={7} fill={skin.shadow} opacity={0.25} />
-            <ellipse cx={418} cy={182} rx={9} ry={7} fill={skin.shadow} opacity={0.25} />
-            {/* brow ridge shadow */}
-            <path
-              d="M378 162 C386 156, 414 156, 422 162 L422 168 L378 168 Z"
-              fill={skin.shadow}
-              opacity={0.22}
-            />
-          </g>
-
-          {/* brow */}
-          <path
-            d="M381 162 Q388 157 396 160"
-            fill="none"
-            stroke={hair.shadow}
-            strokeWidth={2.2}
-            strokeLinecap="round"
-            opacity={0.9}
-          />
-          <path
-            d="M404 160 Q412 157 419 162"
-            fill="none"
-            stroke={hair.shadow}
-            strokeWidth={2.2}
-            strokeLinecap="round"
-            opacity={0.9}
-          />
-
-          <Eye side={-1} clipId={gid("eyeL")} skin={skin} lidDelayClass="" />
-          <Eye side={1} clipId={gid("eyeR")} skin={skin} lidDelayClass="scene-lid-b" />
-
-          {/* nose bridge, tip and nostril */}
-          <path
-            d="M399 166 C398 173, 397 179, 396 183"
-            fill="none"
-            stroke={skin.shadow}
-            strokeWidth={1.4}
-            strokeLinecap="round"
-            opacity={0.55}
-          />
-          <path
-            d="M395 184 Q400 188 405 184"
-            fill="none"
-            stroke={skin.shadow}
-            strokeWidth={1.6}
-            strokeLinecap="round"
-            opacity={0.75}
-          />
-          <path
-            d="M401 167 C403 174, 404 180, 405 183"
-            fill="none"
-            stroke={skin.highlight}
-            strokeWidth={1.4}
-            strokeLinecap="round"
-            opacity={0.5}
-          />
-
-          {/* mouth — restrained, slightly amused */}
-          <path
-            d="M390 191 Q395 190 400 191 Q405 190 410 191 Q405 197 400 197 Q395 197 390 191 Z"
-            fill="#7A4338"
-            opacity={0.55}
-          />
-          <path
-            d="M390 191 Q400 194 410 191"
-            fill="none"
-            stroke="#5E3129"
-            strokeWidth={1.7}
-            strokeLinecap="round"
-            opacity={0.9}
-          />
-          <path
-            d="M395 195 Q400 196 405 195"
-            fill="none"
-            stroke={skin.highlight}
-            strokeWidth={1.5}
-            strokeLinecap="round"
-            opacity={0.5}
-          />
-          {/* shadow under the lower lip, then the lit chin */}
-          <path
-            d="M394 199 Q400 201 406 199"
-            fill="none"
-            stroke={skin.shadow}
-            strokeWidth={1.6}
-            strokeLinecap="round"
-            opacity={0.4}
-          />
-          <path
-            d="M393 202 Q400 205 407 202"
-            fill="none"
-            stroke={SCREEN_LIGHT}
-            strokeWidth={1.8}
-            strokeLinecap="round"
-            opacity={0.3}
-          />
-
-          <FacialHair style={avatar.facialHair} base={hair.base} shadow={hair.shadow} />
-
-          <HairFront style={avatar.hairStyle} base={hair.base} shadow={hair.shadow} />
-
-          {avatar.glasses && (
-            <g>
-              <rect x={376} y={161} width={23} height={18} rx={6} fill={accent} opacity={0.08} />
-              <rect x={401} y={161} width={23} height={18} rx={6} fill={accent} opacity={0.08} />
-              <rect
-                x={376}
-                y={161}
-                width={23}
-                height={18}
-                rx={6}
-                fill="none"
-                stroke="#1F2933"
-                strokeWidth={2}
-              />
-              <rect
-                x={401}
-                y={161}
-                width={23}
-                height={18}
-                rx={6}
-                fill="none"
-                stroke="#1F2933"
-                strokeWidth={2}
-              />
-              <path d="M399 168 L401 168" stroke="#1F2933" strokeWidth={2} strokeLinecap="round" />
-              <path d="M376 167 L370 170" stroke="#1F2933" strokeWidth={2} strokeLinecap="round" />
-              <path d="M424 167 L430 170" stroke="#1F2933" strokeWidth={2} strokeLinecap="round" />
-              {/* screen reflected in the lenses */}
-              <path d="M380 176 L392 163" stroke="#FFFFFF" strokeWidth={2} opacity={0.35} strokeLinecap="round" />
-              <path d="M405 176 L417 163" stroke="#FFFFFF" strokeWidth={2} opacity={0.35} strokeLinecap="round" />
-            </g>
-          )}
-
-          {avatar.headphones && (
+            {/* ---------- CHAIR ---------- */}
             <g>
               <path
-                d="M364 168 C362 126, 438 126, 436 168"
+                d="M308 246 C308 226, 320 216, 340 216 L460 216 C480 216, 492 226, 492 246 L492 330
+                   C492 342, 484 348, 470 348 L330 348 C316 348, 308 342, 308 330 Z"
+                fill={`url(#${gid("chair")})`}
+              />
+              {/* lumbar seam + edge light so the chair reads behind the figure */}
+              <path
+                d="M316 248 C316 234, 326 226, 342 226 L458 226 C474 226, 484 234, 484 248"
                 fill="none"
-                stroke="#22262E"
-                strokeWidth={7}
+                stroke="#FFFFFF"
+                strokeWidth={2}
+                opacity={0.1}
+              />
+              <path
+                d="M308 246 C308 226, 320 216, 340 216 L460 216 C480 216, 492 226, 492 246"
+                fill="none"
+                stroke={SCREEN_LIGHT}
+                strokeWidth={2}
+                opacity={0.14}
+              />
+              {/* armrests */}
+              <rect x={286} y={306} width={34} height={12} rx={6} fill={chair.shadow} />
+              <rect x={480} y={306} width={34} height={12} rx={6} fill={chair.shadow} />
+            </g>
+
+            {/* ---------- FIGURE ---------- */}
+            {/* hair volume that sits behind the skull */}
+            <HairBack style={avatar.hairStyle} base={hair.base} shadow={hair.shadow} />
+
+            {/* torso */}
+            <g>
+              <path d={TORSO_PATH} fill={top.base} />
+              <g clipPath={`url(#${gid("torsoClip")})`}>
+                <rect x={320} y={210} width={160} height={150} fill={`url(#${gid("torsoForm")})`} />
+                <rect x={320} y={210} width={160} height={150} fill={`url(#${gid("chestLight")})`} />
+                {/* collar + placket, so the top reads as a garment */}
+                <path
+                  d="M378 218 C386 234, 414 234, 422 218 L432 224 C424 246, 376 246, 368 224 Z"
+                  fill="#000000"
+                  opacity={0.22}
+                />
+                <rect x={398} y={240} width={3} height={108} fill="#000000" opacity={0.16} />
+                {/* trapezius line into the shoulders */}
+                <path
+                  d="M368 226 C380 238, 420 238, 432 226"
+                  fill="none"
+                  stroke="#FFFFFF"
+                  strokeWidth={2}
+                  opacity={0.12}
+                />
+              </g>
+              {/* rim light along the shoulder line, facing the screen */}
+              <path
+                d="M356 231 C346 238, 340 252, 337 272"
+                fill="none"
+                stroke={SCREEN_LIGHT}
+                strokeWidth={2.2}
+                opacity={0.28}
                 strokeLinecap="round"
               />
               <path
-                d="M366 158 C366 132, 434 132, 434 158"
+                d="M444 231 C454 238, 460 252, 463 272"
                 fill="none"
-                stroke="#3C424E"
-                strokeWidth={2.4}
+                stroke={SCREEN_LIGHT}
+                strokeWidth={2.2}
+                opacity={0.28}
                 strokeLinecap="round"
               />
-              <rect x={356} y={160} width={15} height={28} rx={7} fill="#22262E" />
-              <rect x={429} y={160} width={15} height={28} rx={7} fill="#22262E" />
-              <rect x={359} y={164} width={9} height={20} rx={4.5} fill="#3C424E" />
-              <rect x={432} y={164} width={9} height={20} rx={4.5} fill="#3C424E" />
-              <rect x={357} y={184} width={13} height={2.5} rx={1.2} fill={accent} opacity={0.8} />
-              <rect x={430} y={184} width={13} height={2.5} rx={1.2} fill={accent} opacity={0.8} />
             </g>
-          )}
-        </g>
 
-        {/* ---------- DESK ---------- */}
-        <g filter={`url(#${gid("soft")})`}>
-          <rect x={96} y={DESK_TOP} width={620} height={22} rx={3} fill={`url(#${gid("desk")})`} />
-          <rect x={96} y={DESK_TOP} width={620} height={3} rx={1.5} fill={desk.highlight} opacity={0.75} />
-          <rect x={126} y={366} width={14} height={98} rx={4} fill={desk.shadow} />
-          <rect x={672} y={366} width={14} height={98} rx={4} fill={desk.shadow} />
-          <rect x={126} y={366} width={4} height={98} rx={2} fill={desk.highlight} opacity={0.3} />
-          <rect x={672} y={366} width={4} height={98} rx={2} fill={desk.highlight} opacity={0.3} />
-        </g>
+            {/* arms */}
+            <Arm skin={skin} topColor={top.base} />
+            <Arm skin={skin} topColor={top.base} flip />
 
-        {/* Luna, on the floor in front of the desk so the legs never clip her. */}
-        {avatar.companion === "luna" && (
-          <Luna pose={avatar.companionPose} accent={accent} />
+            {/* neck + the occlusion shadow the chin casts on it */}
+            <g>
+              <path d={NECK_PATH} fill={skin.base} />
+              <path d={NECK_PATH} fill={`url(#${gid("neck")})`} />
+              <ellipse cx={CENTER} cy={196} rx={22} ry={12} fill={`url(#${gid("chinShadow")})`} />
+              {/* sternocleidomastoid, so the neck has structure */}
+              <path
+                d="M390 196 C389 206, 386 214, 383 220"
+                fill="none"
+                stroke="#000000"
+                strokeWidth={1.4}
+                opacity={0.18}
+                strokeLinecap="round"
+              />
+              <path
+                d="M410 196 C411 206, 414 214, 417 220"
+                fill="none"
+                stroke="#000000"
+                strokeWidth={1.4}
+                opacity={0.18}
+                strokeLinecap="round"
+              />
+              <path
+                d="M388 215 C394 222, 406 222, 412 215"
+                fill="none"
+                stroke={SCREEN_LIGHT}
+                strokeWidth={2}
+                opacity={0.22}
+                strokeLinecap="round"
+              />
+            </g>
+
+            {/* head */}
+            <g>
+              <ellipse cx={371} cy={174} rx={5.5} ry={9} fill={skin.base} />
+              <ellipse cx={429} cy={174} rx={5.5} ry={9} fill={skin.base} />
+              <ellipse cx={371} cy={175} rx={2.6} ry={4.4} fill={skin.shadow} opacity={0.6} />
+              <ellipse cx={429} cy={175} rx={2.6} ry={4.4} fill={skin.shadow} opacity={0.6} />
+
+              <path d={HEAD_PATH} fill={`url(#${gid("skin")})`} />
+
+              <g clipPath={`url(#${gid("headClip")})`}>
+                {/* far side falls into shadow */}
+                <rect x={370} y={128} width={60} height={80} fill={`url(#${gid("farSide")})`} />
+                {/* screen light raking up from under the jaw */}
+                <rect x={370} y={128} width={60} height={80} fill={`url(#${gid("keyLight")})`} />
+                {/* cheekbone + temple shading */}
+                <ellipse cx={382} cy={182} rx={9} ry={7} fill={skin.shadow} opacity={0.25} />
+                <ellipse cx={418} cy={182} rx={9} ry={7} fill={skin.shadow} opacity={0.25} />
+                {/* brow ridge shadow */}
+                <path
+                  d="M378 162 C386 156, 414 156, 422 162 L422 168 L378 168 Z"
+                  fill={skin.shadow}
+                  opacity={0.22}
+                />
+              </g>
+
+              {/* brow */}
+              <path
+                d="M381 162 Q388 157 396 160"
+                fill="none"
+                stroke={hair.shadow}
+                strokeWidth={2.2}
+                strokeLinecap="round"
+                opacity={0.9}
+              />
+              <path
+                d="M404 160 Q412 157 419 162"
+                fill="none"
+                stroke={hair.shadow}
+                strokeWidth={2.2}
+                strokeLinecap="round"
+                opacity={0.9}
+              />
+
+              <Eye side={-1} clipId={gid("eyeL")} skin={skin} lidDelayClass="" />
+              <Eye side={1} clipId={gid("eyeR")} skin={skin} lidDelayClass="scene-lid-b" />
+
+              {/* nose bridge, tip and nostril */}
+              <path
+                d="M399 166 C398 173, 397 179, 396 183"
+                fill="none"
+                stroke={skin.shadow}
+                strokeWidth={1.4}
+                strokeLinecap="round"
+                opacity={0.55}
+              />
+              <path
+                d="M395 184 Q400 188 405 184"
+                fill="none"
+                stroke={skin.shadow}
+                strokeWidth={1.6}
+                strokeLinecap="round"
+                opacity={0.75}
+              />
+              <path
+                d="M401 167 C403 174, 404 180, 405 183"
+                fill="none"
+                stroke={skin.highlight}
+                strokeWidth={1.4}
+                strokeLinecap="round"
+                opacity={0.5}
+              />
+
+              {/* mouth — restrained, slightly amused */}
+              <path
+                d="M390 191 Q395 190 400 191 Q405 190 410 191 Q405 197 400 197 Q395 197 390 191 Z"
+                fill="#7A4338"
+                opacity={0.55}
+              />
+              <path
+                d="M390 191 Q400 194 410 191"
+                fill="none"
+                stroke="#5E3129"
+                strokeWidth={1.7}
+                strokeLinecap="round"
+                opacity={0.9}
+              />
+              <path
+                d="M395 195 Q400 196 405 195"
+                fill="none"
+                stroke={skin.highlight}
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                opacity={0.5}
+              />
+              {/* shadow under the lower lip, then the lit chin */}
+              <path
+                d="M394 199 Q400 201 406 199"
+                fill="none"
+                stroke={skin.shadow}
+                strokeWidth={1.6}
+                strokeLinecap="round"
+                opacity={0.4}
+              />
+              <path
+                d="M393 202 Q400 205 407 202"
+                fill="none"
+                stroke={SCREEN_LIGHT}
+                strokeWidth={1.8}
+                strokeLinecap="round"
+                opacity={0.3}
+              />
+
+              <FacialHair style={avatar.facialHair} base={hair.base} shadow={hair.shadow} />
+
+              <HairFront style={avatar.hairStyle} base={hair.base} shadow={hair.shadow} />
+
+              {avatar.glasses && (
+                <g>
+                  <rect x={376} y={161} width={23} height={18} rx={6} fill={accent} opacity={0.08} />
+                  <rect x={401} y={161} width={23} height={18} rx={6} fill={accent} opacity={0.08} />
+                  <rect
+                    x={376}
+                    y={161}
+                    width={23}
+                    height={18}
+                    rx={6}
+                    fill="none"
+                    stroke="#1F2933"
+                    strokeWidth={2}
+                  />
+                  <rect
+                    x={401}
+                    y={161}
+                    width={23}
+                    height={18}
+                    rx={6}
+                    fill="none"
+                    stroke="#1F2933"
+                    strokeWidth={2}
+                  />
+                  <path d="M399 168 L401 168" stroke="#1F2933" strokeWidth={2} strokeLinecap="round" />
+                  <path d="M376 167 L370 170" stroke="#1F2933" strokeWidth={2} strokeLinecap="round" />
+                  <path d="M424 167 L430 170" stroke="#1F2933" strokeWidth={2} strokeLinecap="round" />
+                  {/* screen reflected in the lenses */}
+                  <path d="M380 176 L392 163" stroke="#FFFFFF" strokeWidth={2} opacity={0.35} strokeLinecap="round" />
+                  <path d="M405 176 L417 163" stroke="#FFFFFF" strokeWidth={2} opacity={0.35} strokeLinecap="round" />
+                </g>
+              )}
+
+              {avatar.headphones && (
+                <g>
+                  <path
+                    d="M364 168 C362 126, 438 126, 436 168"
+                    fill="none"
+                    stroke="#22262E"
+                    strokeWidth={7}
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M366 158 C366 132, 434 132, 434 158"
+                    fill="none"
+                    stroke="#3C424E"
+                    strokeWidth={2.4}
+                    strokeLinecap="round"
+                  />
+                  <rect x={356} y={160} width={15} height={28} rx={7} fill="#22262E" />
+                  <rect x={429} y={160} width={15} height={28} rx={7} fill="#22262E" />
+                  <rect x={359} y={164} width={9} height={20} rx={4.5} fill="#3C424E" />
+                  <rect x={432} y={164} width={9} height={20} rx={4.5} fill="#3C424E" />
+                  <rect x={357} y={184} width={13} height={2.5} rx={1.2} fill={accent} opacity={0.8} />
+                  <rect x={430} y={184} width={13} height={2.5} rx={1.2} fill={accent} opacity={0.8} />
+                </g>
+              )}
+            </g>
+
+            {/* ---------- DESK ---------- */}
+            <g filter={`url(#${gid("soft")})`}>
+              <rect x={96} y={DESK_TOP} width={620} height={22} rx={3} fill={`url(#${gid("desk")})`} />
+              <rect x={96} y={DESK_TOP} width={620} height={3} rx={1.5} fill={desk.highlight} opacity={0.75} />
+              <rect x={126} y={366} width={14} height={98} rx={4} fill={desk.shadow} />
+              <rect x={672} y={366} width={14} height={98} rx={4} fill={desk.shadow} />
+              <rect x={126} y={366} width={4} height={98} rx={2} fill={desk.highlight} opacity={0.3} />
+              <rect x={672} y={366} width={4} height={98} rx={2} fill={desk.highlight} opacity={0.3} />
+            </g>
+
+            {/* ---------- MOVABLE PROPS (behind the display plane) ----------
+                Lamp, plant, books and Luna: everything the screen should occlude. */}
+            {propsBehindDisplay.map(renderProp)}
+
+            {/* ---------- DISPLAY(S) ---------- */}
+            {avatar.display === "dual" && (
+              <g transform="rotate(-7 636 280)">
+                <ScreenPanel
+                  x={566}
+                  y={244}
+                  width={140}
+                  height={72}
+                  screenGradId={gid("screen")}
+                  glowGradId={gid("screenGlow")}
+                >
+                  <CodeLines x={578} y={258} width={124} scale={0.82} />
+                </ScreenPanel>
+                <rect x={628} y={322} width={16} height={18} rx={3} fill="#2A2E37" />
+                <rect x={610} y={338} width={52} height={7} rx={3.5} fill="#22262E" />
+              </g>
+            )}
+
+            {avatar.display === "laptop" ? (
+              <g>
+                <ScreenPanel
+                  x={348}
+                  y={248}
+                  width={104}
+                  height={74}
+                  screenGradId={gid("screen")}
+                  glowGradId={gid("screenGlow")}
+                >
+                  <CodeLines x={358} y={262} width={92} scale={0.78} />
+                </ScreenPanel>
+                <circle cx={400} cy={245} r={1.6} fill="#3C424E" />
+                {/* base */}
+                <path d="M334 328 L466 328 L472 340 Q400 346 328 340 Z" fill="#2A2E37" />
+                <path d="M334 328 L466 328 L466 331 L334 331 Z" fill="#3C424E" />
+                <rect x={378} y={333} width={44} height={4} rx={2} fill="#3C424E" opacity={0.7} />
+              </g>
+            ) : (
+              <g>
+                <ScreenPanel
+                  x={336}
+                  y={238}
+                  width={128}
+                  height={80}
+                  screenGradId={gid("screen")}
+                  glowGradId={gid("screenGlow")}
+                >
+                  <CodeLines x={348} y={252} width={112} scale={0.82} />
+                </ScreenPanel>
+                <rect x={392} y={324} width={16} height={16} rx={3} fill="#2A2E37" />
+                <rect x={368} y={338} width={64} height={7} rx={3.5} fill="#22262E" />
+              </g>
+            )}
+
+            {/* light spilling from the display onto the desk */}
+            <ellipse cx={CENTER} cy={340} rx={130} ry={26} fill={`url(#${gid("spill")})`} />
+
+            {/* ---------- MOVABLE PROPS (in front of the display plane) ----------
+                Keyboard, phone and mug: the things that live between you and the
+                screen. The hands stay on top of all of them. */}
+            {propsInFrontOfDisplay.map(renderProp)}
+
+            {/* ---------- HANDS ---------- */}
+            <Hand skin={skin} />
+            <Hand skin={skin} flip />
+          </svg>
+        </div>
+
+        {interactive && (
+          <SceneCustomizer
+            avatar={avatar}
+            open={panelOpen}
+            onToggle={() => setPanelOpen((prev) => !prev)}
+            onChange={handleChange}
+            onRandomize={handleRandomize}
+            onReset={handleReset}
+            description={label}
+          />
         )}
+      </div>
 
-        {/* ---------- DESK PROPS (behind the display plane) ---------- */}
-        {avatar.plant && <Plant />}
-        {avatar.books && <Books />}
-        {avatar.lamp && <Lamp accent={isNight ? "#FDE68A" : "#FFFFFF"} lit={isNight} />}
-
-        {/* ---------- DISPLAY(S) ---------- */}
-        {avatar.display === "dual" && (
-          <g transform="rotate(-7 636 280)">
-            <ScreenPanel
-              x={566}
-              y={244}
-              width={140}
-              height={72}
-              screenGradId={gid("screen")}
-              glowGradId={gid("screenGlow")}
-            >
-              <CodeLines x={578} y={258} width={124} scale={0.82} />
-            </ScreenPanel>
-            <rect x={628} y={322} width={16} height={18} rx={3} fill="#2A2E37" />
-            <rect x={610} y={338} width={52} height={7} rx={3.5} fill="#22262E" />
-          </g>
-        )}
-
-        {avatar.display === "laptop" ? (
-          <g>
-            <ScreenPanel
-              x={348}
-              y={248}
-              width={104}
-              height={74}
-              screenGradId={gid("screen")}
-              glowGradId={gid("screenGlow")}
-            >
-              <CodeLines x={358} y={262} width={92} scale={0.78} />
-            </ScreenPanel>
-            <circle cx={400} cy={245} r={1.6} fill="#3C424E" />
-            {/* base */}
-            <path d="M334 328 L466 328 L472 340 Q400 346 328 340 Z" fill="#2A2E37" />
-            <path d="M334 328 L466 328 L466 331 L334 331 Z" fill="#3C424E" />
-            <rect x={378} y={333} width={44} height={4} rx={2} fill="#3C424E" opacity={0.7} />
-          </g>
-        ) : (
-          <g>
-            <ScreenPanel
-              x={336}
-              y={238}
-              width={128}
-              height={80}
-              screenGradId={gid("screen")}
-              glowGradId={gid("screenGlow")}
-            >
-              <CodeLines x={348} y={252} width={112} scale={0.82} />
-            </ScreenPanel>
-            <rect x={392} y={324} width={16} height={16} rx={3} fill="#2A2E37" />
-            <rect x={368} y={338} width={64} height={7} rx={3.5} fill="#22262E" />
-          </g>
-        )}
-
-        {/* light spilling from the display onto the desk */}
-        <ellipse cx={CENTER} cy={340} rx={130} ry={26} fill={`url(#${gid("spill")})`} />
-
-        {/* ---------- DESK PROPS (in front of the display plane) ---------- */}
-        {avatar.mug && <Mug accent={accent} />}
-        {avatar.phone && <Phone accent={accent} />}
-
-        {/* ---------- KEYBOARD + HANDS ---------- */}
-        {hasSeparateKeyboard && <Keyboard mech={avatar.mechKeyboard} accent={accent} />}
-        <Hand skin={skin} />
-        <Hand skin={skin} flip />
-      </svg>
-
-      {customizable && !avatarProp && (
-        <SceneCustomizer
-          avatar={avatar}
-          open={panelOpen}
-          onToggle={() => setPanelOpen((prev) => !prev)}
-          onChange={handleChange}
-          onRandomize={handleRandomize}
-          onReset={handleReset}
-          description={label}
-        />
-      )}
+      {/* Moves and additions are not visible to everyone — say them out loud. */}
+      <p className="sr-only" role="status" aria-live="polite">
+        {status}
+      </p>
     </div>
   );
 };

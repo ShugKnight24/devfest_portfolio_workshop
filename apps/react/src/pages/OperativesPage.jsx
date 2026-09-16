@@ -444,10 +444,10 @@ Generated via DevFest Sovereign Sandbox.
                             ))}
                           </div>
                           <div className="flex justify-between pt-2 border-t border-gray-700 font-bold text-sm">
-                            <span className="text-red-400">
+                            <span className="text-red-800 dark:text-red-400">
                               Total Burn: ${csvSummary.totalExpense.toFixed(2)}
                             </span>
-                            <span className="text-green-400">
+                            <span className="text-green-800 dark:text-green-400">
                               Total Income: ${csvSummary.totalIncome.toFixed(2)}
                             </span>
                           </div>
@@ -678,7 +678,7 @@ Generated via DevFest Sovereign Sandbox.
                               <button
                                 type="button"
                                 onClick={() => removeCartItem(item.id)}
-                                className="text-red-400 hover:text-red-300 px-1 font-bold"
+                                className="text-red-800 dark:text-red-400 hover:text-red-800 dark:text-red-300 px-1 font-bold"
                               >
                                 &minus;
                               </button>
@@ -790,8 +790,8 @@ Generated via DevFest Sovereign Sandbox.
                   <span
                     className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded inline-flex items-center gap-1.5 ${
                       isZeroBloat
-                        ? "bg-green-500/20 text-green-400 border border-green-500/40"
-                        : "bg-red-500/20 text-red-400 border border-red-500/40"
+                        ? "bg-green-500/20 text-green-800 dark:text-green-400 border border-green-500/40"
+                        : "bg-red-500/20 text-red-800 dark:text-red-400 border border-red-500/40"
                     }`}
                   >
                     {isZeroBloat ? (
@@ -815,7 +815,7 @@ Generated via DevFest Sovereign Sandbox.
                   className="w-full bg-[#05070a] border border-[#1f2430] rounded-xl p-3 font-mono text-xs text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00ffcc]"
                 />
                 {!isZeroBloat && (
-                  <p className="text-xs text-red-400 font-mono mt-1">
+                  <p className="text-xs text-red-800 dark:text-red-400 font-mono mt-1">
                     The Neagley Principle prohibits unnecessary dependencies.
                     Replace external packages with native standard APIs (e.g. fetch instead of axios).
                   </p>

@@ -92,7 +92,7 @@ export const LivePreview = ({
         )}
 
         {activeTab === "code" && (
-          <pre className="p-4 bg-gray-900 text-green-400 rounded-lg text-sm overflow-x-auto">
+          <pre className="p-4 bg-gray-900 text-green-800 dark:text-green-400 rounded-lg text-sm overflow-x-auto">
             {`
               <${componentName}
                 ${Object.entries(props)

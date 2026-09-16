@@ -126,7 +126,7 @@ export class ErrorBoundary extends Component {
             <div className="text-xs uppercase tracking-wider text-[#ff0055] font-bold">
               Diagnostic String:
             </div>
-            <div className="text-sm text-red-300 font-mono break-words bg-black/60 p-3 rounded border border-red-900/40">
+            <div className="text-sm text-red-800 dark:text-red-300 font-mono break-words bg-black/60 p-3 rounded border border-red-300 dark:border-red-900/40">
               {error?.toString() || "Unknown error encountered"}
             </div>
           </div>

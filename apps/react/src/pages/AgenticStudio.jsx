@@ -13,7 +13,7 @@ const TIERS = [
     color: "from-emerald-400 to-teal-500",
     border: "border-emerald-500/40",
     bg: "bg-emerald-500/10",
-    text: "text-emerald-400",
+    text: "text-emerald-800 dark:text-emerald-400",
     summary: "Conversational prompt-to-app workflow. Zero setup, instant feedback, and bespoke micro-tools built for yourself.",
     focus: ["Plain-English prompts", "Zero-install web editors", "Audience of One mindset", "Quick visual prototypes"],
     agentRole: "AI is your lead engineer who writes and runs code while you direct the vision."
@@ -25,7 +25,7 @@ const TIERS = [
     color: "from-cyan-400 to-blue-500",
     border: "border-cyan-500/40",
     bg: "bg-cyan-500/10",
-    text: "text-cyan-400",
+    text: "text-cyan-800 dark:text-cyan-400",
     summary: "AI pair-programming for accelerated learning. Build portfolio projects, understand React hooks, and ace technical interviews.",
     focus: ["Interactive learning loops", "Guided bug fixing", "Portfolio project velocity", "Explaining tricky concepts"],
     agentRole: "AI is a senior mentor sitting beside you, reviewing PRs and explaining trade-offs."
@@ -37,7 +37,7 @@ const TIERS = [
     color: "from-purple-400 to-violet-500",
     border: "border-purple-500/40",
     bg: "bg-purple-500/10",
-    text: "text-purple-400",
+    text: "text-purple-800 dark:text-purple-400",
     summary: "High-speed feature execution and Context Engineering. CRISP frameworks, refactoring legacy debt, and TDD verification gates.",
     focus: ["CRISP prompt framework", "Context Engineering", "Automated Vitest gates", "Multi-file component systems"],
     agentRole: "AI is a hyper-fast autonomous junior teammate that drafts features and writes unit tests."
@@ -49,7 +49,7 @@ const TIERS = [
     color: "from-amber-400 to-orange-500",
     border: "border-amber-500/40",
     bg: "bg-amber-500/10",
-    text: "text-amber-400",
+    text: "text-amber-800 dark:text-amber-400",
     summary: "Multi-subagent orchestration (cavecrew), token economics (caveman/cove), repository rules engines (AGENTS.md), and sovereign telemetry.",
     focus: ["Subagent triage pipelines", "Context compression (caveman/cove)", "Repo rules (AGENTS.md)", "Telemetry bot isolation"],
     agentRole: "AI is an orchestrated fleet of specialized subagents (Investigator, Builder, Reviewer) gated by CI."
@@ -386,8 +386,8 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
       <div className="max-w-7xl mx-auto space-y-12 relative z-10">
         {/* Header */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-950/60 border border-purple-800/50 text-purple-300 text-xs font-mono uppercase tracking-wider">
-            <EmojiIcon name="lightning" className="w-3.5 h-3.5 text-amber-300 inline" /> Speed of Thought • Agentic Workshop Engine
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-100 dark:bg-purple-950/60 border border-purple-800/50 text-purple-800 dark:text-purple-300 text-xs font-mono uppercase tracking-wider">
+            <EmojiIcon name="lightning" className="w-3.5 h-3.5 text-amber-800 dark:text-amber-300 inline" /> Speed of Thought • Agentic Workshop Engine
           </div>
           <h1 className="text-4xl md:text-6xl font-black tracking-tight text-(--color-text) dark:text-(--color-text-dark)">
             Agentic Dev &amp; <br />
@@ -432,7 +432,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                     <span className={`text-xs font-mono font-bold ${isActive ? t.text : "text-(--color-muted-text) dark:text-(--color-muted-text-dark)"}`}>
                       {t.badge}
                     </span>
-                    {isActive && <EmojiIcon name="sparkles" className="w-3.5 h-3.5 text-amber-300 shrink-0" />}
+                    {isActive && <EmojiIcon name="sparkles" className="w-3.5 h-3.5 text-amber-800 dark:text-amber-300 shrink-0" />}
                   </div>
                   <h3 className="text-lg font-bold text-(--color-text) dark:text-(--color-text-dark) mb-2">{t.name}</h3>
                   <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) line-clamp-2 leading-relaxed">
@@ -461,7 +461,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                   key={i}
                   className="px-2.5 py-1 rounded-md bg-(--color-surface) dark:bg-(--color-surface-dark)/80 border border-(--color-border) dark:border-(--color-border-dark) text-xs font-medium text-(--color-text) dark:text-(--color-text-dark) inline-flex items-center gap-1.5"
                 >
-                  <Checkmark className="w-3 h-3 text-emerald-400 shrink-0" /> {f}
+                  <Checkmark className="w-3 h-3 text-emerald-800 dark:text-emerald-400 shrink-0" /> {f}
                 </span>
               ))}
             </div>
@@ -471,13 +471,13 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
               to="/lessons?track=agentic"
               className="px-5 py-2.5 rounded-xl bg-(--color-surface) dark:bg-(--color-surface-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark) text-(--color-text) dark:text-(--color-text-dark) text-xs font-bold font-mono transition-all text-center border border-(--color-border) dark:border-(--color-border-dark) flex items-center justify-center gap-2"
             >
-              <EmojiIcon name="book" className="w-4 h-4 text-cyan-400 shrink-0" /> View Agentic Lessons
+              <EmojiIcon name="book" className="w-4 h-4 text-cyan-800 dark:text-cyan-400 shrink-0" /> View Agentic Lessons
             </Link>
             <Link
               to="/slides"
               className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold font-mono transition-all text-center shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2"
             >
-              <EmojiIcon name="mic" className="w-4 h-4 text-amber-300 shrink-0" /> Present Slide Decks
+              <EmojiIcon name="mic" className="w-4 h-4 text-amber-800 dark:text-amber-300 shrink-0" /> Present Slide Decks
             </Link>
           </div>
         </div>
@@ -488,51 +488,51 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
             onClick={() => setActiveTab("poc-studio")}
             className={`pb-4 text-sm font-bold font-mono tracking-wide transition-all border-b-2 flex items-center gap-2 whitespace-nowrap cursor-pointer ${
               activeTab === "poc-studio"
-                ? "border-purple-500 text-purple-400"
+                ? "border-purple-500 text-purple-800 dark:text-purple-400"
                 : "border-transparent text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark)"
             }`}
           >
-            <EmojiIcon name="target" className="w-4 h-4 text-purple-400" /> 1. Audience of One: POC Studio
+            <EmojiIcon name="target" className="w-4 h-4 text-purple-800 dark:text-purple-400" /> 1. Audience of One: POC Studio
           </button>
           <button
             onClick={() => setActiveTab("best-practices")}
             className={`pb-4 text-sm font-bold font-mono tracking-wide transition-all border-b-2 flex items-center gap-2 whitespace-nowrap cursor-pointer ${
               activeTab === "best-practices"
-                ? "border-cyan-500 text-cyan-400"
+                ? "border-cyan-500 text-cyan-800 dark:text-cyan-400"
                 : "border-transparent text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark)"
             }`}
           >
-            <EmojiIcon name="robot" className="w-4 h-4 text-cyan-400" /> 2. Subagent Triage Simulator
+            <EmojiIcon name="robot" className="w-4 h-4 text-cyan-800 dark:text-cyan-400" /> 2. Subagent Triage Simulator
           </button>
           <button
             onClick={() => setActiveTab("context-hierarchy")}
             className={`pb-4 text-sm font-bold font-mono tracking-wide transition-all border-b-2 flex items-center gap-2 whitespace-nowrap cursor-pointer ${
               activeTab === "context-hierarchy"
-                ? "border-lime-500 text-lime-400"
+                ? "border-lime-500 text-lime-800 dark:text-lime-400"
                 : "border-transparent text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark)"
             }`}
           >
-            <EmojiIcon name="scroll" className="w-4 h-4 text-lime-400" /> 3. Context Engineering &amp; Rules
+            <EmojiIcon name="scroll" className="w-4 h-4 text-lime-800 dark:text-lime-400" /> 3. Context Engineering &amp; Rules
           </button>
           <button
             onClick={() => setActiveTab("verification-playground")}
             className={`pb-4 text-sm font-bold font-mono tracking-wide transition-all border-b-2 flex items-center gap-2 whitespace-nowrap cursor-pointer ${
               activeTab === "verification-playground"
-                ? "border-emerald-500 text-emerald-400"
+                ? "border-emerald-500 text-emerald-800 dark:text-emerald-400"
                 : "border-transparent text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark)"
             }`}
           >
-            <EmojiIcon name="check" className="w-4 h-4 text-emerald-400" /> 4. Automated Gates Playground
+            <EmojiIcon name="check" className="w-4 h-4 text-emerald-800 dark:text-emerald-400" /> 4. Automated Gates Playground
           </button>
           <button
             onClick={() => setActiveTab("speed-frameworks")}
             className={`pb-4 text-sm font-bold font-mono tracking-wide transition-all border-b-2 flex items-center gap-2 whitespace-nowrap cursor-pointer ${
               activeTab === "speed-frameworks"
-                ? "border-amber-500 text-amber-400"
+                ? "border-amber-500 text-amber-800 dark:text-amber-400"
                 : "border-transparent text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark)"
             }`}
           >
-            <EmojiIcon name="lightning" className="w-4 h-4 text-amber-400" /> 5. Speed of Thought &amp; Stage Tactics
+            <EmojiIcon name="lightning" className="w-4 h-4 text-amber-800 dark:text-amber-400" /> 5. Speed of Thought &amp; Stage Tactics
           </button>
         </div>
 
@@ -550,7 +550,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                   className={`text-xs font-mono font-bold px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
                     isCustomMode
                       ? "bg-purple-600 border-purple-500 text-white"
-                      : "bg-(--color-surface) dark:bg-(--color-surface-dark) border-(--color-border) dark:border-(--color-border-dark) text-purple-400 hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark)"
+                      : "bg-(--color-surface) dark:bg-(--color-surface-dark) border-(--color-border) dark:border-(--color-border-dark) text-purple-800 dark:text-purple-400 hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark)"
                   }`}
                 >
                   {isCustomMode ? (
@@ -576,12 +576,12 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                         onClick={() => setSelectedPoc(poc)}
                         className={`p-4 rounded-xl cursor-pointer border transition-all ${
                           isSelected
-                            ? "bg-purple-950/40 border-purple-500/60 shadow-md shadow-purple-500/10"
+                            ? "bg-purple-100 dark:bg-purple-950/40 border-purple-500/60 shadow-md shadow-purple-500/10"
                             : "bg-(--color-surface) dark:bg-(--color-surface-dark)/60 border-(--color-border) dark:border-(--color-border-dark) hover:border-(--color-primary) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark)"
                         }`}
                       >
                         <div className="flex items-center justify-between text-xs mb-1">
-                          <span className="text-purple-400 font-mono font-semibold">{poc.category}</span>
+                          <span className="text-purple-800 dark:text-purple-400 font-mono font-semibold">{poc.category}</span>
                           <span className="text-(--color-muted-text) dark:text-(--color-muted-text-dark) font-mono">{poc.tech.split(" ")[0]}</span>
                         </div>
                         <h4 className="text-base font-bold text-(--color-text) dark:text-(--color-text-dark) mb-1">{poc.title}</h4>
@@ -640,11 +640,11 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
 
               {/* Pro Tip Box */}
               <div className="p-4 rounded-xl bg-(--color-surface) dark:bg-(--color-surface-dark)/80 border border-(--color-border) dark:border-(--color-border-dark) text-xs space-y-2">
-                <div className="flex items-center gap-2 text-amber-400 font-bold font-mono">
+                <div className="flex items-center gap-2 text-amber-800 dark:text-amber-400 font-bold font-mono">
                   <Info /> "Audience of One" Principle
                 </div>
                 <p className="text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
-                  When you build for yourself, you don't need multi-tenant databases, Stripe subscriptions, or bloated admin dashboards. A single React component with <code className="text-purple-400">localStorage</code> solves 95% of personal workflows in 15 minutes.
+                  When you build for yourself, you don't need multi-tenant databases, Stripe subscriptions, or bloated admin dashboards. A single React component with <code className="text-purple-800 dark:text-purple-400">localStorage</code> solves 95% of personal workflows in 15 minutes.
                 </p>
               </div>
             </div>
@@ -654,14 +654,14 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
               <div className="p-6 rounded-2xl bg-(--color-surface) dark:bg-(--color-surface-dark)/90 border border-(--color-border) dark:border-(--color-border-dark) space-y-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-(--color-border) dark:border-(--color-border-dark)">
                   <div>
-                    <span className="text-xs font-mono text-purple-400 uppercase tracking-wider">
+                    <span className="text-xs font-mono text-purple-800 dark:text-purple-400 uppercase tracking-wider">
                       {isCustomMode ? "Bespoke Audience of One Tool" : selectedPoc.category}
                     </span>
                     <h3 className="text-2xl font-black text-(--color-text) dark:text-(--color-text-dark)">
                       {isCustomMode ? customTitle : selectedPoc.title}
                     </h3>
                   </div>
-                  <div className="px-3 py-1 rounded-full bg-purple-900/40 border border-purple-700/50 text-purple-300 text-xs font-mono">
+                  <div className="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/40 border border-purple-700/50 text-purple-800 dark:text-purple-300 text-xs font-mono">
                     Stack: {isCustomMode ? customStack : selectedPoc.tech}
                   </div>
                 </div>
@@ -672,7 +672,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                     <span>1. Terminal Scaffolding Command</span>
                     <CopyButton text={isCustomMode ? customScaffold : selectedPoc.scaffold} size="xs" />
                   </div>
-                  <div className="p-3 rounded-lg bg-(--color-background) dark:bg-(--color-dark)/90 font-mono text-xs text-cyan-300 border border-(--color-border) dark:border-(--color-border-dark) overflow-x-auto">
+                  <div className="p-3 rounded-lg bg-(--color-background) dark:bg-(--color-dark)/90 font-mono text-xs text-cyan-800 dark:text-cyan-300 border border-(--color-border) dark:border-(--color-border-dark) overflow-x-auto">
                     $ {isCustomMode ? customScaffold : selectedPoc.scaffold}
                   </div>
                 </div>
@@ -715,7 +715,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                   <h3 className="text-2xl font-bold text-(--color-text) dark:text-(--color-text-dark) flex items-center gap-2">
-                    <EmojiIcon name="lightning" className="w-5 h-5 text-amber-300 shrink-0" /> Subagent Pipeline: <code className="text-cyan-400 text-xl font-mono">cavecrew</code> Pattern
+                    <EmojiIcon name="lightning" className="w-5 h-5 text-amber-800 dark:text-amber-300 shrink-0" /> Subagent Pipeline: <code className="text-cyan-800 dark:text-cyan-400 text-xl font-mono">cavecrew</code> Pattern
                   </h3>
                   <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
                     Instead of running 1 monolithic chat, orchestrate specialized subagents that emit compressed findings.
@@ -728,7 +728,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                       setSimScenario(e.target.value);
                       setSimStep(0);
                     }}
-                    className="px-3 py-2 rounded-xl bg-(--color-background) dark:bg-(--color-dark)/90 border border-(--color-border) dark:border-(--color-border-dark) text-xs font-mono text-cyan-300 focus:outline-none"
+                    className="px-3 py-2 rounded-xl bg-(--color-background) dark:bg-(--color-dark)/90 border border-(--color-border) dark:border-(--color-border-dark) text-xs font-mono text-cyan-800 dark:text-cyan-300 focus:outline-none"
                   >
                     <option value="auth-token">Auth Token Expiry Bug</option>
                     <option value="lcp-perf">Core Web Vitals LCP Lag</option>
@@ -749,7 +749,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
 
               {/* Active Scenario Badge */}
               <div className="flex items-center gap-3 text-xs font-mono">
-                <span className="px-2.5 py-1 rounded-md bg-cyan-950/60 border border-cyan-800/40 text-cyan-400">
+                <span className="px-2.5 py-1 rounded-md bg-cyan-100 dark:bg-cyan-950/60 border border-cyan-800/40 text-cyan-800 dark:text-cyan-400">
                   Target: {currentScenario.file}
                 </span>
                 <span className="text-(--color-muted-text) dark:text-(--color-muted-text-dark)">{currentScenario.badge}</span>
@@ -760,11 +760,11 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                 {/* Step 1: Investigator */}
                 <div className={`p-4 rounded-xl border transition-all ${
                   simStep >= 1
-                    ? "bg-cyan-950/40 border-cyan-500 shadow-md shadow-cyan-500/20"
+                    ? "bg-cyan-100 dark:bg-cyan-950/40 border-cyan-500 shadow-md shadow-cyan-500/20"
                     : "bg-(--color-surface) dark:bg-(--color-surface-dark)/60 border-(--color-border) dark:border-(--color-border-dark) opacity-60"
                 }`}>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-mono font-bold text-cyan-400">[01] INVESTIGATOR</span>
+                    <span className="text-xs font-mono font-bold text-cyan-800 dark:text-cyan-400">[01] INVESTIGATOR</span>
                     {simStep >= 1 && <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse inline-block" />}
                   </div>
                   <h4 className="text-sm font-bold text-(--color-text) dark:text-(--color-text-dark) mb-1">Locate &amp; Scrape</h4>
@@ -777,11 +777,11 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                 {/* Step 2: Builder */}
                 <div className={`p-4 rounded-xl border transition-all ${
                   simStep >= 2
-                    ? "bg-purple-950/40 border-purple-500 shadow-md shadow-purple-500/20"
+                    ? "bg-purple-100 dark:bg-purple-950/40 border-purple-500 shadow-md shadow-purple-500/20"
                     : "bg-(--color-surface) dark:bg-(--color-surface-dark)/60 border-(--color-border) dark:border-(--color-border-dark) opacity-60"
                 }`}>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-mono font-bold text-purple-400">[02] BUILDER</span>
+                    <span className="text-xs font-mono font-bold text-purple-800 dark:text-purple-400">[02] BUILDER</span>
                     {simStep >= 2 && <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse inline-block" />}
                   </div>
                   <h4 className="text-sm font-bold text-(--color-text) dark:text-(--color-text-dark) mb-1">Surgical Edit</h4>
@@ -794,11 +794,11 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                 {/* Step 3: Reviewer */}
                 <div className={`p-4 rounded-xl border transition-all ${
                   simStep >= 3
-                    ? "bg-amber-950/40 border-amber-500 shadow-md shadow-amber-500/20"
+                    ? "bg-amber-100 dark:bg-amber-950/40 border-amber-500 shadow-md shadow-amber-500/20"
                     : "bg-(--color-surface) dark:bg-(--color-surface-dark)/60 border-(--color-border) dark:border-(--color-border-dark) opacity-60"
                 }`}>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-mono font-bold text-amber-400">[03] REVIEWER</span>
+                    <span className="text-xs font-mono font-bold text-amber-800 dark:text-amber-400">[03] REVIEWER</span>
                     {simStep >= 3 && <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse inline-block" />}
                   </div>
                   <h4 className="text-sm font-bold text-(--color-text) dark:text-(--color-text-dark) mb-1">Audit Diff</h4>
@@ -811,16 +811,16 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                 {/* Step 4: Verification Gate */}
                 <div className={`p-4 rounded-xl border transition-all ${
                   simStep >= 4
-                    ? "bg-emerald-950/40 border-emerald-500 shadow-md shadow-emerald-500/20"
+                    ? "bg-emerald-100 dark:bg-emerald-950/40 border-emerald-500 shadow-md shadow-emerald-500/20"
                     : "bg-(--color-surface) dark:bg-(--color-surface-dark)/60 border-(--color-border) dark:border-(--color-border-dark) opacity-60"
                 }`}>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-mono font-bold text-emerald-400">[04] VITEST GATE</span>
-                    {simStep >= 4 && <Checkmark className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
+                    <span className="text-xs font-mono font-bold text-emerald-800 dark:text-emerald-400">[04] VITEST GATE</span>
+                    {simStep >= 4 && <Checkmark className="w-3.5 h-3.5 text-emerald-800 dark:text-emerald-400 shrink-0" />}
                   </div>
                   <h4 className="text-sm font-bold text-(--color-text) dark:text-(--color-text-dark) mb-1">CI &amp; Build Pass</h4>
                   <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) mb-3">Automated harness verifies production bundle and passes all tests.</p>
-                  <div className="p-2 rounded bg-(--color-background) dark:bg-(--color-dark)/80 text-[11px] font-mono text-emerald-400 border border-(--color-border) dark:border-(--color-border-dark) min-h-[50px]">
+                  <div className="p-2 rounded bg-(--color-background) dark:bg-(--color-dark)/80 text-[11px] font-mono text-emerald-800 dark:text-emerald-400 border border-(--color-border) dark:border-(--color-border-dark) min-h-[50px]">
                     {simStep >= 4 ? currentScenario.gate : "Waiting..."}
                   </div>
                 </div>
@@ -830,12 +830,12 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
             {/* Token Economics & Compression Demo */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Uncompressed Verbose */}
-              <div className="p-6 rounded-2xl bg-red-950/20 border border-red-900/40 space-y-4">
+              <div className="p-6 rounded-2xl bg-red-100 dark:bg-red-950/20 border border-red-300 dark:border-red-900/40 space-y-4">
                 <div className="flex justify-between items-center">
-                  <h4 className="text-sm font-mono font-bold text-red-400 flex items-center gap-1.5">
-                    <EmojiIcon name="cross" className="w-4 h-4 text-red-400" /> Verbose Agent Loop (Context Rot)
+                  <h4 className="text-sm font-mono font-bold text-red-800 dark:text-red-400 flex items-center gap-1.5">
+                    <EmojiIcon name="cross" className="w-4 h-4 text-red-800 dark:text-red-400" /> Verbose Agent Loop (Context Rot)
                   </h4>
-                  <span className="px-2.5 py-1 rounded bg-red-900/40 text-red-300 text-xs font-mono font-bold">
+                  <span className="px-2.5 py-1 rounded bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 text-xs font-mono font-bold">
                     ~2,400 tokens / turn
                   </span>
                 </div>
@@ -844,21 +844,21 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                 </p>
                 <div className="p-4 rounded-xl bg-(--color-background) dark:bg-(--color-dark)/80 font-mono text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) space-y-2 border border-(--color-border) dark:border-(--color-border-dark) max-h-56 overflow-y-auto">
                   <div className="text-gray-500 dark:text-gray-400">// Turn 12 response:</div>
-                  <div className="text-red-300">
+                  <div className="text-red-800 dark:text-red-300">
                     "Certainly! I'd be more than happy to assist you with refactoring your authentication context. As you know, React 19 provides multiple hooks that we can leverage..."
                   </div>
                   <div className="text-gray-500 dark:text-gray-400">[Dumps 250 lines of unmodified code...]</div>
-                  <div className="text-red-400">Result: Context window exhausted by Turn 15. Agent begins hallucinating.</div>
+                  <div className="text-red-800 dark:text-red-400">Result: Context window exhausted by Turn 15. Agent begins hallucinating.</div>
                 </div>
               </div>
 
               {/* Compressed Caveman / Cove */}
-              <div className="p-6 rounded-2xl bg-emerald-950/20 border border-emerald-900/40 space-y-4">
+              <div className="p-6 rounded-2xl bg-emerald-100 dark:bg-emerald-950/20 border border-emerald-300 dark:border-emerald-900/40 space-y-4">
                 <div className="flex justify-between items-center">
-                  <h4 className="text-sm font-mono font-bold text-emerald-400 flex items-center gap-1.5">
-                    <EmojiIcon name="check" className="w-4 h-4 text-emerald-400" /> Caveman + Cove Loop (Sharp Context)
+                  <h4 className="text-sm font-mono font-bold text-emerald-800 dark:text-emerald-400 flex items-center gap-1.5">
+                    <EmojiIcon name="check" className="w-4 h-4 text-emerald-800 dark:text-emerald-400" /> Caveman + Cove Loop (Sharp Context)
                   </h4>
-                  <span className="px-2.5 py-1 rounded bg-emerald-900/40 text-emerald-300 text-xs font-mono font-bold">
+                  <span className="px-2.5 py-1 rounded bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 text-xs font-mono font-bold">
                     ~420 tokens / turn (82% savings)
                   </span>
                 </div>
@@ -867,13 +867,13 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                 </p>
                 <div className="p-4 rounded-xl bg-(--color-background) dark:bg-(--color-dark)/80 font-mono text-xs text-(--color-text) dark:text-(--color-text-dark) space-y-2 border border-(--color-border) dark:border-(--color-border-dark) max-h-56 overflow-y-auto">
                   <div className="text-gray-500 dark:text-gray-400">// Turn 12 response:</div>
-                  <div className="text-emerald-300">
+                  <div className="text-emerald-800 dark:text-emerald-300">
                     AuthContext.jsx:42 — null token check use `?.` not `&&`.
                   </div>
-                  <div className="text-cyan-300 font-mono">
+                  <div className="text-cyan-800 dark:text-cyan-300 font-mono">
                     verified: vitest 54 passed (0 regressions).
                   </div>
-                  <div className="text-emerald-400">Result: 50+ turns without context degradation. High precision.</div>
+                  <div className="text-emerald-800 dark:text-emerald-400">Result: 50+ turns without context degradation. High precision.</div>
                 </div>
               </div>
             </div>
@@ -885,7 +885,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
           <div className="p-8 rounded-2xl bg-(--color-surface) dark:bg-(--color-surface-dark)/90 border border-(--color-border) dark:border-(--color-border-dark) space-y-6">
             <div>
               <h3 className="text-2xl font-bold text-(--color-text) dark:text-(--color-text-dark) flex items-center gap-2">
-                <EmojiIcon name="scroll" className="w-5 h-5 text-indigo-400 shrink-0" /> The Context Hierarchy: Engineering What Agents See
+                <EmojiIcon name="scroll" className="w-5 h-5 text-indigo-800 dark:text-indigo-400 shrink-0" /> The Context Hierarchy: Engineering What Agents See
               </h3>
               <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark) mt-1">
                 Context is the biggest lever for AI quality. Too little = hallucinations; too much = lost focus.
@@ -896,7 +896,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
               <div className="p-4 rounded-xl bg-(--color-surface) dark:bg-(--color-surface-dark)/50 border border-(--color-border) dark:border-(--color-border-dark) flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded bg-purple-900/60 text-purple-300 font-mono text-xs font-bold">LEVEL 1</span>
+                    <span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-900/60 text-purple-800 dark:text-purple-300 font-mono text-xs font-bold">LEVEL 1</span>
                     <h4 className="font-bold text-(--color-text) dark:text-(--color-text-dark) text-base">Persistent Rules File (AGENTS.md / CLAUDE.md)</h4>
                   </div>
                   <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
@@ -909,40 +909,40 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
               <div className="p-4 rounded-xl bg-(--color-surface) dark:bg-(--color-surface-dark)/50 border border-(--color-border) dark:border-(--color-border-dark) flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded bg-cyan-900/60 text-cyan-300 font-mono text-xs font-bold">LEVEL 2</span>
+                    <span className="px-2 py-0.5 rounded bg-cyan-100 dark:bg-cyan-900/60 text-cyan-800 dark:text-cyan-300 font-mono text-xs font-bold">LEVEL 2</span>
                     <h4 className="font-bold text-(--color-text) dark:text-(--color-text-dark) text-base">Spec &amp; Architecture Document (SPEC.md)</h4>
                   </div>
                   <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
                     Loaded per feature. Defines user stories, prop interfaces, state transitions, and acceptance criteria.
                   </p>
                 </div>
-                <span className="text-xs font-mono text-cyan-400">Per-Task Scope</span>
+                <span className="text-xs font-mono text-cyan-800 dark:text-cyan-400">Per-Task Scope</span>
               </div>
 
               <div className="p-4 rounded-xl bg-(--color-surface) dark:bg-(--color-surface-dark)/50 border border-(--color-border) dark:border-(--color-border-dark) flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded bg-amber-900/60 text-amber-300 font-mono text-xs font-bold">LEVEL 3</span>
+                    <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 font-mono text-xs font-bold">LEVEL 3</span>
                     <h4 className="font-bold text-(--color-text) dark:text-(--color-text-dark) text-base">Scoped Source Files</h4>
                   </div>
                   <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
                     Only include the 1-3 files being actively edited. Never dump the entire codebase into transient prompt context.
                   </p>
                 </div>
-                <span className="text-xs font-mono text-amber-400">Minimal Diff</span>
+                <span className="text-xs font-mono text-amber-800 dark:text-amber-400">Minimal Diff</span>
               </div>
 
               <div className="p-4 rounded-xl bg-(--color-surface) dark:bg-(--color-surface-dark)/50 border border-(--color-border) dark:border-(--color-border-dark) flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-300 font-mono text-xs font-bold">LEVEL 4</span>
+                    <span className="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 font-mono text-xs font-bold">LEVEL 4</span>
                     <h4 className="font-bold text-(--color-text) dark:text-(--color-text-dark) text-base">Automated Error Output &amp; Test Results</h4>
                   </div>
                   <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
                     Vitest failure snippets passed back to agent for closed-loop self-correction.
                   </p>
                 </div>
-                <span className="text-xs font-mono text-emerald-400">Zero-Human Gate</span>
+                <span className="text-xs font-mono text-emerald-800 dark:text-emerald-400">Zero-Human Gate</span>
               </div>
             </div>
           </div>
@@ -954,7 +954,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <h3 className="text-2xl font-bold text-(--color-text) dark:text-(--color-text-dark) flex items-center gap-2">
-                  <EmojiIcon name="check" className="w-5 h-5 text-emerald-400 shrink-0" /> Automated Gates &amp; CI Verification Playground
+                  <EmojiIcon name="check" className="w-5 h-5 text-emerald-800 dark:text-emerald-400 shrink-0" /> Automated Gates &amp; CI Verification Playground
                 </h3>
                 <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
                   Simulate how automated test suites protect your repository from agentic hallucinations, syntax errors, and regressions.
@@ -967,7 +967,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                     setGateScenario(e.target.value);
                     setGateStep(0);
                   }}
-                  className="px-3 py-2 rounded-xl bg-(--color-background) dark:bg-(--color-dark)/90 border border-(--color-border) dark:border-(--color-border-dark) text-xs font-mono text-emerald-300 focus:outline-none"
+                  className="px-3 py-2 rounded-xl bg-(--color-background) dark:bg-(--color-dark)/90 border border-(--color-border) dark:border-(--color-border-dark) text-xs font-mono text-emerald-800 dark:text-emerald-300 focus:outline-none"
                 >
                   <option value="all-pass">Clean Conventional PR (Pass)</option>
                   <option value="fail-lint">Linter &amp; Type Regression (Fail)</option>
@@ -986,7 +986,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
 
             {/* Scenario Description */}
             <div className="p-4 rounded-xl bg-(--color-background) dark:bg-(--color-dark)/80 border border-(--color-border) dark:border-(--color-border-dark) text-xs space-y-1">
-              <span className="font-mono text-emerald-400 font-bold uppercase">{currentGate.name}</span>
+              <span className="font-mono text-emerald-800 dark:text-emerald-400 font-bold uppercase">{currentGate.name}</span>
               <p className="text-(--color-muted-text) dark:text-(--color-muted-text-dark)">{currentGate.description}</p>
             </div>
 
@@ -996,16 +996,16 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
               <div className={`p-4 rounded-xl border transition-all ${
                 gateStep >= 1
                   ? currentGate.lint.pass
-                    ? "bg-emerald-950/30 border-emerald-500/80"
-                    : "bg-red-950/30 border-red-500/80"
+                    ? "bg-emerald-100 dark:bg-emerald-950/30 border-emerald-500/80"
+                    : "bg-red-100 dark:bg-red-950/30 border-red-500/80"
                   : "bg-(--color-surface) dark:bg-(--color-surface-dark)/60 border-(--color-border) dark:border-(--color-border-dark) opacity-60"
               }`}>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs font-mono font-bold text-(--color-muted-text) dark:text-(--color-muted-text-dark)">GATE 1: LINTER</span>
                   {gateStep >= 1 && (
                     currentGate.lint.pass
-                      ? <Checkmark className="w-3.5 h-3.5 text-emerald-400" />
-                      : <Close className="w-3.5 h-3.5 text-red-400" />
+                      ? <Checkmark className="w-3.5 h-3.5 text-emerald-800 dark:text-emerald-400" />
+                      : <Close className="w-3.5 h-3.5 text-red-800 dark:text-red-400" />
                   )}
                 </div>
                 <h4 className="text-sm font-bold text-(--color-text) dark:text-(--color-text-dark) mb-1">Syntax &amp; Types</h4>
@@ -1018,16 +1018,16 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
               <div className={`p-4 rounded-xl border transition-all ${
                 gateStep >= 2
                   ? currentGate.vitest.pass
-                    ? "bg-emerald-950/30 border-emerald-500/80"
-                    : "bg-red-950/30 border-red-500/80"
+                    ? "bg-emerald-100 dark:bg-emerald-950/30 border-emerald-500/80"
+                    : "bg-red-100 dark:bg-red-950/30 border-red-500/80"
                   : "bg-(--color-surface) dark:bg-(--color-surface-dark)/60 border-(--color-border) dark:border-(--color-border-dark) opacity-60"
               }`}>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs font-mono font-bold text-(--color-muted-text) dark:text-(--color-muted-text-dark)">GATE 2: VITEST</span>
                   {gateStep >= 2 && (
                     currentGate.vitest.pass
-                      ? <Checkmark className="w-3.5 h-3.5 text-emerald-400" />
-                      : <Close className="w-3.5 h-3.5 text-red-400" />
+                      ? <Checkmark className="w-3.5 h-3.5 text-emerald-800 dark:text-emerald-400" />
+                      : <Close className="w-3.5 h-3.5 text-red-800 dark:text-red-400" />
                   )}
                 </div>
                 <h4 className="text-sm font-bold text-(--color-text) dark:text-(--color-text-dark) mb-1">Unit &amp; Specs</h4>
@@ -1040,16 +1040,16 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
               <div className={`p-4 rounded-xl border transition-all ${
                 gateStep >= 3
                   ? currentGate.build.pass
-                    ? "bg-emerald-950/30 border-emerald-500/80"
-                    : "bg-red-950/30 border-red-500/80"
+                    ? "bg-emerald-100 dark:bg-emerald-950/30 border-emerald-500/80"
+                    : "bg-red-100 dark:bg-red-950/30 border-red-500/80"
                   : "bg-(--color-surface) dark:bg-(--color-surface-dark)/60 border-(--color-border) dark:border-(--color-border-dark) opacity-60"
               }`}>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs font-mono font-bold text-(--color-muted-text) dark:text-(--color-muted-text-dark)">GATE 3: BUILD</span>
                   {gateStep >= 3 && (
                     currentGate.build.pass
-                      ? <Checkmark className="w-3.5 h-3.5 text-emerald-400" />
-                      : <Close className="w-3.5 h-3.5 text-red-400" />
+                      ? <Checkmark className="w-3.5 h-3.5 text-emerald-800 dark:text-emerald-400" />
+                      : <Close className="w-3.5 h-3.5 text-red-800 dark:text-red-400" />
                   )}
                 </div>
                 <h4 className="text-sm font-bold text-(--color-text) dark:text-(--color-text-dark) mb-1">Rollup Bundle</h4>
@@ -1062,16 +1062,16 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
               <div className={`p-4 rounded-xl border transition-all ${
                 gateStep >= 4
                   ? currentGate.deploy.includes("live")
-                    ? "bg-emerald-950/30 border-emerald-500/80"
-                    : "bg-red-950/30 border-red-500/80"
+                    ? "bg-emerald-100 dark:bg-emerald-950/30 border-emerald-500/80"
+                    : "bg-red-100 dark:bg-red-950/30 border-red-500/80"
                   : "bg-(--color-surface) dark:bg-(--color-surface-dark)/60 border-(--color-border) dark:border-(--color-border-dark) opacity-60"
               }`}>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs font-mono font-bold text-(--color-muted-text) dark:text-(--color-muted-text-dark)">GATE 4: DEPLOY</span>
                   {gateStep >= 4 && (
                     currentGate.deploy.includes("live")
-                      ? <Checkmark className="w-3.5 h-3.5 text-emerald-400" />
-                      : <Close className="w-3.5 h-3.5 text-red-400" />
+                      ? <Checkmark className="w-3.5 h-3.5 text-emerald-800 dark:text-emerald-400" />
+                      : <Close className="w-3.5 h-3.5 text-red-800 dark:text-red-400" />
                   )}
                 </div>
                 <h4 className="text-sm font-bold text-(--color-text) dark:text-(--color-text-dark) mb-1">Edge Release</h4>
@@ -1089,7 +1089,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
             {/* Header Banner */}
             <div className="p-8 rounded-3xl bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-cyan-500/10 border border-amber-500/30 backdrop-blur-xl">
               <div className="max-w-3xl space-y-3">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-mono uppercase tracking-widest border border-amber-500/40">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-mono uppercase tracking-widest border border-amber-500/40">
                   <EmojiIcon name="lightning" className="w-3.5 h-3.5" /> Keynote Engine • Live Stage Sovereignty
                 </div>
                 <h2 className="text-3xl md:text-4xl font-black text-(--color-text) dark:text-(--color-text-dark) uppercase font-sans">
@@ -1108,7 +1108,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
               <div className="p-6 rounded-2xl bg-(--color-surface) dark:bg-(--color-surface-dark)/80 border border-cyan-500/40 backdrop-blur-md flex flex-col justify-between shadow-xl">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono font-bold uppercase px-2.5 py-1 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
+                    <span className="text-xs font-mono font-bold uppercase px-2.5 py-1 rounded bg-cyan-500/20 text-cyan-800 dark:text-cyan-400 border border-cyan-500/40">
                       Framework 01
                     </span>
                     <span className="text-xs font-mono text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
@@ -1118,7 +1118,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                   <h3 className="text-xl font-bold text-(--color-text) dark:text-(--color-text-dark)">
                     The Reacher Framework
                   </h3>
-                  <div className="text-xs font-mono text-cyan-400 font-semibold">
+                  <div className="text-xs font-mono text-cyan-800 dark:text-cyan-400 font-semibold">
                     Speed via Deduction
                   </div>
                   <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
@@ -1144,7 +1144,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
               <div className="p-6 rounded-2xl bg-(--color-surface) dark:bg-(--color-surface-dark)/80 border border-red-500/40 backdrop-blur-md flex flex-col justify-between shadow-xl">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono font-bold uppercase px-2.5 py-1 rounded bg-red-500/20 text-red-400 border border-red-500/40">
+                    <span className="text-xs font-mono font-bold uppercase px-2.5 py-1 rounded bg-red-500/20 text-red-800 dark:text-red-400 border border-red-500/40">
                       Framework 02
                     </span>
                     <span className="text-xs font-mono text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
@@ -1154,7 +1154,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                   <h3 className="text-xl font-bold text-(--color-text) dark:text-(--color-text-dark)">
                     The Chainsaw Man Framework
                   </h3>
-                  <div className="text-xs font-mono text-red-400 font-semibold">
+                  <div className="text-xs font-mono text-red-800 dark:text-red-400 font-semibold">
                     Speed via Momentum
                   </div>
                   <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
@@ -1180,7 +1180,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
               <div className="p-6 rounded-2xl bg-(--color-surface) dark:bg-(--color-surface-dark)/80 border border-amber-500/40 backdrop-blur-md flex flex-col justify-between shadow-xl">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono font-bold uppercase px-2.5 py-1 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40">
+                    <span className="text-xs font-mono font-bold uppercase px-2.5 py-1 rounded bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-500/40">
                       Framework 03
                     </span>
                     <span className="text-xs font-mono text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
@@ -1190,7 +1190,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                   <h3 className="text-xl font-bold text-(--color-text) dark:text-(--color-text-dark)">
                     The Iron Framework
                   </h3>
-                  <div className="text-xs font-mono text-amber-400 font-semibold">
+                  <div className="text-xs font-mono text-amber-800 dark:text-amber-400 font-semibold">
                     Speed via Form &amp; Architecture
                   </div>
                   <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
@@ -1227,7 +1227,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Tactic 1 */}
                 <div className="p-6 rounded-2xl bg-(--color-surface) dark:bg-(--color-surface-dark)/60 border border-(--color-border) dark:border-(--color-border-dark) space-y-4">
-                  <div className="flex items-center gap-2 text-amber-400 font-mono text-xs font-bold uppercase">
+                  <div className="flex items-center gap-2 text-amber-800 dark:text-amber-400 font-mono text-xs font-bold uppercase">
                     <EmojiIcon name="flame" className="w-4 h-4" /> Tactic 01 • The 60s Feature
                   </div>
                   <h4 className="text-base font-bold text-(--color-text) dark:text-(--color-text-dark)">
@@ -1236,14 +1236,14 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                   <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
                     Open the <code>pomidor</code> repo. Ask the room: <em>"Give me a wild condition when the timer hits zero!"</em> (e.g., "Flash magenta and shake the viewport!"). Speak it out loud. Compile and render live in under 60 seconds.
                   </p>
-                  <div className="p-3 bg-black/60 rounded-xl border border-gray-800 text-[11px] font-mono text-cyan-300">
+                  <div className="p-3 bg-black/60 rounded-xl border border-gray-800 text-[11px] font-mono text-cyan-800 dark:text-cyan-300">
                     &gt; "On timer zero: flash viewport magenta and trigger CSS screen shake."
                   </div>
                 </div>
 
                 {/* Tactic 2 */}
                 <div className="p-6 rounded-2xl bg-(--color-surface) dark:bg-(--color-surface-dark)/60 border border-(--color-border) dark:border-(--color-border-dark) space-y-4">
-                  <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs font-bold uppercase">
+                  <div className="flex items-center gap-2 text-cyan-800 dark:text-cyan-400 font-mono text-xs font-bold uppercase">
                     <EmojiIcon name="eye" className="w-4 h-4" /> Tactic 02 • Visual Teardown
                   </div>
                   <h4 className="text-base font-bold text-(--color-text) dark:text-(--color-text-dark)">
@@ -1252,14 +1252,14 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                   <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
                     Take a screenshot of a bloated enterprise SaaS UI. Drop it into your agent tool on stage. Prompt: <em>"Strip the bloat. Rebuild this UI in Tailwind using only 3 colors."</em> Watch clean, semantic code emerge.
                   </p>
-                  <div className="p-3 bg-black/60 rounded-xl border border-gray-800 text-[11px] font-mono text-cyan-300">
+                  <div className="p-3 bg-black/60 rounded-xl border border-gray-800 text-[11px] font-mono text-cyan-800 dark:text-cyan-300">
                     &gt; "Strip bloat. 3 colors max. Tailwind v4 only. Eliminate all div soup."
                   </div>
                 </div>
 
                 {/* Tactic 3 */}
                 <div className="p-6 rounded-2xl bg-(--color-surface) dark:bg-(--color-surface-dark)/60 border border-(--color-border) dark:border-(--color-border-dark) space-y-4">
-                  <div className="flex items-center gap-2 text-emerald-400 font-mono text-xs font-bold uppercase">
+                  <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-400 font-mono text-xs font-bold uppercase">
                     <EmojiIcon name="hammer" className="w-4 h-4" /> Tactic 03 • The Intentional Snap
                   </div>
                   <h4 className="text-base font-bold text-(--color-text) dark:text-(--color-text-dark)">
@@ -1268,7 +1268,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                   <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
                     Intentionally break <code>next_shopping_cart</code> (invert the total calculation). Show the error. Speak a single prompt: <em>"The cart state is inverted. Deduce root cause and apply strict fix."</em> Watch instant forensic healing.
                   </p>
-                  <div className="p-3 bg-black/60 rounded-xl border border-gray-800 text-[11px] font-mono text-cyan-300">
+                  <div className="p-3 bg-black/60 rounded-xl border border-gray-800 text-[11px] font-mono text-cyan-800 dark:text-cyan-300">
                     &gt; "Cart state inverted. Deduce root cause from stack trace. Output diff only."
                   </div>
                 </div>
@@ -1296,7 +1296,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
               to="/showcase"
               className="px-6 py-3 rounded-xl bg-(--color-surface) dark:bg-(--color-surface-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark) text-(--color-text) dark:text-(--color-text-dark) font-bold text-xs font-mono transition-all border border-(--color-border) dark:border-(--color-border-dark) flex items-center gap-2"
             >
-              <EmojiIcon name="star" className="w-4 h-4 text-amber-300" /> Explore Live Showcase
+              <EmojiIcon name="star" className="w-4 h-4 text-amber-800 dark:text-amber-300" /> Explore Live Showcase
             </Link>
           </div>
         </div>

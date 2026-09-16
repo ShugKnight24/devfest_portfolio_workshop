@@ -732,7 +732,7 @@ export const ChallengeModal = ({ isOpen, onClose }) => {
                             key={i}
                             className="text-sm text-red-600 dark:text-red-400 flex items-start gap-2"
                           >
-                            <span className="text-red-400">•</span>
+                            <span className="text-red-800 dark:text-red-400">•</span>
                             {error}
                           </li>
                         ))}

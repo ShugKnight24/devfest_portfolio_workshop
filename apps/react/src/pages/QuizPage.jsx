@@ -57,11 +57,11 @@ const QuizPage = () => {
       return {
         level: "Skilled Developer",
         icon: "star",
-        color: "text-blue-400",
+        color: "text-blue-800 dark:text-blue-400",
       };
     if (accuracy >= 60)
-      return { level: "Learning Fast", icon: "books", color: "text-green-400" };
-    return { level: "Getting Started", icon: "target", color: "text-purple-400" };
+      return { level: "Learning Fast", icon: "books", color: "text-green-800 dark:text-green-400" };
+    return { level: "Getting Started", icon: "target", color: "text-purple-800 dark:text-purple-400" };
   };
 
   const mastery = getMasteryLevel();

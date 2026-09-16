@@ -244,7 +244,7 @@ const AchievementPreview = ({ achievements = {}, unlockedIds = [] }) => {
         </h3>
         <Link
           to="/achievements"
-          className="inline-flex items-center gap-1 text-sm font-semibold text-blue-500 hover:text-blue-400"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-blue-500 hover:text-blue-800 dark:text-blue-400"
         >
           View all
           <span aria-hidden="true">
@@ -290,7 +290,7 @@ const ChallengeStats = ({ stats, challenges, completedChallenges }) => {
         </h3>
         <Link
           to="/challenges"
-          className="inline-flex items-center gap-1 text-sm font-semibold text-blue-500 hover:text-blue-400"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-blue-500 hover:text-blue-800 dark:text-blue-400"
         >
           View all
           <span aria-hidden="true">
@@ -418,7 +418,7 @@ export const ProgressDashboard = () => {
                 {totalPoints} total points •{" "}
                 {streak > 0 ? (
                   <>
-                    <EmojiIcon name="fire" className="w-4 h-4 inline-block text-orange-300" />{" "}
+                    <EmojiIcon name="fire" className="w-4 h-4 inline-block text-orange-800 dark:text-orange-300" />{" "}
                     {streak} day streak
                   </>
                 ) : (
@@ -503,7 +503,7 @@ export const ProgressDashboard = () => {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <Link
                   to="/lessons"
-                  className="p-4 bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 rounded-lg text-center hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors"
+                  className="p-4 bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 rounded-lg text-center hover:bg-blue-100 dark:hover:bg-blue-100 dark:bg-blue-900/60 transition-colors"
                 >
                   <span className="flex justify-center text-blue-600 dark:text-blue-400">
                     <EmojiIcon name="book" className="w-7 h-7" />
@@ -514,7 +514,7 @@ export const ProgressDashboard = () => {
                 </Link>
                 <Link
                   to="/challenges"
-                  className="p-4 bg-purple-50 dark:bg-purple-950/40 border border-purple-100 dark:border-purple-900/50 rounded-lg text-center hover:bg-purple-100 dark:hover:bg-purple-900/60 transition-colors"
+                  className="p-4 bg-purple-50 dark:bg-purple-950/40 border border-purple-100 dark:border-purple-900/50 rounded-lg text-center hover:bg-purple-100 dark:hover:bg-purple-100 dark:bg-purple-900/60 transition-colors"
                 >
                   <span className="flex justify-center text-purple-600 dark:text-purple-400">
                     <EmojiIcon name="lightning" className="w-7 h-7" />
@@ -525,7 +525,7 @@ export const ProgressDashboard = () => {
                 </Link>
                 <Link
                   to="/showcase"
-                  className="p-4 bg-green-50 dark:bg-green-950/40 border border-green-100 dark:border-green-900/50 rounded-lg text-center hover:bg-green-100 dark:hover:bg-green-900/60 transition-colors"
+                  className="p-4 bg-green-50 dark:bg-green-950/40 border border-green-100 dark:border-green-900/50 rounded-lg text-center hover:bg-green-100 dark:hover:bg-green-100 dark:bg-green-900/60 transition-colors"
                 >
                   <span className="flex justify-center text-green-600 dark:text-green-400">
                     <EmojiIcon name="palette" className="w-7 h-7" />
@@ -547,7 +547,7 @@ export const ProgressDashboard = () => {
                 </Link>
                 <Link
                   to="/components"
-                  className="p-4 bg-teal-50 dark:bg-teal-950/40 border border-teal-100 dark:border-teal-900/50 rounded-lg text-center hover:bg-teal-100 dark:hover:bg-teal-900/60 transition-colors"
+                  className="p-4 bg-teal-50 dark:bg-teal-950/40 border border-teal-100 dark:border-teal-900/50 rounded-lg text-center hover:bg-teal-100 dark:hover:bg-teal-100 dark:bg-teal-900/60 transition-colors"
                 >
                   <span className="flex justify-center text-teal-600 dark:text-teal-400">
                     <EmojiIcon name="puzzle" className="w-7 h-7" />
@@ -558,7 +558,7 @@ export const ProgressDashboard = () => {
                 </Link>
                 <Link
                   to="/dashboard/telemetry"
-                  className="p-4 bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900/50 rounded-lg text-center hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors"
+                  className="p-4 bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900/50 rounded-lg text-center hover:bg-red-100 dark:hover:bg-red-100 dark:bg-red-900/60 transition-colors"
                 >
                   <span className="flex justify-center text-red-600 dark:text-red-400">
                     <EmojiIcon name="robot" className="w-7 h-7" />
@@ -589,7 +589,7 @@ export const ProgressDashboard = () => {
             )}
             {overallProgress >= 50 && overallProgress < 75 && (
               <>
-                <EmojiIcon name="fire" className="w-5 h-5 text-amber-300" />
+                <EmojiIcon name="fire" className="w-5 h-5 text-amber-800 dark:text-amber-300" />
                 <span>Halfway there! Keep up the amazing work!</span>
               </>
             )}

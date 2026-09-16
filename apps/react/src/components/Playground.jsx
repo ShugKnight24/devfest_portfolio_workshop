@@ -48,7 +48,7 @@ export const Playground = ({
         <textarea
           value={code}
           onChange={(e) => setCode(e.target.value)}
-          className="w-full h-32 p-3 font-mono text-sm bg-gray-900 text-green-400 rounded-lg border border-gray-600 focus:ring-2 focus:ring-(--color-primary) outline-none"
+          className="w-full h-32 p-3 font-mono text-sm bg-gray-900 text-green-800 dark:text-green-400 rounded-lg border border-gray-600 focus:ring-2 focus:ring-(--color-primary) outline-none"
           spellCheck="false"
         />
 

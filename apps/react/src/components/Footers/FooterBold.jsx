@@ -57,7 +57,7 @@ export const FooterBold = ({ currentYear, name, socialLinks }) => {
             © {currentYear} {name}. Crafted with passion and code
           </p>
           <p className="text-(--color-text-inverse)/60 text-xs inline-flex items-center justify-center gap-1.5 w-full">
-            Powered by React <EmojiIcon name="atom" className="w-3.5 h-3.5 inline text-cyan-300" /> &amp; Tailwind CSS <EmojiIcon name="palette" className="w-3.5 h-3.5 inline text-amber-300" />
+            Powered by React <EmojiIcon name="atom" className="w-3.5 h-3.5 inline text-cyan-800 dark:text-cyan-300" /> &amp; Tailwind CSS <EmojiIcon name="palette" className="w-3.5 h-3.5 inline text-amber-800 dark:text-amber-300" />
           </p>
         </div>
       </div>

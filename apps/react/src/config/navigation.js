@@ -52,7 +52,7 @@ export const routes = [
     to: "/slides",
     label: "Slides",
     desc: "The elastic deck. Lightning to keynote on one spine.",
-    section: "Stage",
+    section: "Present",
     modes: ["stage", "workshop", "explore"],
     primary: ["stage", "workshop"],
     keywords: ["deck", "present", "talk", "keynote", "reacher", "lhm", "devfest"],
@@ -61,7 +61,7 @@ export const routes = [
     to: "/builder",
     label: "Portfolio Builder",
     desc: "The live-build surface. This is the demo.",
-    section: "Stage",
+    section: "Build",
     modes: ["stage", "workshop", "explore"],
     primary: ["stage"],
     step: 2,
@@ -71,7 +71,7 @@ export const routes = [
     to: "/operatives",
     label: "Operatives",
     desc: "Audience-of-One agents. Bespoke personal tooling.",
-    section: "Stage",
+    section: "Present",
     modes: ["stage", "explore"],
     primary: ["stage"],
     keywords: ["agent", "sandbox", "audience of one", "sovereign", "macro"],
@@ -80,7 +80,7 @@ export const routes = [
     to: "/agentic-studio",
     label: "Agentic Studio",
     desc: "Prompt workspace. Four audience tiers, POC generator.",
-    section: "Stage",
+    section: "Present",
     modes: ["stage", "explore"],
     primary: ["stage"],
     keywords: ["prompt", "studio", "ai", "agentic", "poc", "generator"],
@@ -89,7 +89,7 @@ export const routes = [
     to: "/demo",
     label: "Demo",
     desc: "The pre-built example to walk through.",
-    section: "Stage",
+    section: "Present",
     modes: ["stage", "explore"],
     keywords: ["example", "finished", "preview", "walkthrough"],
   },
@@ -99,9 +99,10 @@ export const routes = [
     to: "/",
     label: "Home",
     desc: "Track selector and starting line.",
-    section: "Workshop",
+    section: "Reference",
     modes: ["stage", "workshop", "explore"],
     primary: ["stage", "workshop", "explore"],
+    brand: true,
     step: 0,
     keywords: ["home", "start", "landing", "index"],
   },
@@ -109,7 +110,7 @@ export const routes = [
     to: "/guide",
     label: "Guide",
     desc: "Step-by-step setup. Start here if you are stuck.",
-    section: "Workshop",
+    section: "Learn",
     modes: ["workshop", "explore"],
     primary: ["workshop"],
     step: 1,
@@ -119,7 +120,7 @@ export const routes = [
     to: "/lessons",
     label: "Lessons",
     desc: "Five tracks: React, Vanilla, Vue, Svelte, Agentic.",
-    section: "Workshop",
+    section: "Learn",
     modes: ["workshop", "explore"],
     primary: ["workshop"],
     step: 3,
@@ -129,7 +130,7 @@ export const routes = [
     to: "/components",
     label: "Components",
     desc: "Variant library. Swap a section, see it live.",
-    section: "Workshop",
+    section: "Build",
     modes: ["workshop", "explore"],
     step: 4,
     keywords: ["variant", "library", "ui", "blocks", "sections"],
@@ -138,7 +139,7 @@ export const routes = [
     to: "/challenges",
     label: "Challenges",
     desc: "Timed quests to lock the muscle memory in.",
-    section: "Workshop",
+    section: "Learn",
     modes: ["workshop", "explore"],
     step: 5,
     keywords: ["quest", "exercise", "practice", "timed"],
@@ -147,7 +148,7 @@ export const routes = [
     to: "/whats-next",
     label: "What's Next",
     desc: "Ship it. Deploy, share, keep going.",
-    section: "Workshop",
+    section: "Progress",
     modes: ["workshop", "explore"],
     primary: ["workshop"],
     step: 6,
@@ -176,7 +177,7 @@ export const routes = [
     to: "/events",
     label: "Events",
     desc: "LHM Summit, Michigan DevFest, past talks.",
-    section: "Reference",
+    section: "Present",
     modes: ["stage", "explore"],
     keywords: ["conference", "speaking", "talk", "devfest", "lhm", "summit"],
   },
@@ -184,7 +185,7 @@ export const routes = [
     to: "/showcase",
     label: "Showcase",
     desc: "Portfolios other people built here.",
-    section: "Reference",
+    section: "Build",
     modes: ["explore"],
     keywords: ["gallery", "community", "inspiration", "examples"],
   },
@@ -210,7 +211,7 @@ export const routes = [
     to: "/quiz",
     label: "Quiz",
     desc: "Check what actually stuck.",
-    section: "Progress",
+    section: "Learn",
     modes: ["workshop", "explore"],
     keywords: ["test", "knowledge", "question", "check"],
   },
@@ -253,6 +254,28 @@ export const groupBySection = (list) => {
  * hidden state is the inconsistency this nav was rebuilt to remove.
  */
 export const groupedRoutes = () => groupBySection(routes);
+
+/**
+ * Section order for the top bar. The bar shows these headings, each revealing
+ * its routes, so structure is visible instead of hidden behind one menu button.
+ */
+export const SECTION_ORDER = ["Present", "Build", "Learn", "Reference", "Progress"];
+
+/** Sections in bar order, excluding the brand route. */
+export const barSections = () => {
+  const bySection = new Map();
+  for (const route of routes) {
+    if (route.brand) continue;
+    if (!bySection.has(route.section)) bySection.set(route.section, []);
+    bySection.get(route.section).push(route);
+  }
+  return SECTION_ORDER.filter((name) => bySection.has(name)).map((name) => ({
+    section: name,
+    items: bySection.get(name),
+  }));
+};
+
+export const brandRoute = () => routes.find((r) => r.brand) ?? routes[0];
 
 /** Routes whose visible nav entry belongs to `mode`. */
 export const routesForMode = (mode) =>

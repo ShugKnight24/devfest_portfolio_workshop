@@ -1,44 +1,35 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import ThemeSwitcher from "./ThemeSwitcher";
 import DarkModeToggle from "./DarkModeToggle";
 import { useShell } from "../context/ShellContext";
-import { groupedRoutes, spineNeighbors } from "../config/navigation.js";
+import { barSections, brandRoute, spineNeighbors } from "../config/navigation.js";
 
-import {
-  Checkmark,
-  ChevronLeft,
-  ChevronRight,
-  Close,
-  Menu,
-} from "./Icons";
+import { ChevronDown, ChevronLeft, ChevronRight, Close, Menu } from "./Icons";
 
 /*
- * Navigation — the workshop app's own chrome. One bar. Every route. Always.
+ * Navigation — a top bar with VISIBLE sections.
  *
- * The configurable, repositionable nav this file used to grow was a teaching
- * demo about the ATTENDEE'S portfolio ("your nav can go anywhere"). It was
- * never meant to be the workshop app's own shell, and applying it here is why
- * the bar ballooned: modes, primaries, an overflow menu, a stepper, a hide
- * toggle, a separate mobile sheet, and nothing on /slides at all.
+ * Two earlier attempts failed in opposite directions. The first grew until it
+ * held every route at once and changed shape per page. The second collapsed to
+ * three controls, which kept the chrome constant but hid the whole information
+ * architecture behind one anonymous "Menu" — you could not see what the app
+ * contained without opening something.
  *
- * So this bar holds three controls and nothing else:
+ * This one shows the structure and nothing more: five section headings, always
+ * the same five, in the same order, on every route. Each reveals its own routes
+ * on click. You can read the app's shape from the bar without opening anything,
+ * and the bar's width is a function of five fixed headings, never of how many
+ * routes live under them. A thirtieth route lengthens a dropdown, not the bar.
  *
- *   Home · Search (Cmd+K) · Menu
+ * Sections come from the registry (config/navigation.js), so adding a route is
+ * still a data change. Nothing here hardcodes a link.
  *
- * That is the whole invariant. The route list is not in the bar, it is in the
- * overlay behind Menu, so the bar's width is a function of three controls and
- * never of `routes.length`. A 30th route changes the overlay, not the chrome.
- *
- * The two things that used to make the chrome shift per route now live
- * elsewhere: the workshop stepper is a bottom-anchored bar on spine routes
- * only, and /slides gets the same bar in an auto-hiding presenting variant
- * rather than no bar at all.
- *
- * Modes (Stage / Workshop / Explore) are gone from the visible chrome. `mode`
- * still lives in ShellContext, the palette still sets it, and the landing page
- * still seeds it — but nothing in this file reads it. A menu button whose
- * contents depend on invisible state is the inconsistency, not the cure.
+ * Two things deliberately live outside this bar, because they were what made
+ * the old chrome shift from page to page:
+ *   - the workshop stepper, now bottom-anchored and only on spine routes
+ *   - /slides, which gets this same bar in an auto-hiding presenting variant
+ *     rather than a different bar or no bar at all
  */
 
 /** Presenting: how long the pointer may rest before the bar gets out of the way. */
@@ -46,163 +37,143 @@ const PRESENTING_HIDE_MS = 3000;
 
 const slug = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
-/** Shared pill styling for the three bar controls. */
-const CONTROL_CLASS =
+const CONTROL =
   "px-2.5 py-1.5 rounded-[2px] text-[11px] font-mono font-bold uppercase tracking-wider " +
-  "flex items-center gap-1.5 whitespace-nowrap cursor-pointer transition-colors " +
+  "flex items-center gap-1 whitespace-nowrap cursor-pointer transition-colors " +
   "text-(--color-muted-text) dark:text-(--color-muted-text-dark) " +
   "hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark) " +
   "hover:text-(--color-text) dark:hover:text-(--color-text-dark)";
 
-const ACTIVE_CONTROL_CLASS =
+const CONTROL_ACTIVE =
   "px-2.5 py-1.5 rounded-[2px] text-[11px] font-mono font-bold uppercase tracking-wider " +
-  "flex items-center gap-1.5 whitespace-nowrap cursor-pointer transition-colors " +
+  "flex items-center gap-1 whitespace-nowrap cursor-pointer transition-colors " +
   "bg-(--color-primary) text-(--color-primary-text,white)";
+
+/** One route row, shared by the dropdowns and the mobile sheet. */
+const RouteRow = ({ route, idPrefix }) => (
+  <li>
+    <NavLink
+      id={`${idPrefix}-${slug(route.label)}`}
+      to={route.to}
+      end={route.to === "/"}
+      className={({ isActive }) =>
+        `block px-3 py-2 rounded-[2px] no-underline transition-colors ${
+          isActive
+            ? "bg-(--color-primary) text-(--color-primary-text,white)"
+            : "text-(--color-text) dark:text-(--color-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark)"
+        }`
+      }
+    >
+      <span className="block text-xs font-bold">{route.label}</span>
+      <span className="block text-[11px] leading-snug text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
+        {route.desc}
+      </span>
+    </NavLink>
+  </li>
+);
 
 export const Navigation = () => {
   const location = useLocation();
   const { openPalette } = useShell();
 
   const barRef = useRef(null);
-  const panelRef = useRef(null);
-  const menuButtonRef = useRef(null);
+  const openButtonRef = useRef(null);
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [openSection, setOpenSection] = useState(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isBarVisible, setIsBarVisible] = useState(true);
 
-  const sections = useMemo(() => groupedRoutes(), []);
+  const sections = useMemo(() => barSections(), []);
+  const brand = useMemo(() => brandRoute(), []);
   const spine = useMemo(() => spineNeighbors(location.pathname), [location.pathname]);
 
-  /**
-   * The deck owns the whole screen, but it does not get to own the app.
-   *
-   * Returning null here was the single biggest inconsistency: the one route a
-   * speaker is standing in front of was the one route with no way back. The bar
-   * renders on /slides too — parked clear of the deck's own fixed header
-   * ([aria-label="Stage controls"]) and bottom HUD, below them in stacking
-   * order, and fading itself out after a few still seconds.
-   */
   const isPresenting = location.pathname.startsWith("/slides");
 
-  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
+  const closeAll = useCallback(() => {
+    setOpenSection(null);
+    setIsSheetOpen(false);
+  }, []);
 
-  // Close the overlay on route change; the destination is already on screen.
+  // Route changes close whatever is open; nothing should survive navigation.
   useEffect(() => {
-    setIsMenuOpen(false);
-  }, [location.pathname]);
+    closeAll();
+  }, [location.pathname, closeAll]);
 
-  /**
-   * Presenting auto-hide.
-   *
-   * Two hard rules: it never hides while the overlay is open, and it never
-   * hides while it contains focus — a keyboard user tabbing into the bar must
-   * not have it vanish under them. When either holds, the timer simply declines
-   * to fire; the next pointer move or focus change schedules a fresh one.
+  // Dismiss on outside click and on Escape, restoring focus to the opener.
+  useEffect(() => {
+    if (!openSection && !isSheetOpen) return undefined;
+    const onPointerDown = (e) => {
+      if (barRef.current && !barRef.current.contains(e.target)) closeAll();
+    };
+    const onKeyDown = (e) => {
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      closeAll();
+      openButtonRef.current?.focus?.();
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [openSection, isSheetOpen, closeAll]);
+
+  /*
+   * Presenting: the deck owns the screen, so the bar fades after a still
+   * pointer and returns on movement or focus. It must never vanish while it
+   * holds focus or has something open, or keyboard users lose their place.
    */
   useEffect(() => {
     if (!isPresenting) {
       setIsBarVisible(true);
       return undefined;
     }
-
     let timer;
-
     const schedule = () => {
       clearTimeout(timer);
       timer = setTimeout(() => {
-        if (isMenuOpen) return;
-        if (barRef.current?.contains(document.activeElement)) return;
+        const holdsFocus = barRef.current?.contains(document.activeElement);
+        if (holdsFocus || openSection || isSheetOpen) return;
         setIsBarVisible(false);
       }, PRESENTING_HIDE_MS);
     };
-
     const reveal = () => {
       setIsBarVisible(true);
       schedule();
     };
-
+    schedule();
     window.addEventListener("mousemove", reveal);
     window.addEventListener("focusin", reveal);
-    schedule();
-
     return () => {
       clearTimeout(timer);
       window.removeEventListener("mousemove", reveal);
       window.removeEventListener("focusin", reveal);
     };
-  }, [isPresenting, isMenuOpen]);
+  }, [isPresenting, openSection, isSheetOpen]);
 
-  /**
-   * Overlay focus handling: move focus in on open, hand it back to the Menu
-   * button on close, and let Escape close from anywhere inside.
-   */
-  useEffect(() => {
-    if (!isMenuOpen) return undefined;
-
-    const opener = document.activeElement;
-    panelRef.current?.querySelector("button, [href]")?.focus?.();
-
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        setIsMenuOpen(false);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-
-    // The page behind a full-screen overlay must not scroll under it.
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = previousOverflow;
-      const restoreTo = menuButtonRef.current || opener;
-      restoreTo?.focus?.();
-    };
-  }, [isMenuOpen]);
-
-  /**
-   * Keep Tab inside the overlay.
-   *
-   * `aria-modal` tells assistive tech the rest of the page is inert; it does
-   * not stop Tab from walking out into the bar behind us.
-   */
-  const handlePanelKeyDown = (e) => {
-    if (e.key !== "Tab") return;
-    const focusable = panelRef.current?.querySelectorAll(
-      'button, [href], input, [tabindex]:not([tabindex="-1"])'
-    );
-    if (!focusable?.length) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault();
-      first.focus();
-    }
+  const toggleSection = (name, event) => {
+    openButtonRef.current = event.currentTarget;
+    setOpenSection((prev) => (prev === name ? null : name));
+    setIsSheetOpen(false);
   };
 
-  const overlayLinkClass = ({ isActive }) =>
-    `block p-2 rounded-[2px] no-underline transition-colors ${
-      isActive
-        ? "bg-(--color-primary) text-(--color-primary-text,white)"
-        : "text-(--color-text) dark:text-(--color-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark)"
-    }`;
+  /** Left/Right arrow walks the section headings, as a menubar should. */
+  const onSectionKeyDown = (e) => {
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    const buttons = [...(barRef.current?.querySelectorAll("[data-section-button]") ?? [])];
+    const i = buttons.indexOf(e.currentTarget);
+    if (i === -1) return;
+    e.preventDefault();
+    const next =
+      e.key === "ArrowRight"
+        ? (i + 1) % buttons.length
+        : (i - 1 + buttons.length) % buttons.length;
+    buttons[next].focus();
+  };
 
-  /*
-   * Position is the only thing that differs between the two variants, and it
-   * differs because the deck has fixed chrome at both edges: its header sits at
-   * the top and its HUD at the bottom, so the bar parks above the HUD on the
-   * left and drops below both in stacking order. Everything inside the bar —
-   * the controls, their order, their labels, the overlay they open — is
-   * identical on every route.
-   *
-   * The bar's max-w is belt-and-braces: it holds three fixed controls, so it
-   * cannot grow with the route list even if someone tries to add a link to it.
-   */
+  const sectionHasActive = (items) => items.some((r) => r.to === location.pathname);
+
   const barPlacement = isPresenting
     ? `fixed bottom-24 left-4 z-30 transition-opacity duration-300 ${
         isBarVisible ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -215,245 +186,176 @@ export const Navigation = () => {
         ref={barRef}
         id="app-bar"
         aria-label="Primary"
-        className={`${barPlacement} flex items-center gap-1 p-1 max-w-[min(92vw,22rem)]
-          bg-(--color-surface)/90 dark:bg-(--color-surface-dark)/90 backdrop-blur-xl
+        className={`${barPlacement} flex items-center gap-1 p-1 max-w-[96vw]
+          bg-(--color-surface)/95 dark:bg-(--color-surface-dark)/95 backdrop-blur-xl
           rounded-[2px] shadow-xl border border-(--color-border) dark:border-(--color-border-dark)`}
         inert={isPresenting && !isBarVisible}
       >
-        <ul className="flex items-center gap-1 list-none m-0 p-0">
-          <li>
-            <NavLink
-              id="app-bar-home"
-              to="/"
-              end
-              className={({ isActive }) =>
-                isActive ? ACTIVE_CONTROL_CLASS : CONTROL_CLASS
-              }
-              title="Workshop home"
-            >
-              Home
-            </NavLink>
-          </li>
+        <NavLink
+          id="app-bar-home"
+          to={brand.to}
+          end
+          className={({ isActive }) => (isActive ? CONTROL_ACTIVE : CONTROL)}
+          title={brand.desc}
+        >
+          {brand.label}
+        </NavLink>
 
-          <li>
-            {/* The palette is the real navigation surface. This is its door. */}
-            <button
-              type="button"
-              id="app-bar-search"
-              onClick={openPalette}
-              className={`${CONTROL_CLASS} border border-(--color-border) dark:border-(--color-border-dark) hover:border-(--color-primary)`}
-              title="Search every page"
-              aria-keyshortcuts="Meta+K Control+K"
-            >
-              <span>Search</span>
-              <kbd className="font-mono not-italic opacity-70" aria-hidden="true">
-                &#8984;K
-              </kbd>
-            </button>
-          </li>
+        <span
+          aria-hidden="true"
+          className="w-px h-4 bg-(--color-border) dark:bg-(--color-border-dark) mx-0.5 shrink-0"
+        />
 
-          <li>
-            <button
-              type="button"
-              id="app-bar-menu"
-              ref={menuButtonRef}
-              onClick={() => setIsMenuOpen((open) => !open)}
-              aria-expanded={isMenuOpen}
-              aria-haspopup="dialog"
-              aria-controls="app-menu"
-              className={`${CONTROL_CLASS} border border-(--color-border) dark:border-(--color-border-dark) hover:border-(--color-primary)`}
-              title="All pages, themes and settings"
-            >
-              <Menu className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-              <span>Menu</span>
-            </button>
-          </li>
+        {/* The sections, visible. This is the whole point of the redesign. */}
+        <ul className="hidden md:flex items-center gap-0.5 list-none m-0 p-0">
+          {sections.map(({ section, items }) => {
+            const isOpen = openSection === section;
+            const panelId = `app-bar-panel-${slug(section)}`;
+            return (
+              <li key={section} className="relative">
+                <button
+                  type="button"
+                  data-section-button
+                  id={`app-bar-section-${slug(section)}`}
+                  onClick={(e) => toggleSection(section, e)}
+                  onKeyDown={onSectionKeyDown}
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
+                  aria-haspopup="true"
+                  className={isOpen || sectionHasActive(items) ? CONTROL_ACTIVE : CONTROL}
+                >
+                  {section}
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+
+                {isOpen && (
+                  <div
+                    id={panelId}
+                    role="group"
+                    aria-labelledby={`app-bar-section-${slug(section)}`}
+                    className="absolute left-0 top-full mt-1 w-72 p-1 z-10
+                      bg-(--color-surface) dark:bg-(--color-surface-dark)
+                      border border-(--color-border) dark:border-(--color-border-dark)
+                      rounded-[2px] shadow-2xl"
+                  >
+                    <ul className="list-none m-0 p-0 space-y-0.5">
+                      {items.map((route) => (
+                        <RouteRow
+                          key={route.to}
+                          route={route}
+                          idPrefix={`nav-${slug(section)}`}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
+
+        {/* Narrow viewports: one sheet, but it still lists the sections. */}
+        <button
+          type="button"
+          id="app-bar-sheet-toggle"
+          className={`md:hidden ${isSheetOpen ? CONTROL_ACTIVE : CONTROL}`}
+          onClick={(e) => {
+            openButtonRef.current = e.currentTarget;
+            setIsSheetOpen((prev) => !prev);
+            setOpenSection(null);
+          }}
+          aria-expanded={isSheetOpen}
+          aria-controls="app-bar-sheet"
+        >
+          {isSheetOpen ? <Close className="w-3.5 h-3.5" /> : <Menu className="w-3.5 h-3.5" />}
+          Menu
+        </button>
+
+        <span
+          aria-hidden="true"
+          className="w-px h-4 bg-(--color-border) dark:bg-(--color-border-dark) mx-0.5 shrink-0"
+        />
+
+        <button type="button" id="app-bar-search" onClick={openPalette} className={CONTROL}>
+          Search
+          <kbd
+            aria-hidden="true"
+            className="px-1 py-0.5 rounded-[2px] border border-(--color-border) dark:border-(--color-border-dark) font-sans text-[10px]"
+          >
+            &#8984;K
+          </kbd>
+        </button>
+
+        <span className="hidden sm:flex items-center gap-1">
+          <ThemeSwitcher />
+          <DarkModeToggle />
+        </span>
       </nav>
 
-      {/*
-       * The overlay is where route growth goes. It is a scrolling grid, so the
-       * 30th route costs a row here and nothing in the bar.
-       */}
-      {isMenuOpen && (
-        <div className="fixed inset-0 z-90 flex items-start justify-center px-4 py-4 sm:py-[8vh]">
-          <div
-            className="absolute inset-0 bg-(--color-dark)/85 backdrop-blur-sm"
-            onClick={closeMenu}
-            aria-hidden="true"
-          />
-
-          <div
-            ref={panelRef}
-            id="app-menu"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="app-menu-title"
-            onKeyDown={handlePanelKeyDown}
-            /* No overflow-hidden: the scrolling lives on the route grid below,
-               and clipping the panel would eat the theme menu, which opens
-               upward out of the footer. */
-            className="relative w-full max-w-3xl max-h-full flex flex-col
-              bg-(--color-surface) dark:bg-(--color-surface-dark)
-              border border-(--color-border) dark:border-(--color-border-dark)
-              rounded-[2px] shadow-2xl"
-          >
-            <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-(--color-border) dark:border-(--color-border-dark)">
-              <h2
-                id="app-menu-title"
-                className="m-0 text-xs font-mono font-bold uppercase tracking-[0.2em] text-(--color-text) dark:text-(--color-text-dark)"
-              >
-                All pages
+      {/* Mobile sheet: every section, every route, grouped the same way. */}
+      {isSheetOpen && (
+        <div
+          id="app-bar-sheet"
+          className="md:hidden fixed inset-x-2 top-16 z-60 max-h-[75vh] overflow-y-auto p-2
+            bg-(--color-surface) dark:bg-(--color-surface-dark)
+            border border-(--color-border) dark:border-(--color-border-dark)
+            rounded-[2px] shadow-2xl"
+        >
+          {sections.map(({ section, items }) => (
+            <section key={section} className="mb-3 last:mb-0">
+              <h2 className="px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-widest text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
+                {section}
               </h2>
-              <button
-                type="button"
-                id="app-menu-close"
-                onClick={closeMenu}
-                className="p-1.5 rounded-[2px] cursor-pointer transition-colors text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark)"
-                aria-label="Close menu"
-              >
-                <Close className="w-4 h-4" />
-              </button>
-            </div>
-
-            <button
-              type="button"
-              id="app-menu-search"
-              onClick={() => {
-                closeMenu();
-                openPalette();
-              }}
-              className="mx-4 mt-4 px-3 py-2 rounded-[2px] text-[11px] font-mono font-bold uppercase tracking-wider
-                flex items-center justify-between gap-2 cursor-pointer transition-colors
-                border border-(--color-border) dark:border-(--color-border-dark)
-                text-(--color-muted-text) dark:text-(--color-muted-text-dark)
-                hover:text-(--color-text) dark:hover:text-(--color-text-dark) hover:border-(--color-primary)"
-              aria-keyshortcuts="Meta+K Control+K"
-            >
-              <span>Search everything</span>
-              <kbd className="font-mono opacity-70" aria-hidden="true">
-                &#8984;K
-              </kbd>
-            </button>
-
-            <nav
-              aria-label="All pages"
-              className="flex-1 overflow-y-auto p-4 grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3"
-            >
-              {sections.map((group) => (
-                <div key={group.section}>
-                  <h3
-                    id={`app-menu-section-${slug(group.section)}`}
-                    className="m-0 px-2 py-1 text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-(--color-muted-text) dark:text-(--color-muted-text-dark)"
-                  >
-                    {group.section}
-                  </h3>
-                  <ul
-                    aria-labelledby={`app-menu-section-${slug(group.section)}`}
-                    className="list-none m-0 p-0 space-y-0.5"
-                  >
-                    {group.items.map((item) => (
-                      <li key={item.to}>
-                        <NavLink
-                          id={`app-menu-link-${slug(item.label)}`}
-                          to={item.to}
-                          end={item.to === "/"}
-                          onClick={closeMenu}
-                          className={overlayLinkClass}
-                        >
-                          {({ isActive }) => (
-                            <>
-                              <span className="text-xs font-bold font-mono flex items-center justify-between gap-2">
-                                {item.label}
-                                {isActive && (
-                                  <Checkmark className="w-3.5 h-3.5 text-current shrink-0" />
-                                )}
-                              </span>
-                              <span className="block text-[11px] leading-tight mt-0.5 opacity-80">
-                                {item.desc}
-                              </span>
-                            </>
-                          )}
-                        </NavLink>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </nav>
-
-            {/* Theme controls live here, not in the bar: they are set once. */}
-            <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-(--color-border) dark:border-(--color-border-dark)">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
-                Appearance
-              </span>
-              <div className="flex items-center gap-1">
-                <ThemeSwitcher
-                  menuClassName="right-0 bottom-full mb-2"
-                  buttonClassName="p-2 rounded-[2px] cursor-pointer transition-colors text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark)"
-                />
-                <DarkModeToggle
-                  buttonClassName="p-2 rounded-[2px] cursor-pointer transition-colors text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark)"
-                />
-              </div>
-            </div>
+              <ul className="list-none m-0 p-0 space-y-0.5">
+                {items.map((route) => (
+                  <RouteRow
+                    key={route.to}
+                    route={route}
+                    idPrefix={`sheet-${slug(section)}`}
+                  />
+                ))}
+              </ul>
+            </section>
+          ))}
+          <div className="flex items-center gap-2 px-3 pt-2 border-t border-(--color-border) dark:border-(--color-border-dark)">
+            <ThemeSwitcher />
+            <DarkModeToggle />
           </div>
         </div>
       )}
 
       {/*
-       * Spine stepper — bottom-anchored, and only where there is a next step.
-       * It used to sit in the top bar, which meant the top chrome changed shape
-       * as you walked the workshop. Down here it is additive: the bar above it
-       * is the same on every route whether this exists or not.
+       * The workshop stepper. Bottom-anchored and only on spine routes, so the
+       * top chrome stays identical whether or not you are on the guided path.
        */}
-      {spine.index !== -1 && (
+      {spine.index !== -1 && !isPresenting && (
         <nav
-          id="workshop-spine"
           aria-label="Workshop steps"
-          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 p-1
-            bg-(--color-surface)/90 dark:bg-(--color-surface-dark)/90 backdrop-blur-xl
+          className="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 p-1
+            bg-(--color-surface)/95 dark:bg-(--color-surface-dark)/95 backdrop-blur-xl
             rounded-[2px] shadow-xl border border-(--color-border) dark:border-(--color-border-dark)"
         >
-          <ul className="flex items-center gap-1 list-none m-0 p-0">
-            <li>
-              {spine.prev ? (
-                <Link
-                  id="workshop-spine-prev"
-                  to={spine.prev.to}
-                  className="flex p-1.5 rounded-[2px] transition-colors text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark)"
-                  aria-label={`Previous step: ${spine.prev.label}`}
-                  title={`Previous: ${spine.prev.label}`}
-                >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                </Link>
-              ) : (
-                <span className="flex p-1.5 opacity-30" aria-hidden="true">
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                </span>
-              )}
-            </li>
-            <li className="px-1 text-[10px] font-mono font-bold uppercase tracking-wider whitespace-nowrap text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
-              Step {spine.index + 1} of {spine.total}
-            </li>
-            <li>
-              {spine.next ? (
-                <Link
-                  id="workshop-spine-next"
-                  to={spine.next.to}
-                  className="flex p-1.5 rounded-[2px] transition-colors text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark)"
-                  aria-label={`Next step: ${spine.next.label}`}
-                  title={`Next: ${spine.next.label}`}
-                >
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </Link>
-              ) : (
-                <span className="flex p-1.5 opacity-30" aria-hidden="true">
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </span>
-              )}
-            </li>
-          </ul>
+          {spine.prev ? (
+            <NavLink to={spine.prev.to} className={CONTROL} id="spine-prev">
+              <ChevronLeft className="w-3 h-3" />
+              {spine.prev.label}
+            </NavLink>
+          ) : (
+            <span className={`${CONTROL} opacity-40 pointer-events-none`}>Start</span>
+          )}
+
+          <span className="px-2 text-[11px] font-mono font-bold uppercase tracking-wider text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
+            Step {spine.index + 1} of {spine.total}
+          </span>
+
+          {spine.next ? (
+            <NavLink to={spine.next.to} className={CONTROL} id="spine-next">
+              {spine.next.label}
+              <ChevronRight className="w-3 h-3" />
+            </NavLink>
+          ) : (
+            <span className={`${CONTROL} opacity-40 pointer-events-none`}>Done</span>
+          )}
         </nav>
       )}
     </>

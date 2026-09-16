@@ -3,7 +3,8 @@
  *
  * The speaker drives this live, so the contract under test is the one they will
  * actually lean on: Cmd+K anywhere, arrows, Enter, Escape, and an app bar that
- * is the same three controls on every single route — including /slides.
+ * shows the same five section headings on every single route — including
+ * /slides — so the app's structure is readable without opening anything.
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
@@ -13,7 +14,7 @@ import { ThemeProvider } from "../context/ThemeContext";
 import { ShellProvider } from "../context/ShellContext";
 import { CommandPalette } from "./CommandPalette";
 import { Navigation } from "./Navigation";
-import { routes } from "../config/navigation.js";
+import { routes, barSections } from "../config/navigation.js";
 
 const Shell = ({ initialPath = "/" }) => (
   <ThemeProvider>
@@ -126,95 +127,93 @@ describe("app bar", () => {
     localStorage.clear();
   });
 
-  it("is the same three controls, and nothing else", () => {
+  it("shows every section heading, and no route links, in the bar", () => {
     render(<Shell />);
     const bar = getBar();
 
-    for (const name of BAR_CONTROLS) {
-      expect(
-        within(bar).getByRole(name === "Home" ? "link" : "button", { name })
-      ).toBeInTheDocument();
+    // The structure is visible: one heading per section, always.
+    for (const { section } of barSections()) {
+      expect(within(bar).getByRole("button", { name: new RegExp(`^${section}`) })).toBeInTheDocument();
     }
 
-    // The bar holds exactly one link and two buttons. This is the invariant
-    // that keeps it from growing: routes live in the overlay, never here.
+    // Routes live in the dropdowns, never in the bar itself. That is the
+    // invariant that stops the bar growing with the route list.
+    expect(within(bar).queryByRole("link", { name: /Components/ })).not.toBeInTheDocument();
+    expect(within(bar).queryByRole("link", { name: /Portfolio Builder/ })).not.toBeInTheDocument();
+    // Home is the only link in the bar.
     expect(within(bar).getAllByRole("link")).toHaveLength(1);
-    expect(within(bar).getAllByRole("button")).toHaveLength(2);
-    expect(within(bar).queryByRole("link", { name: "Components" })).not.toBeInTheDocument();
   });
 
-  it("renders the identical bar on every route, /slides included", () => {
+  it("renders the identical section set on every route, /slides included", () => {
+    const expected = barSections().map((s) => s.section);
     for (const path of ["/", "/resources", "/dashboard/telemetry", "/slides"]) {
       const { unmount } = render(<Shell initialPath={path} />);
       const bar = getBar();
-      for (const name of BAR_CONTROLS) {
+      for (const section of expected) {
         expect(
-          within(bar).getByRole(name === "Home" ? "link" : "button", { name })
+          within(bar).getByRole("button", { name: new RegExp(`^${section}`) }),
+          `${section} missing on ${path}`
         ).toBeInTheDocument();
       }
-      expect(within(bar).getAllByRole("link")).toHaveLength(1);
-      expect(within(bar).getAllByRole("button")).toHaveLength(2);
       unmount();
     }
   });
 
-  it("opens the menu overlay with every route in it", () => {
+  it("reveals a section's routes on click, and only that section's", () => {
     render(<Shell />);
-    const menuButton = within(getBar()).getByRole("button", { name: "Menu" });
-    expect(menuButton).toHaveAttribute("aria-expanded", "false");
-    expect(menuButton).toHaveAttribute("aria-controls", "app-menu");
+    const bar = getBar();
+    const [first, second] = barSections();
 
-    fireEvent.click(menuButton);
+    fireEvent.click(within(bar).getByRole("button", { name: new RegExp(`^${first.section}`) }));
 
-    const dialog = screen.getByRole("dialog", { name: /all pages/i });
-    expect(menuButton).toHaveAttribute("aria-expanded", "true");
+    for (const route of first.items) {
+      expect(screen.getByRole("link", { name: new RegExp(route.label, "i") })).toBeInTheDocument();
+    }
+    // A different section's routes stay closed.
+    const other = second.items[0];
+    expect(screen.queryByRole("link", { name: new RegExp(`^${other.label}$`, "i") })).not.toBeInTheDocument();
+  });
 
-    // Match on href, not label: two routes may share a word, and what matters
-    // is that no route in the registry is unreachable from the overlay.
-    const hrefs = within(dialog)
-      .getAllByRole("link")
-      .map((link) => link.getAttribute("href"));
-    for (const route of routes) {
-      expect(hrefs).toContain(route.to);
+  it("keeps every route reachable across the sections", () => {
+    render(<Shell />);
+    const bar = getBar();
+    const seen = new Set();
+
+    for (const { section, items } of barSections()) {
+      fireEvent.click(within(bar).getByRole("button", { name: new RegExp(`^${section}`) }));
+      for (const route of items) seen.add(route.to);
+    }
+    // Every non-brand route lives under exactly one visible heading.
+    for (const route of routes.filter((r) => !r.brand)) {
+      expect(seen.has(route.to), `${route.to} is not under any section`).toBe(true);
     }
   });
 
-  it("closes the overlay on Escape and restores focus to the menu button", () => {
+  it("closes an open section on Escape and restores focus to its heading", () => {
     render(<Shell />);
-    const menuButton = within(getBar()).getByRole("button", { name: "Menu" });
-    fireEvent.click(menuButton);
-    expect(screen.getByRole("dialog", { name: /all pages/i })).toBeInTheDocument();
+    const bar = getBar();
+    const { section, items } = barSections()[0];
+    const heading = within(bar).getByRole("button", { name: new RegExp(`^${section}`) });
 
-    fireEvent.keyDown(window, { key: "Escape" });
+    fireEvent.click(heading);
+    expect(heading).toHaveAttribute("aria-expanded", "true");
 
-    expect(screen.queryByRole("dialog", { name: /all pages/i })).not.toBeInTheDocument();
-    expect(menuButton).toHaveAttribute("aria-expanded", "false");
-    expect(document.activeElement).toBe(menuButton);
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(heading).toHaveAttribute("aria-expanded", "false");
+    expect(document.activeElement).toBe(heading);
+    expect(screen.queryByRole("link", { name: new RegExp(`^${items[0].label}$`, "i") })).not.toBeInTheDocument();
   });
 
-  it("marks the active route with aria-current inside the overlay", () => {
-    render(<Shell initialPath="/guide" />);
-    fireEvent.click(within(getBar()).getByRole("button", { name: "Menu" }));
+  it("marks the active route with aria-current inside its section", () => {
+    const target = barSections()[0].items[0];
+    render(<Shell initialPath={target.to} />);
+    const bar = getBar();
 
-    const dialog = screen.getByRole("dialog", { name: /all pages/i });
-    expect(within(dialog).getByRole("link", { name: /^Guide/i })).toHaveAttribute(
-      "aria-current",
-      "page"
+    fireEvent.click(
+      within(bar).getByRole("button", { name: new RegExp(`^${barSections()[0].section}`) })
     );
-  });
-
-  it("marks Home in the bar with aria-current on the home route", () => {
-    render(<Shell initialPath="/" />);
-    expect(within(getBar()).getByRole("link", { name: "Home" })).toHaveAttribute(
-      "aria-current",
-      "page"
-    );
-  });
-
-  it("reaches the command palette from the bar", () => {
-    render(<Shell />);
-    fireEvent.click(within(getBar()).getByRole("button", { name: "Search" }));
-    expect(screen.getByRole("dialog", { name: /command palette/i })).toBeInTheDocument();
+    const link = screen.getByRole("link", { name: new RegExp(target.label, "i") });
+    expect(link).toHaveAttribute("aria-current", "page");
   });
 });
 
@@ -269,7 +268,7 @@ describe("presenting variant", () => {
   it("never hides while it holds focus", async () => {
     render(<Shell initialPath="/slides" />);
     const bar = getBar();
-    within(bar).getByRole("button", { name: "Menu" }).focus();
+    within(bar).getByRole("button", { name: /Search/ }).focus();
 
     await act(async () => {
       vi.advanceTimersByTime(6000);

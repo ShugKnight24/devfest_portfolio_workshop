@@ -1,11 +1,24 @@
 /**
- * Michigan DevFest & AI Hackathon 2026 Slide Deck
+ * Michigan DevFest & AI Hackathon 2026 — Workshop Spine
  * Date: November 2026 — Google GDG Detroit
  *
  * Theme: "Hackathon Velocity: From Audience of One to Sovereign Software"
- * Tailored for high-speed hackathon prototyping, subagents, automated verification,
- * and turning personal bespoke prototypes into scalable production software.
+ *
+ * CHAPTER TWO. This deck is deliberately the sequel to the LHM Summit keynote
+ * (see ./lhmSlides.js, September 19 2026). The keynote makes the argument in
+ * fifteen minutes and builds one thing live. This deck assumes the argument and
+ * spends the day making the room do it with their own hands.
+ *
+ * Same elastic runtime model (./runtime.js), one tier deeper:
+ *   keynote  runtime → the talk portion, no labs. Use this to open the day.
+ *   workshop runtime → the full curriculum including all four labs.
+ *
+ * The four labs were previously a separate `workshop` deck. They live here now,
+ * so the day is one continuous document rather than two decks you switch
+ * between while forty people watch you fumble a menu.
  */
+
+import { TIER } from "./runtime";
 
 export const devfestDeckMeta = {
   id: "devfest",
@@ -14,12 +27,19 @@ export const devfestDeckMeta = {
   conference: "Michigan DevFest & AI Hackathon 2026",
   organization: "Google GDG Detroit",
   date: "November 2026",
+  duration: "Elastic — 60 min talk / full-day workshop",
+  elastic: true,
+  defaultRuntime: "keynote",
+  continuesFrom: "lhm",
+  accent: "#00ffcc",
+  accentAlt: "#ffcc00",
   url: "https://gdg.community.dev/events/details/google-gdg-detroit-presents-michigan-devfest-ai-hackathon-2026/cohost-gdg-detroit/",
 };
 
 export const devfestSlides = [
   {
     id: "title",
+    tier: TIER.CORE,
     type: "title",
     title: "Hackathon Velocity",
     subtitle: "From Audience of One to Sovereign Software",
@@ -28,7 +48,20 @@ export const devfestSlides = [
     conferenceBadge: "GDG Detroit • Michigan DevFest AI Hackathon 2026",
   },
   {
+    id: "chapter-two",
+    type: "statement",
+    tier: TIER.CORE,
+    budget: 80,
+    phase: "Chapter Two",
+    center: true,
+    title: "You watched it.\nNow you do it.",
+    description:
+      "In September I stood on a stage and built one thing, live, in about four minutes, off a problem somebody in the room shouted at me. That was the argument. Today is the part where you stop watching and your name is on the commit.",
+    signature: "// Sept 19 — The Reacher Protocol — one build, fifteen minutes.\n// Today — four labs, your friction, your repo.",
+  },
+  {
     id: "hackathon-formula",
+    tier: TIER.CORE,
     type: "reacher-intro",
     title: "The Hackathon Velocity Triad",
     subtitle: "Speed • Precision • Zero Human Verification",
@@ -59,6 +92,7 @@ export const devfestSlides = [
   },
   {
     id: "audience-pulse",
+    tier: TIER.CORE,
     type: "poll",
     title: "Hackathon Readiness Check",
     subtitle: "Where does your hackathon squad stand right now?",
@@ -99,6 +133,7 @@ export const devfestSlides = [
   },
   {
     id: "whoami",
+    tier: TIER.DEEP,
     type: "bio",
     title: "Who Am I?",
     name: "Shugmi Shumunov",
@@ -116,6 +151,7 @@ export const devfestSlides = [
   },
   {
     id: "beyond-portfolio",
+    tier: TIER.CORE,
     type: "paradigm",
     title: "The Hackathon Trap vs. The Sovereign Maker",
     subtitle: "Build What Matters",
@@ -144,6 +180,7 @@ export const devfestSlides = [
   },
   {
     id: "case-studies",
+    tier: TIER.EXTENDED,
     type: "case-studies",
     title: "From Personal Hack to Production",
     subtitle: "Real Software Solutions That Scaled",
@@ -176,6 +213,7 @@ export const devfestSlides = [
   },
   {
     id: "reacher-loop",
+    tier: TIER.CORE,
     type: "process",
     title: "The Hackathon Sprint Loop",
     subtitle: "Spec • Build • Verify • Deploy",
@@ -206,8 +244,100 @@ export const devfestSlides = [
       },
     ],
   },
+  // ───────────────────────── LABS (workshop runtime only) ─────────────────────
+  // Previously a separate `workshop` deck. Folded in so the day is one document.
+  {
+    id: "lab-01",
+    type: "lab",
+    tier: TIER.LAB,
+    budget: 900,
+    labNumber: "01",
+    badge: "LAB 01 // AUDIT",
+    title: "The Friction Audit",
+    subtitle: "Find three real bottlenecks in your own week",
+    description:
+      "Close the tab with the startup ideas in it. Write down the three most repetitive, soul-crushing digital tasks in your ACTUAL life. Not a product. A chore.",
+    objective: "Identify acute personal friction — bank CSVs, school newsletters, macro math.",
+    fileTarget: "personal_friction_audit.txt",
+    terminalLines: [
+      "> echo '1. Parsing Chase CSV exports into monthly totals' >> friction.txt",
+      "> echo '2. Digesting 4-page weekly school newsletters' >> friction.txt",
+      "> echo '3. Calculating protein and grocery weights' >> friction.txt",
+      "[AUDIT COMPLETE] Target identified. Audience of One.",
+    ],
+    actionLink: "/operatives",
+    actionLabel: "Launch Operatives Sandbox",
+  },
+  {
+    id: "lab-02",
+    type: "lab",
+    tier: TIER.LAB,
+    budget: 1200,
+    labNumber: "02",
+    badge: "LAB 02 // CLINIC",
+    title: "The Prompt Clinic",
+    subtitle: "Constraints, not wishes",
+    description:
+      "A polite request gets you a plausible answer. A constraint gets you a correct one. Write the runtime target, the explicit inputs and outputs, and the dependency ceiling — before you write the ask.",
+    objective: "Master constraint-driven prompting: Target, Goal, Constraints, Output format.",
+    fileTarget: "prompt_blueprint.md",
+    terminalLines: [
+      "> Target: Python 3 CLI / native Web API",
+      "> Goal: Extract dates and action items from unstructured newsletter text",
+      "> Constraints: stdlib only (csv, re, datetime). ZERO external dependencies",
+      "> Output: unified diff, or one executable file. Nothing else",
+      "[PROMPT VERIFIED] Hallucination surface minimised.",
+    ],
+    actionLink: "/agentic-studio",
+    actionLabel: "Open the Prompt Clinic",
+  },
+  {
+    id: "lab-03",
+    type: "lab",
+    tier: TIER.LAB,
+    budget: 1800,
+    labNumber: "03",
+    badge: "LAB 03 // SPRINT",
+    title: "The 30-Minute Sprint",
+    subtitle: "Build your operative",
+    description:
+      "Thirty uninterrupted minutes. Generate, run it, read what came back, correct it, run it again. The loop is the skill — not the first output.",
+    objective: "Ship a working personal agent: a script, a widget, or a macro. It must run.",
+    fileTarget: "apps/react/src/data/portfolioData.js",
+    terminalLines: [
+      "> claude .",
+      "> // Prompt: personal operative, strict isolation, stdlib only",
+      "> python3 operative.py test_input.csv",
+      "> [SUCCESS] Completed in 240ms. Zero dependencies installed.",
+    ],
+    actionLink: "/operatives",
+    actionLabel: "Test in Operatives Sandbox",
+  },
+  {
+    id: "lab-04",
+    type: "lab",
+    tier: TIER.LAB,
+    budget: 1800,
+    labNumber: "04",
+    badge: "LAB 04 // SHOW & TELL",
+    title: "Show & Tell",
+    subtitle: "Run it in front of people",
+    description:
+      "Project your screen. Show the input, hit enter, show the output. Then push the blueprint so somebody else can run your thing on their machine. That last step is what turns One into Many.",
+    objective: "Demo a live operative, publish the blueprint, join the builder network.",
+    fileTarget: "blueprints/operative_export.json",
+    terminalLines: [
+      "> git add operatives/ && git commit -m 'feat: add school email operative'",
+      "> git push origin feat/my-personal-agent",
+      "> [COMMUNITY SYNC] Blueprint registered.",
+      "[VERIFIED] ¯\\_(ツ)_/¯ jackpot ¯\\_(ツ)_/¯",
+    ],
+    actionLink: "/showcase",
+    actionLabel: "View Community Blueprints",
+  },
   {
     id: "launch",
+    tier: TIER.CORE,
     type: "launch",
     title: "Hackathon Countdown: Let's Build",
     subtitle: "Your Roadmap for DevFest 2026",
@@ -224,6 +354,16 @@ export const devfestSlides = [
 ];
 
 export const devfestPresenterNotes = {
+  "chapter-two":
+    "Explicitly call back to the September keynote. Some of this room was there; most were not. Give the 20-second version of the live build so nobody feels locked out, then pivot hard to 'today you do it.'",
+  "lab-01":
+    "LAB 01 (15m): Circulate. Push people toward REAL personal friction and disqualify 'a CRM for my manager.' The test is whether they have complained about it out loud before today.",
+  "lab-02":
+    "LAB 02 (20m): Break the prompt structure down on the big screen. Show live how adding 'stdlib only' kills most hallucinated imports. Have someone read a bad prompt and a good prompt back to back.",
+  "lab-03":
+    "LAB 03 (30m): Countdown on screen. Walk the room. When someone's agent is stuck, do NOT fix it for them — ask them what the error actually says. That is the whole lesson.",
+  "lab-04":
+    "LAB 04 (30m): Call up 4-5 volunteers. Input, enter, output. Celebrate every working operative, including the ugly ones. Close by pushing blueprints so the room leaves with each other's work.",
   title:
     "Welcome Michigan DevFest & AI Hackathon attendees! Highlight that this session is optimized for maximum shipping velocity during the hackathon.",
   "hackathon-formula":

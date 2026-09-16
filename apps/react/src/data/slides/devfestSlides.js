@@ -30,7 +30,7 @@ export const devfestDeckMeta = {
   duration: "Elastic — 60 min talk / full-day workshop",
   elastic: true,
   defaultRuntime: "keynote",
-  continuesFrom: "lhm",
+  continuesFrom: "combined",
   accent: "#00ffcc",
   accentAlt: "#ffcc00",
   url: "https://gdg.community.dev/events/details/google-gdg-detroit-presents-michigan-devfest-ai-hackathon-2026/cohost-gdg-detroit/",

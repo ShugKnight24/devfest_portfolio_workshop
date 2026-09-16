@@ -28,7 +28,9 @@
 import { TIER } from "./runtime";
 
 export const lhmDeckMeta = {
-  id: "lhm",
+  // Shelved under `lhm-spine`: the id `lhm` is now an alias onto `combined`,
+  // which absorbed this spine and adds the character pairings on top of it.
+  id: "lhm-spine",
   title: "The Reacher Protocol",
   subtitle: "Critical Deduction & Overwhelming Force in Agentic Dev",
   conference: "Detroit Latin Heritage Month Innovation Summit 2026",

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getDeck, getAllDecks, getLiveDecks, getShelvedDecks } from "../data/slides";
+import { getDeck, getAllDecks, getLiveDecks, getShelvedDecks, DEFAULT_DECK_ID } from "../data/slides";
 import { speakingEvents } from "../data/eventsData";
 
 describe("WorkshopSlides multi-deck registry", () => {
@@ -11,16 +11,24 @@ describe("WorkshopSlides multi-deck registry", () => {
     expect(ids).toContain("ripcord");
     expect(ids).toContain("iron");
     expect(ids).toContain("combined");
-    expect(ids).toContain("lhm");
+    // The original elastic spine is archived under its own id; the bare `lhm`
+    // id is now an alias pointing at the deck that absorbed it.
+    expect(ids).toContain("lhm-spine");
+    expect(ids).not.toContain("lhm");
     expect(ids).toContain("lightning");
     expect(ids).toContain("workshop");
     expect(ids).toContain("devfest");
     expect(ids).toContain("pride");
   });
 
+  it("should open on the combined trilogy deck by default", () => {
+    expect(DEFAULT_DECK_ID).toBe("combined");
+    expect(getDeck(undefined).meta.id).toBe("combined");
+  });
+
   it("should surface only the two presentable decks as live, shelving the rest", () => {
     const live = getLiveDecks().map((d) => d.id).sort();
-    expect(live).toEqual(["devfest", "lhm"]);
+    expect(live).toEqual(["combined", "devfest"]);
 
     const shelved = getShelvedDecks().map((d) => d.id);
     expect(shelved).toHaveLength(7);
@@ -62,23 +70,56 @@ describe("WorkshopSlides multi-deck registry", () => {
     expect(formSlide.columns[1].tag).toContain("Isolation Sets");
   });
 
-  it("should load combined deck (Trilogy Keynote) weaving all three lenses", () => {
+  it("should load the combined deck as the elastic trilogy keynote", () => {
     const combined = getDeck("combined");
     expect(combined.meta.title).toContain("The Trilogy");
-    expect(combined.slides.length).toBe(14);
-    expect(combined.slides.some((s) => s.id === "combined-speed-frameworks")).toBe(true);
-    expect(combined.slides.some((s) => s.id === "combined-stage-tactics")).toBe(true);
+    expect(combined.meta.elastic).toBe(true);
+    expect(combined.meta.defaultRuntime).toBe("lightning");
+
+    const reacherSlide = combined.slides.find((s) => s.type === "reacher-intro");
+    expect(reacherSlide).toBeDefined();
+    expect(reacherSlide.traits.length).toBe(3);
+
+    // The three live beats are the spine of the talk and must all be core tier.
+    const liveBeats = combined.slides.filter((s) => s.type === "live-build");
+    expect(liveBeats.map((s) => s.id)).toEqual(["the-ask", "launch-build", "payoff"]);
+    for (const beat of liveBeats) expect(beat.tier).toBe(1);
+
+    // Chesterton's Fence came across with the spine and stays core.
+    const fence = combined.slides.find((s) => s.id === "chestertons-fence");
+    expect(fence.tier).toBe(1);
   });
 
-  it("should fall back to the lhm keynote for unknown ids and keep legacy aliases working", () => {
-    const fallback = getDeck("unknown-deck");
-    expect(fallback.meta.id).toBe("lhm");
-
-    // These four used to resolve to the retired `combined` deck. The elastic
-    // lhm deck covers that runtime now, so old links land somewhere correct.
-    for (const alias of ["unified", "keynote", "master", "reacher"]) {
-      expect(getDeck(alias).meta.id).toBe("lhm");
+  it("should keep the character pairings that make the combined deck worth giving", () => {
+    const combined = getDeck("combined");
+    const pairs = combined.slides.filter((s) => s.id.startsWith("pair-")).map((s) => s.id);
+    expect(pairs).toEqual([
+      "pair-finlay-roscoe",
+      "pair-reacher-neagley",
+      "pair-denji-aki",
+      "pair-power",
+      "pair-odonnell-dixon",
+      "pair-makima-kishibe",
+    ]);
+    // A pairing that does not state a rule is just a character tour.
+    for (const slide of combined.slides.filter((s) => s.id.startsWith("pair-"))) {
+      expect(slide.columns.length).toBe(2);
+      expect(slide.description.length, `${slide.id} needs a lesson`).toBeGreaterThan(40);
     }
+  });
+
+  it("should fall back to the combined deck for unknown ids and keep legacy aliases working", () => {
+    const fallback = getDeck("unknown-deck");
+    expect(fallback.meta.id).toBe("combined");
+
+    // `lhm` was the default before the spine was merged into `combined`, so
+    // every printed link and QR code from before that has to land here.
+    for (const alias of ["lhm", "unified", "keynote", "master", "reacher", "trilogy"]) {
+      expect(getDeck(alias).meta.id, `alias "${alias}" drifted`).toBe("combined");
+    }
+
+    // The archived spine is still openable under its own id.
+    expect(getDeck("lhm-spine").meta.title).toContain("The Reacher Protocol");
 
     const chainsaw = getDeck("chainsaw");
     expect(chainsaw.meta.id).toBe("ripcord");
@@ -90,26 +131,23 @@ describe("WorkshopSlides multi-deck registry", () => {
     expect(labsAlias.meta.id).toBe("workshop");
   });
 
-  it("should load the lhm deck as the elastic keynote spine", () => {
-    const lhm = getDeck("lhm");
-    expect(lhm.meta.title).toContain("The Reacher Protocol");
-    expect(lhm.meta.elastic).toBe(true);
-    expect(lhm.meta.defaultRuntime).toBe("lightning");
-
-    const reacherSlide = lhm.slides.find((s) => s.type === "reacher-intro");
-    expect(reacherSlide).toBeDefined();
-    expect(reacherSlide.traits.length).toBe(3);
-
-    // The three live beats are the spine of the talk and must all be core tier.
-    const liveBeats = lhm.slides.filter((s) => s.type === "live-build");
-    expect(liveBeats.map((s) => s.id)).toEqual(["the-ask", "launch-build", "payoff"]);
-    for (const beat of liveBeats) expect(beat.tier).toBe(1);
+  it("should give every combined slide presenter notes, since the deck is given live", () => {
+    const combined = getDeck("combined");
+    for (const slide of combined.slides) {
+      expect(combined.presenterNotes[slide.id], `missing notes for "${slide.id}"`).toBeTruthy();
+    }
+    // And no orphan notes for slides that were cut.
+    const ids = new Set(combined.slides.map((s) => s.id));
+    for (const noteId of Object.keys(combined.presenterNotes)) {
+      expect(ids.has(noteId), `orphan note for "${noteId}"`).toBe(true);
+    }
   });
 
-  it("should give every lhm slide presenter notes, since the deck is given live", () => {
-    const lhm = getDeck("lhm");
-    for (const slide of lhm.slides) {
-      expect(lhm.presenterNotes[slide.id], `missing notes for "${slide.id}"`).toBeTruthy();
+  it("should keep the archived spine intact with its own presenter notes", () => {
+    const spine = getDeck("lhm-spine");
+    expect(spine.meta.shelf).toBe(true);
+    for (const slide of spine.slides) {
+      expect(spine.presenterNotes[slide.id], `missing notes for "${slide.id}"`).toBeTruthy();
     }
   });
 

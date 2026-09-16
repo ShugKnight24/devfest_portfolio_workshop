@@ -15,8 +15,22 @@ import { prideDeckMeta, prideSlides, pridePresenterNotes } from "./prideSlides";
  * the right one on stage was a reading exercise. There are now two decks you
  * would actually stand up and give:
  *
- *   lhm      — THE talk. Elastic: 15 / 30 / 60 min off one spine (see runtime.js).
+ *   combined — THE talk. "The Trilogy Ensemble". Elastic: 15 / 30 / 60 min off
+ *              one spine (see runtime.js), built around the character pairings.
  *   devfest  — the Michigan DevFest workshop, which builds on that spine.
+ *
+ * WHY `combined` AND NOT `lhm`
+ * ---------------------------
+ * The pairing structure — two habits held against each other until the rule
+ * between them is obvious — is the thing that actually teaches, and it only
+ * ever existed in `combined`. That deck was shelved for lacking the elastic
+ * spine (tiers, the flex zone, the live-build beats, Chesterton's Fence), which
+ * was a reason to merge the spine into it, not to retire it. It now carries
+ * both, so `lhm` has nothing left that `combined` does not have.
+ *
+ * `lhm` is therefore an ALIAS onto `combined`: every old link, QR code and
+ * bookmark lands on the deck that superseded it. The original spine is kept
+ * verbatim under `lhm-spine` so the directory can still open it.
  *
  * Everything else is still here and still reachable — the framework decks hold
  * good material and `pride` is a real archive — but they are marked `shelf` so
@@ -28,10 +42,10 @@ const shelve = (meta, reason) => ({ ...meta, shelf: true, shelfReason: reason })
 
 export const decks = {
   // ── Live decks ──────────────────────────────────────────────────────────
-  lhm: {
-    meta: lhmDeckMeta,
-    slides: lhmSlides,
-    presenterNotes: lhmPresenterNotes,
+  combined: {
+    meta: combinedDeckMeta,
+    slides: combinedSlides,
+    presenterNotes: combinedPresenterNotes,
   },
   devfest: {
     meta: devfestDeckMeta,
@@ -39,29 +53,32 @@ export const decks = {
     presenterNotes: devfestPresenterNotes,
   },
 
-  // ── Shelved: source material, folded into the lhm tiers ─────────────────
-  combined: {
-    meta: shelve(combinedDeckMeta, "Superseded by the elastic lhm deck at keynote runtime."),
-    slides: combinedSlides,
-    presenterNotes: combinedPresenterNotes,
+  // ── Shelved: source material, folded into the combined tiers ────────────
+  "lhm-spine": {
+    meta: shelve(
+      lhmDeckMeta,
+      "The original elastic spine. Merged into the combined deck, which adds the character pairings."
+    ),
+    slides: lhmSlides,
+    presenterNotes: lhmPresenterNotes,
   },
   lightning: {
-    meta: shelve(lightningDeckMeta, "Superseded by the elastic lhm deck at lightning runtime."),
+    meta: shelve(lightningDeckMeta, "Superseded by the combined deck at lightning runtime."),
     slides: lightningSlides,
     presenterNotes: lightningPresenterNotes,
   },
   nomad: {
-    meta: shelve(nomadDeckMeta, "Framework 01 — now a flex-zone slide in lhm."),
+    meta: shelve(nomadDeckMeta, "Framework 01 — now the Reacher half of the pairings in combined."),
     slides: nomadSlides,
     presenterNotes: nomadPresenterNotes,
   },
   ripcord: {
-    meta: shelve(ripcordDeckMeta, "Framework 02 — now a flex-zone slide in lhm."),
+    meta: shelve(ripcordDeckMeta, "Framework 02 — now the Division 4 half of the pairings in combined."),
     slides: ripcordSlides,
     presenterNotes: ripcordPresenterNotes,
   },
   iron: {
-    meta: shelve(ironDeckMeta, "Framework 03 — now a flex-zone slide in lhm."),
+    meta: shelve(ironDeckMeta, "Framework 03 — now the form-check material in combined."),
     slides: ironSlides,
     presenterNotes: ironPresenterNotes,
   },
@@ -79,14 +96,18 @@ export const decks = {
   },
 };
 
-export const DEFAULT_DECK_ID = "lhm";
+export const DEFAULT_DECK_ID = "combined";
 
 /** Legacy and convenience ids kept working so old links and muscle memory do not break. */
 const ALIASES = {
-  unified: "lhm",
-  keynote: "lhm",
-  master: "lhm",
-  reacher: "lhm",
+  // `lhm` was the default until the spine was merged into `combined`. Every
+  // printed link and QR code from before that still resolves here.
+  lhm: "combined",
+  unified: "combined",
+  keynote: "combined",
+  master: "combined",
+  reacher: "combined",
+  trilogy: "combined",
   "lightning-talk": "lightning",
   chainsaw: "ripcord",
   labs: "workshop",

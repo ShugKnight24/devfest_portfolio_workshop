@@ -21,12 +21,12 @@ import {
 /**
  * WorkshopSlides — Cinematic Multi-Deck Presentation Engine
  *
- * Dedicated decks for:
- * - Master Keynote (60 min): "The Reacher Protocol" (Detroit LHM & DevFest 2026)
- * - Lightning Strike (15 min): Rapid-fire tactical dossier
- * - Builder's Workshop Labs: Interactive all-day hands-on lab dashboard
- * - Michigan DevFest & AI Hackathon 2026: "Hackathon Velocity"
- * - Detroit Pride Summit 2026: "The REZE_BOMB System" (Archive)
+ * Two decks are live; the rest are shelved source material (see data/slides).
+ * - combined: "The Trilogy Ensemble" — THE talk, elastic 15 / 30 / 60 min.
+ * - devfest:  "Hackathon Velocity" — the same spine, one tier deeper, plus labs.
+ *
+ * Length is a runtime VIEW over a deck, not a separate deck: the runtime bar
+ * picks a max tier and the flex zone opens on demand mid-talk.
  */
 
 // Slide 1: Title Slide (Tactical Cyberpunk)
@@ -1344,6 +1344,7 @@ export const WorkshopSlides = () => {
     "unified",
     "keynote",
     "master",
+    "trilogy",
     "lightning",
     "lightning-talk",
     "workshop",
@@ -1352,6 +1353,7 @@ export const WorkshopSlides = () => {
     "ripcord",
     "iron",
     "lhm",
+    "lhm-spine",
     "devfest",
     "pride",
     "reacher",

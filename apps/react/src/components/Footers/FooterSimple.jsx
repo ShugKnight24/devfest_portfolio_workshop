@@ -13,7 +13,7 @@ const quickLinks = [
 
 export const FooterSimple = ({ currentYear, name, socialLinks }) => {
   return (
-    <footer className="bg-(--color-surface) text-(--color-text-primary)">
+    <footer className="bg-(--color-surface) dark:bg-(--color-surface-dark) text-(--color-text-primary)">
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Main Footer Content */}
         <div className="grid md:grid-cols-3 gap-8 mb-8">

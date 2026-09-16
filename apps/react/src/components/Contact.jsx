@@ -25,7 +25,7 @@ export const Contact = () => {
       id="contact"
       className="section-container bg-(--color-surface-highlight)"
     >
-      <div className="max-w-2xl mx-auto bg-(--color-surface) p-8 rounded-2xl shadow-xl">
+      <div className="max-w-2xl mx-auto bg-(--color-surface) dark:bg-(--color-surface-dark) p-8 rounded-2xl shadow-xl">
         <h2 className="section-title mb-8">Get In Touch</h2>
 
         {status === "success" ? (
@@ -55,7 +55,7 @@ export const Contact = () => {
                 name="name"
                 type="text"
                 required
-                className="w-full px-4 py-3 rounded-lg bg-(--color-background) border border-(--color-border) focus:ring-2 focus:ring-(--color-primary) outline-none transition-all"
+                className="w-full px-4 py-3 rounded-lg bg-(--color-background) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) focus:ring-2 focus:ring-(--color-primary) outline-none transition-all"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
@@ -71,7 +71,7 @@ export const Contact = () => {
                 name="email"
                 type="email"
                 required
-                className="w-full px-4 py-3 rounded-lg bg-(--color-background) border border-(--color-border) focus:ring-2 focus:ring-(--color-primary) outline-none transition-all"
+                className="w-full px-4 py-3 rounded-lg bg-(--color-background) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) focus:ring-2 focus:ring-(--color-primary) outline-none transition-all"
                 value={formData.email}
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
@@ -87,7 +87,7 @@ export const Contact = () => {
                 name="message"
                 required
                 rows="4"
-                className="w-full px-4 py-3 rounded-lg bg-(--color-background) border border-(--color-border) focus:ring-2 focus:ring-(--color-primary) outline-none transition-all"
+                className="w-full px-4 py-3 rounded-lg bg-(--color-background) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) focus:ring-2 focus:ring-(--color-primary) outline-none transition-all"
                 value={formData.message}
                 onChange={(e) =>
                   setFormData({ ...formData, message: e.target.value })
@@ -97,7 +97,7 @@ export const Contact = () => {
             <button
               type="submit"
               disabled={status === "submitting"}
-              className="w-full py-4 bg-(--color-primary) text-white font-bold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
+              className="w-full py-4 bg-(--color-primary) text-(--color-primary-text) font-bold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
             >
               {status === "submitting" ? "Sending..." : "Send Message"}
             </button>

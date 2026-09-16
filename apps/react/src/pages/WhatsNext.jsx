@@ -435,7 +435,7 @@ export const WhatsNext = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-(--color-background) text-(--color-text) dark:text-(--color-text-dark) py-24">
+    <div className="min-h-screen bg-(--color-background) dark:bg-(--color-dark) text-(--color-text) dark:text-(--color-text-dark) py-24">
       {/* Hero Section */}
       <div className="section-container text-center mb-16">
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-(--color-primary)/10 text-(--color-primary) rounded-full text-sm font-bold mb-6 border border-(--color-primary)/20">

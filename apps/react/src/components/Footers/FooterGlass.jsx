@@ -11,10 +11,10 @@ import { EmojiIcon } from "@portfolio/icons/react";
 
 export const FooterGlass = ({ currentYear, name, socialLinks }) => {
   return (
-    <footer className="relative bg-(--color-surface)">
+    <footer className="relative bg-(--color-surface) dark:bg-(--color-surface-dark)">
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Glass Card */}
-        <div className="backdrop-blur-xl bg-(--color-surface)/30 rounded-3xl shadow-2xl border border-(--color-border)/50 p-8">
+        <div className="backdrop-blur-xl bg-(--color-surface) dark:bg-(--color-surface-dark)/30 rounded-3xl shadow-2xl border border-(--color-border)/50 p-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             {/* Left: Name & Tagline */}
             <div className="text-center md:text-left">

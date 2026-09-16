@@ -67,7 +67,7 @@ export const SkillsGrouped = ({ skills }) => {
         {Object.entries(groupedSkills).map(([category, categorySkills]) => (
           <div
             key={category}
-            className="bg-(--color-surface) rounded-xl p-6 shadow-sm"
+            className="bg-(--color-surface) dark:bg-(--color-surface-dark) rounded-xl p-6 shadow-sm"
           >
             {/* Category Header */}
             <h3

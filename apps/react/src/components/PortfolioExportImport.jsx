@@ -192,7 +192,7 @@ export const PortfolioExportImport = ({
                   className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
                   aria-label="Close export/import modal"
                 >
-                  <Close className="w-5 h-5 text-gray-500" />
+                  <Close className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                 </button>
               </div>
 
@@ -242,7 +242,7 @@ export const PortfolioExportImport = ({
                     <div className="flex gap-3">
                       <button
                         onClick={handleCopy}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
                       >
                         {copied ? (
                           <>
@@ -255,7 +255,7 @@ export const PortfolioExportImport = ({
                       </button>
                       <button
                         onClick={handleDownload}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-green-700 hover:bg-green-800 text-white rounded-lg font-medium transition-colors"
                       >
                         <Download className="w-4 h-4" />
                         Download JSON
@@ -278,7 +278,7 @@ export const PortfolioExportImport = ({
                       <p className="text-gray-600 dark:text-gray-400">
                         Click to upload or drag & drop
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         .json files only
                       </p>
                       <input
@@ -293,7 +293,7 @@ export const PortfolioExportImport = ({
 
                     <div className="flex items-center gap-4">
                       <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
-                      <span className="text-sm text-gray-500">or</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">or</span>
                       <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
                     </div>
 
@@ -345,7 +345,7 @@ export const PortfolioExportImport = ({
                     <button
                       onClick={handleImport}
                       disabled={!importData || importErrors.length > 0}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
                     >
                       <Upload className="w-4 h-4" />
                       Import Portfolio
@@ -356,7 +356,7 @@ export const PortfolioExportImport = ({
 
               {/* Footer */}
               <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                <p className="text-xs text-gray-500 text-center inline-flex items-center justify-center gap-1 w-full">
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center inline-flex items-center justify-center gap-1 w-full">
                   <EmojiIcon name="lightbulb" className="w-3.5 h-3.5" /> Tip: Share
                   your exported JSON with classmates to compare portfolios!
                 </p>

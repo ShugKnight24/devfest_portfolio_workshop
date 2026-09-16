@@ -64,7 +64,7 @@ export const ComponentComparer = ({ variants, title, description }) => {
   if (!LeftComponent || !RightComponent) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center">
-        <p className="text-gray-500">Loading components...</p>
+        <p className="text-gray-500 dark:text-gray-400">Loading components...</p>
       </div>
     );
   }
@@ -169,7 +169,7 @@ export const ComponentComparer = ({ variants, title, description }) => {
             </select>
             <button
               onClick={() => setPreviewPanel("left")}
-              className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 border border-gray-300 dark:border-gray-600"
+              className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 border border-gray-300 dark:border-gray-600"
               title="Open in Preview Mode"
             >
               {Icons.preview}
@@ -188,7 +188,7 @@ export const ComponentComparer = ({ variants, title, description }) => {
                 onClick={() => setLeftViewport(vp)}
                 className={`p-1.5 rounded transition-colors cursor-pointer ${
                   leftViewport.name === vp.name
-                    ? "bg-(--color-primary) text-white"
+                    ? "bg-(--color-primary) text-(--color-primary-text)"
                     : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
                 }`}
                 title={`${vp.name}${
@@ -223,7 +223,7 @@ export const ComponentComparer = ({ variants, title, description }) => {
               </select>
               <button
                 onClick={() => setPreviewPanel("right")}
-                className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 border border-gray-300 dark:border-gray-600"
+                className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 border border-gray-300 dark:border-gray-600"
                 title="Open in Preview Mode"
               >
                 {Icons.preview}

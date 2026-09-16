@@ -4,6 +4,7 @@ import { ComponentComparer } from "../components/ComponentComparer";
 import { useAchievements } from "../components/Achievements";
 
 import {
+  ChevronRight,
   Email,
   GithubLogo,
   LinkedInLogo,
@@ -326,7 +327,7 @@ export const Showcase = () => {
               {showGuide ? "Hide" : "Show"} Guide
             </span>
             <svg
-              className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+              className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
                 showGuide ? "rotate-180" : ""
               }`}
               fill="none"
@@ -462,7 +463,7 @@ export const Showcase = () => {
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
                 <svg
-                  className="w-4 h-4 text-gray-500"
+                  className="w-4 h-4 text-gray-500 dark:text-gray-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -644,9 +645,12 @@ export const Showcase = () => {
           <div className="flex flex-wrap justify-center gap-4">
             <a
               href="/lessons"
-              className="px-6 py-3 bg-(--color-primary) text-(--color-primary-text) rounded-lg font-medium hover:opacity-90 transition-opacity"
+              className="inline-flex items-center gap-1.5 px-6 py-3 bg-(--color-primary) text-(--color-primary-text) rounded-lg font-medium hover:opacity-90 transition-opacity"
             >
-              Start Learning →
+              Start Learning
+              <span aria-hidden="true">
+                <ChevronRight className="w-4 h-4" />
+              </span>
             </a>
             <a
               href="/"

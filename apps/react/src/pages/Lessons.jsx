@@ -4,6 +4,7 @@ import { Playground } from "../components/Playground";
 import { Tooltip } from "../components/Tooltip";
 import { ProgressTracker } from "../components/ProgressTracker";
 import { EmojiIcon } from "@portfolio/icons/react";
+import { ChevronLeft, ChevronRight } from "../components/Icons";
 
 // ─── Track definitions ───────────────────────────────────────────────
 const TRACKS = {
@@ -208,7 +209,7 @@ const reactLessons = [
       concept: ".map()",
       initialCode: `
         const skills = ["React", "JavaScript", "CSS"];
-        skills.map(skill => "⭐ " + skill).join(", ")
+        skills.map(skill => "[" + skill + "]").join(", ")
       `,
       hints: [
         "Try adding an index: skills.map((skill, i) => ...)",
@@ -355,7 +356,7 @@ const reactLessons = [
             <code>text-lg</code>, <code>font-bold</code> - Typography
           </li>
           <li>
-            <code>bg-blue-500</code>, <code>text-white</code> - Colors
+            <code>bg-blue-600</code>, <code>text-white</code> - Colors
           </li>
           <li>
             <code>rounded-lg</code>, <code>shadow-md</code> - Effects
@@ -2488,7 +2489,7 @@ const TrackSelector = ({ activeTrack, onTrackChange }) => (
         onClick={() => onTrackChange(track.id)}
         className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${
           activeTrack === track.id
-            ? "bg-(--color-primary) text-white shadow-md"
+            ? "bg-(--color-primary) text-(--color-primary-text) shadow-md"
             : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
         }`}
       >
@@ -2669,9 +2670,12 @@ export const Lessons = () => {
               <button
                 onClick={() => setActiveLesson(Math.max(0, activeLesson - 1))}
                 disabled={activeLesson === 0}
-                className="px-6 py-3 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors hover:cursor-pointer disabled:cursor-not-allowed"
+                className="px-6 py-3 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors hover:cursor-pointer disabled:cursor-not-allowed inline-flex items-center gap-1.5"
               >
-                ← Previous
+                <span aria-hidden="true">
+                  <ChevronLeft className="w-4 h-4" />
+                </span>
+                Previous
               </button>
               <button
                 onClick={() =>
@@ -2680,9 +2684,12 @@ export const Lessons = () => {
                   )
                 }
                 disabled={activeLesson === lessons.length - 1}
-                className="px-6 py-3 rounded-lg bg-(--color-primary) text-white disabled:opacity-50 hover:opacity-90 transition-opacity hover:cursor-pointer disabled:cursor-not-allowed"
+                className="px-6 py-3 rounded-lg bg-(--color-primary) text-(--color-primary-text) disabled:opacity-50 hover:opacity-90 transition-opacity hover:cursor-pointer disabled:cursor-not-allowed inline-flex items-center gap-1.5"
               >
-                Next →
+                Next
+                <span aria-hidden="true">
+                  <ChevronRight className="w-4 h-4" />
+                </span>
               </button>
             </div>
           </div>

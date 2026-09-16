@@ -33,7 +33,7 @@
 
 export const SkillsDefault = () => {
   return (
-    <section className="section-container bg-white">
+    <section className="section-container bg-white dark:bg-(--color-surface-dark)">
       <h2 className="section-title">My Skills</h2>
       <div className="flex flex-wrap gap-3 justify-center">
         {/* 

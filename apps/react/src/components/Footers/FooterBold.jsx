@@ -14,7 +14,7 @@ export const FooterBold = ({ currentYear, name, socialLinks }) => {
     <footer className="relative bg-(--color-primary) text-(--color-text-inverse) overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 -left-4 w-72 h-72 bg-(--color-surface) rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+        <div className="absolute top-0 -left-4 w-72 h-72 bg-(--color-surface) dark:bg-(--color-surface-dark) rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
         <div className="absolute bottom-0 right-0 w-72 h-72 bg-(--color-secondary) rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-700"></div>
       </div>
 

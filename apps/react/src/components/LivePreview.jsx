@@ -23,7 +23,7 @@ export const LivePreview = ({
             onClick={() => setActiveTab(tab)}
             className={`flex-1 px-4 py-3 text-sm font-medium capitalize transition-colors ${
               activeTab === tab
-                ? "bg-(--color-primary) text-white"
+                ? "bg-(--color-primary) text-(--color-primary-text)"
                 : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
             }`}
           >
@@ -65,7 +65,7 @@ export const LivePreview = ({
                     onClick={() => updateProp(prop.name, !props[prop.name])}
                     className={`px-4 py-2 rounded-lg font-medium cursor-pointer ${
                       props[prop.name]
-                        ? "bg-green-500 text-white"
+                        ? "bg-green-700 text-white"
                         : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                     }`}
                   >

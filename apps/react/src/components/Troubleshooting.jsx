@@ -339,9 +339,9 @@ const TroubleshootingItem = ({ item }) => {
           {item.question}
         </span>
         {isOpen ? (
-          <ChevronUp className="w-5 h-5 text-gray-500 shrink-0" />
+          <ChevronUp className="w-5 h-5 text-gray-500 dark:text-gray-400 shrink-0" />
         ) : (
-          <ChevronDown className="w-5 h-5 text-gray-500 shrink-0" />
+          <ChevronDown className="w-5 h-5 text-gray-500 dark:text-gray-400 shrink-0" />
         )}
       </button>
       {isOpen && (
@@ -372,7 +372,7 @@ const TroubleshootingCategory = ({ category, items }) => {
           <ChevronRight className="w-5 h-5" />
         )}
         {category}
-        <span className="text-sm font-normal text-gray-500">
+        <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
           ({items.length})
         </span>
       </button>
@@ -450,7 +450,7 @@ export const Troubleshooting = () => {
           <a
             key={category.category}
             href={`#${category.category.toLowerCase().replace(/\s+/g, "-")}`}
-            className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-sm hover:bg-(--color-primary) hover:text-white transition-colors"
+            className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-sm hover:bg-(--color-primary) hover:text-(--color-primary-text) transition-colors"
           >
             {category.category}
           </a>
@@ -493,7 +493,7 @@ export const Troubleshooting = () => {
             href="https://stackoverflow.com/"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
+            className="px-4 py-2 bg-orange-700 text-white rounded-lg hover:bg-orange-800 transition-colors text-sm font-medium"
           >
             Search Stack Overflow
           </a>

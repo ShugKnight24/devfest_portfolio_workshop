@@ -63,10 +63,10 @@ const PreviewComponents = {
     onClick,
   }) => {
     const variants = {
-      primary: "bg-blue-500 hover:bg-blue-600 text-white",
+      primary: "bg-blue-600 hover:bg-blue-700 text-white",
       secondary:
         "bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
-      success: "bg-green-500 hover:bg-green-600 text-white",
+      success: "bg-green-700 hover:bg-green-800 text-white",
       danger: "bg-red-500 hover:bg-red-600 text-white",
       outline: "border-2 border-blue-500 text-blue-500 hover:bg-blue-50",
     };
@@ -270,7 +270,7 @@ const PreviewComponents = {
         }`}
       />
       {error && <p className="text-sm text-red-500">{error}</p>}
-      {helper && !error && <p className="text-sm text-gray-500">{helper}</p>}
+      {helper && !error && <p className="text-sm text-gray-500 dark:text-gray-400">{helper}</p>}
     </div>
   ),
 
@@ -465,7 +465,7 @@ const PropControl = ({ control, value, onChange }) => {
     case "text":
       return (
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">
+          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
             {control.label}
           </label>
           <input
@@ -480,7 +480,7 @@ const PropControl = ({ control, value, onChange }) => {
     case "select":
       return (
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">
+          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
             {control.label}
           </label>
           <select
@@ -515,7 +515,7 @@ const PropControl = ({ control, value, onChange }) => {
     case "number":
       return (
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">
+          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
             {control.label}
           </label>
           <input
@@ -571,7 +571,7 @@ export const LivePreview = ({ componentName, initialProps }) => {
 
   if (!config || !Component) {
     return (
-      <div className="p-4 text-center text-gray-500">
+      <div className="p-4 text-center text-gray-500 dark:text-gray-400">
         Component "{componentName}" not found
       </div>
     );
@@ -595,7 +595,7 @@ export const LivePreview = ({ componentName, initialProps }) => {
           <h3 className="font-bold text-gray-900 dark:text-gray-100">
             {config.name}
           </h3>
-          <p className="text-sm text-gray-500">{config.description}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{config.description}</p>
         </div>
         <div className="flex items-center gap-2">
           {["mobile", "tablet", "desktop"].map((vp) => (
@@ -693,7 +693,7 @@ export const ComponentGallery = () => {
               <h3 className="font-bold text-gray-900 dark:text-gray-100">
                 {config.name}
               </h3>
-              <p className="text-sm text-gray-500 mt-1">{config.description}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{config.description}</p>
             </div>
           );
         })}
@@ -707,7 +707,7 @@ export const ComponentGallery = () => {
               onClick={() => setSelectedComponent(null)}
               className="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors z-10"
             >
-              <Close className="w-5 h-5 text-gray-500" />
+              <Close className="w-5 h-5 text-gray-500 dark:text-gray-400" />
             </button>
             <div className="overflow-y-auto max-h-[90vh]">
               <LivePreview componentName={selectedComponent} />

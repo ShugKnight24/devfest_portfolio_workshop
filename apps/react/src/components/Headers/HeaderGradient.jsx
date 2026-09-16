@@ -25,7 +25,7 @@ export const HeaderGradient = ({ personal }) => {
   const { github, linkedin, twitter } = social;
 
   return (
-    <header className="bg-(--color-primary) text-white shadow-lg">
+    <header className="bg-(--color-primary) text-(--color-primary-text) shadow-lg">
       <div className="section-container py-16">
         {/* Top Bar with Dark Mode Toggle & Theme Switcher */}
         <div className="flex justify-end mb-3 gap-3">

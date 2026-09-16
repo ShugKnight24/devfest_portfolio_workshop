@@ -40,7 +40,7 @@ export const AboutSkills = ({ avatar, bio }) => {
   ];
 
   return (
-    <section className="section-container bg-(--color-surface)">
+    <section className="section-container bg-(--color-surface) dark:bg-(--color-surface-dark)">
       <h2 className="section-title">About Me</h2>
 
       <div className="max-w-6xl mx-auto">

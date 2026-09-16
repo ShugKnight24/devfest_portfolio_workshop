@@ -1,8 +1,45 @@
 import { Link } from "react-router-dom";
 import { EmojiIcon } from "../components/Icons/EmojiIcon";
 import { InteractiveLearningScene } from "../components/InteractiveLearningScene";
+import { useShell } from "../context/ShellContext";
+import { getUpcomingEvents } from "../data/eventsData";
+
+/**
+ * Where a visitor should go first, by why they are here. Someone who just
+ * walked out of the talk, someone following along at a laptop, and someone who
+ * found the repo cold all want different first clicks. Each door also sets the
+ * nav shell's mode, so the rest of the app narrows to match the intent.
+ */
+const doors = [
+  {
+    id: "watch",
+    mode: "stage",
+    to: "/slides",
+    kicker: "I was in the room",
+    title: "Replay the talk",
+    desc: "The deck, the live-build beats, and every speaker note. Runs at 15, 30, or 60 minutes.",
+  },
+  {
+    id: "build",
+    mode: "workshop",
+    to: "/guide",
+    kicker: "I want to build",
+    title: "Start the workshop",
+    desc: "The guided path, in order, from setup to a deployed portfolio you own.",
+  },
+  {
+    id: "explore",
+    mode: "explore",
+    to: "/operatives",
+    kicker: "I'm just looking",
+    title: "Poke at the sandbox",
+    desc: "Agentic Studio, Operatives, and every experiment behind the talk.",
+  },
+];
 
 export const LandingPage = () => {
+  const { setMode } = useShell();
+  const nextEvent = getUpcomingEvents()[0];
   const courses = [
     {
       id: "react",
@@ -13,7 +50,7 @@ export const LandingPage = () => {
       icon: "atom",
       link: "/builder",
       active: true,
-      color: "from-cyan-400 to-blue-500 text-cyan-500",
+      color: "from-cyan-400 to-blue-500 text-cyan-700 dark:text-cyan-400",
       features: ["Vite 7 + React 19", "Context Providers", "Component Variant Pattern", "Full Vitest Suite"]
     },
     {
@@ -25,7 +62,7 @@ export const LandingPage = () => {
       icon: "lightning",
       link: "/guide", // links to the guide showing how to run it
       active: true,
-      color: "from-amber-400 to-orange-500 text-amber-500",
+      color: "from-amber-400 to-orange-500 text-amber-800 dark:text-amber-400",
       features: ["Zero Dependencies", "Semantic HTML5", "CSS Custom Properties", "Works Offline via file://"]
     },
     {
@@ -37,7 +74,7 @@ export const LandingPage = () => {
       icon: "palette",
       link: "/lessons?track=vue",
       active: true,
-      color: "from-emerald-400 to-teal-500 text-emerald-500",
+      color: "from-emerald-400 to-teal-500 text-emerald-700 dark:text-emerald-400",
       features: ["Vite + Vue 3", "Composition API", "Scoped Styling", "SFC Architecture"]
     },
     {
@@ -49,7 +86,7 @@ export const LandingPage = () => {
       icon: "brick",
       link: "/lessons?track=svelte",
       active: true,
-      color: "from-red-400 to-pink-500 text-red-500",
+      color: "from-red-400 to-pink-500 text-red-700 dark:text-red-400",
       features: ["SvelteKit Routing", "Reactive Declarations", "Built-in Stores", "Optimal Bundle Size"]
     },
     {
@@ -61,7 +98,7 @@ export const LandingPage = () => {
       icon: "robot",
       link: "/agentic-studio",
       active: true,
-      color: "from-purple-400 to-violet-500 text-purple-500",
+      color: "from-purple-400 to-violet-500 text-purple-700 dark:text-purple-400",
       features: ["Audience of One Apps", "Context Engineering (AGENTS.md)", "Subagent Triage (cavecrew)", "Token Economics (caveman/cove)"]
     }
   ];
@@ -80,7 +117,7 @@ export const LandingPage = () => {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-(--color-primary) opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-(--color-primary)"></span>
             </span>
-            Platform Engine v2.0 Live
+            {nextEvent ? `${nextEvent.shortTitle} — ${nextEvent.date}` : "Live"}
           </div>
           <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-none text-(--color-text) dark:text-(--color-text-dark)">
             Coding at the <br />
@@ -89,24 +126,47 @@ export const LandingPage = () => {
             </span>
           </h1>
           <p className="text-lg md:text-xl text-(--color-muted-text) dark:text-(--color-muted-text-dark) font-medium">
-            A battle-tested workshop architecture empowering developers to move
-            beyond rigid boilerplate and engineer tailored software at machine velocity.
+            The syntax barrier is dead. This is the workshop for what comes after it:
+            deduce the real problem, direct the machine, and audit what comes back.
+            Build software for an Audience of One — starting with your own Tuesday.
           </p>
-          <div className="flex justify-center gap-4 pt-4">
-            <a
-              href="#courses"
-              className="px-8 py-3 bg-(--color-primary) hover:opacity-90 text-(--color-primary-text,white) rounded-xl shadow-lg hover:scale-105 transition-all font-bold text-sm tracking-wide"
-            >
-              Browse Tracks
-            </a>
-            <Link
-              to="/slides"
-              className="px-8 py-3 bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) text-(--color-text) dark:text-(--color-text-dark) hover:border-(--color-primary) rounded-xl transition-all font-bold text-sm tracking-wide shadow-sm hover:scale-105"
-            >
-              Slide Decks
-            </Link>
-          </div>
+          {/* Keyboard hint only where there is a keyboard. */}
+          <p className="hidden md:block text-xs font-mono uppercase tracking-widest text-(--color-muted-text) dark:text-(--color-muted-text-dark) pt-2">
+            Press <kbd className="px-1.5 py-0.5 rounded-[2px] border border-(--color-border) dark:border-(--color-border-dark) font-sans">⌘K</kbd> anywhere to jump to anything
+          </p>
         </div>
+
+        {/* Three doors: pick by intent, and the shell narrows to match. */}
+        <section aria-labelledby="orientation-heading" className="space-y-6">
+          <h2 id="orientation-heading" className="sr-only">
+            Choose where to start
+          </h2>
+          <ul className="grid gap-4 md:grid-cols-3 list-none m-0 p-0">
+            {doors.map((door) => (
+              <li key={door.id}>
+                <Link
+                  id={`door-${door.id}`}
+                  to={door.to}
+                  onClick={() => setMode(door.mode)}
+                  className="group h-full flex flex-col gap-2 p-6 rounded-[2px] border-l-[3px] border-l-(--color-primary)
+                    border border-(--color-border) dark:border-(--color-border-dark)
+                    bg-(--color-surface)/70 dark:bg-(--color-surface-dark)/70 backdrop-blur-md
+                    hover:border-(--color-primary) transition-colors no-underline"
+                >
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-(--color-primary)">
+                    {door.kicker}
+                  </span>
+                  <span className="text-xl font-black tracking-tight text-(--color-text) dark:text-(--color-text-dark)">
+                    {door.title}
+                  </span>
+                  <span className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
+                    {door.desc}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         {/* Interactive Animated Learning Centerpiece */}
         <InteractiveLearningScene />
@@ -225,10 +285,10 @@ export const LandingPage = () => {
               <thead>
                 <tr className="border-b border-(--color-border) dark:border-(--color-border-dark) text-(--color-muted-text) dark:text-(--color-muted-text-dark) font-bold uppercase tracking-wider text-xs bg-(--color-surface-hover) dark:bg-(--color-surface-hover-dark)">
                   <th className="p-5">Feature Matrix</th>
-                  <th className="p-5 text-amber-500">Vanilla HTML/JS</th>
+                  <th className="p-5 text-amber-800 dark:text-amber-400">Vanilla HTML/JS</th>
                   <th className="p-5 text-(--color-primary)">React 19</th>
                   <th className="p-5 text-emerald-400">Vue 3 (STUB)</th>
-                  <th className="p-5 text-red-500">Svelte (STUB)</th>
+                  <th className="p-5 text-red-700 dark:text-red-400">Svelte (STUB)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-(--color-border)/60 dark:divide-(--color-border-dark)/60 text-(--color-muted-text) dark:text-(--color-muted-text-dark) font-medium">

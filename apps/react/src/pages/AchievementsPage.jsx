@@ -29,7 +29,7 @@ const AchievementsPage = () => {
   const rank = getRank(totalPoints);
 
   return (
-    <div className="min-h-screen bg-(--color-background) text-(--color-text) dark:text-(--color-text-dark) py-12 px-4">
+    <div className="min-h-screen bg-(--color-background) dark:bg-(--color-dark) text-(--color-text) dark:text-(--color-text-dark) py-12 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-12">

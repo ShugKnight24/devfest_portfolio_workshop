@@ -27,8 +27,8 @@ export const AboutDefault = () => {
       <h2 className="section-title text-3xl font-bold text-center mb-12 text-slate-800 dark:text-slate-100">
         About Me
       </h2>
-      <div className="text-center text-gray-500">
-        <p className="text-gray-500 mb-6">
+      <div className="text-center text-gray-500 dark:text-gray-400">
+        <p className="text-gray-500 dark:text-gray-400 mb-6">
           Your basic run of the mill about Component - Add your bio here!
         </p>
         {/* Layout Container */}

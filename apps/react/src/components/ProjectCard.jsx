@@ -7,12 +7,14 @@
  * @param {Object} project - Contains title, description, image, tags, githubUrl, liveUrl
  */
 
+import { ChevronRight } from "./Icons";
+
 export const ProjectCard = (project) => {
   const { title, description, image, tags, githubUrl, liveUrl, featured } =
     project;
 
   return (
-    <div className="bg-(--color-surface) rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+    <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
       {/* Project Image */}
       <img src={image} alt={title} className="w-full h-48 object-cover" />
 
@@ -50,9 +52,12 @@ export const ProjectCard = (project) => {
               href={githubUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-(--color-primary) hover:text-(--color-secondary) font-medium text-sm"
+              className="inline-flex items-center gap-1 text-(--color-primary) hover:text-(--color-secondary) font-medium text-sm"
             >
-              View Code →
+              View Code
+              <span aria-hidden="true">
+                <ChevronRight className="w-4 h-4" />
+              </span>
             </a>
           )}
           {liveUrl && (
@@ -60,9 +65,12 @@ export const ProjectCard = (project) => {
               href={liveUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-(--color-secondary) hover:text-(--color-accent) font-medium text-sm"
+              className="inline-flex items-center gap-1 text-(--color-secondary) hover:text-(--color-accent) font-medium text-sm"
             >
-              Live Demo →
+              Live Demo
+              <span aria-hidden="true">
+                <ChevronRight className="w-4 h-4" />
+              </span>
             </a>
           )}
         </div>

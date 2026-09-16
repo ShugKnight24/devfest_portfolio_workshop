@@ -57,12 +57,13 @@ export function ThemeProvider({ children }) {
 
     /*
      * `primary` is tuned for the DARK canvas and measures ~1.3:1 as text on the
-     * light one, which is why light mode was unreadable. So the two mode-
-     * sensitive tokens are not written inline here: they are published as
+     * light one, which is why light mode was unreadable. `secondary` and
+     * `accent` have the same problem (Pochita gold is 2:1 on bone). So the
+     * mode-sensitive tokens are not written inline here: they are published as
      * `--brand-*` pairs and index.css picks the right one per mode. Writing
      * them inline would beat both rules and pin the dark value everywhere.
      */
-    const MODE_SENSITIVE = new Set(["primary", "primaryText"]);
+    const MODE_SENSITIVE = new Set(["primary", "primaryText", "secondary", "accent"]);
 
     Object.entries(tokens).forEach(([key, value]) => {
       if (MODE_SENSITIVE.has(key)) return;
@@ -75,6 +76,10 @@ export function ThemeProvider({ children }) {
     root.style.setProperty("--brand-primary-light", tokens.primaryOnLight);
     root.style.setProperty("--brand-primary-text-dark", tokens.primaryText);
     root.style.setProperty("--brand-primary-text-light", tokens.primaryTextOnLight);
+    root.style.setProperty("--brand-secondary-dark", tokens.secondary);
+    root.style.setProperty("--brand-secondary-light", tokens.secondaryOnLight);
+    root.style.setProperty("--brand-accent-dark", tokens.accent);
+    root.style.setProperty("--brand-accent-light", tokens.accentOnLight);
 
     trackEvent("theme_changed", { theme: currentTheme });
   }, [currentTheme]);

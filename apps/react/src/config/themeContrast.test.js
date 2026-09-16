@@ -5,6 +5,7 @@ import {
   contrastRatio,
   CONTRAST_TARGETS,
   TOKEN_KEYS,
+  mixColors,
 } from "@portfolio/themes/tokens";
 
 /**
@@ -57,6 +58,23 @@ describe("theme token resolution", () => {
       for (const key of ["accent", "secondary"]) {
         const ratio = contrastRatio(t[key], t.surfaceDark);
         if (ratio < 3) failures.push(`${name}: ${key}/surfaceDark = ${ratio.toFixed(2)} (need 3)`);
+      }
+    }
+    expect(failures, `\n${failures.join("\n")}\n`).toEqual([]);
+  });
+
+  it("should keep light-mode brand text legible on its own chip tint", () => {
+    // `text-(--color-primary)` very often sits on `bg-(--color-primary)/10` or
+    // `/15`. The tint is darker than the plane under it, so a colour that only
+    // clears the bare plane still fails on the chip.
+    const failures = [];
+    for (const [name, theme] of themeEntries) {
+      const t = resolveThemeTokens(theme);
+      for (const key of ["primaryOnLight", "secondaryOnLight", "accentOnLight"]) {
+        for (const plane of ["surface", "background", "surfaceHover"]) {
+          const ratio = contrastRatio(t[key], mixColors(t[key], 0.15, t[plane]));
+          if (ratio < 4.5) failures.push(`${name}: ${key} on 15% tint over ${plane} = ${ratio.toFixed(2)}`);
+        }
       }
     }
     expect(failures, `\n${failures.join("\n")}\n`).toEqual([]);

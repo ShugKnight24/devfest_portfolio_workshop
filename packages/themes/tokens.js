@@ -135,6 +135,44 @@ const ensureContrast = (color, bg, target) => {
   return contrastRatio("#FFFFFF", bg) >= contrastRatio("#000000", bg) ? "#FFFFFF" : "#000000";
 };
 
+/** `fg` laid over `bg` at `alpha` — what a `bg-(--color-x)/15` chip renders as. */
+export const mixColors = (fg, alpha, bg) => {
+  const f = hexToRgb(fg);
+  const b = hexToRgb(bg);
+  return rgbToHex(...f.map((v, i) => v * alpha + b[i] * (1 - alpha)));
+};
+
+/**
+ * Tune a brand colour to read as TEXT on the light canvas.
+ *
+ * 3:1 is enough for a rule or an icon, but these colours are used as body-size
+ * text (`text-(--color-primary)` links, kickers, counts), and very often on a
+ * 10-15% tint of themselves (`bg-(--color-primary)/10`). A tint sits between
+ * the colour and the plane, so it is always the harder background. Every plane
+ * is checked, because which one is hardest depends on the theme: the darkest
+ * for a bone canvas, the lightest for a theme whose "light" canvas is dark.
+ */
+const ensureTextOnLight = (color, planes, target = 4.5, tint = 0.15) => {
+  const passes = (c) =>
+    planes.every(
+      (p) => contrastRatio(c, p) >= target && contrastRatio(c, mixColors(c, tint, p)) >= target
+    );
+  if (passes(color)) return color;
+
+  const hardest = planes.reduce((a, b) => (getLuminance(a) <= getLuminance(b) ? a : b));
+  const start = lightnessOf(color);
+  const directions = getLuminance(hardest) < 0.5 ? [1, -1] : [-1, 1];
+  for (const dir of directions) {
+    for (let step = 1; step <= 100; step += 1) {
+      const l = start + dir * step * 0.01;
+      if (l < 0 || l > 1) break;
+      const candidate = withLightness(color, l);
+      if (passes(candidate)) return candidate;
+    }
+  }
+  return ensureContrast(color, hardest, target);
+};
+
 /** Best of black or white against `bg`, nudged if neither is enough. */
 const readableOn = (bg, target = 4.5) => {
   const white = contrastRatio("#FFFFFF", bg);
@@ -151,7 +189,9 @@ export const TOKEN_KEYS = [
   "primaryOnLight",
   "primaryTextOnLight",
   "secondary",
+  "secondaryOnLight",
   "accent",
+  "accentOnLight",
   "background",
   "dark",
   "surface",
@@ -181,9 +221,18 @@ export const CONTRAST_TARGETS = [
   ["mutedTextDark", "surfaceDark", 4.5],
   ["primaryText", "primary", 4.5],
   ["primary", "surfaceDark", 3.0],
-  ["primaryOnLight", "surface", 3.0],
-  ["primaryOnLight", "background", 3.0],
+  // The *OnLight brand colours are used as text in light mode, so they carry the
+  // text target on every light plane, not the 3:1 non-text one.
+  ["primaryOnLight", "surface", 4.5],
+  ["primaryOnLight", "background", 4.5],
+  ["primaryOnLight", "surfaceHover", 4.5],
   ["primaryTextOnLight", "primaryOnLight", 4.5],
+  ["secondaryOnLight", "surface", 4.5],
+  ["secondaryOnLight", "background", 4.5],
+  ["secondaryOnLight", "surfaceHover", 4.5],
+  ["accentOnLight", "surface", 4.5],
+  ["accentOnLight", "background", 4.5],
+  ["accentOnLight", "surfaceHover", 4.5],
   ["secondary", "surfaceDark", 3.0],
   ["accent", "surfaceDark", 3.0],
 ];
@@ -238,17 +287,21 @@ export const resolveThemeTokens = (theme) => {
   // and `primaryOnLight` is the same hue retuned for light surfaces.
   const primaryRaw = c.primary || "#3B82F6";
   const primary = ensureContrast(primaryRaw, surfaceDark, 3.0);
-  // Tune against whichever light plane is DARKER — that is the harder one for a
+  // Tune against whichever light plane is DARKEST — that is the harder one for a
   // dark-ish brand colour to sit on. Tuning only against `surface` (usually near
-  // white) left the hero at 2.8:1 on the slightly darker page background.
-  const hardestLightPlane =
-    getLuminance(surface) <= getLuminance(lightCanvas) ? surface : lightCanvas;
-  const primaryOnLight = ensureContrast(primaryRaw, hardestLightPlane, 3.0);
+  // white) left the hero at 2.8:1 on the slightly darker page background, and
+  // tuning to 3:1 left every `text-(--color-primary)` label at ~3.5:1.
+  const lightPlanes = [surface, lightCanvas, surfaceHover];
+  const primaryOnLight = ensureTextOnLight(primaryRaw, lightPlanes);
   // Secondary and accent carry badges, rules and phase labels on dark surfaces,
   // so they need the same floor as primary. Several themes shipped values that
   // measured close to invisible there (divergentFist's secondary was 1.07:1).
   const secondary = ensureContrast(c.secondary || primary, surfaceDark, 3.0);
   const accent = ensureContrast(c.accent || primary, surfaceDark, 3.0);
+  // ...and, like primary, they are tuned for the dark canvas: Pochita gold is
+  // 2:1 as text on bone. Light mode gets its own retuned pair.
+  const secondaryOnLight = ensureTextOnLight(c.secondary || primaryRaw, lightPlanes);
+  const accentOnLight = ensureTextOnLight(c.accent || primaryRaw, lightPlanes);
 
   // Body text must clear its own canvas, not merely be "dark-ish".
   const text = ensureContrast(c.text || "#1F2937", surface, 4.5);
@@ -277,7 +330,9 @@ export const resolveThemeTokens = (theme) => {
     primaryOnLight,
     primaryTextOnLight,
     secondary,
+    secondaryOnLight,
     accent,
+    accentOnLight,
     background: lightCanvas,
     dark: darkCanvas,
     surface,

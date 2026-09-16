@@ -1,786 +1,460 @@
-import { useState, useEffect, useRef } from "react";
-import { NavLink, useLocation, Link } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import ThemeSwitcher from "./ThemeSwitcher";
 import DarkModeToggle from "./DarkModeToggle";
+import { useShell } from "../context/ShellContext";
+import { groupedRoutes, spineNeighbors } from "../config/navigation.js";
 
 import {
   Checkmark,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  ChevronUp,
   Close,
-  Eye,
-  EyeClosed,
   Menu,
-  Settings,
 } from "./Icons";
 
-const navIcons = {
-  top: <ChevronUp />,
-  bottom: <ChevronDown />,
-  left: <ChevronLeft />,
-  right: <ChevronRight />,
-  center: <Menu />,
-  hide: <EyeClosed />,
-  show: <Eye />,
-  menu: <Menu />,
-  close: <Close />,
-  settings: <Settings />,
-};
+/*
+ * Navigation — the workshop app's own chrome. One bar. Every route. Always.
+ *
+ * The configurable, repositionable nav this file used to grow was a teaching
+ * demo about the ATTENDEE'S portfolio ("your nav can go anywhere"). It was
+ * never meant to be the workshop app's own shell, and applying it here is why
+ * the bar ballooned: modes, primaries, an overflow menu, a stepper, a hide
+ * toggle, a separate mobile sheet, and nothing on /slides at all.
+ *
+ * So this bar holds three controls and nothing else:
+ *
+ *   Home · Search (Cmd+K) · Menu
+ *
+ * That is the whole invariant. The route list is not in the bar, it is in the
+ * overlay behind Menu, so the bar's width is a function of three controls and
+ * never of `routes.length`. A 30th route changes the overlay, not the chrome.
+ *
+ * The two things that used to make the chrome shift per route now live
+ * elsewhere: the workshop stepper is a bottom-anchored bar on spine routes
+ * only, and /slides gets the same bar in an auto-hiding presenting variant
+ * rather than no bar at all.
+ *
+ * Modes (Stage / Workshop / Explore) are gone from the visible chrome. `mode`
+ * still lives in ShellContext, the palette still sets it, and the landing page
+ * still seeds it — but nothing in this file reads it. A menu button whose
+ * contents depend on invisible state is the inconsistency, not the cure.
+ */
 
-// Direct standalone primary links
-const directNavLinks = [
-  { to: "/", label: "Home" },
-  { to: "/slides", label: "Slides" },
-  { to: "/agentic-studio", label: "Agentic Studio" },
-];
+/** Presenting: how long the pointer may rest before the bar gets out of the way. */
+const PRESENTING_HIDE_MS = 3000;
 
-// Grouped dropdown categories for space-saving navigation
-const navGroups = [
-  {
-    id: "learn",
-    label: "Learn",
-    items: [
-      { to: "/lessons", label: "Lessons", desc: "5 tracks: React, Vanilla, Vue, Svelte, AI" },
-      { to: "/guide", label: "Guide", desc: "Step-by-step workshop guidebook" },
-      { to: "/resources", label: "Resources", desc: "Curated tools, links & cheat sheets" },
-      { to: "/whats-next", label: "What's Next", desc: "Production release & next steps" },
-    ],
-  },
-  {
-    id: "build",
-    label: "Build",
-    items: [
-      { to: "/builder", label: "Portfolio Builder", desc: "Interactive visual portfolio editor" },
-      { to: "/components", label: "Components", desc: "Modular UI variant library" },
-      { to: "/demo", label: "Demo", desc: "Live preview of portfolio styles" },
-    ],
-  },
-  {
-    id: "play",
-    label: "Play",
-    items: [
-      { to: "/challenges", label: "Challenges", desc: "Daily code quests & milestones" },
-      { to: "/quiz", label: "Quiz", desc: "Test frontend & agentic fluency" },
-      { to: "/achievements", label: "Achievements", desc: "Badges & workshop progression" },
-      { to: "/showcase", label: "Showcase", desc: "Community portfolios & inspirations" },
-    ],
-  },
-  {
-    id: "hub",
-    label: "Hub",
-    items: [
-      { to: "/events", label: "Events", desc: "Detroit LHM, DevFest & summit talks" },
-      { to: "/dashboard", label: "Dashboard", desc: "Progress metrics & workshop stats" },
-      { to: "/dashboard/telemetry", label: "Telemetry", desc: "Bot isolation & traffic telemetry" },
-      { to: "/help", label: "Help & FAQ", desc: "Common issues, FAQ & setup fixes" },
-    ],
-  },
-];
+const slug = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
-// Flat list of all links for expanded / mobile fallback
-const allNavLinks = [
-  ...directNavLinks,
-  ...navGroups.flatMap((g) => g.items),
-];
+/** Shared pill styling for the three bar controls. */
+const CONTROL_CLASS =
+  "px-2.5 py-1.5 rounded-[2px] text-[11px] font-mono font-bold uppercase tracking-wider " +
+  "flex items-center gap-1.5 whitespace-nowrap cursor-pointer transition-colors " +
+  "text-(--color-muted-text) dark:text-(--color-muted-text-dark) " +
+  "hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark) " +
+  "hover:text-(--color-text) dark:hover:text-(--color-text-dark)";
+
+const ACTIVE_CONTROL_CLASS =
+  "px-2.5 py-1.5 rounded-[2px] text-[11px] font-mono font-bold uppercase tracking-wider " +
+  "flex items-center gap-1.5 whitespace-nowrap cursor-pointer transition-colors " +
+  "bg-(--color-primary) text-(--color-primary-text,white)";
 
 export const Navigation = () => {
   const location = useLocation();
-  const dropdownRef = useRef(null);
+  const { openPalette } = useShell();
 
-  // Persist position & layout preferences
-  const [verticalPos, setVerticalPos] = useState(() => {
-    const saved = localStorage.getItem("nav_vertical");
-    return saved || "top";
-  });
-  const [horizontalPos, setHorizontalPos] = useState(() => {
-    const saved = localStorage.getItem("nav_horizontal");
-    return saved || "center";
-  });
-  const [displayMode, setDisplayMode] = useState(() => {
-    const saved = localStorage.getItem("nav_display_mode");
-    return saved || "compact"; // "compact" (space-saving grouped) or "expanded" (all links)
-  });
+  const barRef = useRef(null);
+  const panelRef = useRef(null);
+  const menuButtonRef = useRef(null);
 
-  const [isHidden, setIsHidden] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isBarVisible, setIsBarVisible] = useState(true);
 
-  // Save preferences
+  const sections = useMemo(() => groupedRoutes(), []);
+  const spine = useMemo(() => spineNeighbors(location.pathname), [location.pathname]);
+
+  /**
+   * The deck owns the whole screen, but it does not get to own the app.
+   *
+   * Returning null here was the single biggest inconsistency: the one route a
+   * speaker is standing in front of was the one route with no way back. The bar
+   * renders on /slides too — parked clear of the deck's own fixed header
+   * ([aria-label="Stage controls"]) and bottom HUD, below them in stacking
+   * order, and fading itself out after a few still seconds.
+   */
+  const isPresenting = location.pathname.startsWith("/slides");
+
+  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
+
+  // Close the overlay on route change; the destination is already on screen.
   useEffect(() => {
-    localStorage.setItem("nav_vertical", verticalPos);
-  }, [verticalPos]);
-
-  useEffect(() => {
-    localStorage.setItem("nav_horizontal", horizontalPos);
-  }, [horizontalPos]);
-
-  useEffect(() => {
-    localStorage.setItem("nav_display_mode", displayMode);
-  }, [displayMode]);
-
-  // Close menus on route change or outside click
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-    setShowSettings(false);
-    setOpenDropdown(null);
+    setIsMenuOpen(false);
   }, [location.pathname]);
 
+  /**
+   * Presenting auto-hide.
+   *
+   * Two hard rules: it never hides while the overlay is open, and it never
+   * hides while it contains focus — a keyboard user tabbing into the bar must
+   * not have it vanish under them. When either holds, the timer simply declines
+   * to fire; the next pointer move or focus change schedules a fresh one.
+   */
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setOpenDropdown(null);
-      }
+    if (!isPresenting) {
+      setIsBarVisible(true);
+      return undefined;
+    }
+
+    let timer;
+
+    const schedule = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (isMenuOpen) return;
+        if (barRef.current?.contains(document.activeElement)) return;
+        setIsBarVisible(false);
+      }, PRESENTING_HIDE_MS);
     };
+
+    const reveal = () => {
+      setIsBarVisible(true);
+      schedule();
+    };
+
+    window.addEventListener("mousemove", reveal);
+    window.addEventListener("focusin", reveal);
+    schedule();
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("mousemove", reveal);
+      window.removeEventListener("focusin", reveal);
+    };
+  }, [isPresenting, isMenuOpen]);
+
+  /**
+   * Overlay focus handling: move focus in on open, hand it back to the Menu
+   * button on close, and let Escape close from anywhere inside.
+   */
+  useEffect(() => {
+    if (!isMenuOpen) return undefined;
+
+    const opener = document.activeElement;
+    panelRef.current?.querySelector("button, [href]")?.focus?.();
+
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
-        setOpenDropdown(null);
-        setShowSettings(false);
+        e.preventDefault();
+        setIsMenuOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+
+    // The page behind a full-screen overlay must not scroll under it.
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      const restoreTo = menuButtonRef.current || opener;
+      restoreTo?.focus?.();
     };
-  }, []);
+  }, [isMenuOpen]);
 
-  // Desktop link styles
-  const linkClass = ({ isActive }) =>
-    `px-3.5 py-1.5 rounded-lg text-xs font-semibold font-mono tracking-wide transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
-      isActive
-        ? "bg-(--color-primary) text-(--color-primary-text,white) shadow-md shadow-(--color-primary)/30"
-        : "text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark)"
-    }`;
+  /**
+   * Keep Tab inside the overlay.
+   *
+   * `aria-modal` tells assistive tech the rest of the page is inert; it does
+   * not stop Tab from walking out into the bar behind us.
+   */
+  const handlePanelKeyDown = (e) => {
+    if (e.key !== "Tab") return;
+    const focusable = panelRef.current?.querySelectorAll(
+      'button, [href], input, [tabindex]:not([tabindex="-1"])'
+    );
+    if (!focusable?.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  };
 
-  // Vertical sidebar (left/right) link styles
-  const verticalLinkClass = ({ isActive }) =>
-    `px-3 py-2 rounded-lg text-xs font-semibold font-mono transition-all flex items-center gap-2.5 w-full ${
-      isActive
-        ? "bg-(--color-primary) text-(--color-primary-text,white) shadow-md shadow-(--color-primary)/30"
-        : "text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark)"
-    }`;
-
-  // Mobile drawer link styles
-  const mobileLinkClass = ({ isActive }) =>
-    `px-3 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-3 w-full ${
+  const overlayLinkClass = ({ isActive }) =>
+    `block p-2 rounded-[2px] no-underline transition-colors ${
       isActive
         ? "bg-(--color-primary) text-(--color-primary-text,white)"
-        : "text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark)"
+        : "text-(--color-text) dark:text-(--color-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark)"
     }`;
 
-  // Desktop positioning classes
-  const getDesktopPositionClasses = () => {
-    const vertical = verticalPos === "top" ? "top-3" : "bottom-3";
-
-    if (horizontalPos === "left") {
-      return `${vertical} left-3 right-auto translate-x-0 flex-col items-stretch max-h-[92vh] overflow-y-auto`;
-    } else if (horizontalPos === "right") {
-      return `${vertical} right-3 left-auto translate-x-0 flex-col items-stretch max-h-[92vh] overflow-y-auto`;
-    }
-    return `${vertical} left-1/2 -translate-x-1/2 flex-row items-center max-w-[95vw]`;
-  };
-
-  // Mobile button position
-  const getMobileButtonPosition = () => {
-    const vertical = verticalPos === "top" ? "top-3" : "bottom-3";
-    if (horizontalPos === "left") return `${vertical} left-3`;
-    if (horizontalPos === "right") return `${vertical} right-3`;
-    return `${vertical} right-3`;
-  };
-
-  // Mobile drawer classes
-  const getMobileDrawerClasses = () => {
-    if (horizontalPos === "left") {
-      return {
-        panel: `fixed top-0 left-0 h-full w-72 z-60 transform transition-transform duration-300 ${
-          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        }`,
-        direction: "left",
-      };
-    } else if (horizontalPos === "right") {
-      return {
-        panel: `fixed top-0 right-0 h-full w-72 z-60 transform transition-transform duration-300 ${
-          isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
-        }`,
-        direction: "right",
-      };
-    }
-    return {
-      panel: `fixed ${
-        verticalPos === "top" ? "top-0" : "bottom-0"
-      } left-0 right-0 z-60 transform transition-transform duration-300 ${
-        isMobileMenuOpen
-          ? "translate-y-0"
-          : verticalPos === "top"
-          ? "-translate-y-full"
-          : "translate-y-full"
-      }`,
-      direction: "center",
-    };
-  };
-
-  const isVerticalLayout =
-    horizontalPos === "left" || horizontalPos === "right";
-  const drawerClasses = getMobileDrawerClasses();
-
-  // Hidden state - show minimal toggle button
-  if (isHidden) {
-    return (
-      <button
-        onClick={() => setIsHidden(false)}
-        className={`fixed ${getMobileButtonPosition()} z-60 
-          px-3.5 py-1.5 bg-(--color-surface)/90 dark:bg-(--color-surface-dark)/90 backdrop-blur-md rounded-full shadow-lg border border-(--color-border) dark:border-(--color-border-dark)
-          text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark)
-          transition-all hover:scale-105 cursor-pointer flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-blue-500`}
-        title="Show Navigation"
-        aria-label="Show Navigation"
-      >
-        {navIcons.show}
-        <span className="text-xs font-mono font-semibold">Show Nav</span>
-      </button>
-    );
-  }
-
-  // Settings dropdown content
-  const SettingsContent = ({ onClose, isMobile = false }) => (
-    <div className={isMobile ? "space-y-4" : "space-y-3"}>
-      {/* Theme & Dark Mode Controls */}
-      <div>
-        <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 px-2 py-1 uppercase tracking-wider font-mono">
-          Theme & Mode
-        </p>
-        <div className="flex items-center gap-1.5 px-0.5">
-          <ThemeSwitcher
-            showLabel={true}
-            menuClassName={isMobile ? "left-0 top-full mt-2" : undefined}
-            buttonClassName="flex-1 px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold flex items-center justify-center gap-1.5 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-          />
-          <DarkModeToggle
-            showLabel={true}
-            buttonClassName="flex-1 px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold flex items-center justify-center gap-1.5 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-          />
-        </div>
-      </div>
-
-      <div className="h-px bg-gray-200 dark:bg-gray-700" />
-
-      {/* Display Mode (Compact vs Expanded) */}
-      <div>
-        <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 px-2 py-1 uppercase tracking-wider font-mono">
-          Display Mode
-        </p>
-        <div className="grid grid-cols-2 gap-1.5">
-          <button
-            onClick={() => {
-              setDisplayMode("compact");
-              if (!isMobile) onClose();
-            }}
-            className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors ${
-              displayMode === "compact"
-                ? "bg-(--color-primary) text-(--color-primary-text,white) font-bold"
-                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
-          >
-            Compact
-          </button>
-          <button
-            onClick={() => {
-              setDisplayMode("expanded");
-              if (!isMobile) onClose();
-            }}
-            className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors ${
-              displayMode === "expanded"
-                ? "bg-(--color-primary) text-(--color-primary-text,white) font-bold"
-                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
-          >
-            All Links
-          </button>
-        </div>
-      </div>
-
-      <div className="h-px bg-gray-200 dark:bg-gray-700" />
-
-      {/* Vertical Position */}
-      <div>
-        <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 px-2 py-1 uppercase tracking-wider font-mono">
-          Vertical Position
-        </p>
-        <div className={isMobile ? "flex gap-2" : "space-y-1"}>
-          <button
-            onClick={() => {
-              setVerticalPos("top");
-              if (!isMobile) onClose();
-            }}
-            className={`${
-              isMobile ? "flex-1" : "w-full"
-            } px-3 py-1.5 rounded-lg text-xs ${
-              isMobile ? "justify-center" : "text-left"
-            } flex items-center gap-2 cursor-pointer transition-colors ${
-              verticalPos === "top"
-                ? "bg-(--color-primary)/20 text-gray-950 dark:text-white font-semibold"
-                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
-          >
-            {navIcons.top}
-            Top
-            {!isMobile && verticalPos === "top" && (
-              <Checkmark className="w-3.5 h-3.5 ml-auto text-current" />
-            )}
-          </button>
-          <button
-            onClick={() => {
-              setVerticalPos("bottom");
-              if (!isMobile) onClose();
-            }}
-            className={`${
-              isMobile ? "flex-1" : "w-full"
-            } px-3 py-1.5 rounded-lg text-xs ${
-              isMobile ? "justify-center" : "text-left"
-            } flex items-center gap-2 cursor-pointer transition-colors ${
-              verticalPos === "bottom"
-                ? "bg-(--color-primary)/20 text-gray-950 dark:text-white font-semibold"
-                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
-          >
-            {navIcons.bottom}
-            Bottom
-            {!isMobile && verticalPos === "bottom" && (
-              <Checkmark className="w-3.5 h-3.5 ml-auto text-current" />
-            )}
-          </button>
-        </div>
-      </div>
-
-      <div className="h-px bg-gray-200 dark:bg-gray-700" />
-
-      {/* Horizontal Position */}
-      <div>
-        <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 px-2 py-1 uppercase tracking-wider font-mono">
-          Horizontal Position
-        </p>
-        <div className={isMobile ? "flex gap-2" : "space-y-1"}>
-          <button
-            onClick={() => {
-              setHorizontalPos("left");
-              if (!isMobile) onClose();
-            }}
-            className={`${
-              isMobile ? "flex-1" : "w-full"
-            } px-3 py-1.5 rounded-lg text-xs ${
-              isMobile ? "justify-center" : "text-left"
-            } flex items-center gap-2 cursor-pointer transition-colors ${
-              horizontalPos === "left"
-                ? "bg-(--color-primary)/20 text-gray-950 dark:text-white font-semibold"
-                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
-          >
-            {navIcons.left}
-            Left
-            {!isMobile && horizontalPos === "left" && (
-              <Checkmark className="w-3.5 h-3.5 ml-auto text-current" />
-            )}
-          </button>
-          <button
-            onClick={() => {
-              setHorizontalPos("center");
-              if (!isMobile) onClose();
-            }}
-            className={`${
-              isMobile ? "flex-1" : "w-full"
-            } px-3 py-1.5 rounded-lg text-xs ${
-              isMobile ? "justify-center" : "text-left"
-            } flex items-center gap-2 cursor-pointer transition-colors ${
-              horizontalPos === "center"
-                ? "bg-(--color-primary)/20 text-gray-950 dark:text-white font-semibold"
-                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
-          >
-            {navIcons.center}
-            Center
-            {!isMobile && horizontalPos === "center" && (
-              <Checkmark className="w-3.5 h-3.5 ml-auto text-current" />
-            )}
-          </button>
-          <button
-            onClick={() => {
-              setHorizontalPos("right");
-              if (!isMobile) onClose();
-            }}
-            className={`${
-              isMobile ? "flex-1" : "w-full"
-            } px-3 py-1.5 rounded-lg text-xs ${
-              isMobile ? "justify-center" : "text-left"
-            } flex items-center gap-2 cursor-pointer transition-colors ${
-              horizontalPos === "right"
-                ? "bg-(--color-primary)/20 text-gray-950 dark:text-white font-semibold"
-                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
-          >
-            {navIcons.right}
-            Right
-            {!isMobile && horizontalPos === "right" && (
-              <Checkmark className="w-3.5 h-3.5 ml-auto text-current" />
-            )}
-          </button>
-        </div>
-      </div>
-
-      <div className="h-px bg-gray-200 dark:bg-gray-700" />
-
-      {/* Hide Option */}
-      <button
-        onClick={() => {
-          setIsHidden(true);
-          onClose();
-        }}
-        className="w-full px-3 py-1.5 rounded-lg text-xs text-left flex items-center gap-2 cursor-pointer transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-mono"
-      >
-        {navIcons.hide}
-        Hide Navigation
-      </button>
-    </div>
-  );
+  /*
+   * Position is the only thing that differs between the two variants, and it
+   * differs because the deck has fixed chrome at both edges: its header sits at
+   * the top and its HUD at the bottom, so the bar parks above the HUD on the
+   * left and drops below both in stacking order. Everything inside the bar —
+   * the controls, their order, their labels, the overlay they open — is
+   * identical on every route.
+   *
+   * The bar's max-w is belt-and-braces: it holds three fixed controls, so it
+   * cannot grow with the route list even if someone tries to add a link to it.
+   */
+  const barPlacement = isPresenting
+    ? `fixed bottom-24 left-4 z-30 transition-opacity duration-300 ${
+        isBarVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+      }`
+    : "fixed top-3 left-1/2 -translate-x-1/2 z-60";
 
   return (
     <>
-      {/* Desktop Navigation */}
       <nav
-        ref={dropdownRef}
-        className={`fixed ${getDesktopPositionClasses()} z-60 
-          hidden md:flex gap-1 p-1 
-          bg-(--color-surface)/90 dark:bg-(--color-surface-dark)/90 backdrop-blur-xl 
-          rounded-2xl shadow-xl border border-(--color-border)/80 dark:border-(--color-border-dark)/80
-          transition-all duration-300`}
+        ref={barRef}
+        id="app-bar"
+        aria-label="Primary"
+        className={`${barPlacement} flex items-center gap-1 p-1 max-w-[min(92vw,22rem)]
+          bg-(--color-surface)/90 dark:bg-(--color-surface-dark)/90 backdrop-blur-xl
+          rounded-[2px] shadow-xl border border-(--color-border) dark:border-(--color-border-dark)`}
+        inert={isPresenting && !isBarVisible}
       >
-        {/* COMPACT MODE (DEFAULT): Space-Saving Grouped Dropdowns */}
-        {displayMode === "compact" && !isVerticalLayout ? (
-          <>
-            {/* Primary direct links */}
-            {directNavLinks.map((link) => (
-              <NavLink key={link.to} to={link.to} className={linkClass}>
-                {link.label}
-              </NavLink>
-            ))}
-
-            {/* Grouped Category Dropdowns */}
-            {navGroups.map((group) => {
-              const isGroupActive = group.items.some(
-                (item) => item.to === location.pathname
-              );
-              const isOpen = openDropdown === group.id;
-
-              return (
-                <div key={group.id} className="relative">
-                  <button
-                    onClick={() => setOpenDropdown(isOpen ? null : group.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold font-mono tracking-wide transition-all flex items-center gap-1 cursor-pointer select-none ${
-                      isGroupActive
-                        ? "bg-(--color-primary)/20 text-(--color-text) dark:text-(--color-text-dark) border border-(--color-primary)/40"
-                        : "text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark)"
-                    }`}
-                    aria-expanded={isOpen}
-                    aria-haspopup="true"
-                    aria-label={`${group.label} navigation menu`}
-                  >
-                    <span>{group.label}</span>
-                    <ChevronDown
-                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                        isOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                    {isGroupActive && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-(--color-primary) inline-block" />
-                    )}
-                  </button>
-
-                  {/* Dropdown Menu Popover */}
-                  {isOpen && (
-                    <div
-                      className={`absolute z-70 bg-(--color-surface)/95 dark:bg-(--color-surface-dark)/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-(--color-border) dark:border-(--color-border-dark) p-2 min-w-[240px] animate-fade-in ${
-                        verticalPos === "top"
-                          ? "top-full mt-2 left-0"
-                          : "bottom-full mb-2 left-0"
-                      }`}
-                    >
-                      <div className="px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
-                        {group.label} Section
-                      </div>
-                      <div className="space-y-1 pt-1">
-                        {group.items.map((item) => {
-                          const isItemActive = location.pathname === item.to;
-                          return (
-                            <Link
-                              key={item.to}
-                              to={item.to}
-                              onClick={() => setOpenDropdown(null)}
-                              className={`p-2 rounded-xl text-left transition-all block group cursor-pointer ${
-                                isItemActive
-                                  ? "bg-(--color-primary) text-(--color-primary-text,white) shadow-sm"
-                                  : "hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark) text-(--color-text) dark:text-(--color-text-dark)"
-                              }`}
-                            >
-                              <div className="text-xs font-bold font-mono flex items-center justify-between">
-                                <span>{item.label}</span>
-                                {isItemActive && (
-                                  <Checkmark className="w-3.5 h-3.5 text-current" />
-                                )}
-                              </div>
-                              <p
-                                className={`text-[11px] leading-tight mt-0.5 line-clamp-1 ${
-                                  isItemActive
-                                    ? "opacity-90 font-medium"
-                                    : "text-gray-500 dark:text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300"
-                                }`}
-                              >
-                                {item.desc}
-                              </p>
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </>
-        ) : (
-          /* EXPANDED MODE or VERTICAL SIDEBAR: Clean categorized structure */
-          <div className={isVerticalLayout ? "space-y-3 w-full" : "flex items-center gap-1"}>
-            {isVerticalLayout ? (
-              <>
-                <div className="px-2 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-gray-400">
-                  Primary
-                </div>
-                {directNavLinks.map((link) => (
-                  <NavLink key={link.to} to={link.to} className={verticalLinkClass}>
-                    {link.label}
-                  </NavLink>
-                ))}
-
-                {navGroups.map((group) => (
-                  <div key={group.id} className="pt-2">
-                    <div className="px-2 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-gray-400">
-                      {group.label}
-                    </div>
-                    <div className="space-y-0.5">
-                      {group.items.map((item) => (
-                        <NavLink key={item.to} to={item.to} className={verticalLinkClass}>
-                          {item.label}
-                        </NavLink>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </>
-            ) : (
-              allNavLinks.map((link) => (
-                <NavLink key={link.to} to={link.to} className={linkClass}>
-                  {link.label}
-                </NavLink>
-              ))
-            )}
-          </div>
-        )}
-
-        {/* Divider */}
-        <div
-          className={
-            isVerticalLayout
-              ? "h-px w-full bg-(--color-border) dark:bg-(--color-border-dark) my-1"
-              : "w-px h-6 bg-(--color-border) dark:bg-(--color-border-dark) mx-1"
-          }
-        />
-
-        {/* Theme Switcher */}
-        <ThemeSwitcher
-          isVertical={isVerticalLayout}
-          verticalPos={verticalPos}
-          horizontalPos={horizontalPos}
-          showLabel={isVerticalLayout}
-          buttonClassName={`${
-            isVerticalLayout ? "w-full justify-start px-3 py-2" : "p-1.5"
-          } rounded-lg transition-all cursor-pointer flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-blue-500 text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark)`}
-        />
-
-        {/* Dark Mode Toggle */}
-        <DarkModeToggle
-          showLabel={isVerticalLayout}
-          buttonClassName={`${
-            isVerticalLayout ? "w-full justify-start px-3 py-2" : "p-1.5"
-          } rounded-lg transition-all cursor-pointer flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-blue-500 text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark)`}
-        />
-
-        {/* Settings Button */}
-        <div className="relative">
-          <button
-            onClick={() => setShowSettings(!showSettings)}
-            className={`${
-              isVerticalLayout ? "w-full justify-start px-3 py-2" : "p-1.5"
-            } rounded-lg transition-all cursor-pointer flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-blue-500 ${
-              showSettings
-                ? "bg-(--color-surface-hover) dark:bg-(--color-surface-hover-dark) text-(--color-text) dark:text-(--color-text-dark)"
-                : "text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark)"
-            }`}
-            title="Navigation Settings"
-            aria-label="Navigation Settings"
-            aria-expanded={showSettings}
-          >
-            {navIcons.settings}
-            {isVerticalLayout && <span className="text-xs font-mono font-semibold">Settings</span>}
-          </button>
-
-          {/* Settings Dropdown */}
-          {showSettings && (
-            <div
-              className={`absolute z-70 bg-(--color-surface)/95 dark:bg-(--color-surface-dark)/95 backdrop-blur-xl rounded-xl shadow-xl border border-(--color-border) dark:border-(--color-border-dark) p-2.5 min-w-[200px]
-                ${
-                  isVerticalLayout
-                    ? horizontalPos === "left"
-                      ? "left-full ml-2 top-0"
-                      : "right-full mr-2 top-0"
-                    : verticalPos === "top"
-                    ? "top-full mt-2 right-0"
-                    : "bottom-full mb-2 right-0"
-                }`}
+        <ul className="flex items-center gap-1 list-none m-0 p-0">
+          <li>
+            <NavLink
+              id="app-bar-home"
+              to="/"
+              end
+              className={({ isActive }) =>
+                isActive ? ACTIVE_CONTROL_CLASS : CONTROL_CLASS
+              }
+              title="Workshop home"
             >
-              <SettingsContent onClose={() => setShowSettings(false)} />
-            </div>
-          )}
-        </div>
+              Home
+            </NavLink>
+          </li>
+
+          <li>
+            {/* The palette is the real navigation surface. This is its door. */}
+            <button
+              type="button"
+              id="app-bar-search"
+              onClick={openPalette}
+              className={`${CONTROL_CLASS} border border-(--color-border) dark:border-(--color-border-dark) hover:border-(--color-primary)`}
+              title="Search every page"
+              aria-keyshortcuts="Meta+K Control+K"
+            >
+              <span>Search</span>
+              <kbd className="font-mono not-italic opacity-70" aria-hidden="true">
+                &#8984;K
+              </kbd>
+            </button>
+          </li>
+
+          <li>
+            <button
+              type="button"
+              id="app-bar-menu"
+              ref={menuButtonRef}
+              onClick={() => setIsMenuOpen((open) => !open)}
+              aria-expanded={isMenuOpen}
+              aria-haspopup="dialog"
+              aria-controls="app-menu"
+              className={`${CONTROL_CLASS} border border-(--color-border) dark:border-(--color-border-dark) hover:border-(--color-primary)`}
+              title="All pages, themes and settings"
+            >
+              <Menu className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              <span>Menu</span>
+            </button>
+          </li>
+        </ul>
       </nav>
 
-      {/* Mobile Navigation */}
-      <div className="md:hidden">
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className={`fixed ${getMobileButtonPosition()} z-70 
-            p-2.5 bg-(--color-surface)/90 dark:bg-(--color-surface-dark)/90 backdrop-blur-md rounded-full shadow-lg border border-(--color-border) dark:border-(--color-border-dark)
-            text-(--color-text) dark:text-(--color-text-dark) transition-all hover:scale-105 cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500`}
-          title={isMobileMenuOpen ? "Close Menu" : "Open Menu"}
-          aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-          aria-expanded={isMobileMenuOpen}
-        >
-          {isMobileMenuOpen ? navIcons.close : navIcons.menu}
-        </button>
-
-        {/* Mobile Menu Overlay */}
-        {isMobileMenuOpen && (
+      {/*
+       * The overlay is where route growth goes. It is a scrolling grid, so the
+       * 30th route costs a row here and nothing in the bar.
+       */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-90 flex items-start justify-center px-4 py-4 sm:py-[8vh]">
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
-            onClick={() => setIsMobileMenuOpen(false)}
+            className="absolute inset-0 bg-(--color-dark)/85 backdrop-blur-sm"
+            onClick={closeMenu}
+            aria-hidden="true"
           />
-        )}
 
-        {/* Mobile Menu Drawer */}
-        <div
-          className={`${
-            drawerClasses.panel
-          } bg-(--color-surface)/95 dark:bg-(--color-surface-dark)/95 backdrop-blur-2xl shadow-2xl border-(--color-border) dark:border-(--color-border-dark) overflow-y-auto max-h-screen
-            ${drawerClasses.direction === "left" ? "border-r" : ""}
-            ${drawerClasses.direction === "right" ? "border-l" : ""}
-            ${
-              drawerClasses.direction === "center" && verticalPos === "top"
-                ? "border-b"
-                : ""
-            }
-            ${
-              drawerClasses.direction === "center" && verticalPos === "bottom"
-                ? "border-t"
-                : ""
-            }
-          `}
-        >
-          {/* Drawer Header */}
-          <div className="p-4 border-b border-(--color-border) dark:border-(--color-border-dark) flex items-center justify-between">
-            <h2 className="font-bold font-mono text-sm uppercase tracking-wider text-(--color-text) dark:text-(--color-text-dark)">
-              Workshop Navigation
-            </h2>
-            <div className="flex items-center gap-1">
-              <ThemeSwitcher
-                menuClassName="right-0 top-full mt-2"
-                buttonClassName="p-2 rounded-lg text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark) focus-visible:ring-2 focus-visible:ring-blue-500 cursor-pointer"
-              />
-              <DarkModeToggle
-                buttonClassName="p-2 rounded-lg text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark) focus-visible:ring-2 focus-visible:ring-blue-500 cursor-pointer"
-              />
-              <button
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="p-1.5 text-(--color-muted-text) hover:text-(--color-text) dark:text-(--color-muted-text-dark) dark:hover:text-(--color-text-dark) rounded-lg hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark) cursor-pointer"
-                aria-label="Close navigation drawer"
+          <div
+            ref={panelRef}
+            id="app-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="app-menu-title"
+            onKeyDown={handlePanelKeyDown}
+            /* No overflow-hidden: the scrolling lives on the route grid below,
+               and clipping the panel would eat the theme menu, which opens
+               upward out of the footer. */
+            className="relative w-full max-w-3xl max-h-full flex flex-col
+              bg-(--color-surface) dark:bg-(--color-surface-dark)
+              border border-(--color-border) dark:border-(--color-border-dark)
+              rounded-[2px] shadow-2xl"
+          >
+            <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-(--color-border) dark:border-(--color-border-dark)">
+              <h2
+                id="app-menu-title"
+                className="m-0 text-xs font-mono font-bold uppercase tracking-[0.2em] text-(--color-text) dark:text-(--color-text-dark)"
               >
-                {navIcons.close}
+                All pages
+              </h2>
+              <button
+                type="button"
+                id="app-menu-close"
+                onClick={closeMenu}
+                className="p-1.5 rounded-[2px] cursor-pointer transition-colors text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark)"
+                aria-label="Close menu"
+              >
+                <Close className="w-4 h-4" />
               </button>
             </div>
-          </div>
 
-          <div className="p-4 space-y-4">
-            {/* Primary Section */}
-            <div>
-              <div className="px-1 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-gray-400">
-                Core
-              </div>
-              <div className="space-y-1 pt-1">
-                {directNavLinks.map((link) => (
-                  <NavLink
-                    key={link.to}
-                    to={link.to}
-                    className={mobileLinkClass}
-                    onClick={() => setIsMobileMenuOpen(false)}
+            <button
+              type="button"
+              id="app-menu-search"
+              onClick={() => {
+                closeMenu();
+                openPalette();
+              }}
+              className="mx-4 mt-4 px-3 py-2 rounded-[2px] text-[11px] font-mono font-bold uppercase tracking-wider
+                flex items-center justify-between gap-2 cursor-pointer transition-colors
+                border border-(--color-border) dark:border-(--color-border-dark)
+                text-(--color-muted-text) dark:text-(--color-muted-text-dark)
+                hover:text-(--color-text) dark:hover:text-(--color-text-dark) hover:border-(--color-primary)"
+              aria-keyshortcuts="Meta+K Control+K"
+            >
+              <span>Search everything</span>
+              <kbd className="font-mono opacity-70" aria-hidden="true">
+                &#8984;K
+              </kbd>
+            </button>
+
+            <nav
+              aria-label="All pages"
+              className="flex-1 overflow-y-auto p-4 grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3"
+            >
+              {sections.map((group) => (
+                <div key={group.section}>
+                  <h3
+                    id={`app-menu-section-${slug(group.section)}`}
+                    className="m-0 px-2 py-1 text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-(--color-muted-text) dark:text-(--color-muted-text-dark)"
                   >
-                    {link.label}
-                  </NavLink>
-                ))}
-              </div>
-            </div>
-
-            {/* Categorized Sections */}
-            {navGroups.map((group) => (
-              <div key={group.id} className="pt-2 border-t border-gray-100 dark:border-gray-800/80">
-                <div className="px-1 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-gray-400">
-                  {group.label}
+                    {group.section}
+                  </h3>
+                  <ul
+                    aria-labelledby={`app-menu-section-${slug(group.section)}`}
+                    className="list-none m-0 p-0 space-y-0.5"
+                  >
+                    {group.items.map((item) => (
+                      <li key={item.to}>
+                        <NavLink
+                          id={`app-menu-link-${slug(item.label)}`}
+                          to={item.to}
+                          end={item.to === "/"}
+                          onClick={closeMenu}
+                          className={overlayLinkClass}
+                        >
+                          {({ isActive }) => (
+                            <>
+                              <span className="text-xs font-bold font-mono flex items-center justify-between gap-2">
+                                {item.label}
+                                {isActive && (
+                                  <Checkmark className="w-3.5 h-3.5 text-current shrink-0" />
+                                )}
+                              </span>
+                              <span className="block text-[11px] leading-tight mt-0.5 opacity-80">
+                                {item.desc}
+                              </span>
+                            </>
+                          )}
+                        </NavLink>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <div className="space-y-1 pt-1">
-                  {group.items.map((item) => (
-                    <NavLink
-                      key={item.to}
-                      to={item.to}
-                      className={mobileLinkClass}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <div className="flex flex-col text-left">
-                        <span className="font-semibold">{item.label}</span>
-                        <span className="text-[11px] text-gray-400 font-normal">{item.desc}</span>
-                      </div>
-                    </NavLink>
-                  ))}
-                </div>
-              </div>
-            ))}
+              ))}
+            </nav>
 
-            {/* Mobile Settings */}
-            <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800">
-              <SettingsContent
-                onClose={() => setIsMobileMenuOpen(false)}
-                isMobile={true}
-              />
+            {/* Theme controls live here, not in the bar: they are set once. */}
+            <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-(--color-border) dark:border-(--color-border-dark)">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
+                Appearance
+              </span>
+              <div className="flex items-center gap-1">
+                <ThemeSwitcher
+                  menuClassName="right-0 bottom-full mb-2"
+                  buttonClassName="p-2 rounded-[2px] cursor-pointer transition-colors text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark)"
+                />
+                <DarkModeToggle
+                  buttonClassName="p-2 rounded-[2px] cursor-pointer transition-colors text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark)"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Click outside to close settings */}
-      {showSettings && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setShowSettings(false)}
-        />
+      {/*
+       * Spine stepper — bottom-anchored, and only where there is a next step.
+       * It used to sit in the top bar, which meant the top chrome changed shape
+       * as you walked the workshop. Down here it is additive: the bar above it
+       * is the same on every route whether this exists or not.
+       */}
+      {spine.index !== -1 && (
+        <nav
+          id="workshop-spine"
+          aria-label="Workshop steps"
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 p-1
+            bg-(--color-surface)/90 dark:bg-(--color-surface-dark)/90 backdrop-blur-xl
+            rounded-[2px] shadow-xl border border-(--color-border) dark:border-(--color-border-dark)"
+        >
+          <ul className="flex items-center gap-1 list-none m-0 p-0">
+            <li>
+              {spine.prev ? (
+                <Link
+                  id="workshop-spine-prev"
+                  to={spine.prev.to}
+                  className="flex p-1.5 rounded-[2px] transition-colors text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark)"
+                  aria-label={`Previous step: ${spine.prev.label}`}
+                  title={`Previous: ${spine.prev.label}`}
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </Link>
+              ) : (
+                <span className="flex p-1.5 opacity-30" aria-hidden="true">
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </span>
+              )}
+            </li>
+            <li className="px-1 text-[10px] font-mono font-bold uppercase tracking-wider whitespace-nowrap text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
+              Step {spine.index + 1} of {spine.total}
+            </li>
+            <li>
+              {spine.next ? (
+                <Link
+                  id="workshop-spine-next"
+                  to={spine.next.to}
+                  className="flex p-1.5 rounded-[2px] transition-colors text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark) hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark)"
+                  aria-label={`Next step: ${spine.next.label}`}
+                  title={`Next: ${spine.next.label}`}
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              ) : (
+                <span className="flex p-1.5 opacity-30" aria-hidden="true">
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </span>
+              )}
+            </li>
+          </ul>
+        </nav>
       )}
     </>
   );

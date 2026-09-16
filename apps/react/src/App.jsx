@@ -19,6 +19,7 @@ import { TelemetryDashboard } from "./pages/TelemetryDashboard";
 import { LandingPage } from "./pages/LandingPage";
 import { Resources } from "./pages/Resources";
 import { AgenticStudio } from "./pages/AgenticStudio";
+import { OperativesPage } from "./pages/OperativesPage";
 import { SpeakingEventsHub } from "./components/SpeakingEventsHub";
 
 // Components
@@ -29,6 +30,7 @@ import { ScrollToTop } from "./components/ScrollToTop";
 import { StarterInstructions } from "./components/StarterInstructions";
 import { KonamiEasterEgg } from "./components/KonamiEasterEgg";
 import { KeyboardShortcutsModal } from "./components/KeyboardShortcutsModal";
+import { CommandPalette } from "./components/CommandPalette";
 import { SkeletonStyles } from "./components/Skeleton";
 import {
   AchievementNotification,
@@ -98,15 +100,20 @@ export const App = () => {
         return;
       }
 
-      // ? or Cmd+K / Ctrl+K for shortcuts modal
-      if (e.key === "?" || ((e.metaKey || e.ctrlKey) && e.key === "k")) {
+      // ? for the shortcuts modal. Cmd+K / Ctrl+K belongs to the command palette.
+      if (e.key === "?") {
         e.preventDefault();
         setShowShortcutsModal(true);
         trackAction("keyboard_shortcut");
       }
 
-      // D for dark mode toggle
+      // D for dark mode toggle — except while presenting. The deck binds D to
+      // its own directory, and both listeners are on `window`, so without this
+      // guard one keypress opens the directory AND flips the app theme behind
+      // it. Read from `window.location` because this effect sits outside the
+      // Router, so `useLocation` is not available here.
       if (e.key === "d" || e.key === "D") {
+        if (window.location.pathname.startsWith("/slides")) return;
         toggleDarkMode();
         trackAction("dark_mode_toggle");
         trackAction("keyboard_shortcut");
@@ -149,6 +156,8 @@ export const App = () => {
           Skip to main content
         </a>
         <TelemetryTracker />
+        {/* Cmd+K palette. Lives inside BrowserRouter: it navigates. */}
+        <CommandPalette />
         <div className="font-sans antialiased text-(--color-text) dark:text-(--color-text-dark)">
           {/* Global Navigation for the Workshop */}
           <Navigation />
@@ -196,6 +205,8 @@ export const App = () => {
                 <Route path="/events" element={<SpeakingEventsHub />} />
                 {/* Agentic Studio & Audience of One Software */}
                 <Route path="/agentic-studio" element={<AgenticStudio />} />
+                {/* Sovereign Operatives & Audience of One Personal Agents */}
+                <Route path="/operatives" element={<OperativesPage />} />
                 {/* Catch-all route for 404 Not Found */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

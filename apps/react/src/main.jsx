@@ -25,6 +25,7 @@ if (import.meta.env.PROD) {
 initTelemetry();
 
 import { ThemeProvider } from "./context/ThemeContext";
+import { ShellProvider } from "./context/ShellContext";
 import { ToastProvider } from "./components/Toast";
 import { AchievementProvider } from "./components/Achievements";
 import { ChallengeProvider } from "./components/ChallengeMode";
@@ -34,6 +35,7 @@ import { QuizProvider } from "./components/QuizSystem";
  * Main serves as the main entry point and container for all other components.
  * It targets the root div in our index.html file to render our React application within it.
  * We wrap our App component with ThemeProvider to provide theme context to the entire app. This allows us to manage light/dark mode and other theme-related features globally.
+ * ShellProvider holds the navigation mode (stage / workshop / explore) and the command palette open state.
  * ToastProvider enables toast notifications throughout the app using the useToast() hook.
  * AchievementProvider adds gamification with achievements and progress tracking.
  * ChallengeProvider enables timed coding challenges with hints and point tracking.
@@ -46,15 +48,17 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ErrorBoundary>
       <ThemeProvider>
-        <ToastProvider>
-          <AchievementProvider>
-            <ChallengeProvider>
-              <QuizProvider>
-                <App />
-              </QuizProvider>
-            </ChallengeProvider>
-          </AchievementProvider>
-        </ToastProvider>
+        <ShellProvider>
+          <ToastProvider>
+            <AchievementProvider>
+              <ChallengeProvider>
+                <QuizProvider>
+                  <App />
+                </QuizProvider>
+              </ChallengeProvider>
+            </AchievementProvider>
+          </ToastProvider>
+        </ShellProvider>
       </ThemeProvider>
     </ErrorBoundary>
   </React.StrictMode>

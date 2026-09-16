@@ -6,7 +6,7 @@ import { EmojiIcon } from "./Icons/EmojiIcon";
  * Keyboard Shortcuts Modal
  *
  * Shows all available keyboard shortcuts in the app.
- * Opens with ? or Cmd+K / Ctrl+K
+ * Opens with ? — Cmd+K / Ctrl+K belongs to the command palette.
  */
 
 const shortcuts = [
@@ -23,8 +23,8 @@ const shortcuts = [
     category: "General",
     items: [
       { keys: ["?"], description: "Open this help modal" },
-      { keys: ["⌘", "K"], description: "Open this help modal (Mac)" },
-      { keys: ["Ctrl", "K"], description: "Open this help modal (Windows)" },
+      { keys: ["⌘", "K"], description: "Open the command palette (Mac)" },
+      { keys: ["Ctrl", "K"], description: "Open the command palette (Windows)" },
       { keys: ["Esc"], description: "Close modals / Exit preview mode" },
       { keys: ["D"], description: "Toggle dark mode" },
     ],
@@ -119,7 +119,7 @@ export const KeyboardShortcutsModal = ({ isOpen, onClose }) => {
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             aria-label="Close"
           >
-            <Close className="w-5 h-5 text-gray-500" />
+            <Close className="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </button>
         </div>
 

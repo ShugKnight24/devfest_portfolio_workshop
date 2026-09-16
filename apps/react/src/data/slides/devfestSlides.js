@@ -29,7 +29,10 @@ export const devfestDeckMeta = {
   date: "November 2026",
   duration: "Elastic — 60 min talk / full-day workshop",
   elastic: true,
-  defaultRuntime: "keynote",
+  // A workshop deck opens as a workshop. It defaulted to "keynote", which the
+  // runtime model now defines as concept-tagged slides only — and nothing here
+  // was tagged, so the deck opened on zero slides.
+  defaultRuntime: "workshopFull",
   continuesFrom: "combined",
   accent: "#00ffcc",
   accentAlt: "#ffcc00",
@@ -39,6 +42,7 @@ export const devfestDeckMeta = {
 export const devfestSlides = [
   {
     id: "title",
+    altitude: "concept",
     tier: TIER.CORE,
     type: "title",
     title: "Hackathon Velocity",
@@ -49,6 +53,7 @@ export const devfestSlides = [
   },
   {
     id: "chapter-two",
+    altitude: "concept",
     type: "statement",
     tier: TIER.CORE,
     budget: 80,
@@ -61,6 +66,7 @@ export const devfestSlides = [
   },
   {
     id: "hackathon-formula",
+    altitude: "concept",
     tier: TIER.CORE,
     type: "reacher-intro",
     title: "The Hackathon Velocity Triad",
@@ -92,6 +98,7 @@ export const devfestSlides = [
   },
   {
     id: "audience-pulse",
+    altitude: "concept",
     tier: TIER.CORE,
     type: "poll",
     title: "Hackathon Readiness Check",
@@ -133,6 +140,7 @@ export const devfestSlides = [
   },
   {
     id: "whoami",
+    altitude: "concept",
     tier: TIER.DEEP,
     type: "bio",
     title: "Who Am I?",
@@ -151,6 +159,7 @@ export const devfestSlides = [
   },
   {
     id: "beyond-portfolio",
+    altitude: "concept",
     tier: TIER.CORE,
     type: "paradigm",
     title: "The Hackathon Trap vs. The Sovereign Maker",
@@ -180,6 +189,7 @@ export const devfestSlides = [
   },
   {
     id: "case-studies",
+    altitude: "concept",
     tier: TIER.EXTENDED,
     type: "case-studies",
     title: "From Personal Hack to Production",
@@ -213,6 +223,7 @@ export const devfestSlides = [
   },
   {
     id: "reacher-loop",
+    altitude: "tactical",
     tier: TIER.CORE,
     type: "process",
     title: "The Hackathon Sprint Loop",
@@ -248,6 +259,7 @@ export const devfestSlides = [
   // Previously a separate `workshop` deck. Folded in so the day is one document.
   {
     id: "lab-01",
+    labTrack: "short",
     type: "lab",
     tier: TIER.LAB,
     budget: 900,
@@ -270,6 +282,7 @@ export const devfestSlides = [
   },
   {
     id: "lab-02",
+    labTrack: "full",
     type: "lab",
     tier: TIER.LAB,
     budget: 1200,
@@ -293,6 +306,7 @@ export const devfestSlides = [
   },
   {
     id: "lab-03",
+    labTrack: "short",
     type: "lab",
     tier: TIER.LAB,
     budget: 1800,
@@ -315,6 +329,7 @@ export const devfestSlides = [
   },
   {
     id: "lab-04",
+    labTrack: "full",
     type: "lab",
     tier: TIER.LAB,
     budget: 1800,
@@ -337,6 +352,7 @@ export const devfestSlides = [
   },
   {
     id: "launch",
+    altitude: "tactical",
     tier: TIER.CORE,
     type: "launch",
     title: "Hackathon Countdown: Let's Build",

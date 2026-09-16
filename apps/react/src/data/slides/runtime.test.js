@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
   TIER,
+  ALTITUDE,
+  LAB_TRACK,
   RUNTIMES,
   getRuntime,
   selectSlides,
@@ -11,37 +13,51 @@ import {
   formatClock,
   formatDrift,
 } from "./runtime";
-import { combinedSlides } from "./combinedSlides";
+import { combinedSlides, combinedPresenterNotes } from "./combinedSlides";
+
+const minutesFor = (runtime) =>
+  selectSlides(combinedSlides, { runtime }).reduce((sum, s) => sum + slideBudget(s), 0) / 60;
+
+const idsFor = (runtime, opts = {}) =>
+  selectSlides(combinedSlides, { runtime, ...opts }).map((s) => s.id);
 
 describe("elastic runtime selection", () => {
-  it("should keep only core slides at lightning runtime", () => {
+  it("should keep lightning to the argument: core and extended, never deep or labs", () => {
     const picked = selectSlides(combinedSlides, { runtime: "lightning" });
-    expect(picked.every((s) => s.tier === TIER.CORE && !s.flex)).toBe(true);
+    expect(picked.every((s) => s.tier <= TIER.EXTENDED)).toBe(true);
     // The spine has to survive the shortest runtime intact.
     const ids = picked.map((s) => s.id);
-    expect(ids).toContain("title");
-    expect(ids).toContain("the-ask");
-    expect(ids).toContain("launch-build");
-    expect(ids).toContain("payoff");
-    expect(ids).toContain("close");
-  });
-
-  it("should expand monotonically as the runtime grows", () => {
-    const counts = ["lightning", "standard", "keynote", "workshop"].map(
-      (runtime) => selectSlides(combinedSlides, { runtime }).length
-    );
-    for (let i = 1; i < counts.length; i += 1) {
-      expect(counts[i]).toBeGreaterThanOrEqual(counts[i - 1]);
+    for (const id of ["title", "umelo-bridge", "the-ask", "launch-build", "payoff", "audience-of-one", "close"]) {
+      expect(ids, `${id} missing from lightning`).toContain(id);
     }
-    expect(counts[0]).toBeLessThan(counts[counts.length - 1]);
   });
 
-  it("should never drop a core slide at any runtime", () => {
-    const coreIds = combinedSlides.filter((s) => s.tier === TIER.CORE && !s.flex).map((s) => s.id);
+  it("should expand monotonically along the depth ladder", () => {
+    // Keynote is not on this ladder: it is a concept-only cut, not a longer one.
+    const ladder = ["lightning", "standard", "workshopShort", "workshopFull"];
+    const selections = ladder.map((runtime) => idsFor(runtime));
+    for (let i = 1; i < selections.length; i += 1) {
+      expect(selections[i].length).toBeGreaterThan(selections[i - 1].length);
+      expect(selections[i]).toEqual(expect.arrayContaining(selections[i - 1]));
+    }
+  });
+
+  it("should run the keynote as a subset of the standard talk", () => {
+    expect(idsFor("standard")).toEqual(expect.arrayContaining(idsFor("keynote")));
+  });
+
+  it("should never drop a core slide, except tactical ones at the concept-only keynote", () => {
+    const core = combinedSlides.filter((s) => s.tier === TIER.CORE && !s.flex);
     for (const runtime of Object.keys(RUNTIMES)) {
-      const ids = selectSlides(combinedSlides, { runtime }).map((s) => s.id);
-      for (const id of coreIds) expect(ids, `${id} dropped at ${runtime}`).toContain(id);
+      const ids = idsFor(runtime);
+      const expected =
+        runtime === "keynote" ? core.filter((s) => s.altitude === ALTITUDE.CONCEPT) : core;
+      for (const { id } of expected) expect(ids, `${id} dropped at ${runtime}`).toContain(id);
     }
+    // The only core beats the keynote gives up are the live build, and nothing else.
+    const keynote = idsFor("keynote");
+    const skipped = core.filter((s) => !keynote.includes(s.id)).map((s) => s.id);
+    expect(skipped.sort()).toEqual(["launch-build", "payoff", "the-ask"]);
   });
 
   it("should pull a flex zone in on demand without changing the runtime", () => {
@@ -67,21 +83,86 @@ describe("elastic runtime selection", () => {
   });
 
   it("should include flex slides automatically once the runtime is long enough", () => {
-    const standard = selectSlides(combinedSlides, { runtime: "standard" }).map((s) => s.id);
+    const standard = idsFor("standard");
     expect(standard).toContain("pair-reacher-neagley");
     expect(standard).toContain("zero-bloat");
   });
 
   it("should honour slides dropped live", () => {
-    const ids = selectSlides(combinedSlides, {
-      runtime: "keynote",
-      dropped: ["bio"],
-    }).map((s) => s.id);
-    expect(ids).not.toContain("bio");
+    expect(idsFor("keynote")).toContain("bio");
+    expect(idsFor("keynote", { dropped: ["bio"] })).not.toContain("bio");
   });
 
   it("should fall back to the default runtime for an unknown id", () => {
     expect(getRuntime("nope").id).toBe(RUNTIMES.lightning.id);
+  });
+});
+
+describe("altitude", () => {
+  it("should tag every non-lab slide, because an untagged slide silently vanishes from the keynote", () => {
+    const valid = Object.values(ALTITUDE);
+    for (const slide of combinedSlides.filter((s) => s.tier !== TIER.LAB)) {
+      expect(valid, `"${slide.id}" has no altitude`).toContain(slide.altitude);
+    }
+  });
+
+  it("should put a track on every lab slide", () => {
+    const valid = Object.values(LAB_TRACK);
+    for (const slide of combinedSlides.filter((s) => s.tier === TIER.LAB)) {
+      expect(valid, `"${slide.id}" has no labTrack`).toContain(slide.labTrack);
+    }
+  });
+
+  it("should keep the how-to out of the keynote", () => {
+    const keynote = idsFor("keynote");
+    for (const id of ["the-ask", "launch-build", "payoff", "prompt-anatomy", "verification-gate", "context-hierarchy"]) {
+      expect(keynote, `${id} leaked into the keynote`).not.toContain(id);
+    }
+  });
+
+  it("should carry the characters as metaphor and the community act at the keynote", () => {
+    const keynote = idsFor("keynote");
+    expect(keynote.filter((id) => id.startsWith("pair-")).length).toBeGreaterThanOrEqual(3);
+    for (const id of ["umelo-bridge", "crew-and-unit", "the-110th", "division-4", "audience-of-one", "build-on-it"]) {
+      expect(keynote, `${id} missing from the keynote`).toContain(id);
+    }
+  });
+});
+
+describe("runtime timings", () => {
+  const within = (runtime, target, tolerance) => {
+    const minutes = minutesFor(runtime);
+    expect(minutes, `${runtime} runs ${minutes.toFixed(1)} min`).toBeGreaterThanOrEqual(target - tolerance);
+    expect(minutes, `${runtime} runs ${minutes.toFixed(1)} min`).toBeLessThanOrEqual(target + tolerance);
+  };
+
+  it("should match every runtime's advertised length to the target it is tested against", () => {
+    expect(RUNTIMES.lightning.minutes).toBe(30);
+    expect(RUNTIMES.keynote.minutes).toBe(40);
+    expect(RUNTIMES.standard.minutes).toBe(60);
+    expect(RUNTIMES.workshopShort.minutes).toBe(90);
+    expect(RUNTIMES.workshopFull.minutes).toBe(180);
+  });
+
+  it("should land lightning within 3 minutes of 30", () => {
+    within("lightning", RUNTIMES.lightning.minutes, 3);
+  });
+
+  it("should land the keynote within 5 minutes of 40, on fewer slides than standard", () => {
+    within("keynote", RUNTIMES.keynote.minutes, 5);
+    expect(idsFor("keynote").length).toBeLessThan(idsFor("standard").length);
+  });
+
+  it("should land standard within 4 minutes of 60", () => {
+    within("standard", RUNTIMES.standard.minutes, 4);
+  });
+
+  it("should land the 90-minute workshop within 8 minutes of 90", () => {
+    within("workshopShort", RUNTIMES.workshopShort.minutes, 8);
+  });
+
+  it("should land the 3-hour workshop within 15 minutes of 180", () => {
+    within("workshopFull", RUNTIMES.workshopFull.minutes, 15);
   });
 });
 
@@ -125,45 +206,23 @@ describe("pacing", () => {
     expect(driftSeconds).toBeLessThan(0);
   });
 
-  it("should keep the lightning runtime near its 15 minute budget", () => {
+  it("should report the same total the timing tests measure", () => {
     const { totalSeconds } = pacingStatus(selected, 0, 0);
-    const minutes = totalSeconds / 60;
-    expect(minutes).toBeGreaterThan(10);
-    expect(minutes).toBeLessThanOrEqual(RUNTIMES.lightning.minutes + 2);
-  });
-
-  it("should land the lightning runtime UNDER 15 minutes, not merely near it", () => {
-    // A 15-minute slot is 15 minutes of room time, and the live build is the
-    // one beat that always overruns. The spine has to leave slack for it.
-    const { totalSeconds } = pacingStatus(selected, 0, 0);
-    expect(totalSeconds / 60).toBeLessThan(RUNTIMES.lightning.minutes);
-  });
-
-  it("should fill the longer runtimes close to their advertised length", () => {
-    const minutesFor = (runtime) =>
-      selectSlides(combinedSlides, { runtime }).reduce((sum, s) => sum + slideBudget(s), 0) / 60;
-
-    // Standard sits around 30. Keynote has to genuinely fill an hour slot —
-    // a "60 minute" deck that runs 31 minutes is the failure this tier exists
-    // to prevent.
-    expect(minutesFor("standard")).toBeGreaterThan(RUNTIMES.standard.minutes - 3);
-    expect(minutesFor("standard")).toBeLessThan(RUNTIMES.standard.minutes + 3);
-    expect(minutesFor("keynote")).toBeGreaterThan(55);
-    expect(minutesFor("keynote")).toBeLessThanOrEqual(RUNTIMES.keynote.minutes);
+    expect(totalSeconds / 60).toBe(minutesFor("lightning"));
   });
 });
 
 describe("character pairings", () => {
-  it("should carry every pairing at extended tier, never in the spine", () => {
+  it("should carry every pairing at extended tier, never in the core spine", () => {
     const pairs = combinedSlides.filter((s) => s.id.startsWith("pair-"));
     expect(pairs).toHaveLength(6);
     for (const p of pairs) {
       expect(p.type, `${p.id} should be a comparison`).toBe("comparison");
       expect(p.tier, `${p.id} should be extended tier`).toBe(TIER.EXTENDED);
     }
-    // None of them survive the lightning cut — the spine is the argument.
-    const lightning = selectSlides(combinedSlides, { runtime: "lightning" }).map((s) => s.id);
-    expect(lightning.some((id) => id.startsWith("pair-"))).toBe(false);
+    // Lightning carries them as evidence; the standard talk carries all of them.
+    const standard = idsFor("standard");
+    for (const p of pairs) expect(standard).toContain(p.id);
   });
 
   it("should stand the three strongest pairings up in the while-it-builds zone", () => {
@@ -182,6 +241,70 @@ describe("character pairings", () => {
     const zoneStart = combinedSlides.findIndex((s) => s.zone === "while-it-builds");
     expect(zoneStart).toBeGreaterThan(combinedSlides.indexOf(launch));
     expect(zoneStart).toBeLessThan(combinedSlides.findIndex((s) => s.id === "payoff"));
+  });
+});
+
+describe("community throughline", () => {
+  it("should open on the Umelo bridge, straight after the title, at every runtime", () => {
+    const bridge = combinedSlides.find((s) => s.id === "umelo-bridge");
+    expect(bridge.tier).toBe(TIER.CORE);
+    expect(bridge.altitude).toBe(ALTITUDE.CONCEPT);
+    expect(`${bridge.phase} ${bridge.description}`).toContain("Umelo Onyejiaka");
+    for (const runtime of Object.keys(RUNTIMES)) {
+      expect(idsFor(runtime).slice(0, 2), `bridge moved at ${runtime}`).toEqual(["title", "umelo-bridge"]);
+    }
+  });
+
+  it("should tell the speaker to name Umelo in the bridge note", () => {
+    expect(combinedPresenterNotes["umelo-bridge"]).toContain("Umelo Onyejiaka");
+  });
+
+  it("should make Audience of One to Audience of Many the community move", () => {
+    const aoo = combinedSlides.find((s) => s.id === "audience-of-one");
+    expect(aoo.tier).toBe(TIER.CORE);
+    expect(aoo.title).toContain("Audience of Many");
+    // The how-to for "build something others can build on" follows it at every talk length.
+    for (const runtime of ["lightning", "keynote", "standard"]) {
+      const ids = idsFor(runtime);
+      expect(ids.indexOf("build-on-it"), runtime).toBeGreaterThan(ids.indexOf("audience-of-one"));
+    }
+  });
+
+  it("should reach the lightning talk, not only the long cuts", () => {
+    const lightning = idsFor("lightning");
+    for (const id of ["umelo-bridge", "crew-and-unit", "audience-of-one", "build-on-it", "close"]) {
+      expect(lightning, `${id} missing from lightning`).toContain(id);
+    }
+  });
+});
+
+describe("labs", () => {
+  const labs = combinedSlides.filter((s) => s.tier === TIER.LAB);
+
+  it("should run two short-track labs, and nothing else, in the 90-minute workshop", () => {
+    const short = labs.filter((s) => s.labTrack === LAB_TRACK.SHORT);
+    expect(short).toHaveLength(2);
+    const picked = selectSlides(combinedSlides, { runtime: "workshopShort" }).filter((s) => s.tier === TIER.LAB);
+    expect(picked.map((s) => s.id)).toEqual(short.map((s) => s.id));
+  });
+
+  it("should give the 3-hour workshop every lab, a break, and show and tell", () => {
+    const full = idsFor("workshopFull");
+    for (const lab of labs) expect(full).toContain(lab.id);
+    expect(labs.filter((s) => s.labTrack === LAB_TRACK.FULL).length).toBeGreaterThanOrEqual(4);
+    expect(full).toContain("break");
+    expect(full).toContain("lab-show-and-tell");
+    expect(idsFor("workshopShort")).not.toContain("break");
+  });
+
+  it("should budget every lab explicitly, since the default is a guess", () => {
+    for (const lab of labs) expect(lab.budget, `${lab.id} has no budget`).toBeGreaterThan(0);
+  });
+
+  it("should never run a lab outside a workshop", () => {
+    for (const runtime of ["lightning", "keynote", "standard"]) {
+      expect(selectSlides(combinedSlides, { runtime }).some((s) => s.tier === TIER.LAB)).toBe(false);
+    }
   });
 });
 
@@ -244,31 +367,78 @@ describe("clock formatting", () => {
 });
 
 describe("devfest workshop spine", () => {
-  it("should run as a talk at keynote runtime and a full day at workshop runtime", async () => {
+  it("opens as a workshop and runs its talk and labs at the right runtimes", async () => {
     const { devfestSlides, devfestDeckMeta, devfestPresenterNotes } = await import("./devfestSlides");
 
     expect(devfestDeckMeta.continuesFrom).toBe("combined");
-    expect(devfestDeckMeta.defaultRuntime).toBe("keynote");
+    expect(devfestDeckMeta.defaultRuntime).toBe("workshopFull");
 
-    const talk = selectSlides(devfestSlides, { runtime: "keynote" });
-    const fullDay = selectSlides(devfestSlides, { runtime: "workshop" });
+    const talk = selectSlides(devfestSlides, { runtime: "standard" });
+    const shortDay = selectSlides(devfestSlides, { runtime: "workshopShort" });
+    const fullDay = selectSlides(devfestSlides, { runtime: "workshopFull" });
 
-    // The talk portion must carry no labs; the full day must carry all four.
+    // Assert there IS a talk before asserting it has no labs. The old version of
+    // this test checked "no labs" on its own, which an EMPTY selection satisfies —
+    // so it kept passing while the deck opened on zero slides.
+    expect(talk.length).toBeGreaterThan(0);
     expect(talk.some((s) => s.type === "lab")).toBe(false);
+
+    expect(shortDay.filter((s) => s.type === "lab")).toHaveLength(2);
     expect(fullDay.filter((s) => s.type === "lab")).toHaveLength(4);
 
-    // Every slide needs notes: this deck is delivered in front of a room too.
     for (const slide of devfestSlides) {
       expect(devfestPresenterNotes[slide.id], `missing notes for "${slide.id}"`).toBeTruthy();
     }
   });
 
-  it("should budget the labs as the bulk of the workshop day", async () => {
+  it("budgets the labs as the bulk of the full workshop", async () => {
     const { devfestSlides } = await import("./devfestSlides");
-    const fullDay = selectSlides(devfestSlides, { runtime: "workshop" });
-    const labSeconds = fullDay
-      .filter((s) => s.type === "lab")
-      .reduce((sum, s) => sum + slideBudget(s), 0);
-    expect(labSeconds / 60).toBeGreaterThan(80);
+    const fullDay = selectSlides(devfestSlides, { runtime: "workshopFull" });
+    const labs = fullDay.filter((s) => s.type === "lab");
+    expect(labs.length).toBeGreaterThan(0);
+    const labMinutes = labs.reduce((sum, s) => sum + slideBudget(s), 0) / 60;
+    expect(labMinutes).toBeGreaterThan(80);
+  });
+});
+
+describe("every live deck", () => {
+  // The guard that would have caught the empty devfest deck. A runtime change
+  // is a cross-deck change: tightening what a runtime selects can silently empty
+  // a deck nobody was looking at. So check every live deck, at every runtime.
+  it("opens on real content at its default runtime", async () => {
+    const { getLiveDecks, getDeck } = await import("./index");
+    for (const { id } of getLiveDecks()) {
+      const deck = getDeck(id);
+      const runtime = deck.meta.defaultRuntime ?? "lightning";
+      const opened = selectSlides(deck.slides, { runtime });
+      expect(opened.length, `${id} opens on ZERO slides at its default "${runtime}"`).toBeGreaterThan(0);
+    }
+  });
+
+  it("presents something at every runtime", async () => {
+    const { getLiveDecks, getDeck } = await import("./index");
+    const { RUNTIME_ORDER } = await import("./runtime");
+    for (const { id } of getLiveDecks()) {
+      const deck = getDeck(id);
+      for (const runtime of RUNTIME_ORDER) {
+        const selected = selectSlides(deck.slides, { runtime });
+        expect(selected.length, `${id} is empty at "${runtime}"`).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("tags every non-lab slide with an altitude and every lab with a track", async () => {
+    // Untagged slides silently drop out of the concept-only keynote, and
+    // untracked labs silently drop out of the 90-minute workshop.
+    const { getLiveDecks, getDeck } = await import("./index");
+    for (const { id } of getLiveDecks()) {
+      for (const slide of getDeck(id).slides) {
+        if (slide.tier === TIER.LAB) {
+          expect(slide.labTrack, `${id}/${slide.id} lab has no labTrack`).toBeTruthy();
+        } else {
+          expect(slide.altitude, `${id}/${slide.id} has no altitude`).toBeTruthy();
+        }
+      }
+    }
   });
 });

@@ -1,30 +1,35 @@
 /**
  * Elastic Deck Runtime
  *
- * The old model was nine hand-maintained decks (nomad, ripcord, iron, combined,
- * lightning, workshop, lhm, devfest, pride). Every edit to the thesis had to be
- * made in five places, the "full" deck was too long to give, and the "condensed"
- * one had the spine cut out of it. Both failure modes came from the same cause:
- * length was baked into the content.
+ * Length is a VIEW over one deck, never a second deck. Nine hand-maintained
+ * decks meant every edit to the thesis landed in five places, the "full" deck
+ * was too long to give and the "condensed" one had the spine cut out of it.
+ * Both failures came from baking length into the content.
  *
- * Here length is a VIEW over one deck. Every slide declares a tier:
+ * A runtime is now described along THREE independent axes, because a single
+ * "how long" number could not express what the talk actually needs:
  *
- *   TIER.CORE     the argument does not survive without it. Always shown.
- *   TIER.EXTENDED the evidence and the frameworks. Shown at 30 min and up.
- *   TIER.DEEP     full case studies and process detail. Keynote and workshop.
- *   TIER.LAB      hands-on exercises. Workshop only.
+ *   TIER      depth. Every slide declares one.
+ *               CORE      the argument does not survive without it
+ *               EXTENDED  evidence, pairings, the community thread
+ *               DEEP      full case studies, process, craft detail
+ *               LAB       hands-on exercises, workshops only
  *
- * A runtime picks a max tier; the deck contracts or expands around a spine that
- * never changes.
+ *   ALTITUDE  concept vs tactical. A high-level keynote is NOT the longest cut:
+ *             it keeps the ideas and drops the how-to. So it cannot be a max
+ *             tier. It is a filter, and it is OPT-IN — a runtime that asks for
+ *             an altitude includes only slides that explicitly declare it, so
+ *             a new untagged slide can never leak tactics into the keynote.
+ *
+ *   LAB TRACK which labs a workshop runs. The 90-minute workshop runs the
+ *             `short` track; the 3-hour workshop runs every lab.
  *
  * FLEX ZONES
  * ----------
- * A slide can also declare `flex: true`. Flex slides sit in a named zone the
- * speaker can open on demand mid-talk — the case that motivated this: you kick
- * off an agent build live on stage, and you need somewhere to stand for however
- * long it actually takes. Two minutes or eleven, you are covered, and you are
- * not visibly stalling. `selectSlides` can pull a zone in without changing the
- * runtime, so the rest of the deck keeps its shape.
+ * A slide can declare `flex: true` and a `zone`. Flex slides are standing
+ * material the speaker pulls in mid-talk — built for the live build, where an
+ * agent takes however long it takes and you need somewhere to stand. A zone
+ * can be opened without changing the runtime, so the deck keeps its shape.
  */
 
 export const TIER = {
@@ -34,40 +39,92 @@ export const TIER = {
   LAB: 4,
 };
 
+export const ALTITUDE = {
+  CONCEPT: "concept",
+  TACTICAL: "tactical",
+};
+
+export const LAB_TRACK = {
+  SHORT: "short",
+  FULL: "full",
+};
+
 export const RUNTIMES = {
   lightning: {
     id: "lightning",
     label: "Lightning",
-    minutes: 15,
-    maxTier: TIER.CORE,
-    blurb: "Spine only. The argument, the live build, the close.",
-  },
-  standard: {
-    id: "standard",
-    label: "Standard",
     minutes: 30,
     maxTier: TIER.EXTENDED,
-    blurb: "Spine plus the three frameworks and the evidence.",
+    blurb: "The argument, the community bridge, the live build, the close.",
   },
   keynote: {
     id: "keynote",
     label: "Keynote",
+    minutes: 40,
+    maxTier: TIER.DEEP,
+    altitude: ALTITUDE.CONCEPT,
+    blurb: "Ideas only. Frameworks, characters as metaphor, community, the shift.",
+  },
+  standard: {
+    id: "standard",
+    label: "Standard",
     minutes: 60,
     maxTier: TIER.DEEP,
-    blurb: "Everything except the hands-on labs.",
+    blurb: "The full talk: ideas, evidence, craft and the live build.",
   },
-  workshop: {
-    id: "workshop",
-    label: "Workshop",
-    minutes: 240,
+  workshopShort: {
+    id: "workshopShort",
+    label: "Workshop Short",
+    minutes: 90,
     maxTier: TIER.LAB,
-    blurb: "Full curriculum including labs. Michigan DevFest shape.",
+    labTrack: LAB_TRACK.SHORT,
+    blurb: "The talk plus two hands-on labs.",
+  },
+  workshopFull: {
+    id: "workshopFull",
+    label: "Workshop Full",
+    minutes: 180,
+    maxTier: TIER.LAB,
+    labTrack: LAB_TRACK.FULL,
+    blurb: "Every lab, a break, and time for show and tell.",
   },
 };
 
+/** Display and hotkey order: shortest to longest. */
+export const RUNTIME_ORDER = ["lightning", "keynote", "standard", "workshopShort", "workshopFull"];
+
 export const DEFAULT_RUNTIME = "lightning";
 
-export const getRuntime = (id) => RUNTIMES[id] ?? RUNTIMES[DEFAULT_RUNTIME];
+/** Human length for a runtime: 30m, 90m, 3h, 2h 30m. */
+export const formatRuntimeLength = (minutes) => {
+  if (minutes < 120) return `${minutes}m`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m ? `${h}h ${m}m` : `${h}h`;
+};
+
+/** Old ids kept working so saved state and old links do not break. */
+const RUNTIME_ALIASES = { workshop: "workshopFull" };
+
+export const getRuntime = (id) =>
+  RUNTIMES[RUNTIME_ALIASES[id] ?? id] ?? RUNTIMES[DEFAULT_RUNTIME];
+
+/**
+ * Does `slide` belong in `runtime` on its own merits (ignoring flex zones and
+ * live drops)? Exported so tests and the presenter UI can ask the same
+ * question the selector does, instead of re-deriving the rules.
+ */
+export const includedAt = (slide, runtime) => {
+  const rt = typeof runtime === "string" ? getRuntime(runtime) : runtime;
+  if ((slide.tier ?? TIER.CORE) > rt.maxTier) return false;
+  // Altitude is opt-in: an altitude runtime takes only slides that declare it.
+  if (rt.altitude && slide.altitude !== rt.altitude) return false;
+  // Labs follow their track. The short workshop runs only short-track labs.
+  if (slide.tier === TIER.LAB && rt.labTrack === LAB_TRACK.SHORT) {
+    return slide.labTrack === LAB_TRACK.SHORT;
+  }
+  return true;
+};
 
 /**
  * Select the slides to present.
@@ -75,22 +132,20 @@ export const getRuntime = (id) => RUNTIMES[id] ?? RUNTIMES[DEFAULT_RUNTIME];
  * @param {Array}  slides            the deck's full slide list
  * @param {object} opts
  * @param {string} opts.runtime      RUNTIMES id
- * @param {string[]} opts.openZones  flex zone ids pulled in on top of the tier
+ * @param {string[]} opts.openZones  flex zone ids pulled in on top of the runtime
  * @param {string[]} opts.dropped    slide ids the speaker killed live
  */
 export const selectSlides = (slides, { runtime, openZones = [], dropped = [] } = {}) => {
-  const { maxTier } = getRuntime(runtime);
+  const rt = getRuntime(runtime);
   const open = new Set(openZones);
   const cut = new Set(dropped);
 
   return slides.filter((s) => {
     if (cut.has(s.id)) return false;
-    // A flex slide can arrive two ways: its zone was pulled open live, or the
-    // runtime is long enough that it would have been included anyway. So the
-    // frameworks are standing material at 15 min and default material at 60.
-    // A flex slide with no tier at all is purely opt-in.
-    if (s.flex) return open.has(s.zone) || (s.tier ?? Infinity) <= maxTier;
-    return (s.tier ?? TIER.CORE) <= maxTier;
+    // A flex slide arrives if its zone was opened live, or if the runtime would
+    // have included it anyway. A flex slide with no tier is purely opt-in.
+    if (s.flex) return open.has(s.zone) || (s.tier !== undefined && includedAt(s, rt));
+    return includedAt(s, rt);
   });
 };
 

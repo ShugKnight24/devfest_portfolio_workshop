@@ -3,22 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Reacher Protocol — Lightning Strike (15 Minutes)</title>
+    <title>The Sovereign Agent — 25-Minute Lightning Keynote</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;900&family=JetBrains+Mono:wght@700&display=swap');
-        body { margin: 0; background: #070709; color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; }
-        .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transform: translateY(40px); transition: all 0.6s ease; padding: 2rem; text-align: center; }
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;900&family=JetBrains+Mono:wght@500;700&display=swap');
+        body { margin: 0; background: #05070a; color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; }
+        .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transform: translateY(40px); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 2.5rem; text-align: center; }
         .slide.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
-        h1 { font-size: clamp(3rem, 7vw, 5.5rem); text-transform: uppercase; font-weight: 900; margin: 0 0 1rem 0; line-height: 1.1; color: #ff0055;}
-        h2 { font-size: clamp(1rem, 2vw, 1.5rem); color: #00ffcc; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; margin-bottom: 1.5rem; letter-spacing: 2px;}
-        p { font-size: clamp(1.1rem, 2vw, 1.6rem); color: #a0a0a5; max-width: 900px; line-height: 1.6; }
-        
-        .hud { position: fixed; bottom: 2rem; left: 2rem; right: 2rem; display: flex; justify-content: space-between; font-family: 'JetBrains Mono'; color: #666; z-index: 50; border-top: 1px solid #1a1a20; padding-top: 1rem; font-size: 0.85rem;}
+        h1 { font-size: clamp(2.5rem, 6vw, 5rem); text-transform: uppercase; font-weight: 900; margin: 0 0 1rem 0; line-height: 1.1; color: #ff0055;}
+        h2 { font-size: clamp(0.9rem, 1.8vw, 1.3rem); color: #00ffcc; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; margin-bottom: 1.2rem; letter-spacing: 2px;}
+        p { font-size: clamp(1rem, 1.8vw, 1.4rem); color: #a0a0a5; max-width: 900px; line-height: 1.6; margin: 0 auto 1.5rem auto; }
+        .code-box { background: rgba(0,0,0,0.75); border: 1px solid #1f2430; padding: 1.2rem 1.8rem; border-radius: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; text-align: left; max-width: 750px; color: #00ffcc; margin: 1rem auto; box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
+        .highlight { color: #ffcc00; font-weight: bold; }
+        .hud { position: fixed; bottom: 1.5rem; left: 2rem; right: 2rem; display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; color: #666; z-index: 50; border-top: 1px solid #1a1a20; padding-top: 1rem; font-size: 0.85rem;}
         .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: #ff0055; z-index: 100; transition: width 0.3s ease; }
-
+        .top-hud {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: rgba(5, 7, 10, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #1f2430;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 100;
+        }
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .nav-btn {
+            background: transparent;
+            border: 1px solid #1f2430;
+            color: #888;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .nav-btn:hover, .nav-btn.active {
+            border-color: #ff0055;
+            color: #fff;
+            background: rgba(255, 0, 85, 0.1);
+        }
+        
         @media print {
             body { overflow: visible; background: #fff !important; color: #000 !important; }
-            .hud, .progress-bar { display: none !important; }
+            .top-hud, .hud, .progress-bar { display: none !important; }
             .slide { position: static !important; opacity: 1 !important; transform: none !important; page-break-after: always; min-height: 100vh; }
             h1 { color: #000 !important; }
             h2, p { color: #333 !important; }
@@ -26,32 +64,92 @@
     </style>
 </head>
 <body>
-    <div class="progress-bar" id="progress"></div>
+    <!-- Top Variant Switcher -->
+    <header class="top-hud">
+        <div class="nav-links">
+            <a href="../../" class="nav-btn">← PORTFOLIO</a>
+            <span style="color: #666; font-size: 0.7rem; margin-left: 8px;">KEYNOTES:</span>
+        </div>
+        <div class="nav-links">
+            <a href="../combined/index.html" class="nav-btn">★ UNIFIED (DEFAULT)</a>
+            <a href="../lightning/index.html" class="nav-btn active">⚡ LIGHTNING (25m)</a>
+            <a href="../workshop/index.html" class="nav-btn">🛠 WORKSHOP (LAB)</a>
+            <a href="../nomad/index.html" class="nav-btn">110th REACHER</a>
+            <a href="../ripcord/index.html" class="nav-btn">DIV 4 CHAINSAW</a>
+            <a href="../iron/index.html" class="nav-btn">THE IRON</a>
+        </div>
+        <div>
+            <span style="font-family: 'JetBrains Mono'; font-size: 0.75rem; color: #ff0055; font-weight: bold;">25M LIGHTNING</span>
+        </div>
+    </header>
 
+    <div class="progress-bar" id="progress" style="top: 50px;"></div>
+
+    <!-- Slide 1: Title -->
     <div class="slide active">
-        <h2>Detroit Latin Heritage Month Innovation Summit 2026</h2>
-        <h1>The Reacher Protocol</h1>
-        <p>Analyze like Reacher. Execute like Chainsaw Man. The end of the static portfolio.</p>
+        <div class="badge">25-Min Sovereign Arc // Detroit LHM & DevFest 2026</div>
+        <h1>The Sovereign Agent</h1>
+        <h2>Personal AI Agents for an Audience of One</h2>
+        <p>The syntax barrier is dead. When execution cost drops to zero, the most valuable software you can build is for an Audience of One: You.</p>
     </div>
+
+    <!-- Slide 2: The Hook -->
     <div class="slide">
-        <h2>Token Economics</h2>
-        <h1>"Reacher Said Nothing."</h1>
-        <p>Every polite apology your AI generates is wasted compute. Eliminate noise. Investigate the root cause, form a surgical diff, and strike.</p>
+        <div class="badge" style="border-color: #00ffcc; color: #00ffcc; background: rgba(0,255,204,0.1);">0:00 - 4:00 // The Hook</div>
+        <h1>Burn the SaaS</h1>
+        <h2>Reclaim Your Autonomy from Bloated Subscriptions</h2>
+        <p>We spend 8 hours a day building B2B SaaS for corporate giants, then go home and manage our lives using bloated, $15/month subscription apps that don't quite fit.</p>
+        <div class="code-box">
+<span class="highlight">// The Paradigm Shift</span><br>
+When execution cost drops to zero, building bespoke sovereign operatives beats paying monthly rent for generic software.
+        </div>
     </div>
+
+    <!-- Slide 3: The Showstopper -->
     <div class="slide">
-        <h2>Audience of One</h2>
-        <h1>Burn the Resume.</h1>
-        <p>Stop building cookie-cutter portfolio sites. Build software to eliminate your own acute daily friction. A bespoke tool that persists state and solves a problem is 100x more impressive.</p>
+        <div class="badge">4:00 - 15:00 // The Showstopper</div>
+        <h1>Live Speed of Thought</h1>
+        <h2>Mirror the IDE // Define Constraints, Not Syntax</h2>
+        <p>"Watch my thought process. I'm not writing syntax. I'm defining constraints. Target: Python script. Goal: Parse bank CSVs. Constraints: Native OS libraries only, zero external dependencies. Execute."</p>
+        <div class="code-box">
+&gt; Target: Python 3 CLI<br>
+&gt; Goal: Parse local Chase exports &amp; group by date<br>
+&gt; Constraints: Native libraries only, zero pip/npm bloat<br>
+&gt; Execution Time: 15 seconds. Moved at the speed of thought.
+        </div>
     </div>
+
+    <!-- Slide 4: Architecture of Chaos -->
     <div class="slide">
-        <h2>Clearance Profile</h2>
+        <div class="badge" style="border-color: #c6ff00; color: #c6ff00; background: rgba(198,255,0,0.1);">15:00 - 20:00 // Architecture</div>
+        <h1>Architecture of Chaos</h1>
+        <h2>From Solo Coder to Squad Commander</h2>
+        <p>Makima curates chaos by generating 5 architectures and merging the winner. Neagley demands pure isolation and zero dependencies. Real deployed proof: <span class="highlight">pomidor</span> &amp; <span class="highlight">criminal-cookies</span>.</p>
+    </div>
+
+    <!-- Slide 5: The Movement -->
+    <div class="slide">
+        <div class="badge">20:00 - 25:00 // Call to Action</div>
+        <h1>The Sovereign Movement</h1>
+        <h2>Stop Asking for Permission. Pull the Ripcord.</h2>
+        <p>We don't need venture capital to build software that matters. We just need each other. You build a bespoke focus timer, I build a high-speed checkout cart, and we share the blueprints.</p>
+        <p style="font-family: 'JetBrains Mono'; color: #ffcc00; font-size: 1.1rem; margin-top: 1rem;">
+            github.com/shugknight24 // datamoon.com<br>
+            ¯\_(ツ)_/¯ jackpot ¯\_(ツ)_/¯
+        </p>
+    </div>
+
+    <!-- Slide 6: Bio -->
+    <div class="slide">
+        <div class="badge" style="border-color: #00ffcc; color: #00ffcc; background: rgba(0,255,204,0.1);">Clearance Profile</div>
         <h1 style="color: #fff;">Shugmi Shumunov</h1>
-        <p style="color: #00ffcc; font-family: 'JetBrains Mono'; font-size: clamp(1rem, 2vw, 1.3rem);">github.com/shugknight24</p>
-        <p style="font-family: 'JetBrains Mono'; color: #ffcc00; margin-top: 1rem;">¯\_(ツ)_/¯ jackpot ¯\_(ツ)_/¯ // VERIFIED</p>
+        <h2>Software Engineer &amp; Sovereign Builder</h2>
+        <p style="color: #00ffcc; font-family: 'JetBrains Mono';">github.com/shugknight24 | datamoon.com</p>
+        <p>Building bespoke software tools for an Audience of One at the speed of thought.</p>
     </div>
 
     <div class="hud">
-        <div id="slide-count">01 / 04</div>
+        <div id="slide-count">01 / 06</div>
         <div>
             <span style="cursor:pointer; margin-right: 15px;" onclick="prevSlide()">[ &lt; PREV ]</span>
             <span style="cursor:pointer; margin-right: 15px;" onclick="nextSlide()">[ NEXT &gt; ]</span>
@@ -83,9 +181,8 @@
             }
         });
 
-        // Click anywhere to advance
         document.body.addEventListener('click', (e) => {
-            if (e.target.closest('.hud')) return;
+            if (e.target.closest('.hud') || e.target.closest('.top-hud')) return;
             nextSlide();
         });
 

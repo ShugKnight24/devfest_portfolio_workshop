@@ -12,8 +12,8 @@
 
 export const combinedDeckMeta = {
   id: "combined",
-  title: "The Trilogy Ensemble // The 110th x Division 4 x The Iron",
-  subtitle: "Master Keynote: Squad Orchestration, Devil Contracts & Cognitive Hypertrophy",
+  title: "The Trilogy Ensemble // The Sovereign Agent",
+  subtitle: "Squad Orchestration, Personal Operatives & The Speed of Thought",
   conference: "60-Min Masterclass",
   organization: "Google GDG & Tech Keynote",
   date: "2026",

@@ -3,18 +3,19 @@
  *
  * Metaphor: Reacher (the AI execution engine) is a blunt force instrument.
  * But an investigation requires a squad:
- * - Finlay: Rigid structure, strict typings, CI/CD pipeline demanding proof.
- * - Roscoe: Deep local roots, intuition, domain expertise, Audience of One.
- * - Neagley: Pure efficiency, zero bloat, isolated pure functions.
- * - Dixon: Pattern recognition, forensic data telemetry.
- * - O'Donnell: Ceramic switchblade, micro-utilities bypassing bloat.
+ * - Reacher: The Deduction Engine — Carries no baggage. Deduces root cause instantly.
+ * - Finlay: The Guardrails — Tweed suit, follows rules, demands facts. Strict TS & Vitest suite.
+ * - Neagley: The Execution — Pure isolated efficiency. Micro-utilities, zero unnecessary NPM packages.
+ * - Roscoe: The Local Moat — Margrave expertise. Hyper-local domain knowledge is your only moat.
+ * - O'Donnell: The Switchblade — Ceramic switchblade bypassing corporate metal detectors. Bespoke scripts (pomidor).
+ * - Dixon: The Telemetry — Pattern in numbers. Datamoon.com isolating human intent from bot traffic.
  *
  * 60-Minute Masterclass Flow:
  * - Phase 01: The Paradigm (Assemble The Investigators)
- * - Phase 02: Token Economics (The Reacher Protocol vs. The Neagley Precision)
- * - Phase 03: Domain Expertise (The Finlay Architecture vs. The Roscoe Advantage)
- * - Phase 04: The Specialist Tools (O'Donnell's Switchblade vs. Dixon's Telemetry)
- * - The Mandate: Take the Shot
+ * - Phase 02: Deduction vs Execution (Reacher the Deduction Engine vs Neagley Pure Execution)
+ * - Phase 03: Guardrails & Local Moats (Finlay's Guardrails vs Roscoe's Local Moat)
+ * - Phase 04: The Specialist Tools (O'Donnell's Switchblade vs Dixon's Forensic Telemetry)
+ * - The Mandate: Take the Shot (Sovereign Software for an Audience of One)
  */
 
 export const nomadDeckMeta = {
@@ -31,11 +32,11 @@ export const nomadDeckMeta = {
 };
 
 export const nomadPresenterNotes = {
-  0: "NOTES: Welcome them. Point out that solo coding is over. You are now the leader of an AI squad. The $60B Cursor buyout proves code is a commodity. [Press N to hide/show notes. Arrow keys to navigate.]",
-  1: "NOTES: Contrast the bloated 'Civilian' prompt with the 'Investigator' prompt. Reacher only deals in facts. Neagley only deals in isolated, untainted execution.",
-  2: "NOTES: Use Finlay to talk about strict TypeScript/Enterprise devs who demand facts (logs/errors). Use Roscoe to talk about the 'Audience of One' — building tools for your own specific, local problems that AI can't invent on its own (like Criminal Cookies).",
-  3: "NOTES: O'Donnell is the reminder that small, perfectly crafted tools (switchblades) bypass bloated corporate metal detectors. Dixon is the numbers person. If the evidence is corrupt (bot traffic), the investigation fails. Sovereign telemetry is the solution.",
-  4: "NOTES: End with massive fire. Remind them that they are the lead investigator of their own lives and careers. They have the team (AI). Now they must lead.",
+  0: "NOTES: Welcome them. You are no longer a solo developer typing syntax; you are the Commander of the 110th Special Investigators. Code is a commodity. Orchestration is power. [Press N to toggle notes]",
+  1: "NOTES: Phase 02: Introduce Reacher and Neagley. Reacher deduces the root cause with zero baggage. Neagley demands pure isolation and zero dependencies. Contrast the civilian prompt with the investigator prompt.",
+  2: "NOTES: Phase 03: Finlay wears tweed, follows rules, and demands proof. He is your strict TypeScript and Vitest compiler keeping Power/LLMs honest. Roscoe knows Margrave—your local domain knowledge is your only moat against generic foundation models.",
+  3: "NOTES: Phase 04: O'Donnell carries a ceramic switchblade (bespoke micro-tools like pomidor). Dixon audits the numbers when web telemetry is overrun by synthetic AI bots (Datamoon.com).",
+  4: "NOTES: The Mandate: You have the squad. Stop asking for permission from enterprise gatekeepers. Build for an Audience of One and ship.",
 };
 
 export const nomadSlides = [
@@ -45,21 +46,21 @@ export const nomadSlides = [
     phase: "Phase 01 // The Paradigm",
     title: "Assemble The\nInvestigators.",
     description:
-      "The syntax barrier is dead. We are having conversations with computers that code better than we do. But if you don't orchestrate them with strict discipline, you lose the plot.",
+      "The syntax barrier is dead. When anyone can generate code, the differentiator is orchestration. You are the Commander of an elite investigative unit.",
     notes: nomadPresenterNotes[0],
   },
   {
     id: "nomad-02",
     type: "comparison",
-    phase: "Phase 02 // Token Economics",
-    title: "Token Economics",
+    phase: "Phase 02 // Deduction & Execution",
+    title: "The Deduction Engine & Pure Execution",
     description:
-      "Every token wasted is memory forgotten. Reacher brings blunt force; Neagley brings surgical isolation.",
+      "Reacher brings zero baggage and ruthless root-cause deduction; Neagley brings pure isolated efficiency.",
     columns: [
       {
-        character: "The Reacher Protocol",
+        character: "Reacher (The Deduction Engine)",
         narrative:
-          '"Reacher said nothing." Stop talking to the machine like it\'s human. Every polite word wastes context memory. Be surgical.',
+          'Carries no baggage. Needs no toothbrush. Looks at a 5,000-line chaotic codebase and deduces the exact root cause in seconds. "Reacher said nothing." Eliminates all polite token fluff.',
         tag: "Civilian Prompt",
         type: "bad",
         content:
@@ -67,9 +68,9 @@ export const nomadSlides = [
         result: "-> Result: Hallucinates 5 NPM packages.",
       },
       {
-        character: "The Neagley Precision",
+        character: "Neagley (The Execution)",
         narrative:
-          '"Neagley never misses." She doesn\'t like to be touched. These are your isolated, pure functions. Zero dependencies. Absolute precision execution.',
+          '"Neagley never misses." She doesn\'t like to be touched. Represents isolated pure functions, decoupled state machines, and zero unnecessary NPM dependencies. Absolute execution.',
         tag: "Investigator Prompt",
         type: "good",
         content:
@@ -82,26 +83,26 @@ export const nomadSlides = [
   {
     id: "nomad-03",
     type: "comparison",
-    phase: "Phase 03 // Domain Expertise",
-    title: "Domain Expertise",
+    phase: "Phase 03 // Guardrails & Local Moat",
+    title: "The Guardrails & The Local Moat",
     description:
-      "Global AI models need localized grounding and strict invariant verification.",
+      "Enterprise AI tools hallucinate globally. Finlay forces verification; Roscoe provides the hyper-local domain moat.",
     columns: [
       {
-        character: "The Finlay Architecture",
+        character: "Finlay (The Guardrails)",
         narrative:
-          "Finlay is by-the-book. Strict typings. Legacy rules. He relies on evidence and facts. Don't ask AI to 'fix the bug'—give it the exact stack trace. Finlay is your CI/CD pipeline demanding proof.",
+          "Finlay wears a three-piece tweed suit, follows procedure, and demands facts. AI agents hallucinate constantly. Finlay is your strict TypeScript interfaces, your Vitest suite, and your compiler gatekeeper.",
         type: "character",
         boxContent:
-          "// CI/CD Automated Gate\nconst verified = auditCompiler(diff);\nif (!verified.isValid) throw new ForensicError();",
+          "// Finlay Verification Gate\ninterface Transaction {\n  readonly id: string;\n  readonly amountCents: number;\n  readonly timestamp: number;\n}\nexpect(auditLedger(input)).toMatchSnapshot();",
       },
       {
-        character: "The Roscoe Advantage",
+        character: "Roscoe (The Local Moat)",
         narrative:
-          "Roscoe has deep local roots. AI has global knowledge, but it doesn't know your specific problem. Domain expertise is your ultimate moat. Build for an Audience of One.",
+          "Roscoe knows Margrave, Georgia inside and out. Foundation models know Wikipedia and StackOverflow, but they know nothing about your children's school schedule, your fitness regime, or your acute daily friction. Hyper-local context is your moat.",
         type: "character",
         boxContent:
-          "// Audience of One Moat\nconst localContext = loadDomainSpecialization();\nexecuteSovereignWorkflow(localContext);",
+          "// Roscoe Local Context Moat\nconst personalContext = {\n  familyCalendar: readLocalICS(),\n  groceryTaxPayer: 'MI_RESIDENT',\n  strictNutrientProfile: loadLocalMacros()\n};",
       },
     ],
     notes: nomadPresenterNotes[2],
@@ -110,25 +111,25 @@ export const nomadSlides = [
     id: "nomad-04",
     type: "comparison",
     phase: "Phase 04 // The Specialist Tools",
-    title: "The Specialist Tools",
+    title: "The Switchblade & The Telemetry",
     description:
-      "Deploy localized micro-utilities and audit the telemetry crime scene.",
+      "Bypass monolithic corporate bloat with bespoke switchblade scripts, and isolate synthetic bot noise with forensic telemetry.",
     columns: [
       {
-        character: "O'Donnell's Switchblade",
+        character: "O'Donnell (The Switchblade)",
         narrative:
-          "O'Donnell wears a corporate suit now, but still carries a ceramic switchblade to bypass metal detectors. Build micro-utilities. Avoid monolithic AWS frameworks when a localized SQLite database will do.",
+          "O'Donnell wears a corporate suit now, but carries a ceramic switchblade to bypass airport metal detectors. These are your bespoke micro-utilities (like pomidor) engineered to replace bloated $15/mo SaaS.",
         type: "character",
         boxContent:
-          "// Ceramic Switchblade Utility\nconst db = new LocalSQLite(':memory:');\nexport const runAudit = () => db.exec(query);",
+          "// O'Donnell Ceramic Switchblade (pomidor)\nexport const timerCore = (duration) => ({\n  start: () => performance.now(),\n  remaining: (start) => Math.max(0, duration - (performance.now() - start))\n});",
       },
       {
-        character: "Dixon's Telemetry",
+        character: "Dixon (The Telemetry)",
         narrative:
-          "Dixon finds the pattern in the numbers. AI bots generate +6,900% more web traffic today. Your dashboards are lying. Sovereign forensic telemetry is how we isolate human intent from agentic noise.",
+          "Dixon finds the hidden pattern in the financial numbers. AI agents and scrapers generate massive synthetic web traffic. Dixon is Datamoon.com—isolating verified human intent from synthetic noise.",
         type: "character",
         boxContent:
-          "// Forensic Telemetry Filter\nconst isHuman = telemetry.detectFingerprint(req);\nif (!isHuman) quarantineBotTraffic(req);",
+          "// Dixon Forensic Telemetry\nconst fingerprint = evaluateClientIntegrity(request);\nif (fingerprint.isSyntheticBot) {\n  quarantineSyntheticTraffic(request);\n}",
       },
     ],
     notes: nomadPresenterNotes[3],
@@ -138,10 +139,11 @@ export const nomadSlides = [
     type: "statement",
     phase: "The Mandate",
     title: "Take the\nShot.",
+    subtitle: "COMMAND THE SQUAD // RECLAIM YOUR LIFE",
     description:
-      "There is no 'right or wrong' way to code anymore. There is only what survives contact with reality. Stop waiting for permission. Investigate. Execute. Ship.",
+      "You don't need permission from corporate managers or venture capitalists. You have the 110th Special Investigators at your side. Deduce the friction. Enforce the guardrails. Build for an Audience of One.",
     signature:
-      "github.com/shugknight24\n[ VERIFIED ] ¯\\_(ツ)_/¯ jackpot ¯\\_(ツ)_/¯ [ VERIFIED ]",
+      "github.com/shugknight24 // Datamoon.com\n[ VERIFIED ] ¯\\_(ツ)_/¯ jackpot ¯\\_(ツ)_/¯ [ VERIFIED ]",
     notes: nomadPresenterNotes[4],
     center: true,
   },

@@ -18,14 +18,14 @@ export const speakingEvents = [
     badge: "Upcoming Keynote",
     status: "upcoming",
     url: "https://gdg.community.dev/events/details/google-gdg-detroit-presents-detroit-latin-heritage-month-innovation-summit/cohost-gdg-detroit/",
-    slideDeckRoute: "/slides/lhm",
-    topic: "The Reacher Protocol: Critical Deduction & Overwhelming Force in Agentic Dev",
+    slideDeckRoute: "/slides/combined",
+    topic: "Read the Scene. Pull the Cord. — Building at the speed of AI, without building alone",
     abstract:
-      "Moving beyond static portfolios: how to pair Sherlock Holmes-level root cause deduction with the unstoppable strength of agentic workflows to build personal software solutions that scale to others.",
+      "AI will write almost anything you ask for. It won't tell you what's worth building, or notice when it's confidently wrong. Borrowing Jack Reacher's habit of reading a scene before he moves and Chainsaw Man's willingness to pull the cord and commit, this is a talk about building fast with AI, and building things other people can pick up and build on.",
     highlights: [
-      "Reacher Deduction Model (Sherlock Holmes Intellect + Force of 3 Men)",
-      "Beyond the Portfolio: Audience of One to Audience of Many",
-      "Context Hierarchy & Zero-Bloat Engineering",
+      "Read the scene: find the real problem before you trust the output",
+      "Pull the cord: commit, ship, and learn from the imperfect version",
+      "Build for each other: from Audience of One to Audience of Many",
     ],
   },
   {

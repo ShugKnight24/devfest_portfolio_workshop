@@ -5,8 +5,8 @@
  * Theme: "Hackathon Velocity: From Audience of One to Sovereign Software"
  *
  * CHAPTER TWO. This deck is deliberately the sequel to the LHM Summit keynote
- * (see ./lhmSlides.js, September 19 2026). The keynote makes the argument in
- * fifteen minutes and builds one thing live. This deck assumes the argument and
+ * ("Read the Scene. Pull the Cord.", September 19 2026). The keynote makes
+ * the argument and builds one thing live. This deck assumes the argument and
  * spends the day making the room do it with their own hands.
  *
  * Same elastic runtime model (./runtime.js), one tier deeper:
@@ -62,7 +62,7 @@ export const devfestSlides = [
     title: "You watched it.\nNow you do it.",
     description:
       "In September I stood on a stage and built one thing, live, in about four minutes, off a problem somebody in the room shouted at me. That was the argument. Today is the part where you stop watching and your name is on the commit.",
-    signature: "// Sept 19 — The Reacher Protocol — one build, fifteen minutes.\n// Today — four labs, your friction, your repo.",
+    signature: "// Sept 19 — Read the Scene. Pull the Cord. — one build, live.\n// Today — four labs, your friction, your repo.",
   },
   {
     id: "hackathon-formula",

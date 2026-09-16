@@ -25,7 +25,7 @@ import {
  * WorkshopSlides — Cinematic Multi-Deck Presentation Engine
  *
  * Two decks are live; the rest are shelved source material (see data/slides).
- * - combined: "The Trilogy Ensemble" — THE talk, elastic 15 / 30 / 60 min.
+ * - combined: "Read the Scene. Pull the Cord." — THE talk: 30 / 40 / 60 min, 90 min / 3 h workshop.
  * - devfest:  "Hackathon Velocity" — the same spine, one tier deeper, plus labs.
  *
  * Length is a runtime VIEW over a deck, not a separate deck: the runtime bar

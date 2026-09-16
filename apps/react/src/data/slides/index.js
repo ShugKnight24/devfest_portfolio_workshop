@@ -15,8 +15,9 @@ import { prideDeckMeta, prideSlides, pridePresenterNotes } from "./prideSlides";
  * the right one on stage was a reading exercise. There are now two decks you
  * would actually stand up and give:
  *
- *   combined — THE talk. "The Trilogy Ensemble". Elastic: 15 / 30 / 60 min off
- *              one spine (see runtime.js), built around the character pairings.
+ *   combined — THE talk. "Read the Scene. Pull the Cord." Elastic: 30 / 40 / 60
+ *              min talk and 90 min / 3 h workshop off one spine (see runtime.js),
+ *              built around the character pairings.
  *   devfest  — the Michigan DevFest workshop, which builds on that spine.
  *
  * WHY `combined` AND NOT `lhm`

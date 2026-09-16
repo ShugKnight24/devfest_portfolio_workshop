@@ -15,7 +15,8 @@ describe("speakingEvents data", () => {
     expect(lhm).toBeDefined();
     expect(lhm.date).toBe("September 19, 2026");
     expect(lhm.url).toContain("detroit-latin-heritage-month-innovation-summit");
-    expect(lhm.slideDeckRoute).toBe("/slides/lhm");
+    // combined is the canonical deck; /slides/lhm still aliases onto it.
+    expect(lhm.slideDeckRoute).toBe("/slides/combined");
     expect(lhm.status).toBe("upcoming");
   });
 

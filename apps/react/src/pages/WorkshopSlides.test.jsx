@@ -70,9 +70,10 @@ describe("WorkshopSlides multi-deck registry", () => {
     expect(formSlide.columns[1].tag).toContain("Isolation Sets");
   });
 
-  it("should load the combined deck as the elastic trilogy keynote", () => {
+  it("should load the combined deck as the elastic keynote", () => {
     const combined = getDeck("combined");
-    expect(combined.meta.title).toContain("The Trilogy");
+    // Both halves of the method: read the scene (Reacher), pull the cord (Denji).
+    expect(combined.meta.title).toBe("Read the Scene. Pull the Cord.");
     expect(combined.meta.elastic).toBe(true);
     expect(combined.meta.defaultRuntime).toBe("lightning");
 

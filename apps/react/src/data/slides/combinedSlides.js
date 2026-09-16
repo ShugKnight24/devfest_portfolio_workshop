@@ -65,8 +65,8 @@ const { CONCEPT, TACTICAL } = ALTITUDE;
 
 export const combinedDeckMeta = {
   id: "combined",
-  title: "The Trilogy Ensemble",
-  subtitle: "Deduction, Momentum & Form in Agentic Development",
+  title: "Read the Scene. Pull the Cord.",
+  subtitle: "Building at the speed of AI, without building alone",
   conference: "Detroit Latin Heritage Month Innovation Summit 2026",
   organization: "Google GDG Detroit",
   date: "September 19, 2026",
@@ -87,8 +87,8 @@ export const combinedSlides = [
     tier: TIER.CORE,
     altitude: CONCEPT,
     budget: 45,
-    title: "The Trilogy Ensemble",
-    subtitle: "Deduction. Momentum. Form.",
+    title: "Read the Scene.\nPull the Cord.",
+    subtitle: "Building at the speed of AI, without building alone",
     description:
       "One developer directing a crew. In a few minutes this room is going to name something that annoys you, out loud, and we are going to build it on stage.",
     conferenceBadge: "GDG Detroit • Latin Heritage Month Innovation Summit",

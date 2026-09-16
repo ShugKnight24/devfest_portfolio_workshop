@@ -341,7 +341,7 @@ export const Navigation = () => {
               {spine.prev.label}
             </NavLink>
           ) : (
-            <span className={`${CONTROL} opacity-40 pointer-events-none`}>Start</span>
+            <span className="px-2.5 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider cursor-default text-(--color-muted-text) dark:text-(--color-muted-text-dark)" aria-disabled="true">Start</span>
           )}
 
           <span className="px-2 text-[11px] font-mono font-bold uppercase tracking-wider text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
@@ -354,7 +354,7 @@ export const Navigation = () => {
               <ChevronRight className="w-3 h-3" />
             </NavLink>
           ) : (
-            <span className={`${CONTROL} opacity-40 pointer-events-none`}>Done</span>
+            <span className="px-2.5 py-1.5 text-[11px] font-mono font-bold uppercase tracking-wider cursor-default text-(--color-muted-text) dark:text-(--color-muted-text-dark)" aria-disabled="true">Done</span>
           )}
         </nav>
       )}

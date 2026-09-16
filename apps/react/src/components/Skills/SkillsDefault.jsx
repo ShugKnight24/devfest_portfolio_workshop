@@ -39,7 +39,7 @@ export const SkillsDefault = () => {
         {/* 
             TODO: Replace this static message with a map function.
         */}
-        <div className="p-4 border-2 border-dashed border-slate-300 rounded-lg text-slate-500">
+        <div className="p-4 border-2 border-dashed border-(--color-border) dark:border-(--color-border-dark) rounded-lg text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
           Skills will appear here once you map over the array!
         </div>
       </div>

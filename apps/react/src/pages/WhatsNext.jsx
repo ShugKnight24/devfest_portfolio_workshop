@@ -347,9 +347,9 @@ const ResourceCard = ({ resource }) => (
 
 const NextStepCard = ({ step, index }) => {
   const difficultyColors = {
-    Easy: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold",
-    Medium: "bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold",
-    Hard: "bg-rose-500/15 text-rose-600 dark:text-rose-400 font-bold",
+    Easy: "bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 font-bold",
+    Medium: "bg-amber-500/15 text-amber-800 dark:text-amber-400 font-bold",
+    Hard: "bg-rose-500/15 text-rose-800 dark:text-rose-400 font-bold",
   };
 
   return (

@@ -8,7 +8,7 @@ export const StarterInstructions = () => (
     <SpeakingEventsHub />
 
     {/* Hero Workshop Introduction */}
-    <div className="text-center py-10 my-8 rounded-3xl bg-gradient-to-b from-blue-900/10 via-gray-900/40 to-transparent border border-(--color-border) dark:border-(--color-border-dark) p-8">
+    <div className="text-center py-10 my-8 rounded-3xl bg-(--color-surface) dark:bg-transparent dark:bg-gradient-to-b dark:from-blue-900/10 dark:via-gray-900/40 dark:to-transparent border border-(--color-border) dark:border-(--color-border-dark) p-8">
       <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/10 border border-blue-500/30 text-(--color-primary) text-xs font-mono font-bold uppercase tracking-wider mb-4">
         <EmojiIcon name="shield" className="w-4 h-4" />
         The Reacher Protocol • Workshop Guide

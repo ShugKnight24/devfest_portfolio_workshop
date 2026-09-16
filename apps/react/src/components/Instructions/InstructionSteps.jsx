@@ -186,14 +186,14 @@ export const InstructionSteps = () => {
               className={`px-6 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center gap-2.5 border cursor-pointer ${
                 isActive
                   ? "bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-500/20 scale-105"
-                  : "bg-gray-900/60 text-gray-400 border-gray-800 hover:border-gray-700 hover:text-white"
+                  : "bg-(--color-surface) dark:bg-gray-900/60 text-(--color-muted-text) dark:text-gray-400 border-(--color-border) dark:border-gray-800 hover:border-gray-400 dark:hover:border-gray-700 hover:text-(--color-text) dark:hover:text-white"
               }`}
             >
               <EmojiIcon name={data.icon} className="w-4 h-4 shrink-0" />
               <span>{data.name}</span>
               <span
                 className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
-                  isActive ? "bg-blue-800/80 text-blue-200" : "bg-gray-800 text-gray-400"
+                  isActive ? "bg-blue-800/80 text-blue-200" : "bg-(--color-surface-hover) dark:bg-gray-800 text-(--color-muted-text) dark:text-gray-400"
                 }`}
               >
                 {data.badge}
@@ -250,7 +250,7 @@ export const InstructionSteps = () => {
           </h2>
 
           {steps[currentStep].component && (
-            <div className="bg-black/80 border border-(--color-border) dark:border-(--color-border-dark) p-3 rounded-xl mb-4 font-mono text-xs text-emerald-800 dark:text-emerald-400 overflow-x-auto flex items-center justify-between gap-2">
+            <div className="bg-black/80 border border-(--color-border) dark:border-(--color-border-dark) p-3 rounded-xl mb-4 font-mono text-xs text-emerald-400 overflow-x-auto flex items-center justify-between gap-2">
               <code>{steps[currentStep].component}</code>
             </div>
           )}
@@ -260,7 +260,7 @@ export const InstructionSteps = () => {
           </p>
 
           {steps[currentStep].note && (
-            <div className="p-4 rounded-xl bg-amber-100 dark:bg-amber-950/20 border-l-4 border-amber-500 text-xs text-amber-200/90 mb-6 leading-relaxed">
+            <div className="p-4 rounded-xl bg-amber-100 dark:bg-amber-950/20 border-l-4 border-amber-500 text-xs text-amber-900 dark:text-amber-200/90 mb-6 leading-relaxed">
               <strong className="text-amber-800 dark:text-amber-400 font-mono uppercase tracking-wider block mb-1">
                 The Sovereign Rule / Tip:
               </strong>

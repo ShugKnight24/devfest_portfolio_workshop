@@ -66,8 +66,10 @@ export const HeaderAnimated = ({ personal }) => {
     },
   ];
 
+  // Always dark, in either mode, so it is scoped `dark`: the brand tokens then
+  // resolve to their dark-canvas values rather than the light-mode ones.
   return (
-    <header className="relative bg-(--color-dark) text-white overflow-hidden flex flex-col justify-center items-center">
+    <header className="dark relative bg-(--color-dark) text-white overflow-hidden flex flex-col justify-center items-center">
       {/* Animated background elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-(--color-primary) rounded-full blur-[100px] opacity-30 animate-pulse"></div>

@@ -33,7 +33,7 @@ export const CodeBlock = ({
             <span className="text-sm text-gray-400 ml-2">{title}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500 dark:text-gray-400 uppercase">{language}</span>
+            <span className="text-xs text-gray-400 uppercase">{language}</span>
             <CopyButton text={code} size="xs" />
           </div>
         </div>

@@ -193,7 +193,7 @@ export const InteractiveLearningScene = () => {
   };
 
   return (
-    <div className="relative w-full max-w-6xl mx-auto rounded-3xl overflow-hidden border border-(--color-border) dark:border-(--color-border-dark) bg-gradient-to-b from-(--color-surface)/90 to-(--color-surface-dark)/90 backdrop-blur-xl shadow-2xl transition-all duration-500">
+    <div className="relative w-full max-w-6xl mx-auto rounded-3xl overflow-hidden border border-(--color-border) dark:border-(--color-border-dark) bg-(--color-surface) dark:bg-transparent dark:bg-gradient-to-b dark:from-(--color-surface)/90 dark:to-(--color-surface-dark)/90 backdrop-blur-xl shadow-2xl transition-all duration-500">
       {/* Dynamic Ambient Background Glow */}
       <div
         className="absolute inset-0 opacity-20 pointer-events-none transition-all duration-700 blur-3xl"
@@ -243,7 +243,7 @@ export const InteractiveLearningScene = () => {
             </span>
             <div className="text-sm font-bold text-(--color-text) dark:text-(--color-text-dark) flex items-center gap-2">
               <span>{currentMode.name}</span>
-              <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-white/10 dark:bg-white/5 border border-white/10 text-gray-300">
+              <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-(--color-surface-hover) dark:bg-white/5 border border-(--color-border) dark:border-white/10 text-(--color-muted-text) dark:text-gray-300">
                 {currentMode.subtitle}
               </span>
             </div>
@@ -252,12 +252,12 @@ export const InteractiveLearningScene = () => {
 
         {/* Live Badges: XP, Streak, Audio */}
         <div className="flex items-center gap-3">
-          <div className="px-3 py-1.5 rounded-xl bg-black/40 border border-gray-800 text-xs font-mono flex items-center gap-1.5 text-amber-800 dark:text-amber-400 shadow-inner">
+          <div className="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-black/40 border border-amber-200 dark:border-gray-800 text-xs font-mono flex items-center gap-1.5 text-amber-800 dark:text-amber-400 shadow-inner">
             <EmojiIcon name="fire" className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 shrink-0" />
             <span>{streak} Day Streak</span>
           </div>
 
-          <div className="px-3 py-1.5 rounded-xl bg-black/40 border border-gray-800 text-xs font-mono flex items-center gap-1.5 text-cyan-800 dark:text-cyan-400 shadow-inner">
+          <div className="px-3 py-1.5 rounded-xl bg-cyan-50 dark:bg-black/40 border border-cyan-200 dark:border-gray-800 text-xs font-mono flex items-center gap-1.5 text-cyan-800 dark:text-cyan-400 shadow-inner">
             <EmojiIcon name="sparkles" className="w-3.5 h-3.5 text-cyan-800 dark:text-cyan-400 shrink-0" />
             <span className="font-bold">{xp} XP</span>
           </div>
@@ -271,7 +271,7 @@ export const InteractiveLearningScene = () => {
             className={`p-2 rounded-xl border text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-(--color-primary) ${
               soundEnabled
                 ? "bg-purple-600/30 border-purple-500 text-purple-800 dark:text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.3)]"
-                : "bg-black/40 border-gray-800 text-gray-400 hover:text-white"
+                : "bg-(--color-surface-hover) dark:bg-black/40 border-(--color-border) dark:border-gray-800 text-(--color-muted-text) dark:text-gray-400 hover:text-(--color-text) dark:hover:text-white"
             }`}
             title={soundEnabled ? "Audio Effects Active" : "Enable Sound FX"}
             aria-label={soundEnabled ? "Sound enabled" : "Sound disabled"}
@@ -302,7 +302,7 @@ export const InteractiveLearningScene = () => {
       */}
       <div className="space-y-6 p-6 md:p-8 relative z-10">
         {/* The Animated Student Building Scene */}
-        <div className="relative rounded-2xl overflow-hidden bg-black/50 border border-gray-800 p-2 md:p-4 shadow-inner">
+        <div className="relative rounded-2xl overflow-hidden bg-gray-950 dark:bg-black/50 border border-gray-800 p-2 md:p-4 shadow-inner">
           {/* Toolbar above the scene — nothing is allowed to sit on the art. */}
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3 px-1">
             <span
@@ -343,7 +343,7 @@ export const InteractiveLearningScene = () => {
             <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-(--color-muted-text) dark:text-(--color-muted-text-dark) mb-1">
               Choose Your Learning Mindset
             </h3>
-            <p className="text-xs text-gray-400 leading-relaxed">
+            <p className="text-xs text-(--color-muted-text) dark:text-gray-400 leading-relaxed">
               Toggle mental models to adapt your flow state:
             </p>
           </div>
@@ -361,8 +361,8 @@ export const InteractiveLearningScene = () => {
                   }}
                   className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary) ${
                     isActive
-                      ? "bg-black/80 shadow-lg scale-[1.02]"
-                      : "bg-white/5 dark:bg-black/30 border-gray-800 hover:border-gray-700 opacity-75 hover:opacity-100"
+                      ? "dark bg-gray-950 shadow-lg scale-[1.02]"
+                      : "bg-(--color-surface) dark:bg-black/30 border-(--color-border) dark:border-gray-800 hover:border-gray-400 dark:hover:border-gray-700 dark:opacity-75 dark:hover:opacity-100"
                   }`}
                   style={{
                     borderColor: isActive ? mode.accent : undefined,
@@ -371,8 +371,10 @@ export const InteractiveLearningScene = () => {
                 >
                   <div className="flex items-center justify-between">
                     <span
-                      className="text-xs font-mono font-bold uppercase tracking-wider"
-                      style={{ color: isActive ? mode.accent : "#94a3b8" }}
+                      className={`text-xs font-mono font-bold uppercase tracking-wider ${
+                        isActive ? "" : "text-(--color-muted-text) dark:text-slate-400"
+                      }`}
+                      style={isActive ? { color: mode.accent } : undefined}
                     >
                       {mode.name}
                     </span>
@@ -396,7 +398,7 @@ export const InteractiveLearningScene = () => {
       </div>
 
       {/* Dream Milestone Selector: "What is your dream?" */}
-      <div className="px-6 md:px-8 py-6 bg-black/40 border-t border-(--color-border)/60 dark:border-(--color-border-dark)/60 space-y-4">
+      <div className="px-6 md:px-8 py-6 bg-(--color-surface-hover) dark:bg-black/40 border-t border-(--color-border)/60 dark:border-(--color-border-dark)/60 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
           <div>
             <h4 className="text-sm font-bold text-(--color-text) dark:text-(--color-text-dark) flex items-center gap-2">
@@ -410,7 +412,7 @@ export const InteractiveLearningScene = () => {
 
           <Link
             to={currentDream.link}
-            className="px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-all text-center flex items-center justify-center gap-2 shrink-0 hover:scale-105"
+            className="px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-gray-900 hover:bg-gray-800 dark:bg-white/10 dark:hover:bg-white/20 text-white border border-gray-900 dark:border-white/20 transition-all text-center flex items-center justify-center gap-2 shrink-0 hover:scale-105"
           >
             <span>Start {currentDream.recommended}</span>
             <span>&rarr;</span>
@@ -432,7 +434,7 @@ export const InteractiveLearningScene = () => {
                 className={`p-3.5 rounded-xl border text-left transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary) ${
                   isSelected
                     ? "bg-purple-100 dark:bg-purple-950/40 border-purple-500 shadow-md scale-[1.02]"
-                    : "bg-black/20 border-gray-800/80 hover:border-gray-700 text-gray-400"
+                    : "bg-(--color-surface) dark:bg-black/20 border-(--color-border) dark:border-gray-800/80 hover:border-gray-400 dark:hover:border-gray-700 text-(--color-muted-text) dark:text-gray-400"
                 }`}
               >
                 <div className="flex items-center gap-2 mb-1">
@@ -451,7 +453,7 @@ export const InteractiveLearningScene = () => {
       </div>
 
       {/* Motivational Dev Truth Rotating Bar */}
-      <div className="px-6 md:px-8 py-3.5 bg-black/60 border-t border-gray-900 text-center text-xs text-gray-400 font-sans italic flex items-center justify-center gap-2">
+      <div className="px-6 md:px-8 py-3.5 bg-(--color-surface) dark:bg-black/60 border-t border-(--color-border) dark:border-gray-900 text-center text-xs text-(--color-muted-text) dark:text-gray-400 font-sans italic flex items-center justify-center gap-2">
         <span className="text-purple-800 dark:text-purple-400 font-bold not-italic font-mono text-[11px]">
           [DEV TRUTH]
         </span>

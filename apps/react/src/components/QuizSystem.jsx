@@ -792,10 +792,10 @@ export const QuizQuestion = ({ question, onComplete }) => {
         <span
           className={`text-xs px-2 py-1 rounded-full ${
             question.difficulty === "beginner"
-              ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+              ? "bg-emerald-500/15 text-emerald-800 dark:text-emerald-400"
               : question.difficulty === "intermediate"
-                ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
-                : "bg-rose-500/15 text-rose-600 dark:text-rose-400"
+                ? "bg-amber-500/15 text-amber-800 dark:text-amber-400"
+                : "bg-rose-500/15 text-rose-800 dark:text-rose-400"
           }`}
         >
           {question.difficulty}
@@ -1046,11 +1046,11 @@ export const QuizPanel = () => {
           <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Questions Answered</p>
         </div>
         <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow p-4 text-center">
-          <p className="text-2xl font-bold text-emerald-500">{getAccuracy()}%</p>
+          <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-500">{getAccuracy()}%</p>
           <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Accuracy</p>
         </div>
         <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow p-4 text-center">
-          <p className="text-2xl font-bold text-amber-500">
+          <p className="text-2xl font-bold text-amber-700 dark:text-amber-500">
             {quizStats.pointsEarned}
           </p>
           <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Points Earned</p>

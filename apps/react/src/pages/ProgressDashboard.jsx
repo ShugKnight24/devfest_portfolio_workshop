@@ -110,13 +110,22 @@ const ProgressRing = ({
   );
 };
 
+// Spelled out in full so Tailwind can see them. The -500 shades are tuned for
+// the dark canvas and measure under 3:1 on the light surface.
+const STAT_COLORS = {
+  blue: "text-blue-700 dark:text-blue-500",
+  purple: "text-purple-700 dark:text-purple-500",
+  yellow: "text-yellow-700 dark:text-yellow-500",
+  green: "text-green-700 dark:text-green-500",
+};
+
 // Stat card component
 const StatCard = ({ icon, value, label, color = "blue", subtext }) => (
   <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow-lg p-6 text-center">
-    <div className={`mb-2 text-${color}-500 flex justify-center`}>
+    <div className={`mb-2 ${STAT_COLORS[color] ?? STAT_COLORS.blue} flex justify-center`}>
       <EmojiIcon name={icon} emoji={icon} className="w-10 h-10" />
     </div>
-    <p className={`text-3xl font-bold text-${color}-500`}>{value}</p>
+    <p className={`text-3xl font-bold ${STAT_COLORS[color] ?? STAT_COLORS.blue}`}>{value}</p>
     <p className="text-sm font-medium text-(--color-text) dark:text-(--color-text-dark)">{label}</p>
     {subtext && <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) mt-1">{subtext}</p>}
   </div>
@@ -212,7 +221,7 @@ const LessonProgress = ({ completedLessons = [] }) => {
               <span
                 className={`text-xs px-2 py-1 rounded-full ${
                   isCompleted
-                    ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium"
+                    ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 font-medium"
                     : "bg-(--color-surface-hover) dark:bg-(--color-surface-hover-dark) text-(--color-muted-text) dark:text-(--color-muted-text-dark)"
                 }`}
               >
@@ -244,7 +253,7 @@ const AchievementPreview = ({ achievements = {}, unlockedIds = [] }) => {
         </h3>
         <Link
           to="/achievements"
-          className="inline-flex items-center gap-1 text-sm font-semibold text-blue-500 hover:text-blue-800 dark:text-blue-400"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-400"
         >
           View all
           <span aria-hidden="true">
@@ -290,7 +299,7 @@ const ChallengeStats = ({ stats, challenges, completedChallenges }) => {
         </h3>
         <Link
           to="/challenges"
-          className="inline-flex items-center gap-1 text-sm font-semibold text-blue-500 hover:text-blue-800 dark:text-blue-400"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-400"
         >
           View all
           <span aria-hidden="true">
@@ -300,17 +309,17 @@ const ChallengeStats = ({ stats, challenges, completedChallenges }) => {
       </div>
       <div className="grid grid-cols-3 gap-4 text-center">
         <div>
-          <p className="text-2xl font-bold text-purple-500">{completedCount}</p>
+          <p className="text-2xl font-bold text-purple-700 dark:text-purple-500">{completedCount}</p>
           <p className="text-xs font-semibold text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Completed</p>
         </div>
         <div>
-          <p className="text-2xl font-bold text-yellow-500">
+          <p className="text-2xl font-bold text-yellow-700 dark:text-yellow-500">
             {stats.totalPoints}
           </p>
           <p className="text-xs font-semibold text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Points</p>
         </div>
         <div>
-          <p className="text-2xl font-bold text-green-500">
+          <p className="text-2xl font-bold text-green-700 dark:text-green-500">
             {Math.round((completedCount / totalCount) * 100) || 0}%
           </p>
           <p className="text-xs font-semibold text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Complete</p>

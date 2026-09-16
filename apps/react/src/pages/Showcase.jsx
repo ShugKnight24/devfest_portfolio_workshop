@@ -479,16 +479,16 @@ export const Showcase = () => {
               </h3>
               <div className="flex flex-wrap gap-4 text-sm">
                 <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                  <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs font-mono">
+                  <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 dark:text-gray-200 rounded text-xs font-mono">
                     ←
                   </kbd>
-                  <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs font-mono">
+                  <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 dark:text-gray-200 rounded text-xs font-mono">
                     →
                   </kbd>
                   <span>Navigate variants</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                  <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs font-mono">
+                  <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 dark:text-gray-200 rounded text-xs font-mono">
                     Esc
                   </kbd>
                   <span>Exit preview</span>
@@ -506,7 +506,7 @@ export const Showcase = () => {
                   <span className="w-2 h-2 rounded-full bg-red-500"></span>
                   Challenge — Fill-in-the-blank exercises
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400">
                   <span className="w-2 h-2 rounded-full bg-green-500"></span>
                   Beginner — Simple props & basic JSX
                 </span>

@@ -351,7 +351,7 @@ export const ProgressTracker = () => {
                   ${
                     isComplete
                       ? "bg-red-100 dark:bg-red-900/30 text-red-500"
-                      : "bg-green-100 dark:bg-green-900/30 text-green-500"
+                      : "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-500"
                   }
                 `}
               >

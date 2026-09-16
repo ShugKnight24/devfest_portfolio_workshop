@@ -364,7 +364,7 @@ export const useChallenges = () => {
 // Difficulty badge colors
 const difficultyColors = {
   beginner:
-    "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
   intermediate:
     "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
   advanced: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
@@ -611,7 +611,7 @@ export const ChallengeModal = ({ isOpen, onClose }) => {
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 You earned{" "}
-                <span className="text-yellow-500 font-bold">
+                <span className="text-yellow-700 dark:text-yellow-500 font-bold">
                   {earnedPoints} points
                 </span>
               </p>
@@ -639,7 +639,7 @@ export const ChallengeModal = ({ isOpen, onClose }) => {
                         key={i}
                         className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300"
                       >
-                        <span className="text-blue-500 font-bold">
+                        <span className="text-blue-700 dark:text-blue-500 font-bold">
                           {i + 1}.
                         </span>
                         {instruction}
@@ -840,19 +840,19 @@ export const ChallengeModePanel = () => {
       {/* Stats Header */}
       <div className="grid grid-cols-3 gap-4">
         <div className="p-4 bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow text-center">
-          <p className="text-2xl font-bold text-yellow-500">
+          <p className="text-2xl font-bold text-yellow-700 dark:text-yellow-500">
             {challengeStats.totalPoints}
           </p>
           <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Total Points</p>
         </div>
         <div className="p-4 bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow text-center">
-          <p className="text-2xl font-bold text-blue-500">
+          <p className="text-2xl font-bold text-blue-700 dark:text-blue-500">
             {challengeStats.attempts}
           </p>
           <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Challenges Done</p>
         </div>
         <div className="p-4 bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow text-center">
-          <p className="text-2xl font-bold text-green-500">
+          <p className="text-2xl font-bold text-green-700 dark:text-green-500">
             {challengeStats.totalTime > 0
               ? `${Math.floor(challengeStats.totalTime / 60)}m`
               : "0m"}

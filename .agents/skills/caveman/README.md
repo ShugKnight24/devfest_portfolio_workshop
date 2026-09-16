@@ -16,7 +16,7 @@ Six intensity levels:
 |-------|-------------|
 | `lite` | Drop filler/hedging. Sentences stay full. Professional but tight. |
 | `full` | Default. Drop articles, fragments OK, short synonyms. |
-| `ultra` | Bare fragments. Abbreviations (DB, auth, fn). Arrows for causality. |
+| `ultra` | Bare fragments, one fact stated once. Standard acronyms only (DB, API) — no invented abbreviations, no arrows. |
 | `wenyan-lite` | Classical Chinese register, light compression. |
 | `wenyan-full` | Maximum 文言文 compression. |
 | `wenyan-ultra` | Extreme classical compression. |
@@ -27,9 +27,10 @@ Auto-clarity rule: caveman drops to normal prose for security warnings, irrevers
 
 ```
 /caveman              # full mode (default)
+/caveman off          # same as "stop caveman"
 /caveman lite         # lighter compression
 /caveman ultra        # extreme compression
-/caveman wenyan       # classical Chinese
+/caveman wenyan-full  # classical Chinese (also wenyan-lite, wenyan-ultra)
 stop caveman          # back to normal prose
 ```
 
@@ -44,7 +45,17 @@ Caveman (full):
 > New object ref each render. Inline object prop = new ref = re-render. Wrap in `useMemo`.
 
 Caveman (ultra):
-> Inline obj prop → new ref → re-render. `useMemo`.
+> Inline obj prop, new ref, re-render. `useMemo`.
+
+## What it never touches
+
+Caveman is a chat style. It does not reach anything another human reads on its
+own: commit messages, PR/MR bodies, issues, defect reports, docs, code
+comments, or messages to third parties are written in normal prose. Code blocks,
+error strings, API names and CLI commands are always verbatim.
+
+It also drops to normal prose automatically for security warnings, irreversible
+actions, and any place compression would be ambiguous.
 
 ## See also
 

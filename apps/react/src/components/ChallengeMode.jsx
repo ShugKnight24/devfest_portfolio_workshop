@@ -412,13 +412,13 @@ export const ChallengeCard = ({ challenge, onStart }) => {
       </p>
 
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4 text-sm text-gray-500">
+        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
           <span>
-            <EmojiIcon emoji="⏱️" className="w-4 h-4 inline" />{" "}
+            <EmojiIcon name="timer" className="w-4 h-4 inline" />{" "}
             {challenge.timeLimit}s
           </span>
           <span>
-            <EmojiIcon emoji="⭐" className="w-4 h-4 inline" />{" "}
+            <EmojiIcon name="star" className="w-4 h-4 inline" />{" "}
             {challenge.points} pts
           </span>
         </div>
@@ -427,7 +427,7 @@ export const ChallengeCard = ({ challenge, onStart }) => {
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             isCompleted
               ? "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
-              : "bg-blue-500 hover:bg-blue-600 text-white"
+              : "bg-blue-600 hover:bg-blue-700 text-white"
           }`}
         >
           {isCompleted ? "Retry" : "Start"}
@@ -592,7 +592,7 @@ export const ChallengeModal = ({ isOpen, onClose }) => {
                 className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg cursor-pointer"
                 aria-label="Close challenge"
               >
-                <Close className="w-5 h-5 text-gray-500" />
+                <Close className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
           )}
@@ -617,7 +617,7 @@ export const ChallengeModal = ({ isOpen, onClose }) => {
               </p>
               <button
                 onClick={handleClose}
-                className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium"
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
               >
                 Continue
               </button>
@@ -751,7 +751,7 @@ export const ChallengeModal = ({ isOpen, onClose }) => {
                   <button
                     onClick={runTests}
                     disabled={isRunningTests}
-                    className="flex-1 px-4 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white rounded-lg font-medium flex items-center justify-center gap-2"
+                    className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg font-medium flex items-center justify-center gap-2"
                   >
                     {isRunningTests ? (
                       <>
@@ -771,8 +771,8 @@ export const ChallengeModal = ({ isOpen, onClose }) => {
                     disabled={!canComplete}
                     className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${
                       canComplete
-                        ? "bg-green-500 hover:bg-green-600 text-white"
-                        : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                        ? "bg-green-700 hover:bg-green-800 text-white"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-400 cursor-not-allowed"
                     }`}
                     title={!canComplete ? "Run tests and pass them first!" : ""}
                   >

@@ -15,6 +15,7 @@
  * Perfect for: Highlighting your best work
  */
 
+import { EmojiIcon } from "../Icons";
 import { ProjectCard } from "../ProjectCard";
 
 export const ProjectsFeatured = ({ projects }) => {
@@ -22,21 +23,21 @@ export const ProjectsFeatured = ({ projects }) => {
   const otherProjects = projects.filter((project) => !project.featured);
 
   return (
-    <section className="section-container bg-(--color-surface)">
+    <section className="section-container bg-(--color-surface) dark:bg-(--color-surface-dark)">
       <h2 className="section-title">My Projects</h2>
 
       {/* Featured Projects - Large Cards */}
       {featuredProjects.length > 0 && (
         <div className="mb-16">
           <h3 className="text-2xl font-bold text-(--color-text-primary) mb-6 flex items-center gap-2">
-            <span>⭐</span>
+            <EmojiIcon name="star" className="w-6 h-6 text-(--color-accent) shrink-0" />
             <span>Featured Work</span>
           </h3>
           <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
             {featuredProjects.map((project) => (
               <div
                 key={project.id}
-                className="bg-(--color-surface) rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
+                className="bg-(--color-surface) dark:bg-(--color-surface-dark) rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
               >
                 {/* Large Image */}
                 <div className="relative h-64 overflow-hidden group">
@@ -47,8 +48,9 @@ export const ProjectsFeatured = ({ projects }) => {
                   />
                   <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent"></div>
                   <div className="absolute bottom-4 left-4 right-4">
-                    <span className="inline-block px-3 py-1 bg-(--color-accent) text-(--color-text-inverse) text-xs font-bold rounded-full mb-2">
-                      ⭐ Featured
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-(--color-accent) text-(--color-text-inverse) text-xs font-bold rounded-full mb-2">
+                      <EmojiIcon name="star" className="w-3.5 h-3.5 shrink-0" />
+                      Featured
                     </span>
                   </div>
                 </div>

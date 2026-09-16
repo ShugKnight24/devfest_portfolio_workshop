@@ -79,6 +79,10 @@ const renderSkills = (skills) => {
 const renderProjects = (projects) => {
   const grid = document.getElementById('projects-grid');
 
+  // Decorative "opens in a new tab" marker. Inlined because the vanilla
+  // starter has no build step and no dependencies — just raw SVG markup.
+  const EXTERNAL_LINK_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true" style="vertical-align: -2px; margin-left: 0.25rem;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><path d="M15 3h6v6" /><path d="M10 14 21 3" /></svg>`;
+
   grid.innerHTML = projects.map(project => `
     <article class="project-card">
       <h3>${project.title}</h3>
@@ -87,8 +91,8 @@ const renderProjects = (projects) => {
         ${project.tags.map(tag => `<span class="project-tag">${tag}</span>`).join('')}
       </div>
       <div class="project-links">
-        ${project.liveUrl ? `<a href="${project.liveUrl}" target="_blank" rel="noopener noreferrer">Live Demo ↗</a>` : ''}
-        ${project.githubUrl ? `<a href="${project.githubUrl}" target="_blank" rel="noopener noreferrer">Source Code ↗</a>` : ''}
+        ${project.liveUrl ? `<a href="${project.liveUrl}" target="_blank" rel="noopener noreferrer">Live Demo${EXTERNAL_LINK_SVG}</a>` : ''}
+        ${project.githubUrl ? `<a href="${project.githubUrl}" target="_blank" rel="noopener noreferrer">Source Code${EXTERNAL_LINK_SVG}</a>` : ''}
       </div>
     </article>
   `).join('');

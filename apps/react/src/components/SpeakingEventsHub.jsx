@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { speakingEvents } from "../data/eventsData";
 import { EmojiIcon } from "@portfolio/icons/react";
+import { ChevronRight } from "./Icons";
 
 export const SpeakingEventsHub = ({ compact = false }) => {
   return (
@@ -80,7 +81,12 @@ export const SpeakingEventsHub = ({ compact = false }) => {
                       key={idx}
                       className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2"
                     >
-                      <span className="text-blue-500 font-bold shrink-0">→</span>
+                      <span
+                        aria-hidden="true"
+                        className="text-blue-500 shrink-0 mt-0.5"
+                      >
+                        <ChevronRight className="w-3 h-3" />
+                      </span>
                       <span>{highlight}</span>
                     </div>
                   ))}
@@ -91,7 +97,7 @@ export const SpeakingEventsHub = ({ compact = false }) => {
               <div className="pt-4 border-t border-gray-200/60 dark:border-gray-800 flex flex-col sm:flex-row gap-2">
                 <Link
                   to={event.slideDeckRoute}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold text-center transition-colors shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold text-center transition-colors shadow-md flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <EmojiIcon name="presentation" className="w-4 h-4 shrink-0" />
                   Launch Keynote

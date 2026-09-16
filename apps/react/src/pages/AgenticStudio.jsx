@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { CodeBlock } from "../components/CodeBlock";
 import { CopyButton } from "../components/CopyButton";
-import { Checkmark, Close, Info, Chart, Cloud, Database } from "../components/Icons";
+import { Checkmark, Close, Info, Chart, Cloud, Database, ChevronLeft } from "../components/Icons";
 import { EmojiIcon } from "@portfolio/icons/react";
 
 const TIERS = [
@@ -553,7 +553,16 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                       : "bg-(--color-surface) dark:bg-(--color-surface-dark) border-(--color-border) dark:border-(--color-border-dark) text-purple-400 hover:bg-(--color-surface-hover) dark:hover:bg-(--color-surface-hover-dark)"
                   }`}
                 >
-                  {isCustomMode ? "← View Curated" : "+ Build Custom"}
+                  {isCustomMode ? (
+                    <span className="inline-flex items-center gap-1">
+                      <span aria-hidden="true">
+                        <ChevronLeft className="w-3 h-3" />
+                      </span>
+                      View Curated
+                    </span>
+                  ) : (
+                    "+ Build Custom"
+                  )}
                 </button>
               </div>
 
@@ -834,11 +843,11 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                   Uncontrolled pleasantries, repetitive apologies, large raw logs, and boilerplate code quickly exhaust context limits.
                 </p>
                 <div className="p-4 rounded-xl bg-(--color-background) dark:bg-(--color-dark)/80 font-mono text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) space-y-2 border border-(--color-border) dark:border-(--color-border-dark) max-h-56 overflow-y-auto">
-                  <div className="text-gray-500">// Turn 12 response:</div>
+                  <div className="text-gray-500 dark:text-gray-400">// Turn 12 response:</div>
                   <div className="text-red-300">
                     "Certainly! I'd be more than happy to assist you with refactoring your authentication context. As you know, React 19 provides multiple hooks that we can leverage..."
                   </div>
-                  <div className="text-gray-500">[Dumps 250 lines of unmodified code...]</div>
+                  <div className="text-gray-500 dark:text-gray-400">[Dumps 250 lines of unmodified code...]</div>
                   <div className="text-red-400">Result: Context window exhausted by Turn 15. Agent begins hallucinating.</div>
                 </div>
               </div>
@@ -857,7 +866,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                   All technical substance stays. Boilerplate, hedging, and filler die. Sessions stay sharp for 50+ iterations.
                 </p>
                 <div className="p-4 rounded-xl bg-(--color-background) dark:bg-(--color-dark)/80 font-mono text-xs text-(--color-text) dark:text-(--color-text-dark) space-y-2 border border-(--color-border) dark:border-(--color-border-dark) max-h-56 overflow-y-auto">
-                  <div className="text-gray-500">// Turn 12 response:</div>
+                  <div className="text-gray-500 dark:text-gray-400">// Turn 12 response:</div>
                   <div className="text-emerald-300">
                     AuthContext.jsx:42 — null token check use `?.` not `&&`.
                   </div>

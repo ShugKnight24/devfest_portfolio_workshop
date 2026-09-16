@@ -6,7 +6,7 @@ import {
   useEffect,
 } from "react";
 import { createPortal } from "react-dom";
-import { Close, Checkmark } from "./Icons";
+import { Close, Checkmark, ChevronRight } from "./Icons";
 import { EmojiIcon } from "./Icons/EmojiIcon";
 import { useAchievements } from "./Achievements";
 
@@ -871,9 +871,12 @@ export const QuizQuestion = ({ question, onComplete }) => {
       {answered && onComplete && (
         <button
           onClick={onComplete}
-          className="mt-6 w-full py-3 bg-(--color-primary) text-(--color-primary-text) hover:opacity-90 rounded-lg font-medium transition-colors cursor-pointer"
+          className="mt-6 w-full py-3 bg-(--color-primary) text-(--color-primary-text) hover:opacity-90 rounded-lg font-medium transition-colors cursor-pointer inline-flex items-center justify-center gap-1.5"
         >
-          Continue →
+          Continue
+          <span aria-hidden="true">
+            <ChevronRight className="w-4 h-4" />
+          </span>
         </button>
       )}
     </div>

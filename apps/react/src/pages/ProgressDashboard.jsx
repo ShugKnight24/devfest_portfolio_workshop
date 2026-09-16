@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAchievements } from "../components/Achievements";
 import { useChallenges } from "../components/ChallengeMode";
 import { Link } from "react-router-dom";
-import { Checkmark } from "../components/Icons";
+import { Checkmark, ChevronRight } from "../components/Icons";
 import { EmojiIcon } from "../components/Icons/EmojiIcon";
 
 /**
@@ -244,9 +244,12 @@ const AchievementPreview = ({ achievements = {}, unlockedIds = [] }) => {
         </h3>
         <Link
           to="/achievements"
-          className="text-sm font-semibold text-blue-500 hover:text-blue-400"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-blue-500 hover:text-blue-400"
         >
-          View all →
+          View all
+          <span aria-hidden="true">
+            <ChevronRight className="w-4 h-4" />
+          </span>
         </Link>
       </div>
       {recentUnlocked.length > 0 ? (
@@ -287,9 +290,12 @@ const ChallengeStats = ({ stats, challenges, completedChallenges }) => {
         </h3>
         <Link
           to="/challenges"
-          className="text-sm font-semibold text-blue-500 hover:text-blue-400"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-blue-500 hover:text-blue-400"
         >
-          View all →
+          View all
+          <span aria-hidden="true">
+            <ChevronRight className="w-4 h-4" />
+          </span>
         </Link>
       </div>
       <div className="grid grid-cols-3 gap-4 text-center">

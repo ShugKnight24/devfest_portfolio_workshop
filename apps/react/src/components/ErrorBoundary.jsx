@@ -1,5 +1,6 @@
 import { Component } from "react";
 import { Link } from "react-router-dom";
+import { EmojiIcon } from "./Icons/EmojiIcon";
 
 /**
  * ErrorBoundary — Cyber-Brutalist Fault Isolation
@@ -161,7 +162,14 @@ export class ErrorBoundary extends Component {
                   : "bg-[#00ffcc]/15 text-[#00ffcc] border border-[#00ffcc] hover:bg-[#00ffcc] hover:text-black"
               }`}
             >
-              {copied ? "✓ Copied Debug Prompt" : "Copy Reacher Debug Prompt"}
+              {copied ? (
+                <>
+                  <EmojiIcon name="checkmark" className="w-4 h-4 shrink-0" />
+                  Copied Debug Prompt
+                </>
+              ) : (
+                "Copy Reacher Debug Prompt"
+              )}
             </button>
 
             <button

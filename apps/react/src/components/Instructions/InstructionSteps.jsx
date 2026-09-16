@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import VercelDeployment from "../../assets/instructions/vercel_root_directory.png";
 import { EmojiIcon } from "@portfolio/icons/react";
-import { Checkmark } from "../Icons";
+import { Checkmark, ChevronLeft, ChevronRight } from "../Icons";
 import { Link } from "react-router-dom";
 
 export const InstructionSteps = () => {
@@ -230,7 +230,7 @@ export const InstructionSteps = () => {
             <span>
               Step {currentStep + 1} of {steps.length}
             </span>
-            <span className="text-gray-500">← → arrow keys navigate</span>
+            <span className="text-gray-400">← → arrow keys navigate</span>
           </div>
         </div>
 
@@ -240,7 +240,7 @@ export const InstructionSteps = () => {
             <span className="text-xs font-mono font-bold text-blue-400 px-3 py-1 rounded bg-blue-950/60 border border-blue-800">
               STAGE 0{currentStep + 1}
             </span>
-            <span className="text-xs text-gray-500 font-mono">
+            <span className="text-xs text-gray-400 font-mono">
               {currentTrackData.name}
             </span>
           </div>
@@ -283,12 +283,15 @@ export const InstructionSteps = () => {
             <button
               onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
               disabled={currentStep === 0}
-              className="px-5 py-2.5 rounded-xl text-xs font-mono font-bold bg-gray-800 text-gray-300 hover:text-white disabled:opacity-30 disabled:hover:text-gray-300 transition-all cursor-pointer"
+              className="px-5 py-2.5 rounded-xl text-xs font-mono font-bold bg-gray-800 text-gray-300 hover:text-white disabled:opacity-30 disabled:hover:text-gray-300 transition-all cursor-pointer inline-flex items-center gap-1.5"
             >
-              ← Previous Step
+              <span aria-hidden="true">
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </span>
+              Previous Step
             </button>
 
-            <span className="text-xs font-mono text-gray-500">
+            <span className="text-xs font-mono text-gray-400">
               {currentStep + 1} / {steps.length}
             </span>
 
@@ -297,9 +300,12 @@ export const InstructionSteps = () => {
                 setCurrentStep(Math.min(steps.length - 1, currentStep + 1))
               }
               disabled={currentStep === steps.length - 1}
-              className="px-6 py-2.5 rounded-xl text-xs font-mono font-bold bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-30 transition-all shadow-md shadow-blue-600/30 cursor-pointer"
+              className="px-6 py-2.5 rounded-xl text-xs font-mono font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-30 transition-all shadow-md shadow-blue-600/30 cursor-pointer inline-flex items-center gap-1.5"
             >
-              Next Step →
+              Next Step
+              <span aria-hidden="true">
+                <ChevronRight className="w-3.5 h-3.5" />
+              </span>
             </button>
           </div>
         </div>

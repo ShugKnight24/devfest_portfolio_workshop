@@ -126,33 +126,63 @@ describe("theme token resolution", () => {
   });
 });
 
-describe("signature theme", () => {
-  it("should default to the Reacher x Chainsaw house palette", () => {
-    expect(defaultTheme).toBe("reacherChainsaw");
+describe("default theme", () => {
+  it("should default to the Pull the Cord talk palette", () => {
+    expect(defaultTheme).toBe("pullTheCord");
     expect(themes[defaultTheme]).toBeDefined();
   });
 
-  it("should need no auto-correction — the house palette is hand-tuned", () => {
-    const theme = themes.reacherChainsaw;
+  it("should list the default first, both in the themes and the keynote category", () => {
+    expect(Object.keys(themes)[0]).toBe(defaultTheme);
+    expect(themeCategories.tactical.themes[0]).toBe(defaultTheme);
+  });
+
+  it("should carry both series in its palette", () => {
+    const { colors, name } = themes.pullTheCord;
+    // Pochita orange for the pull, Reacher denim for the backup, blood red after.
+    expect(colors.primary.toLowerCase()).toBe("#ff7a1a");
+    expect(colors.secondary.toLowerCase()).toBe("#86a8cc");
+    expect(colors.accent.toLowerCase()).toBe("#f03a3a");
+    expect(name).toBe("Pull the Cord");
+  });
+
+  it("should not be a recolour of Reacher x Chainsaw", () => {
+    const a = themes.pullTheCord.colors;
+    const b = themes.reacherChainsaw.colors;
+    for (const key of ["primary", "secondary", "accent", "background", "dark"]) {
+      expect(a[key].toLowerCase(), `${key} matches reacherChainsaw`).not.toBe(b[key].toLowerCase());
+    }
+  });
+});
+
+// Both hand-tuned palettes ship: the talk default and the former house palette.
+describe.each(["pullTheCord", "reacherChainsaw"])("signature theme %s", (id) => {
+  it("should author all 17 tokens by hand", () => {
+    const authored = Object.keys(themes[id].colors);
+    expect(authored).toHaveLength(17);
+  });
+
+  it("should need no auto-correction — the palette is hand-tuned", () => {
+    const theme = themes[id];
     const t = resolveThemeTokens(theme);
     for (const [key, authored] of Object.entries(theme.colors)) {
       expect(t[key].toLowerCase(), `${key} was corrected`).toBe(authored.toLowerCase());
     }
   });
 
+  it("should be reachable from the theme switcher", () => {
+    const listed = Object.values(themeCategories).some((cat) => cat.themes.includes(id));
+    expect(listed, `${id} is not in any switcher category`).toBe(true);
+  });
+});
+
+describe("reacherChainsaw palette", () => {
   it("should carry both series in its palette", () => {
     const { colors } = themes.reacherChainsaw;
     // Cyan for Reacher's deduction, crimson for Chainsaw Man's force.
     expect(colors.primary.toLowerCase()).toBe("#00f0c0");
     expect(colors.accent.toLowerCase()).toBe("#ff1744");
     expect(themes.reacherChainsaw.name).toContain("Chainsaw");
-  });
-
-  it("should be reachable from the theme switcher", () => {
-    const listed = Object.values(themeCategories).some((cat) =>
-      cat.themes.includes("reacherChainsaw")
-    );
-    expect(listed, "default theme is not in any switcher category").toBe(true);
   });
 });
 

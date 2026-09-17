@@ -9,22 +9,35 @@ import {
   PROP_FOR_TOGGLE,
   SKIN_TONES,
   TOP_COLORS,
-  clampPropPosition,
+  addCompanion,
+  clampItemPosition,
+  companionKey,
   describeAvatar,
-  findOption,
   findFreeSlot,
+  findItem,
+  findOption,
   findProp,
+  hasPlush,
+  hopSurface,
   isPropEnabled,
+  itemBounds,
+  itemCollides,
   loadAvatar,
+  moveItem,
   normalizeAvatar,
-  propBounds,
-  propCollides,
+  placedItems,
   propFootprint,
-  propsByDepth,
   randomAvatar,
   readPosition,
+  removeCompanion,
   saveAvatar,
+  setCompanionVariant,
+  togglePlush,
 } from "../config/avatar";
+import { BOOKCASE, MAX_COMPANIONS, findPlushKind } from "../config/sceneItems";
+import { CHARACTER_ART } from "./scene/characterArt";
+import { LunaPlush, PET_ART } from "./scene/petArt";
+import { SIDEKICK_ART } from "./scene/sidekickArt";
 import { SceneCustomizer } from "./SceneCustomizer";
 
 /**
@@ -739,7 +752,7 @@ const PropRing = ({ box, invalid }) => (
 );
 
 const MovableProp = ({
-  prop,
+  item,
   position,
   interactive = true,
   active,
@@ -753,10 +766,12 @@ const MovableProp = ({
   onBlur,
   children,
 }) => {
-  // The art was authored at the prop's default anchor, so only the delta moves.
-  const dx = Math.round((position.x - prop.x) * 100) / 100;
-  const dy = Math.round((position.y - prop.y) * 100) / 100;
-  const box = propFootprint(prop, { x: prop.x, y: prop.y });
+  // Desk props were authored at their default anchor, so only the delta moves.
+  // Added items (companions, plushies) are drawn around (0, 0) and move whole.
+  const origin = item.prop ? { x: item.prop.x, y: item.prop.y } : { x: 0, y: 0 };
+  const dx = Math.round((position.x - origin.x) * 100) / 100;
+  const dy = Math.round((position.y - origin.y) * 100) / 100;
+  const box = propFootprint(item, origin);
   const transform = dx || dy ? `translate(${dx} ${dy})` : undefined;
 
   if (!interactive) {
@@ -918,66 +933,64 @@ const Keyboard = ({ mech, accent }) => {
 };
 
 /* --------------------------------------------------------------------------
- * Luna
+ * Bookcase
  *
- * Traced from a photograph of her, not drawn from memory. Two hand-drawn
- * attempts both missed: one read as a generic beagle, the other as a Borzoi.
- *
- * The trace is generated, not hand-tuned, so it can be regenerated:
- *   1. GrabCut separates her from the floor. The dark tile leaked into the
- *      mask, so a brightness floor (her coat reads ~139, the tile ~41) removes
- *      it; enclosed dark regions (nose, eye markings) are restored by filling
- *      holes, because they sit INSIDE her silhouette and the floor does not.
- *   2. The photo is dim, so lightness is stretched over her own range and warmth
- *      restored before k-means picks the palette. Unchecked, the lightest colour
- *      came out a muddy #a08a7d instead of her cream chest.
- *   3. Side lighting had put half her face in shadow, which clustering read as
- *      dark fur. Lightness is divided by a heavy blur of itself to cancel the
- *      slow lighting gradient — on her HEAD only, because down the body it also
- *      flattened her cream chest, and that contrast is real.
- *   4. Each of five colour bands becomes nested contours, smoothed (Chaikin)
- *      and emitted as Bezier curves, so she matches the flat vector scene
- *      instead of reading as a posterised photo cutout.
- *
- * There is one pose, because there is one photo of her sitting. A second,
- * hand-drawn "curled" pose used a different footprint from the one the drag
- * system reserves for her, so toggling between them corrupted placement.
+ * Built in the desk's own wood, so the two read as one room's furniture. The
+ * geometry lives in src/config/sceneItems.js because the placement code needs
+ * the same shelf lines and book spans the art draws.
  * ------------------------------------------------------------------------ */
-const LUNA_LAYERS = [
-  ["#e8c5ae", "M419 173C412 172 403 172 395 171C388 171 381 171 374 172C367 172 360 173 354 173C347 172 342 171 336 170C330 169 325 166 319 165C313 163 306 162 298 160C290 159 282 158 274 158C266 158 258 159 250 161C242 162 233 165 227 167C220 170 215 172 209 174C204 176 201 178 194 179C188 180 180 181 172 181C164 181 154 180 147 181C140 182 134 184 129 187C124 190 121 194 119 197C116 200 115 203 114 206C114 209 115 212 114 215C113 218 112 221 110 224C109 227 106 230 105 232C104 235 104 238 104 240C104 243 104 245 106 248C107 250 109 254 112 256C114 260 118 263 122 266C126 268 132 270 137 272C142 274 149 275 154 278C158 281 162 285 164 290C167 295 168 302 169 306C170 311 170 314 170 316C170 319 170 320 168 323C166 326 164 328 161 332C158 335 153 338 150 342C146 346 143 350 140 354C137 359 134 364 130 371C127 378 123 387 120 396C116 406 112 418 111 427C109 437 109 445 110 452C110 459 113 465 114 471C115 477 115 482 115 486C115 491 115 495 115 500C115 504 116 510 117 516C117 522 119 528 119 536C120 544 119 554 118 564C118 573 116 586 116 594C116 602 116 608 117 614C118 620 120 622 120 627C121 632 121 637 122 644C122 651 121 657 124 668C126 679 131 695 136 710C142 725 150 747 157 758C163 770 170 776 176 779C181 782 188 779 192 778C196 777 198 775 200 773C202 770 202 767 203 763C203 760 203 756 203 752C202 747 202 742 200 738C198 734 194 729 190 725C187 721 181 718 178 714C174 710 171 707 169 704C167 700 165 697 164 693C163 689 162 685 162 681C162 677 163 673 164 669C164 666 165 663 167 661C169 658 171 657 177 655C183 653 193 651 203 649C213 647 229 644 238 643C246 642 251 642 255 643C258 643 257 645 258 647C259 650 260 653 261 657C262 661 263 665 265 670C268 675 271 681 274 686C277 692 282 698 286 702C289 706 292 709 295 710C298 712 301 711 304 711C307 711 310 710 314 709C316 707 320 706 322 704C324 702 326 700 326 698C327 696 327 693 326 690C326 688 326 684 324 681C323 678 322 674 320 671C318 668 314 665 311 662C307 659 302 657 299 654C296 652 294 650 293 648C291 645 291 644 290 642C290 640 290 639 291 637C292 635 293 634 298 630C302 626 310 621 319 614C327 608 340 600 348 592C357 585 364 577 370 569C376 561 381 553 385 544C389 535 392 526 394 515C396 505 397 494 398 483C398 472 398 460 398 449C397 437 396 424 394 415C393 406 390 400 388 395C386 390 383 387 382 384C380 380 379 376 378 372C377 367 377 363 378 356C378 349 380 340 382 330C384 320 387 306 390 298C392 289 396 283 399 277C402 272 406 270 410 266C414 263 418 260 422 257C426 254 430 251 434 248C437 245 440 241 441 238C443 234 444 230 445 227C446 224 445 220 445 217C444 214 443 211 442 208C442 204 442 201 442 197C443 193 444 189 444 186C444 183 443 181 442 179C441 178 439 177 436 176C432 175 426 174 419 173Z"],
-  ["#bf9875", "M419 173C412 172 403 172 395 171C388 171 381 171 374 172C367 172 360 173 354 173C347 172 342 171 336 170C330 169 325 166 319 165C313 163 306 162 298 160C290 159 282 158 274 158C266 158 258 159 250 161C242 162 233 165 227 167C220 170 215 172 209 174C204 176 201 178 194 179C188 180 180 181 172 181C164 181 154 180 147 181C140 182 134 184 129 187C124 190 121 194 119 197C116 200 115 203 114 206C114 209 115 212 114 215C113 218 112 221 110 224C109 227 106 230 105 232C104 235 104 238 104 240C104 243 104 245 106 248C107 250 109 254 112 256C114 260 118 263 122 266C126 268 132 270 137 272C142 274 149 275 154 278C158 281 162 285 164 290C167 295 168 302 169 306C170 311 170 314 170 316C170 319 170 320 168 323C166 326 164 328 161 332C158 335 153 338 150 342C146 346 143 350 140 354C137 359 134 364 130 371C127 378 123 387 120 396C116 406 112 418 111 427C109 437 109 445 110 452C110 459 113 465 114 471C115 477 115 482 115 486C115 491 115 495 115 500C115 504 116 510 117 516C117 522 119 528 119 536C120 544 119 554 118 564C118 573 116 586 116 594C116 602 116 608 117 614C118 620 120 622 120 627C121 632 121 637 122 644C122 651 121 657 124 668C126 679 131 695 136 710C142 725 150 747 157 758C163 770 170 776 176 779C181 782 188 779 192 778C196 777 198 775 200 773C202 770 202 767 203 763C203 760 203 756 203 752C202 747 202 742 200 738C198 734 194 729 190 725C187 721 181 718 178 714C174 710 171 707 169 704C167 700 165 697 164 693C163 690 162 686 162 683C162 679 162 675 162 672C163 669 163 667 165 664C167 662 168 660 173 657C179 655 189 652 199 650C209 647 225 644 234 643C243 641 248 641 252 642C256 643 256 645 257 647C258 649 259 651 260 654C261 658 261 661 263 666C265 671 268 677 272 683C276 689 281 697 285 701C289 706 292 708 295 710C298 712 301 711 304 711C307 711 309 711 312 710C315 709 317 708 319 707C321 705 323 703 324 700C325 698 326 694 326 691C326 688 325 684 324 681C323 678 322 674 319 671C317 667 313 663 309 660C305 656 299 652 296 649C293 646 291 644 290 642C290 640 291 638 292 636C293 634 296 632 298 630C300 628 304 625 305 623C307 621 308 619 308 617C308 616 307 614 306 613C305 612 304 611 302 610C299 610 298 610 294 610C290 610 284 611 278 612C271 612 263 614 256 614C249 615 242 615 235 614C228 614 222 613 217 612C212 611 208 610 206 609C203 607 202 606 200 604C199 602 198 599 198 597C198 595 198 592 199 589C200 587 202 585 205 582C207 580 211 578 213 577C215 575 216 573 217 571C217 568 217 567 214 562C212 558 205 550 199 543C192 535 182 524 176 517C170 510 167 505 164 502C161 498 161 497 160 495C160 492 159 490 159 488C158 486 158 484 159 482C160 480 161 479 163 478C166 477 168 476 174 477C181 478 191 481 202 483C212 485 228 490 238 491C248 492 255 490 261 488C267 487 270 482 274 480C278 477 281 476 284 475C287 474 289 474 292 474C294 474 296 475 298 476C300 477 301 478 303 480C305 483 308 486 310 490C312 493 315 498 318 501C320 504 323 506 325 507C327 508 329 508 331 508C333 508 334 507 336 506C337 505 338 504 339 502C340 500 340 497 341 494C342 491 342 487 343 483C345 480 347 476 349 472C351 468 354 464 357 461C359 459 361 457 363 456C365 455 367 456 369 456C371 457 374 458 376 460C378 461 381 464 384 465C386 466 388 466 390 466C392 465 393 465 394 461C395 457 395 449 395 441C395 433 395 421 393 413C392 405 390 400 388 395C386 390 383 387 382 384C380 380 379 376 378 372C377 367 377 363 378 356C378 349 380 340 382 330C384 320 387 306 390 298C392 289 396 283 399 277C402 272 406 270 410 266C414 263 418 260 422 257C426 254 430 251 434 248C437 245 440 241 441 238C443 234 444 230 445 227C446 224 445 220 445 217C444 214 443 211 442 208C442 204 442 201 442 197C443 193 444 189 444 186C444 183 443 181 442 179C441 178 439 177 436 176C432 175 426 174 419 173Z"],
-  ["#966d48", "M322 690C320 690 318 689 316 689C313 690 310 691 306 692C303 694 299 696 296 697C294 699 292 701 291 702C290 703 291 705 291 706C291 707 291 708 292 708C293 709 294 710 296 710C298 710 301 711 304 711C306 711 310 710 313 710C316 709 318 708 320 707C322 706 323 705 324 704C325 702 326 700 326 699C326 697 326 695 325 694C325 692 324 691 322 690ZM277 626C275 626 272 626 269 626C267 627 265 628 263 629C261 630 259 632 259 635C258 638 259 643 260 648C261 652 263 660 265 663C266 667 268 669 269 670C270 670 272 669 273 668C275 667 278 665 280 662C282 660 285 656 286 653C288 650 288 647 289 644C289 641 288 638 288 635C288 633 287 631 286 630C285 628 284 628 283 627C281 626 279 626 277 626ZM419 173C412 172 403 172 396 171C390 171 384 171 380 171C376 171 372 172 369 173C366 174 365 175 364 177C362 178 362 180 362 183C362 185 363 188 364 192C365 195 366 199 368 203C370 207 372 211 374 215C377 219 380 224 382 227C384 231 385 234 386 236C387 239 387 241 387 243C386 245 385 246 384 248C382 249 380 250 376 250C372 249 368 247 362 245C357 243 350 238 346 237C340 235 336 234 332 234C329 234 326 234 323 237C319 239 316 243 313 247C310 251 306 258 304 263C302 268 300 273 299 278C298 283 298 288 296 291C295 295 294 297 293 299C292 301 290 302 289 303C287 304 286 305 284 305C283 305 281 304 279 303C277 302 276 300 274 297C272 294 270 290 267 287C264 284 262 281 258 278C256 275 252 272 249 269C246 266 244 262 242 258C240 254 238 250 236 247C234 243 232 240 229 238C227 235 224 233 223 231C221 229 220 227 220 225C220 223 220 222 221 220C222 218 223 216 225 214C227 213 229 210 232 209C234 208 237 207 239 206C242 206 245 206 248 206C251 207 254 208 257 210C260 212 264 215 266 217C269 218 272 220 274 220C277 221 279 221 282 220C284 219 288 217 291 214C294 212 298 208 302 205C306 202 311 199 315 197C320 194 325 192 329 190C332 188 334 187 336 185C337 183 338 182 338 181C338 179 338 178 337 176C336 174 336 172 331 170C326 168 318 166 309 164C300 162 287 160 277 159C267 159 258 160 250 161C241 162 233 165 227 168C220 170 214 173 210 175C205 177 201 180 198 182C194 183 191 183 187 183C184 183 181 182 177 181C173 180 167 180 162 180C156 180 149 179 144 180C138 182 133 184 129 187C125 190 121 194 119 197C116 200 115 203 114 206C114 209 115 212 114 215C113 218 112 221 110 224C109 227 106 230 105 232C104 235 103 237 103 240C103 242 104 244 106 246C108 249 112 253 116 257C120 260 126 265 131 268C136 271 140 273 144 274C149 276 153 276 156 278C159 281 162 286 164 290C166 295 168 302 169 306C170 311 170 314 170 316C170 319 170 320 168 323C166 326 164 328 161 332C158 335 153 338 150 342C146 346 143 350 140 354C137 359 134 364 130 371C127 378 123 387 120 396C116 406 112 418 111 427C109 437 109 445 110 452C110 459 113 465 114 471C115 477 115 482 115 486C115 491 115 495 115 500C115 504 116 510 117 516C117 522 119 528 119 536C120 544 119 554 118 564C118 573 116 586 116 594C116 602 116 608 117 614C118 620 120 622 120 627C121 632 121 637 122 644C122 651 121 657 124 668C126 679 131 695 136 710C142 725 150 747 157 758C163 770 170 776 176 779C181 782 188 779 192 778C196 777 198 775 200 773C202 770 202 767 203 763C203 760 203 756 203 752C202 747 202 742 200 738C199 734 196 731 194 728C191 725 187 723 184 720C180 718 177 714 175 711C172 707 169 703 167 699C165 695 164 690 164 685C163 680 163 674 164 670C164 666 165 663 167 661C169 658 171 657 174 656C178 654 183 653 188 652C193 651 200 650 204 649C208 647 211 646 213 645C214 643 214 642 214 640C213 638 211 636 209 634C206 632 202 630 200 628C197 626 194 623 192 620C189 617 187 614 184 608C182 603 179 595 176 587C174 580 170 569 168 561C166 553 164 547 163 540C161 534 161 529 159 523C157 517 154 511 151 505C148 499 143 492 140 486C137 480 135 474 132 468C130 463 128 457 127 452C126 447 125 442 125 438C124 433 124 429 125 426C126 422 127 419 128 417C130 414 132 412 134 411C136 409 139 408 140 408C142 407 144 407 146 408C148 408 149 408 150 409C151 410 152 411 153 413C154 415 154 418 155 421C156 424 156 428 157 431C158 434 159 437 160 440C161 443 163 445 166 448C168 451 172 454 177 457C182 460 188 464 194 466C201 469 209 471 218 473C226 475 236 477 244 477C252 478 259 478 266 477C272 476 278 474 284 474C290 473 297 473 303 473C309 473 316 474 321 474C325 474 328 474 330 472C332 470 332 469 332 463C332 456 331 446 330 435C328 425 326 408 323 399C320 390 318 385 314 381C311 378 307 379 302 379C297 378 290 379 284 379C277 380 268 381 263 381C258 382 254 381 252 380C250 380 249 378 249 377C248 376 247 374 247 373C247 372 248 370 249 368C250 366 252 363 254 360C257 357 260 353 264 350C267 347 271 343 276 341C280 338 285 335 288 333C292 331 294 330 296 330C299 329 299 329 302 330C304 331 306 332 310 334C312 336 316 339 320 343C323 346 327 351 331 356C334 361 338 368 341 371C344 375 347 377 349 378C351 378 353 377 354 376C356 375 358 374 359 372C360 370 361 367 361 364C361 361 360 357 360 352C359 348 357 343 356 338C355 334 355 329 356 324C356 320 358 315 359 312C360 308 361 306 362 304C364 302 365 301 367 300C369 300 372 299 374 299C376 299 379 299 382 298C384 297 386 295 388 292C390 289 392 286 396 281C400 277 406 271 412 266C418 260 427 253 432 248C437 242 440 237 443 233C445 228 445 224 445 221C446 218 445 215 445 213C444 210 443 209 442 207C442 204 442 200 442 197C443 194 444 189 444 186C444 183 443 181 442 179C441 178 439 177 436 176C432 175 426 174 419 173Z"],
-  ["#68492e", "M199 757C198 756 196 756 194 755C192 755 190 756 188 756C186 757 184 758 181 759C179 760 176 760 174 760C172 760 169 760 167 760C165 761 163 761 162 762C161 763 160 764 160 766C160 767 160 769 160 771C161 773 161 775 164 777C166 778 171 779 176 779C180 779 188 779 192 778C196 776 198 774 200 772C202 769 202 765 201 762C201 760 200 758 199 757ZM118 491C117 492 116 494 116 498C115 501 116 506 117 513C117 519 119 527 119 535C120 544 119 554 118 564C118 574 116 586 116 594C116 602 116 608 117 614C118 620 120 622 120 627C121 632 121 638 122 644C122 650 121 657 122 664C123 672 125 679 127 687C128 694 132 702 134 708C136 713 137 717 139 719C140 722 141 722 142 724C144 725 145 726 147 726C148 727 150 727 152 727C154 726 157 725 159 723C162 721 165 719 166 715C168 711 167 705 167 700C166 694 164 686 164 680C163 674 165 668 166 664C167 658 170 654 170 650C170 646 169 643 167 639C165 636 160 633 158 630C156 627 154 624 152 621C150 618 149 615 149 611C149 607 150 602 151 596C152 590 154 584 154 576C155 568 154 559 152 550C151 541 148 530 146 522C144 514 142 508 140 504C138 499 135 496 133 494C131 492 129 490 127 489C125 488 123 488 122 488C120 488 119 489 118 491ZM148 348C148 350 147 352 149 355C151 358 156 361 160 365C164 369 171 373 174 379C177 384 178 392 179 400C179 407 177 417 177 423C177 430 177 434 179 438C180 441 182 443 185 445C188 448 192 450 197 453C201 456 207 458 213 461C219 463 226 466 234 468C242 470 250 472 258 473C266 474 275 474 283 474C291 474 299 473 305 472C311 471 315 471 318 469C322 468 322 467 324 463C325 459 326 452 327 444C328 436 328 425 328 418C328 411 327 405 325 400C324 395 322 392 319 389C316 386 312 384 307 382C302 381 296 380 290 380C284 381 276 383 269 385C262 387 253 392 248 393C242 394 239 394 237 392C235 391 236 388 236 386C236 383 237 379 238 375C240 371 242 366 244 362C245 359 245 356 245 353C244 351 244 349 242 348C239 348 235 348 231 350C227 351 220 354 215 354C210 356 206 356 201 356C197 355 193 354 189 352C185 351 182 348 179 345C176 342 173 337 170 335C168 333 166 332 164 332C162 332 160 333 158 334C157 335 155 336 154 337C152 339 151 340 150 342C149 344 148 346 148 348ZM247 276C244 271 240 263 237 258C234 254 232 251 230 249C229 247 228 248 227 247C225 247 224 247 222 247C220 248 218 248 214 250C210 253 203 257 197 261C190 266 180 272 175 276C170 281 168 284 166 286C164 289 166 290 166 292C167 293 167 295 168 296C169 298 170 299 172 300C175 301 178 301 182 301C186 301 190 300 195 301C200 301 206 303 211 305C216 307 222 310 227 312C231 313 235 314 238 314C241 314 243 313 245 312C247 311 248 310 250 308C252 307 253 305 254 303C254 302 255 300 255 298C256 296 256 294 254 291C253 287 250 281 247 276ZM332 244C329 244 327 245 325 247C322 250 320 254 318 258C316 262 313 269 312 273C310 278 310 281 310 285C310 288 310 291 311 293C312 296 314 298 316 300C317 302 320 304 322 305C325 306 328 306 331 306C335 305 339 304 343 301C346 299 351 295 355 292C359 288 364 282 367 279C370 275 371 273 372 271C372 268 371 268 371 266C370 265 369 263 368 262C367 261 365 259 363 258C360 256 357 254 353 251C350 249 345 246 341 245C337 244 334 243 332 244ZM116 207C116 210 117 213 119 216C121 220 124 223 128 227C132 230 137 234 141 236C145 239 148 240 151 240C154 240 157 239 160 238C162 237 165 235 167 233C169 231 171 229 173 227C174 225 175 223 175 221C176 219 176 217 175 216C175 214 174 212 173 211C172 210 170 208 168 208C165 207 161 206 157 206C153 206 147 206 143 205C138 205 135 203 132 202C129 201 127 199 124 198C122 198 120 197 119 198C118 198 116 200 116 201C115 203 115 205 116 207ZM436 176C434 175 431 174 429 174C426 174 424 174 421 174C418 175 416 175 412 177C409 178 404 181 400 184C396 187 390 191 387 194C384 197 382 200 381 203C381 205 382 208 383 211C385 214 388 217 391 220C395 223 400 228 404 229C409 231 414 231 419 230C423 229 429 226 432 225C436 223 438 222 440 221C441 220 442 219 442 217C442 215 442 213 442 210C442 208 442 204 442 202C442 199 442 197 442 196C443 194 444 193 444 191C444 189 444 187 444 185C443 183 442 181 441 179C440 178 438 176 436 176ZM229 173C228 175 230 176 232 178C234 179 237 180 240 181C244 182 249 183 252 185C256 186 259 189 262 191C265 193 268 196 270 197C272 199 274 200 276 200C277 200 278 200 280 198C282 196 284 192 286 188C289 183 292 177 293 173C295 169 295 166 294 164C294 162 292 162 290 161C288 160 285 159 282 158C278 158 274 157 270 158C265 158 259 160 253 161C247 163 240 166 236 168C232 170 230 172 229 173Z"],
-  ["#291d16", "M291 381C288 381 286 382 282 383C279 384 275 387 271 389C267 392 262 396 259 398C256 401 254 403 252 405C251 408 251 409 251 413C252 417 253 423 254 429C256 435 258 444 260 450C262 455 264 459 267 463C270 466 272 468 275 469C278 471 281 471 284 472C288 472 291 471 294 471C297 470 300 469 303 468C306 467 308 466 310 465C312 464 314 462 316 461C317 459 318 458 319 455C320 452 322 448 323 444C324 439 326 434 326 429C327 424 327 419 326 414C326 409 325 404 323 400C321 396 318 392 314 390C310 387 305 385 301 384C297 382 294 382 291 381ZM204 381C203 382 202 383 201 385C200 386 200 389 200 391C199 393 199 396 200 399C200 402 201 406 202 409C203 412 204 417 205 419C207 422 208 423 210 424C211 425 213 425 215 425C216 424 218 423 219 421C220 419 222 417 223 414C224 411 224 408 225 404C225 400 225 396 225 393C225 390 225 388 224 386C223 384 222 383 220 382C219 381 217 380 215 380C213 379 211 379 209 380C207 380 206 380 204 381ZM198 275C197 277 197 279 198 281C199 283 201 286 204 288C206 290 210 293 213 295C216 297 219 299 222 300C225 300 228 301 230 301C233 301 235 300 236 299C238 298 239 297 240 295C241 294 242 292 242 290C242 288 241 285 240 282C239 279 238 276 236 273C234 270 231 265 229 263C227 261 225 259 223 259C221 258 220 258 218 259C216 260 213 261 210 263C207 265 204 267 202 269C200 271 198 273 198 275ZM330 257C328 258 327 260 325 262C324 265 323 268 322 271C321 274 320 278 320 281C320 283 320 285 321 287C322 289 322 290 324 291C325 292 327 293 329 293C331 294 334 294 336 294C339 293 342 292 344 290C347 288 350 286 352 283C354 281 356 278 357 276C358 274 358 271 358 268C358 266 357 264 356 262C354 260 352 259 349 258C347 256 345 256 342 255C340 254 337 254 335 254C333 254 331 255 330 257Z"],
+const BOOK_SPINES = [
+  { w: 7, h: 46, fill: "#1D4ED8", edge: "#60A5FA" },
+  { w: 7, h: 54, fill: "#B91C1C", edge: "#EF4444" },
+  { w: 8, h: 40, fill: "#047857", edge: "#34D399" },
 ];
 
-/** Her feet in trace space, and the scale that fits her into her floor slot. */
-const LUNA_FEET = { x: 274.5, y: 782 };
-const LUNA_SCALE = 0.2016;
+const Bookcase = ({ wood }) => {
+  const { x, y, w, h, boards, books, inner } = BOOKCASE;
+  const bottom = y + h;
+  const side = inner.minX - x;
 
-/**
- * Authored at the companion's default anchor (186, 480), as every movable prop
- * is — MovableProp only translates by the distance she has been dragged.
- */
-const Luna = () => (
-  <g>
-    <ellipse cx={186} cy={479} rx={38} ry={6} fill="#000000" opacity={0.32} />
-    <g transform={`translate(186 480) scale(${LUNA_SCALE}) translate(${-LUNA_FEET.x} ${-LUNA_FEET.y})`}>
-      {/* Her tail, which is too thin and too shadowed to survive segmentation. */}
-      <path
-        d="M140 610 C96 596 58 556 44 500"
-        fill="none"
-        stroke="#bf9060"
-        strokeWidth={24}
-        strokeLinecap="round"
-      />
-      <path d="M58 530 C50 514 46 506 44 500" fill="none" stroke="#f0d0ba" strokeWidth={24} strokeLinecap="round" />
-      {LUNA_LAYERS.map(([fill, d], i) => (
-        <path key={i} fill={fill} fillRule="evenodd" d={d} />
+  return (
+    <g>
+      <ellipse cx={x + w / 2} cy={bottom} rx={w / 2 + 8} ry={6} fill="#000000" opacity={0.3} />
+      {/* back panel, in shadow: the shelves are recessed */}
+      <rect x={x} y={y} width={w} height={h} rx={3} fill={wood.shadow} />
+      <rect x={inner.minX} y={y + 12} width={inner.maxX - inner.minX} height={h - 12} fill="#000000" opacity={0.28} />
+      {/* sides and top */}
+      <rect x={x} y={y} width={side} height={h} rx={2} fill={wood.base} />
+      <rect x={inner.maxX} y={y} width={side} height={h} rx={2} fill={wood.base} />
+      <rect x={x} y={y} width={3} height={h} fill={wood.highlight} opacity={0.35} />
+      <rect x={x - 4} y={y - 6} width={w + 8} height={14} rx={3} fill={wood.base} />
+      <rect x={x - 4} y={y - 6} width={w + 8} height={3} rx={1.5} fill={wood.highlight} opacity={0.7} />
+      {/* kick plate below the last shelf */}
+      <rect x={inner.minX} y={boards[boards.length - 1] + 8} width={inner.maxX - inner.minX} height={bottom - boards[boards.length - 1] - 8} fill={wood.base} opacity={0.85} />
+      {boards.map((boardY) => (
+        <g key={boardY}>
+          <rect x={inner.minX} y={boardY} width={inner.maxX - inner.minX} height={8} fill={wood.base} />
+          <rect x={inner.minX} y={boardY} width={inner.maxX - inner.minX} height={2} fill={wood.highlight} opacity={0.75} />
+          <rect x={inner.minX} y={boardY + 8} width={inner.maxX - inner.minX} height={4} fill="#000000" opacity={0.25} />
+        </g>
       ))}
+      {books.map((book) => {
+        let cursor = book.minX;
+        return (
+          <g key={`${book.shelf}-${book.minX}`}>
+            {BOOK_SPINES.map((spine, i) => {
+              const bx = cursor;
+              cursor += spine.w;
+              return (
+                <g key={i}>
+                  <rect x={bx} y={boards[book.shelf] - spine.h} width={spine.w - 0.6} height={spine.h} rx={1} fill={spine.fill} />
+                  <rect x={bx} y={boards[book.shelf] - spine.h + 6} width={spine.w - 0.6} height={2} fill={spine.edge} opacity={0.6} />
+                </g>
+              );
+            })}
+          </g>
+        );
+      })}
     </g>
-  </g>
-);
+  );
+};
 
 /* --------------------------------------------------------------------------
  * Scene
@@ -1034,9 +1047,60 @@ export const StudentBuildingScene = ({
         );
       } else if (propId && isPropEnabled(avatar, propId) && !isPropEnabled(next, propId)) {
         setStatus(`${findProp(propId).label} removed.`);
+      } else if (key === "bookcase") {
+        setStatus(value ? "Bookcase added beside the desk." : "Bookcase removed, and its plushies with it.");
       }
 
       commit(next);
+    },
+    [avatar, commit],
+  );
+
+  const handleAddCompanion = useCallback(
+    (kindId, variantId) => {
+      const next = addCompanion(avatar, kindId, variantId);
+      if (next === avatar) {
+        setStatus(`The scene holds ${MAX_COMPANIONS} companions. Remove one to add another.`);
+        return;
+      }
+      const added = next.companions[next.companions.length - 1];
+      commit(next);
+      setStatus(
+        `${findItem(next, companionKey(added.id)).label} added. ` +
+          "Drag it, or focus it and use the arrow keys, to move it.",
+      );
+    },
+    [avatar, commit],
+  );
+
+  const handleRemoveCompanion = useCallback(
+    (id) => {
+      const item = findItem(avatar, companionKey(id));
+      commit(removeCompanion(avatar, id));
+      setStatus(`${item ? item.label : "Companion"} removed.`);
+    },
+    [avatar, commit],
+  );
+
+  const handleCompanionVariant = useCallback(
+    (id, variantId) => {
+      const next = commit(setCompanionVariant(avatar, id, variantId));
+      const item = findItem(next, companionKey(id));
+      if (item) setStatus(`Now ${item.label}.`);
+    },
+    [avatar, commit],
+  );
+
+  const handleTogglePlush = useCallback(
+    (kindId) => {
+      const had = hasPlush(avatar, kindId);
+      commit(togglePlush(avatar, kindId));
+      const name = findPlushKind(kindId)?.label ?? "Plushie";
+      setStatus(
+        had
+          ? `${name} plushie taken off the bookcase.`
+          : `${name} plushie added to the bookcase. Up and down arrows move it between shelves.`,
+      );
     },
     [avatar, commit],
   );
@@ -1054,7 +1118,7 @@ export const StudentBuildingScene = ({
   /* ---------------- moving props ---------------- */
 
   /**
-   * Client pixels to SVG user units. The viewBox is 800x500 but the element is
+   * Client pixels to SVG user units. The viewBox is 1000x500 but the element is
    * fluid, so the two are never 1:1 — the screen CTM is the only honest way to
    * convert, and it also handles page zoom and any ancestor transform.
    */
@@ -1070,27 +1134,27 @@ export const StudentBuildingScene = ({
     return { x: local.x, y: local.y };
   }, []);
 
+  /* Props, companions and plushies all move through one set of handlers, keyed
+     by item key: a prop id, `companion:<id>` or `plush:<kind>`. */
   const positionOf = useCallback(
-    (id) => (drag && drag.id === id ? { x: drag.x, y: drag.y } : readPosition(avatar, id)),
+    (key) => (drag && drag.id === key ? { x: drag.x, y: drag.y } : findItem(avatar, key)?.position),
     [avatar, drag],
   );
 
   const movePropTo = useCallback(
-    (id, next) => {
-      // Whole units: the CTM inverse leaves float noise that nobody can see
-      // but everybody would read in the stored config.
-      const clamped = clampPropPosition(id, {
-        x: Math.round(next.x),
-        y: Math.round(next.y),
-      });
-      commit({ ...avatar, positions: { ...avatar.positions, [id]: clamped } });
-      const prop = findProp(id);
-      const overlapping = propCollides(avatar, id, clamped);
+    (key, target) => {
+      // moveItem rounds to whole units: the CTM inverse leaves float noise that
+      // nobody can see but everybody would read in the stored config.
+      const next = commit(moveItem(avatar, key, target));
+      const item = findItem(next, key);
+      if (!item) return null;
+      const { x, y } = item.position;
+      const overlapping = itemCollides(next, key, item.position);
       setStatus(
-        `${prop.label} moved to x ${Math.round(clamped.x)}, y ${Math.round(clamped.y)}` +
+        `${item.label} moved to x ${Math.round(x)}, y ${Math.round(y)}` +
           `${overlapping ? ", overlapping another item" : ""}.`,
       );
-      return clamped;
+      return item.position;
     },
     [avatar, commit],
   );
@@ -1099,7 +1163,8 @@ export const StudentBuildingScene = ({
     (id) => (event) => {
       if (event.pointerType === "mouse" && event.button !== 0) return;
       const point = toSvgPoint(event);
-      if (!point) return;
+      const item = findItem(avatar, id);
+      if (!point || !item) return;
       event.preventDefault();
       const target = event.currentTarget;
       try {
@@ -1110,7 +1175,7 @@ export const StudentBuildingScene = ({
       }
       // preventScroll: focusing must not yank the page mid-drag.
       if (typeof target.focus === "function") target.focus({ preventScroll: true });
-      const start = readPosition(avatar, id);
+      const start = item.position;
       setDrag({
         id,
         pointerId: event.pointerId,
@@ -1128,14 +1193,15 @@ export const StudentBuildingScene = ({
     (id) => (event) => {
       if (!drag || drag.id !== id) return;
       const point = toSvgPoint(event);
-      if (!point) return;
-      const next = clampPropPosition(id, {
+      const item = findItem(avatar, id);
+      if (!point || !item) return;
+      const next = clampItemPosition(item, {
         x: point.x - drag.grabX,
         y: point.y - drag.grabY,
       });
       setDrag((prev) =>
         prev && prev.id === id
-          ? { ...prev, ...next, invalid: propCollides(avatar, id, next) }
+          ? { ...prev, ...next, invalid: itemCollides(avatar, id, next) }
           : prev,
       );
     },
@@ -1159,15 +1225,24 @@ export const StudentBuildingScene = ({
     [drag, movePropTo],
   );
 
-  /** Drag is a mouse affordance; the arrow keys are the real contract. */
+  /**
+   * Drag is a mouse affordance; the arrow keys are the real contract. Shelves
+   * are lines, so up/down against the edge of a surface hops to the next one.
+   */
   const handlePropKeyDown = useCallback(
     (id) => (event) => {
       const delta = ARROW_DELTAS[event.key];
-      if (!delta) return;
+      const item = findItem(avatar, id);
+      if (!delta || !item) return;
       event.preventDefault();
       event.stopPropagation();
+      const from = item.position;
+      const hop = delta[1] ? hopSurface(item, from, delta[1]) : null;
+      if (hop) {
+        movePropTo(id, hop);
+        return;
+      }
       const step = event.shiftKey ? NUDGE_FAST : NUDGE;
-      const from = readPosition(avatar, id);
       movePropTo(id, { x: from.x + delta[0] * step, y: from.y + delta[1] * step });
     },
     [avatar, movePropTo],
@@ -1188,15 +1263,26 @@ export const StudentBuildingScene = ({
   /** A scene driven by a fixed `avatar` prop is a picture, not a workspace. */
   const interactive = customizable && !avatarProp;
 
-  /* The art for each prop, drawn at its authored anchor. */
+  /* The art for each desk prop, drawn at its authored anchor. */
   const propArt = {
     lamp: <Lamp accent={isNight ? "#FDE68A" : "#FFFFFF"} lit={isNight} />,
     plant: <Plant />,
     books: <Books />,
-    companion: <Luna />,
     keyboard: <Keyboard mech={avatar.mechKeyboard} accent={accent} />,
     phone: <Phone accent={accent} />,
     mug: <Mug accent={accent} />,
+  };
+
+  /** Companions and plushies are drawn around (0, 0); see src/components/scene. */
+  const renderArt = (item) => {
+    if (item.type === "prop") return propArt[item.key];
+    if (item.type === "plush") {
+      if (item.kind.id === "luna") return <LunaPlush />;
+      const Plush = SIDEKICK_ART[item.kind.id] || CHARACTER_ART[item.kind.id];
+      return Plush ? <Plush mode="plush" /> : null;
+    }
+    const Art = PET_ART[item.kind.id] || SIDEKICK_ART[item.kind.id] || CHARACTER_ART[item.kind.id];
+    return Art ? <Art variant={item.companion.variant} mode="figure" /> : null;
   };
 
   /**
@@ -1207,43 +1293,44 @@ export const StudentBuildingScene = ({
    * DOM mid-nudge, and moving a focused <g> blurs it, which would break the
    * arrow keys for exactly the people who depend on them.
    */
-  const visibleProps = propsByDepth().filter((prop) => isPropEnabled(avatar, prop.id));
+  const visibleItems = placedItems(avatar);
 
-  const renderProp = (prop) => {
-    const position = positionOf(prop.id);
-    const dragging = drag?.id === prop.id;
-    const bounds = propBounds(prop);
+  const renderProp = (item) => {
+    const position = positionOf(item.key);
+    const dragging = drag?.id === item.key;
+    const bounds = itemBounds(item, position);
 
     return (
       <MovableProp
-        key={prop.id}
-        prop={prop}
+        key={item.key}
+        item={item}
         position={position}
         interactive={interactive}
-        active={dragging ? "drag" : focusedProp === prop.id ? "focus" : null}
+        active={dragging ? "drag" : focusedProp === item.key ? "focus" : null}
         invalid={dragging ? drag.invalid : false}
         label={
-          `${prop.label}, movable. Position ${Math.round(position.x)}, ${Math.round(position.y)} ` +
+          `${item.label}, movable. Position ${Math.round(position.x)}, ${Math.round(position.y)} ` +
           `of ${Math.round(bounds.minX)} to ${Math.round(bounds.maxX)} across. ` +
-          "Arrow keys move it, shift and arrow moves further."
+          "Arrow keys move it, shift and arrow moves further." +
+          (item.surfaces.length > 1 ? " Up and down arrows also move it between surfaces." : "")
         }
-        onPointerDown={handlePropPointerDown(prop.id)}
-        onPointerMove={handlePropPointerMove(prop.id)}
-        onPointerUp={handlePropPointerUp(prop.id)}
-        onKeyDown={handlePropKeyDown(prop.id)}
+        onPointerDown={handlePropPointerDown(item.key)}
+        onPointerMove={handlePropPointerMove(item.key)}
+        onPointerUp={handlePropPointerUp(item.key)}
+        onKeyDown={handlePropKeyDown(item.key)}
         onFocus={() => {
-          setFocusedProp(prop.id);
-          setStatus(`${prop.label} selected. Use the arrow keys to move it.`);
+          setFocusedProp(item.key);
+          setStatus(`${item.label} selected. Use the arrow keys to move it.`);
         }}
-        onBlur={() => setFocusedProp((current) => (current === prop.id ? null : current))}
+        onBlur={() => setFocusedProp((current) => (current === item.key ? null : current))}
       >
-        {propArt[prop.id]}
+        {renderArt(item)}
       </MovableProp>
     );
   };
 
-  const propsBehindDisplay = visibleProps.filter((prop) => prop.depth < DISPLAY_DEPTH);
-  const propsInFrontOfDisplay = visibleProps.filter((prop) => prop.depth >= DISPLAY_DEPTH);
+  const propsBehindDisplay = visibleItems.filter((item) => item.depth < DISPLAY_DEPTH);
+  const propsInFrontOfDisplay = visibleItems.filter((item) => item.depth >= DISPLAY_DEPTH);
 
   return (
     <div className={`@container ${className}`}>
@@ -1282,7 +1369,7 @@ export const StudentBuildingScene = ({
         <div className="relative min-w-0 flex-1">
           <svg
             ref={svgRef}
-            viewBox="0 0 800 500"
+            viewBox="0 0 1000 500"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             className="w-full h-auto"
@@ -1290,7 +1377,7 @@ export const StudentBuildingScene = ({
             aria-label={label}
           >
             <defs>
-              <linearGradient id={gid("bg")} x1="0" y1="0" x2="800" y2="500" gradientUnits="userSpaceOnUse">
+              <linearGradient id={gid("bg")} x1="0" y1="0" x2="1000" y2="500" gradientUnits="userSpaceOnUse">
                 {isNight ? (
                   <>
                     <stop offset="0%" stopColor="#0B1020" />
@@ -1402,8 +1489,8 @@ export const StudentBuildingScene = ({
               </filter>
             </defs>
 
-            <rect width="800" height="500" rx="16" fill={`url(#${gid("bg")})`} />
-            <rect width="800" height="500" rx="16" fill={`url(#${gid("ambient")})`} />
+            <rect width="1000" height="500" rx="16" fill={`url(#${gid("bg")})`} />
+            <rect width="1000" height="500" rx="16" fill={`url(#${gid("ambient")})`} />
 
             {/* ---------- BACKDROP: sun or moon + stars ---------- */}
             <g className="scene-float-slow">
@@ -1488,6 +1575,9 @@ export const StudentBuildingScene = ({
 
             {/* separates the figure from the backdrop */}
             <ellipse cx={CENTER} cy={268} rx={190} ry={150} fill={`url(#${gid("figureHalo")})`} />
+
+            {/* ---------- BOOKCASE (furniture; its plushies are placed items) ---------- */}
+            {avatar.bookcase && <Bookcase wood={desk} />}
 
             {/* ---------- CHAIR ---------- */}
             <g>
@@ -1791,7 +1881,8 @@ export const StudentBuildingScene = ({
             </g>
 
             {/* ---------- MOVABLE PROPS (behind the display plane) ----------
-                Lamp, plant, books and Luna: everything the screen should occlude. */}
+                Lamp, plant, books and floor companions: everything the screen
+                should occlude. */}
             {propsBehindDisplay.map(renderProp)}
 
             {/* ---------- DISPLAY(S) ---------- */}
@@ -1869,6 +1960,10 @@ export const StudentBuildingScene = ({
             onChange={handleChange}
             onRandomize={handleRandomize}
             onReset={handleReset}
+            onAddCompanion={handleAddCompanion}
+            onRemoveCompanion={handleRemoveCompanion}
+            onCompanionVariant={handleCompanionVariant}
+            onTogglePlush={handleTogglePlush}
             description={label}
           />
         )}

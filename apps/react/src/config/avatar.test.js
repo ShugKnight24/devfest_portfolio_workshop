@@ -16,15 +16,26 @@ import {
   SCENE_SURFACES,
   SKIN_TONES,
   HAIR_STYLES,
+  addCompanion,
   arrangeProps,
   clampPropPosition,
   clearStoredAvatar,
   describeAvatar,
   findFreeSlot,
+  findItem,
   findOption,
+  hopSurface,
+  itemCollides,
   isPropEnabled,
   loadAvatar,
+  moveItem,
   normalizeAvatar,
+  placedItems,
+  plushKey,
+  companionKey,
+  removeCompanion,
+  setCompanionVariant,
+  togglePlush,
   propBounds,
   propCollides,
   propFootprint,
@@ -33,11 +44,12 @@ import {
   readPosition,
   saveAvatar,
 } from "./avatar";
+import { BOOKCASE, COMPANION_KINDS, MAX_COMPANIONS, PLUSH_KINDS, shelfBookBoxes } from "./sceneItems";
 
 const CHOICE_KEYS = AVATAR_CHOICES.map((choice) => choice.id);
 const TOGGLE_KEYS = AVATAR_TOGGLES.map((toggle) => toggle.id);
 const PROP_KEYS = SCENE_PROPS.map((prop) => prop.id);
-const ALL_KEYS = [...CHOICE_KEYS, ...TOGGLE_KEYS, "positions"];
+const ALL_KEYS = [...CHOICE_KEYS, ...TOGGLE_KEYS, "positions", "companions", "plushies"];
 
 const expectComplete = (avatar) => {
   expect(Object.keys(avatar).sort()).toEqual([...ALL_KEYS].sort());
@@ -81,14 +93,19 @@ describe("normalizeAvatar", () => {
       deskSurface: "concrete",
       chairColor: "crimson",
       backdrop: "day",
-      companion: "luna",
       mug: false,
       plant: false,
       books: true,
       lamp: false,
       mechKeyboard: true,
       phone: true,
+      bookcase: false,
       positions: positionsOf({ mug: { x: 600, y: 344 } }),
+      companions: [
+        { id: "luna", kind: "dog", variant: "luna", x: 186, y: 480 },
+        { id: "pochita-1", kind: "pochita", variant: null, x: 600, y: 344 },
+      ],
+      plushies: [{ kind: "vegeta", x: 900, y: 352 }],
     };
 
     expect(normalizeAvatar(valid)).toEqual(valid);
@@ -192,7 +209,7 @@ describe("normalizeAvatar", () => {
 /**
  * Prop positions.
  *
- * Every desk prop and the companion carry an {x, y} anchor so they can be
+ * Every desk prop and every added item carries an {x, y} anchor so they can be
  * dragged or arrow-keyed. The same rule applies as to every other axis: a
  * stale or hostile localStorage blob must not be able to put a prop somewhere
  * the scene cannot draw it.
@@ -243,13 +260,17 @@ describe("prop positions", () => {
     expect(farRight.x).toBe(bounds.maxX);
   });
 
-  it("clamps a floor prop into the floor band rather than onto the desk", () => {
-    const tooHigh = clampPropPosition("companion", { x: 300, y: 10 });
-    const tooLow = clampPropPosition("companion", { x: 300, y: 900 });
+  it("clamps a floor companion into the floor band rather than onto the desk", () => {
+    const { companions } = normalizeAvatar({
+      companions: [
+        { id: "a", kind: "cat", x: 300, y: 10 },
+        { id: "b", kind: "cat", x: 300, y: 900 },
+      ],
+    });
 
-    expect(tooHigh.y).toBe(SCENE_SURFACES.floor.minY);
-    expect(tooHigh.y).toBeGreaterThan(366);
-    expect(tooLow.y).toBe(SCENE_SURFACES.floor.maxY);
+    expect(companions[0].y).toBe(SCENE_SURFACES.floor.minY);
+    expect(companions[0].y).toBeGreaterThan(366);
+    expect(companions[1].y).toBe(SCENE_SURFACES.floor.maxY);
   });
 
   it("repairs a malformed coordinate one axis at a time", () => {
@@ -278,13 +299,12 @@ describe("prop positions", () => {
 describe("normalizeAvatar positions", () => {
   it("repairs out-of-range coordinates from storage", () => {
     const result = normalizeAvatar({
-      positions: { mug: { x: 99999, y: -99999 }, companion: { x: -10, y: 0 } },
+      positions: { mug: { x: 99999, y: -99999 } },
     });
 
     const mugBounds = propBounds(SCENE_PROPS.find((prop) => prop.id === "mug"));
     expect(result.positions.mug.x).toBe(mugBounds.maxX);
     expect(result.positions.mug.y).toBe(SCENE_SURFACES.desk.minY);
-    expect(result.positions.companion.y).toBe(SCENE_SURFACES.floor.minY);
     expectComplete(result);
   });
 
@@ -364,7 +384,6 @@ describe("collision and placement", () => {
     // The keyboard is implied by any non-laptop display, not just the toggle.
     expect(isPropEnabled({ ...DEFAULT_AVATAR, display: "laptop", mechKeyboard: false }, "keyboard")).toBe(false);
     expect(isPropEnabled({ ...DEFAULT_AVATAR, display: "monitor", mechKeyboard: false }, "keyboard")).toBe(true);
-    expect(isPropEnabled({ ...DEFAULT_AVATAR, companion: "none" }, "companion")).toBe(false);
   });
 
   it("reports a collision when two props are stacked", () => {
@@ -404,7 +423,6 @@ describe("collision and placement", () => {
       lamp: true,
       phone: true,
       mechKeyboard: true,
-      companion: "luna",
     });
     const arranged = { ...crowded, positions: arrangeProps(crowded) };
 
@@ -492,14 +510,15 @@ describe("storage round trip", () => {
     const moved = normalizeAvatar({
       ...DEFAULT_AVATAR,
       books: true,
-      positions: { mug: { x: 612, y: 338 }, companion: { x: 420, y: 462 } },
+      positions: { mug: { x: 612, y: 338 } },
+      companions: [{ id: "luna", kind: "dog", variant: "luna", x: 420, y: 462 }],
     });
 
     expect(saveAvatar(moved)).toBe(true);
     const restored = loadAvatar();
 
     expect(restored.positions.mug).toEqual({ x: 612, y: 338 });
-    expect(restored.positions.companion).toEqual({ x: 420, y: 462 });
+    expect(restored.companions[0]).toMatchObject({ x: 420, y: 462 });
     expect(restored).toEqual(moved);
     expectComplete(restored);
   });
@@ -540,5 +559,176 @@ describe("storage round trip", () => {
     window.localStorage.setItem(AVATAR_STORAGE_KEY, "{not json");
     expect(loadAvatar()).toEqual({ ...DEFAULT_AVATAR });
     expectComplete(loadAvatar());
+  });
+});
+
+describe("companions", () => {
+  it("migrates a scene saved when Luna was the only companion", () => {
+    const result = normalizeAvatar({ companion: "luna", positions: { companion: { x: 420, y: 462 } } });
+    expect(result.companions).toEqual([{ id: "luna", kind: "dog", variant: "luna", x: 420, y: 462 }]);
+    expect(result).not.toHaveProperty("companion");
+  });
+
+  it("migrates an old scene that had turned Luna off", () => {
+    expect(normalizeAvatar({ companion: "none" }).companions).toEqual([]);
+  });
+
+  it("drops unknown kinds and junk, repairs variants and duplicate ids", () => {
+    const { companions } = normalizeAvatar({
+      companions: [
+        { id: "a", kind: "dragon" },
+        "a cat",
+        null,
+        { id: "same", kind: "cat", variant: "plaid" },
+        { id: "same", kind: "cat", variant: "black" },
+        { id: "<script>", kind: "pochita", variant: "anything" },
+      ],
+    });
+
+    expect(companions.map((c) => c.kind)).toEqual(["cat", "cat", "pochita"]);
+    expect(companions[0].variant).toBe("tabby");
+    expect(companions[1].variant).toBe("black");
+    expect(new Set(companions.map((c) => c.id)).size).toBe(3);
+    expect(companions[2].id).toMatch(/^pochita-\d+$/);
+    expect(companions[2].variant).toBe(null);
+  });
+
+  it("caps the number of companions", () => {
+    const many = Array.from({ length: MAX_COMPANIONS + 5 }, (_, i) => ({ id: `c${i}`, kind: "cat" }));
+    expect(normalizeAvatar({ companions: many }).companions).toHaveLength(MAX_COMPANIONS);
+  });
+
+  it("adds a companion in free space and refuses once the scene is full", () => {
+    let avatar = normalizeAvatar({ companions: [] });
+    for (let i = 0; i < MAX_COMPANIONS; i += 1) avatar = addCompanion(avatar, "cat", "orange");
+
+    expect(avatar.companions).toHaveLength(MAX_COMPANIONS);
+    avatar.companions.forEach((c) => {
+      expect(itemCollides(avatar, companionKey(c.id), c)).toBe(false);
+    });
+    expect(addCompanion(avatar, "dog")).toBe(avatar);
+    expect(addCompanion(normalizeAvatar({ companions: [] }), "unicorn").companions).toEqual([]);
+  });
+
+  it("starts a new dog as a golden, because Luna is not a breed", () => {
+    const avatar = addCompanion(normalizeAvatar({ companions: [] }), "dog");
+    expect(avatar.companions[0].variant).toBe("golden");
+  });
+
+  it("changes a variant and removes a companion by id", () => {
+    let avatar = addCompanion(normalizeAvatar({ companions: [] }), "dog", "husky");
+    const { id } = avatar.companions[0];
+
+    avatar = setCompanionVariant(avatar, id, "beagle");
+    expect(avatar.companions[0].variant).toBe("beagle");
+    expect(removeCompanion(avatar, id).companions).toEqual([]);
+  });
+
+  it("lets a bird perch on the desk or a shelf, whichever is nearer", () => {
+    const { companions } = normalizeAvatar({
+      companions: [
+        { id: "a", kind: "bird", x: 600, y: 330 },
+        { id: "b", kind: "bird", x: 900, y: 280 },
+      ],
+    });
+
+    expect(companions[0].y).toBe(SCENE_SURFACES.desk.minY);
+    expect(companions[1]).toMatchObject({ x: 900, y: BOOKCASE.boards[1] });
+  });
+
+  it("writes a move back onto the companion itself", () => {
+    const avatar = normalizeAvatar({});
+    const moved = moveItem(avatar, companionKey("luna"), { x: 500.4, y: 470.6 });
+    expect(moved.companions[0]).toMatchObject({ x: 500, y: 471 });
+    expect(moved.positions).toEqual(avatar.positions);
+  });
+});
+
+describe("bookcase and plushies", () => {
+  it("fits every plushie between two shelves", () => {
+    const gap = BOOKCASE.boards[1] - BOOKCASE.boards[0];
+    PLUSH_KINDS.forEach((kind) => expect(kind.box.h).toBeLessThan(gap - 8));
+  });
+
+  it("keeps one of each plushie and sits every one on a board", () => {
+    const { plushies } = normalizeAvatar({
+      plushies: [
+        { kind: "power", x: 900, y: 300 },
+        { kind: "power", x: 880, y: 196 },
+        { kind: "gundam", x: 880, y: 196 },
+      ],
+    });
+
+    expect(plushies).toHaveLength(1);
+    expect(BOOKCASE.boards).toContain(plushies[0].y);
+  });
+
+  it("shelves the whole collection without overlapping books or each other", () => {
+    let avatar = normalizeAvatar({ plushies: [] });
+    PLUSH_KINDS.forEach((kind) => {
+      avatar = togglePlush(avatar, kind.id);
+    });
+
+    expect(avatar.plushies).toHaveLength(PLUSH_KINDS.length);
+    avatar.plushies.forEach((plush) => {
+      expect(itemCollides(avatar, plushKey(plush.kind), plush)).toBe(false);
+    });
+  });
+
+  it("takes a plushie back off the shelf when toggled again", () => {
+    const avatar = togglePlush(normalizeAvatar({ plushies: [] }), "goku");
+    expect(togglePlush(avatar, "goku").plushies).toEqual([]);
+  });
+
+  it("treats the shelf books as occupied", () => {
+    const avatar = normalizeAvatar({ plushies: [{ kind: "denji", x: 842, y: BOOKCASE.boards[0] }] });
+    const [book] = shelfBookBoxes("shelf1");
+    expect(book).toBeDefined();
+    expect(itemCollides(avatar, plushKey("denji"), avatar.plushies[0])).toBe(true);
+  });
+
+  it("hides plushies from the scene when the bookcase is off", () => {
+    const keys = (avatar) => placedItems(avatar).map((item) => item.key);
+    expect(keys(normalizeAvatar({ bookcase: true }))).toContain(plushKey("pochita"));
+    expect(keys(normalizeAvatar({ bookcase: false }))).not.toContain(plushKey("pochita"));
+  });
+
+  it("hops a plushie between shelves with the arrow keys", () => {
+    const avatar = normalizeAvatar({});
+    const item = findItem(avatar, plushKey("pochita"));
+
+    const down = hopSurface(item, item.position, 1);
+    expect(down).toEqual({ x: item.position.x, y: BOOKCASE.boards[1] });
+    expect(hopSurface(item, item.position, -1)).toBe(null);
+    expect(hopSurface(item, { x: 900, y: BOOKCASE.boards[3] }, 1)).toBe(null);
+  });
+
+  it("keeps every companion kind's footprint on each surface it may use", () => {
+    COMPANION_KINDS.forEach((kind) => {
+      const avatar = addCompanion(normalizeAvatar({ companions: [] }), kind.id);
+      const [companion] = avatar.companions;
+      const item = findItem(avatar, companionKey(companion.id));
+      const box = propFootprint(item, companion);
+      expect(box.w).toBe(kind.box.w);
+      expect(Number.isFinite(companion.x) && Number.isFinite(companion.y)).toBe(true);
+    });
+  });
+
+  it("names companions and plushies in the alt text", () => {
+    const text = describeAvatar(
+      normalizeAvatar({
+        companions: [
+          { id: "luna", kind: "dog", variant: "luna" },
+          { id: "c", kind: "cat", variant: "orange" },
+          { id: "p", kind: "pochita" },
+        ],
+        plushies: [{ kind: "power" }, { kind: "goku" }],
+      }),
+    );
+
+    expect(text).toContain("Luna, a fawn dog");
+    expect(text).toContain("an orange cat");
+    expect(text).toContain("Pochita");
+    expect(text).toContain("plushies of Power and Goku");
   });
 });

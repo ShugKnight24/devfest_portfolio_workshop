@@ -4,7 +4,15 @@ import {
   AVATAR_GROUPS,
   AVATAR_TOGGLES,
 } from "../config/avatar";
-import { Checkmark, Close, Info, Refresh, Settings, Swap } from "./Icons";
+import {
+  COMPANION_FAMILIES,
+  COMPANION_KINDS,
+  MAX_COMPANIONS,
+  PLUSH_KINDS,
+  companionName,
+  findCompanionKind,
+} from "../config/sceneItems";
+import { Checkmark, Close, Info, Plus, Refresh, Settings, Swap } from "./Icons";
 
 /**
  * SceneCustomizer — the "make it look like my desk" panel.
@@ -129,6 +137,174 @@ const ToggleGroup = ({ toggles, avatar, onChange, legend }) => (
   </fieldset>
 );
 
+/** Group a list by one of its keys, keeping first-seen order. */
+const groupBy = (items, key) => {
+  const groups = new Map();
+  items.forEach((item) => {
+    if (!groups.has(item[key])) groups.set(item[key], []);
+    groups.get(item[key]).push(item);
+  });
+  return [...groups.entries()];
+};
+
+/**
+ * Companions are a list, not a toggle: each one added gets its own row, with
+ * its coat as a radio group and a labelled remove button. Adding is a set of
+ * plain buttons grouped by family, disabled once the scene is full.
+ */
+const CompanionSection = ({ companions, onAdd, onRemove, onVariant, idPrefix }) => {
+  const full = companions.length >= MAX_COMPANIONS;
+
+  return (
+    <section className="space-y-3 px-3 py-3">
+      <div className="flex items-baseline justify-between">
+        <h4 className="text-[10px] font-mono font-bold uppercase tracking-widest text-(--color-text) dark:text-(--color-text-dark)">
+          Companions
+        </h4>
+        <span className="text-[10px] font-mono text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
+          {companions.length} / {MAX_COMPANIONS}
+        </span>
+      </div>
+
+      {companions.length > 0 && (
+        <ul className="m-0 list-none space-y-2 p-0">
+          {companions.map((companion) => {
+            const kind = findCompanionKind(companion.kind);
+            if (!kind) return null;
+            const name = companionName(kind, companion.variant);
+            const groupName = `${idPrefix}-companion-${companion.id}`;
+
+            return (
+              <li
+                key={companion.id}
+                className="rounded-lg border border-(--color-border) p-2 dark:border-(--color-border-dark)"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-mono font-bold text-(--color-text) dark:text-(--color-text-dark)">
+                    {name}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onRemove(companion.id)}
+                    aria-label={`Remove ${name}`}
+                    className={`${SECONDARY_BUTTON} h-7`}
+                  >
+                    <Close className="h-3 w-3" />
+                    <span>Remove</span>
+                  </button>
+                </div>
+                {kind.variants.length > 1 && (
+                  <fieldset className="m-0 mt-2 border-0 p-0">
+                    <legend className="sr-only">{`${name}: coat`}</legend>
+                    <div className="flex flex-wrap gap-1.5">
+                      {kind.variants.map((variant) => {
+                        const optionId = `${groupName}-${variant.id}`;
+                        const selected = variant.id === companion.variant;
+                        return (
+                          <span key={variant.id} className="contents">
+                            <input
+                              type="radio"
+                              id={optionId}
+                              name={groupName}
+                              checked={selected}
+                              onChange={() => onVariant(companion.id, variant.id)}
+                              className="peer sr-only"
+                            />
+                            <label
+                              htmlFor={optionId}
+                              className={`${CHIP_BASE} ${PEER_FOCUS} ${selected ? CHIP_ON : CHIP_OFF}`}
+                            >
+                              {variant.label}
+                            </label>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </fieldset>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {COMPANION_FAMILIES.map((family) => (
+        <fieldset key={family.id} className="m-0 border-0 p-0" disabled={full}>
+          <legend className={LEGEND}>{`Add ${family.label.toLowerCase()}`}</legend>
+          <div className="flex flex-wrap gap-1.5">
+            {COMPANION_KINDS.filter((kind) => kind.family === family.id).map((kind) => (
+              <button
+                key={kind.id}
+                type="button"
+                onClick={() => onAdd(kind.id)}
+                aria-label={`Add ${kind.label}${kind.theme ? ` (${kind.theme})` : ""}`}
+                title={kind.theme}
+                className={`${CHIP_BASE} ${FOCUS} ${CHIP_OFF} disabled:cursor-not-allowed disabled:opacity-50`}
+              >
+                <Plus className="h-3 w-3" />
+                <span>{kind.label}</span>
+              </button>
+            ))}
+          </div>
+        </fieldset>
+      ))}
+      {full && (
+        <p className="text-[11px] text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
+          The scene is full. Remove a companion to add another.
+        </p>
+      )}
+    </section>
+  );
+};
+
+/** One of each plushie, grouped by the theme it comes from. */
+const PlushSection = ({ plushies, bookcase, onToggle }) => {
+  const owned = new Set(plushies.map((plush) => plush.kind));
+
+  return (
+    <section className="space-y-3 px-3 py-3">
+      <h4 className="text-[10px] font-mono font-bold uppercase tracking-widest text-(--color-text) dark:text-(--color-text-dark)">
+        Bookcase plushies
+      </h4>
+      {!bookcase && (
+        <p className="text-[11px] text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
+          Turn on the bookcase under Scene to shelve plushies.
+        </p>
+      )}
+      {groupBy(PLUSH_KINDS, "theme").map(([theme, kinds]) => (
+        <fieldset key={theme} className="m-0 border-0 p-0" disabled={!bookcase}>
+          <legend className={LEGEND}>{theme}</legend>
+          <div className="flex flex-wrap gap-1.5">
+            {kinds.map((kind) => {
+              const on = owned.has(kind.id);
+              return (
+                <button
+                  key={kind.id}
+                  type="button"
+                  aria-pressed={on}
+                  aria-label={`${kind.label} plushie`}
+                  onClick={() => onToggle(kind.id)}
+                  className={`${CHIP_BASE} ${FOCUS} ${on ? CHIP_ON : CHIP_OFF} disabled:cursor-not-allowed disabled:opacity-50`}
+                >
+                  <span
+                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                      on ? "border-current" : "border-(--color-muted-text) dark:border-(--color-muted-text-dark)"
+                    }`}
+                    aria-hidden="true"
+                  >
+                    {on && <Checkmark className="h-3 w-3" />}
+                  </span>
+                  <span>{kind.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+      ))}
+    </section>
+  );
+};
+
 export const SceneCustomizer = ({
   avatar,
   open,
@@ -136,6 +312,10 @@ export const SceneCustomizer = ({
   onChange,
   onRandomize,
   onReset,
+  onAddCompanion = () => {},
+  onRemoveCompanion = () => {},
+  onCompanionVariant = () => {},
+  onTogglePlush = () => {},
   description = "",
 }) => {
   const rawId = useId();
@@ -198,8 +378,9 @@ export const SceneCustomizer = ({
         >
           <Info className="mt-px h-3.5 w-3.5 shrink-0" />
           <span>
-            Props can be moved. Drag one in the scene, or tab to it and nudge it with the
-            arrow keys — hold shift for larger steps.
+            Props, companions and plushies can be moved. Drag one in the scene, or tab to it
+            and nudge it with the arrow keys — hold shift for larger steps. Up and down move a
+            plushie between shelves.
           </span>
         </p>
 
@@ -228,12 +409,26 @@ export const SceneCustomizer = ({
                     toggles={toggles}
                     avatar={avatar}
                     onChange={onChange}
-                    legend={group.id === "character" ? "Accessories" : "Props"}
+                    legend={
+                      group.id === "character" ? "Accessories" : group.id === "scene" ? "Furniture" : "Props"
+                    }
                   />
                 )}
               </section>
             );
           })}
+          <CompanionSection
+            companions={avatar.companions || []}
+            onAdd={onAddCompanion}
+            onRemove={onRemoveCompanion}
+            onVariant={onCompanionVariant}
+            idPrefix={idPrefix}
+          />
+          <PlushSection
+            plushies={avatar.plushies || []}
+            bookcase={Boolean(avatar.bookcase)}
+            onToggle={onTogglePlush}
+          />
         </div>
       </div>
 

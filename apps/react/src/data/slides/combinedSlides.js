@@ -1,15 +1,18 @@
 /**
- * THE TRILOGY ENSEMBLE — the deck you actually give.
+ * PULL THE CORD. BRING BACKUP. — the deck you actually give.
  *
  * Detroit Latin Heritage Month Innovation Summit — September 19, 2026
  * Google GDG Detroit
  *
  * ONE ARGUMENT
  * ------------
- * You are no longer the person who types. You are the person who decides. Every
- * slide here is evidence for that one claim, and the character pairings are the
- * shape the evidence takes: two habits held against each other until the
- * engineering rule between them is obvious.
+ * Stop typing boilerplate; start directing the crew. Denji pulls the cord and
+ * commits before he is ready. Reacher arrives alone and never closes a case
+ * without backup. `the-title` takes the title apart right after the title
+ * slide; `the-way` hands the moves back through Musashi as questions that work
+ * far beyond code. Every slide between is evidence, and the character
+ * pairings are the shape the evidence takes: two habits held against each
+ * other until the engineering rule between them is obvious.
  *
  *   Reacher / Neagley      context is a budget — bring nothing, name everything
  *   Finlay / Roscoe        the two things an agent cannot know: history, terrain
@@ -22,8 +25,8 @@
  * -------------------------
  * This talk follows Umelo Onyejiaka's "AI Won't Replace Community: Why We Still
  * Need to Learn Together". He makes the case for why we still need each other;
- * this deck is what you build for each other. The bridge opens the talk, and
- * the thread closes it:
+ * this deck is what you build for each other. The bridge opens the talk once the
+ * title and the speaker are introduced, and the thread closes it:
  *
  *   umelo-bridge      Umelo gave the why. This is the what.
  *   crew-and-unit     agents are the crew, people are the unit
@@ -32,6 +35,7 @@
  *   audience-of-one   Audience of One -> Audience of Many is the community move
  *   build-on-it       what makes a thing someone else can build on
  *   find-your-110th   how the unit actually forms
+ *   the-way           Musashi: read the terms, pull the cord, bring backup — in all things
  *   close             help, meet, ship something others can build on
  *
  * ELASTIC
@@ -65,8 +69,9 @@ const { CONCEPT, TACTICAL } = ALTITUDE;
 
 export const combinedDeckMeta = {
   id: "combined",
-  title: "Read the Scene. Pull the Cord.",
-  subtitle: "Building at the speed of AI, without building alone",
+  title: "Pull the Cord. Bring Backup.",
+  subtitle:
+    "Stop typing boilerplate. Start directing the crew. What Jack Reacher and Chainsaw Man taught me about agentic development",
   conference: "Detroit Latin Heritage Month Innovation Summit 2026",
   organization: "Google GDG Detroit",
   date: "September 19, 2026",
@@ -87,11 +92,71 @@ export const combinedSlides = [
     tier: TIER.CORE,
     altitude: CONCEPT,
     budget: 45,
-    title: "Read the Scene.\nPull the Cord.",
-    subtitle: "Building at the speed of AI, without building alone",
+    title: "Pull the Cord.\nBring Backup.",
+    subtitle:
+      "Stop typing boilerplate. Start directing the crew. What Jack Reacher and Chainsaw Man taught me about agentic development",
     description:
-      "One developer directing a crew. In a few minutes this room is going to name something that annoys you, out loud, and we are going to build it on stage.",
+      "In a few minutes this room is going to name something that annoys you, out loud, and we are going to build it on stage. Then we are going to find out what it got confidently wrong, together.",
     conferenceBadge: "GDG Detroit • Latin Heritage Month Innovation Summit",
+  },
+
+  {
+    id: "the-title",
+    type: "process",
+    tier: TIER.CORE,
+    altitude: CONCEPT,
+    budget: 100,
+    subtitle: "THE TITLE, TAKEN APART // THE WHOLE TALK, ONE SLIDE",
+    title: "Two moves. Neither one is typing.",
+    quote:
+      "Stop typing boilerplate. Start directing the crew. The machine will write almost anything you ask for; your job is deciding what to ask, committing to it, and bringing the people who catch what it gets confidently wrong.",
+    stages: [
+      {
+        num: "01",
+        name: "Pull the Cord",
+        detail:
+          "In Chainsaw Man, Denji pulls the cord in his chest and the chainsaw starts. He does not wait until he is ready. AI is that engine: a crew that builds in minutes. Read the scene first, then pull, because a running wrong version teaches more than a perfect plan.",
+        rule: "Chainsaw Man",
+      },
+      {
+        num: "02",
+        name: "Bring Backup",
+        detail:
+          "Jack Reacher arrives in town alone, and he never closes a hard case alone: Neagley, Dixon, Finlay, Roscoe, the 110th. Your AI will never tell you that you are wrong. The people who know the history and the users will. Call them in before you ship.",
+        rule: "Jack Reacher",
+      },
+      {
+        num: "03",
+        name: "Direct the Crew",
+        detail:
+          "Agents are the crew: tireless, parallel, and sure of themselves when they are wrong. You are no longer the person who types the boilerplate. You name the problem, set the constraints, pull the cord, and bring the unit that checks the work.",
+        rule: "This talk",
+      },
+    ],
+  },
+
+  {
+    id: "bio",
+    type: "bio",
+    tier: TIER.CORE,
+    altitude: CONCEPT,
+    budget: 45,
+    title: "Clearance Level: Admin",
+    name: "Shugmi Shumunov",
+    role: "Software Engineer & Founder @ Shumunov Solutions",
+    details: [
+      "Software Engineer & Founder @ Shumunov Solutions — Detroit, MI",
+      "Web performance, developer sovereignty, and heavy deadlifts.",
+      "Building bespoke tools for an Audience of One, then handing them over.",
+      "github.com/shugknight24",
+    ],
+    why: [
+      "To get developers off passive resumes and onto production-grade tools they actually use.",
+      "To show that pulling the cord is the easy half. Bringing backup is the job.",
+    ],
+    jackpot: "¯\\_(ツ)_/¯ jackpot ¯\\_(ツ)_/¯ // VERIFIED",
+    image: "/assets/images/shug_headshot.jpg",
+    photoZoneText: "[ DROP PORTRAIT PHOTO HERE ]",
   },
 
   {
@@ -111,7 +176,7 @@ export const combinedSlides = [
   {
     id: "thesis",
     type: "statement",
-    tier: TIER.CORE,
+    tier: TIER.DEEP,
     altitude: CONCEPT,
     budget: 70,
     phase: "The Claim",
@@ -121,41 +186,6 @@ export const combinedSlides = [
       "Typing a for-loop stopped being the scarce skill. What is scarce is knowing which loop, knowing why, and being able to tell when the machine hands you something plausible and wrong. Everything after this slide is about that one judgement.",
     signature:
       "// Nobody is impressed that you can type.\n// They are impressed that you knew what to build.",
-  },
-
-  {
-    id: "three-frameworks",
-    type: "process",
-    tier: TIER.EXTENDED,
-    altitude: CONCEPT,
-    budget: 105,
-    subtitle: "THE WHOLE ARGUMENT, ONE SLIDE",
-    title: "Three ways to go faster.",
-    quote:
-      "Deduction tells you what to build. Momentum makes it real. Form decides whether it survives contact with an agent.",
-    stages: [
-      {
-        num: "01",
-        name: "Deduce",
-        detail:
-          "Read the scene before you touch it. Most bad agent output is a bad question asked confidently. Narrow the problem to the three lines that matter and the answer comes back surgical instead of plausible.",
-        rule: "Reacher",
-      },
-      {
-        num: "02",
-        name: "Move",
-        detail:
-          "A running wrong version teaches you more than another hour of diagram, because now you are arguing with something real instead of with yourself.",
-        rule: "Denji",
-      },
-      {
-        num: "03",
-        name: "Hold Form",
-        detail:
-          "Strict boundaries are not bureaucracy. They are what sets the blast radius of every edit an agent makes while you are looking somewhere else.",
-        rule: "The Iron",
-      },
-    ],
   },
 
   // ═══════════════════════════════════════════ ACT I — DEDUCE FIRST
@@ -1211,27 +1241,37 @@ export const combinedSlides = [
   },
 
   {
-    id: "bio",
-    type: "bio",
-    tier: TIER.DEEP,
+    id: "the-way",
+    type: "process",
+    tier: TIER.CORE,
     altitude: CONCEPT,
-    budget: 60,
-    title: "Clearance Level: Admin",
-    name: "Shugmi Shumunov",
-    role: "Software Engineer & Founder @ Shumunov Solutions",
-    details: [
-      "Software Engineer & Founder @ Shumunov Solutions — Detroit, MI",
-      "Web performance, developer sovereignty, and heavy deadlifts.",
-      "Building bespoke tools for an Audience of One, then handing them over.",
-      "github.com/shugknight24",
+    budget: 90,
+    subtitle: "MIYAMOTO MUSASHI // THE BOOK OF FIVE RINGS",
+    title: "See the Way in all things.",
+    quote: "If you know the Way broadly, you will see it in everything.",
+    stages: [
+      {
+        num: "01",
+        name: "Read the terms",
+        detail:
+          "What is the detail nobody wrote down? Ask it of a codebase, a lease, a job offer, a diagnosis, a deal that looks too good. The fence is everywhere, and so is the history nobody told you.",
+        rule: "Perceive the unseen",
+      },
+      {
+        num: "02",
+        name: "Pull the cord",
+        detail:
+          "What did I just agree to, and is it worth it? Every shortcut is a contract: a free app, a loan, a framework, a model. Weigh it, decide, then move without hesitating. A decision you never make is still a decision.",
+        rule: "Know gain from loss",
+      },
+      {
+        num: "03",
+        name: "Bring backup",
+        detail:
+          "Who will tell me I am wrong? Among Musashi's rules: know the ways of every profession, not only your own. The person outside your craft sees the fence you walked past. Find them, and be that person for someone else.",
+        rule: "Learn every Way",
+      },
     ],
-    why: [
-      "To get developers off passive resumes and onto production-grade tools they actually use.",
-      "To show the deduction before the force, because the force is the easy half.",
-    ],
-    jackpot: "¯\\_(ツ)_/¯ jackpot ¯\\_(ツ)_/¯ // VERIFIED",
-    image: "/assets/images/shug_headshot.jpg",
-    photoZoneText: "[ DROP PORTRAIT PHOTO HERE ]",
   },
 
   {
@@ -1256,13 +1296,13 @@ export const combinedSlides = [
  */
 export const combinedPresenterNotes = {
   title:
-    "Cold open. Do NOT introduce yourself yet. Promise the live build inside the first twenty seconds so the room knows something is actually going to happen to them. [Press N for notes]",
+    "Cold open. Say the title, then promise the live build inside the first twenty seconds so the room knows something is going to happen to them. Do NOT introduce yourself yet: the next slide explains the title, and you introduce yourself straight after it. [Press N for notes]",
+  "the-title":
+    "CORE. The only place you explain the title, and the whole talk on one slide. Assume nobody has seen either show and give each one a single clause. Pull the cord is Denji: he starts the chainsaw before he is ready. Bring backup is Reacher: he arrives alone and never closes a case alone. Then say the subtitle out loud as the thesis: stop typing boilerplate, start directing the crew. Admit that most of this room is building alone with AI right now, you included. Under two minutes.",
   "umelo-bridge":
     "CORE. Say his full name out loud — Umelo Onyejiaka — and the title of his session, 'AI Won't Replace Community.' Then reference ONE specific point from it: his argument that AI can provide answers, but community provides mentorship, accountability, shared experience, collaboration and access to opportunity. Pick whichever of those he actually spent the most time on in the room and name that one. Do not quote him unless you heard the exact words yourself. Then the hand-off, flat: 'Umelo gave you the why. I am going to show you the what.' Under ninety seconds; do not re-argue his talk.",
   thesis:
-    "The claim, stated flat, then a beat of silence before you explain it. Junior-heavy room: lean on 'nobody is impressed that you can type.' Senior-heavy room: lean on 'plausible and wrong.'",
-  "three-frameworks":
-    "EXTENDED. The map for the whole talk — deduce, move, hold form. Say all three out loud once and promise that each one gets a pairing later. Ninety seconds maximum; this is a signpost, not a section.",
+    "DEEP. Out of lightning: the-title carries the claim there. The claim, stated flat, then a beat of silence before you explain it. Junior-heavy room: lean on 'nobody is impressed that you can type.' Senior-heavy room: lean on 'plausible and wrong.'",
   "reacher-formula":
     "Three beats: deduce, then force, then no hesitation. About ninety seconds. Plant the phrase 'the people you trust' in the force beat — it pays off in the community act. This is setup; do not linger.",
   "chestertons-fence":
@@ -1343,7 +1383,9 @@ export const combinedPresenterNotes = {
     "DEEP. Practical and specific, not inspirational. Show up twice; bring something that runs; be someone's Neagley first. Mention GDG Detroit by name as a real place to show up twice. Keep it under ninety seconds.",
   "lab-show-and-tell":
     "LAB, FULL TRACK (20m). Three-hour workshop only. Call up volunteers, two minutes each, hard stop. Input, enter, output. Celebrate every working tool, including the ugly ones. Insist on the two sentences: what the partner caught, and who should fork it next. That credit is the whole workshop in miniature.",
-  bio: "DEEP. Personal clearance profile. Thirty seconds at most — the room already knows who you are by now. Point at the GitHub link.",
+  bio: "CORE, third slide. The title is explained, so now the room wants to know who is telling them this. Forty-five seconds at most: one line on who you are, one on why you care (pulling the cord is easy, bringing backup is the job), point at the GitHub link, then go straight into Umelo.",
+  "the-way":
+    "CORE. The slide that should outlive the talk. Musashi wrote that if you know the Way broadly, you see it in everything, and the point is that nothing in this talk was really about AI. Three questions, one per verb: what is the detail nobody wrote down, what did I just agree to, who will tell me I am wrong. Give one example from outside code for each, from your own life if you have one: a lease, a job offer, a doctor's visit. Tell them to ask all three the next time something feels too easy. The card rules paraphrase three of Musashi's nine (perceive what cannot be seen, distinguish gain from loss, know the ways of all professions); do not present them as a word-for-word translation.",
   close:
-    "CORE. The call to action, in order: meet the person next to you right now, help one person get unstuck this month, ship one thing a stranger can build on. Then the DevFest invite. Leave the repo URL on screen while you take questions, and if time allows, literally pause for fifteen seconds so people turn to their neighbour.",
+    "CORE. The call to action, in order: meet the person next to you right now, help one person get unstuck this month, ship one thing a stranger can build on. Then the DevFest invite. Last line, flat, in these exact words: 'Your AI will never tell you you're wrong. Find the people who will, and be that person for someone else.' Leave the repo URL on screen while you take questions, and if time allows, literally pause for fifteen seconds so people turn to their neighbour.",
 };

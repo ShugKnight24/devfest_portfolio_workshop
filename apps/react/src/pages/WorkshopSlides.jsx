@@ -25,7 +25,7 @@ import {
  * WorkshopSlides — Cinematic Multi-Deck Presentation Engine
  *
  * Two decks are live; the rest are shelved source material (see data/slides).
- * - combined: "Read the Scene. Pull the Cord." — THE talk: 30 / 40 / 60 min, 90 min / 3 h workshop.
+ * - combined: "Pull the Cord. Bring Backup." — THE talk: 30 / 40 / 60 min, 90 min / 3 h workshop.
  * - devfest:  "Hackathon Velocity" — the same spine, one tier deeper, plus labs.
  *
  * Length is a runtime VIEW over a deck, not a separate deck: the runtime bar
@@ -492,16 +492,16 @@ const ProcessSlide = ({ slide, isActive }) => (
             </p>
           </div>
           <div
-            className="pt-3 border-t flex justify-between items-center"
+            className="pt-3 border-t flex justify-between items-center gap-3"
             style={{ borderColor: "var(--stage-border)" }}
           >
             <span
-              className="text-[10px] font-mono font-semibold uppercase"
+              className="text-[10px] font-mono font-semibold uppercase shrink-0"
               style={{ color: "var(--stage-text-muted)" }}
             >
               Protocol Rule
             </span>
-            <span className="text-xs font-mono font-bold" style={{ color: "var(--stage-accent)" }}>
+            <span className="text-xs font-mono font-bold text-right" style={{ color: "var(--stage-accent)" }}>
               {st.rule}
             </span>
           </div>

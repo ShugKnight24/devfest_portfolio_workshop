@@ -19,13 +19,14 @@ export const speakingEvents = [
     status: "upcoming",
     url: "https://gdg.community.dev/events/details/google-gdg-detroit-presents-detroit-latin-heritage-month-innovation-summit/cohost-gdg-detroit/",
     slideDeckRoute: "/slides/combined",
-    topic: "Read the Scene. Pull the Cord. — Building at the speed of AI, without building alone",
+    topic:
+      "Pull the Cord. Bring Backup. — Stop typing boilerplate. Start directing the crew. What Jack Reacher and Chainsaw Man taught me about agentic development",
     abstract:
-      "AI will write almost anything you ask for. It won't tell you what's worth building, or notice when it's confidently wrong. Borrowing Jack Reacher's habit of reading a scene before he moves and Chainsaw Man's willingness to pull the cord and commit, this is a talk about building fast with AI, and building things other people can pick up and build on.",
+      "The syntax barrier is dead, and solo coding died with it. Stop typing boilerplate: you are now the commander of an AI squad, directing agents with different roles, different flaws and different strengths at the bottlenecks that actually slow you down. Two unlikely mentors taught me how to lead that crew. Chainsaw Man's Denji pulls the cord and commits before he's ready. Lee Child's Jack Reacher arrives alone and never closes a case without backup. We'll build something live from the room's own frustrations, catch what the squad gets confidently wrong, and leave with three questions that work far beyond code.",
     highlights: [
-      "Read the scene: find the real problem before you trust the output",
-      "Pull the cord: commit, ship, and learn from the imperfect version",
-      "Build for each other: from Audience of One to Audience of Many",
+      "Pull the cord: commit, ship, and learn from the running version",
+      "Direct the crew: stop typing boilerplate, start specifying, delegating and verifying",
+      "Bring backup: the people who catch what the machine gets confidently wrong",
     ],
   },
   {

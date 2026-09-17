@@ -27,7 +27,7 @@ describe("elastic runtime selection", () => {
     expect(picked.every((s) => s.tier <= TIER.EXTENDED)).toBe(true);
     // The spine has to survive the shortest runtime intact.
     const ids = picked.map((s) => s.id);
-    for (const id of ["title", "umelo-bridge", "the-ask", "launch-build", "payoff", "audience-of-one", "close"]) {
+    for (const id of ["title", "the-title", "bio", "umelo-bridge", "the-ask", "launch-build", "payoff", "audience-of-one", "the-way", "close"]) {
       expect(ids, `${id} missing from lightning`).toContain(id);
     }
   });
@@ -245,13 +245,18 @@ describe("character pairings", () => {
 });
 
 describe("community throughline", () => {
-  it("should open on the Umelo bridge, straight after the title, at every runtime", () => {
+  it("should open on the title, its explanation and the speaker, then the Umelo bridge, at every runtime", () => {
     const bridge = combinedSlides.find((s) => s.id === "umelo-bridge");
     expect(bridge.tier).toBe(TIER.CORE);
     expect(bridge.altitude).toBe(ALTITUDE.CONCEPT);
     expect(`${bridge.phase} ${bridge.description}`).toContain("Umelo Onyejiaka");
     for (const runtime of Object.keys(RUNTIMES)) {
-      expect(idsFor(runtime).slice(0, 2), `bridge moved at ${runtime}`).toEqual(["title", "umelo-bridge"]);
+      expect(idsFor(runtime).slice(0, 4), `opening moved at ${runtime}`).toEqual([
+        "title",
+        "the-title",
+        "bio",
+        "umelo-bridge",
+      ]);
     }
   });
 

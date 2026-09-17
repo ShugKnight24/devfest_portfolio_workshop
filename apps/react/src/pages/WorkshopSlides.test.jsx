@@ -72,8 +72,8 @@ describe("WorkshopSlides multi-deck registry", () => {
 
   it("should load the combined deck as the elastic keynote", () => {
     const combined = getDeck("combined");
-    // Both halves of the method: read the scene (Reacher), pull the cord (Denji).
-    expect(combined.meta.title).toBe("Read the Scene. Pull the Cord.");
+    // Both halves of the title: pull the cord (Chainsaw Man), bring backup (Reacher).
+    expect(combined.meta.title).toBe("Pull the Cord. Bring Backup.");
     expect(combined.meta.elastic).toBe(true);
     expect(combined.meta.defaultRuntime).toBe("lightning");
 

@@ -347,8 +347,15 @@ export const SceneCustomizer = ({
         aria-labelledby={headingId}
         aria-describedby={hintId}
         hidden={!open}
+        /*
+         * `relative` is load-bearing. The radios are `sr-only`, i.e. absolutely
+         * positioned; without a positioned ancestor INSIDE this scroller they are
+         * laid out against the scene card instead, at their unscrolled offset far
+         * below the fold. Clicking a chip focuses its radio, and the browser then
+         * scrolls the card's overflow-hidden box to reach it — the scene vanishes.
+         */
         className={
-          "rounded-2xl border border-(--color-border) bg-(--color-surface) shadow-lg " +
+          "relative rounded-2xl border border-(--color-border) bg-(--color-surface) shadow-lg " +
           "dark:border-(--color-border-dark) dark:bg-(--color-surface-dark) " +
           "@3xl:max-h-[34rem] @3xl:overflow-y-auto"
         }

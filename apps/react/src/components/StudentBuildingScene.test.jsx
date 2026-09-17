@@ -81,3 +81,21 @@ describe("StudentBuildingScene companions and plushies", () => {
     expect(within(panel).getByText("1 / 8")).toBeDefined();
   });
 });
+
+describe("StudentBuildingScene customizer layout", () => {
+  afterEach(() => {
+    clearStoredAvatar();
+  });
+
+  it("keeps the hidden radios positioned inside the scrolling panel", () => {
+    // jsdom has no layout, so this guards the contract rather than the scroll:
+    // sr-only radios need a positioned ancestor inside the panel, or focusing
+    // one scrolls the scene card out of view (see SceneCustomizer).
+    render(<StudentBuildingScene />);
+    openPanel();
+    const panel = screen.getByRole("group", { name: "Make it your desk" });
+    expect(panel.className.split(/\s+/)).toContain("relative");
+    const radio = within(panel).getAllByRole("radio")[0];
+    expect(radio.closest('[role="group"]')).toBe(panel);
+  });
+});

@@ -1,0 +1,52 @@
+# DevFest Portfolio Workshop — The Reacher Protocol (.cursorrules)
+# Commander: ShugKnight24 (Shugmi Shumunov)
+
+The syntax barrier is dead. Code is largely irrelevant; taste, curation, and architecture are sovereign.
+When editing or extending this repository, you operate under the Reacher Protocol and the 110th / Division 4 squad standards.
+
+## Ruthless Mission Objectives
+
+### 1. THE NEAGLEY PRINCIPLE (Zero-Bloat & Performance)
+- Do NOT install new NPM packages without explicit instruction. Never sign contracts with the Tech Debt Devil.
+- If it can be done with native Web APIs, modern CSS (Grid, Flexbox, clamp()), or React 19 built-ins, use native.
+- Zero external state management bloat (no Redux, no MobX). State is managed via useState, useContext, and localStorage.
+- Target: 100 Lighthouse performance. Speed is sovereignty.
+
+### 2. THE FINLAY GUARDRAILS (Accessibility & Rigorous UX)
+- Strict semantic HTML5 tags mandatory: `<nav>`, `<header>`, `<main>`, `<article>`, `<section>`, `<footer>`.
+- No `<div>` soup. Every interactive element must have unique IDs, explicit ARIA labels, and accessible text.
+- High-contrast brutalist `:focus-visible` outlines on all keyboard-focusable elements (`outline: 2px solid var(--color-primary)`).
+- Full WCAG AA contrast compliance. No one gets left behind.
+- All interactive route components must be wrapped in the React ErrorBoundary (`<ErrorBoundary>`) with the cyber-brutalist "SYSTEM OFFLINE: CHECK YOUR CODE" fault-isolation UI.
+
+### 3. THE MAKIMA ARCHITECTURE (Agentic Readiness & Curation)
+- Optimized for agentic IDEs (Cursor, Windsurf, Claude Code, Antigravity).
+- Output surgical diffs only. No conversational pleasantries, no apologies, no fluff.
+- Investigate root cause before touching code.
+- Maintain a cyber-brutalist, high-performance aesthetic: deep dark modes, sharp contrasts, clean modular blocks.
+
+### 4. DATA ISOLATION & AUDIENCE OF ONE
+- All personal data, projects, links, and operatives metadata must remain strictly decoupled in configuration (`portfolioData.js`). Attendees should update their entire identity without touching UI JSX.
+- All personal agent tools and bespoke macros belong in the `/operatives` sandbox route.
+- Treat every personal automation tool as software built for an Audience of One.
+
+### 5. THE ELASTIC DECK (Presentation Architecture)
+- Talk length is a VIEW over one deck, never a second deck. `src/data/slides/runtime.js` is the only
+  place that decides what presents.
+- Every slide declares a `tier` (CORE / EXTENDED / DEEP / LAB) and belongs to a deck's `presenterNotes`.
+  A test enforces the notes — these decks are given live, in front of people.
+- `flex: true` + `zone` marks standing material the speaker pulls in mid-talk (`Z` on stage). Built for
+  the live-build beat, where an agent takes an unknown number of minutes.
+- Two decks are live: `lhm` (elastic keynote) and `devfest` (workshop). The rest are `shelf: true`
+  source material. Do NOT add a tenth deck — add tiers to an existing one.
+
+### 6. ONE NAV REGISTRY, THREE MODES
+- Every route is declared once in `src/config/navigation.js`. Never hardcode a nav list in a component.
+- The bar renders only the current mode's primary routes. `Cmd+K` reaches everything. If a new feature
+  needs a nav entry, give it `modes` and `keywords` in the registry and stop there.
+
+### 7. STAGE TOKENS ARE THE ONLY PRESENTATION COLOURS
+- `src/styles/stage.css` owns every stage colour, size, and motion value.
+- The Reze Override is `data-stage-mode="reze"` on the stage root — ONE attribute. Never reintroduce a
+  per-element `isRezeMode ? "#ff0055" : "#00ffcc"` ternary.
+- Respect `prefers-reduced-motion`. A glitch animation on a 20ft screen is a seizure risk, not a flourish.

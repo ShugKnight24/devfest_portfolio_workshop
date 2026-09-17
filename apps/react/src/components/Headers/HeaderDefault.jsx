@@ -32,7 +32,7 @@ export const HeaderDefault = ({ personal }) => {
       {/* Bonus: Add ThemeSwitcher and DarkModeToggle */}
 
       <div className="text-center space-y-4">
-        <p className="text-gray-500 italic">
+        <p className="text-gray-500 dark:text-gray-400 italic">
           Your Header Component: We'll start building here!
         </p>
 

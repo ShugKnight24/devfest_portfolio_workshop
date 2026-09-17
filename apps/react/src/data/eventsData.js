@@ -18,14 +18,15 @@ export const speakingEvents = [
     badge: "Upcoming Keynote",
     status: "upcoming",
     url: "https://gdg.community.dev/events/details/google-gdg-detroit-presents-detroit-latin-heritage-month-innovation-summit/cohost-gdg-detroit/",
-    slideDeckRoute: "/slides/lhm",
-    topic: "The Reacher Protocol: Critical Deduction & Overwhelming Force in Agentic Dev",
+    slideDeckRoute: "/slides/combined",
+    topic:
+      "Pull the Cord. Bring Backup. — Stop typing boilerplate. Start directing the crew. What Jack Reacher and Chainsaw Man taught me about agentic development",
     abstract:
-      "Moving beyond static portfolios: how to pair Sherlock Holmes-level root cause deduction with the unstoppable strength of agentic workflows to build personal software solutions that scale to others.",
+      "The syntax barrier is dead, and solo coding died with it. Stop typing boilerplate: you are now the commander of an AI squad, directing agents with different roles, different flaws and different strengths at the bottlenecks that actually slow you down. Two unlikely mentors taught me how to lead that crew. Chainsaw Man's Denji pulls the cord and commits before he's ready. Lee Child's Jack Reacher arrives alone and never closes a case without backup. We'll build something live from the room's own frustrations, catch what the squad gets confidently wrong, and leave with three questions that work far beyond code.",
     highlights: [
-      "Reacher Deduction Model (Sherlock Holmes Intellect + Force of 3 Men)",
-      "Beyond the Portfolio: Audience of One to Audience of Many",
-      "Context Hierarchy & Zero-Bloat Engineering",
+      "Pull the cord: commit, ship, and learn from the running version",
+      "Direct the crew: stop typing boilerplate, start specifying, delegating and verifying",
+      "Bring backup: the people who catch what the machine gets confidently wrong",
     ],
   },
   {

@@ -14,6 +14,7 @@ cove active. all logic stays, only boilerplate dies.
 - C++
 - Java
 - JavaScript
+- TypeScript / React
 - HTML/CSS
 - Shell (bash/zsh)
 
@@ -48,14 +49,14 @@ Drop:
 - `Mutex<T>` when single-threaded: use `Rc<RefCell<T>>`
 
 Use:
-- turbofish: `Vec::with_capacity::<T>(n)`
+- turbofish where inference fails: `Vec::<T>::with_capacity(n)`, `"3".parse::<i32>()`
 - iter chains: `.filter().map().collect()`
 - let chains: `if let Some(x) = foo() && x > 0`
 - underscores for unused vars: `fn f(_: i32) {}`
 - compact match arms: `x if x < 0 => todo!()`
 - `..Default::default()` shorthand
-- `?.` operator
-- `??` for Option/Result fallback
+- `?` operator to propagate `Result`/`Option`
+- `.unwrap_or_default()` / `.unwrap_or_else()` for fallback
 - `.unwrap_or()` / `.map()` chains over nested if-lets
 - `Option::ok_or()` / `.ok()` for Result conversion
 - `join!` for parallel independent `await`s
@@ -138,7 +139,7 @@ def process_items(items):
 ✅ full:
 ```python
 def process_items(items):
-    return [i.get_value() for i in items if i and i.get_value() > 0]
+    return [v for i in items if i is not None and (v := i.get_value()) > 0]
 ```
 
 ## C++
@@ -264,8 +265,7 @@ Drop:
 - redundant `()` around lambdas: `x -> { return x; }` → `x -> x`
 - empty constructor / initializer blocks `{}`
 - `public` on interface methods (implicit)
-- `@Override` when method clearly overrides (Lombok, etc.)
-- explicit diamond `<>` when type inferred
+- explicit type args on the right of `new`: `new ArrayList<Integer>()` -> `new ArrayList<>()`
 - redundant braces around single statements
 
 Use:
@@ -299,7 +299,7 @@ public List<Integer> processItems(List<Item> items) {
 ✅ full:
 ```java
 List<Integer> processItems(List<Item> items) {
-    var results = new ArrayList<Integer>();
+    var results = new ArrayList<Integer>();  // var needs the type here
     for (Item item : items)
         if (item != null && item.getValue() > 0)
             results.add(item.getValue());
@@ -357,16 +357,15 @@ print(f"{item.name}: {item.value}")
 ### Shell (bash/zsh)
 
 Drop:
-- `$(...)` when backticks work: `` `command` `` → `$(command)`
-- `echo "$VAR"` → `echo $VAR` (unless needed)
 - `then`/`fi` when single-line `&&`/`||` works
 - `function` keyword (bash)
-- `#!/bin/bash` when shebang not needed
+- `#!/bin/bash` in a sourced file or function library (a standalone executable script keeps it)
 - `exit 0` at end of script
 - verbose `if [ $x -eq 0 ]; then ... fi`
 
 Use:
-- `$()` for command substitution
+- `$()` for command substitution, never backticks (they do not nest and mangle escapes)
+- ALWAYS quote expansions: `"$var"`, `"$@"`, `"${arr[@]}"` — unquoted splits on whitespace and globs
 - `[[ ]]` over `[ ]` (bash)
 - `&&` / `||` for simple conditionals
 - `local` for variables in functions
@@ -392,9 +391,11 @@ function process_files() {
 
 ✅ full:
 ```bash
+#!/usr/bin/env bash
+set -euo pipefail
 process_files() {
-    for f in *.txt; do
-        [[ -f $f ]] && grep "TODO" < "$f"
+    for f in ./*.txt; do
+        [[ -f $f ]] && grep "TODO" "$f"
     done
 }
 ```
@@ -459,6 +460,86 @@ const getFullName = (user) => {
 const getFullName = ({ firstName, lastName }) =>
     firstName ? `${firstName} ${lastName}` : 'Unknown'
 ```
+
+## TypeScript / React
+
+Drop:
+- `React.FC<Props>` — annotate props directly, infers children-free by default
+- `interface Props` when used once and inline type is short
+- explicit return types on components and simple hooks (inferred)
+- `as` casts that a type guard or generic would do honestly
+- `useState` type param when the initial value infers it
+- `useEffect` used to derive state from props — compute during render instead
+- `useCallback`/`useMemo` on values that are cheap and not dependencies of anything memoized
+- redundant fragments: `<><Foo /></>` when a single child
+- `index` keys when a stable id exists
+
+Use:
+- `type` for unions/props, `interface` only when declaration merging is needed
+- discriminated unions over optional-field soup
+- `satisfies` to keep literal inference while checking shape
+- derived state computed in render, not mirrored in `useState`
+- `useReducer` when 3+ state fields change together
+- lazy `useState(() => expensive())` for costly initial values
+- `Readonly<T>` / `as const` for static config tables
+- functional updates: `setX(prev => ...)` inside callbacks and effects
+- one effect per concern, each with its own cleanup
+- server components by default in Next.js App Router; `"use client"` only at the leaf that needs it
+
+❌ verbose:
+```tsx
+interface CounterProps { start: number; label: string }
+
+export const Counter: React.FC<CounterProps> = ({ start, label }) => {
+  const [count, setCount] = useState<number>(start)
+  const [doubled, setDoubled] = useState<number>(start * 2)
+
+  useEffect(() => {
+    setDoubled(count * 2)
+  }, [count])
+
+  const handleClick = useCallback(() => {
+    setCount(count + 1)
+  }, [count])
+
+  return (
+    <>
+      <button onClick={handleClick}>{label}: {count} ({doubled})</button>
+    </>
+  )
+}
+```
+
+✅ cove:
+```tsx
+export const Counter = ({ start, label }: { start: number; label: string }) => {
+  const [count, setCount] = useState(start)
+  const doubled = count * 2
+
+  return <button onClick={() => setCount(c => c + 1)}>{label}: {count} ({doubled})</button>
+}
+```
+
+❌ verbose:
+```tsx
+type State = { status: string; data?: Data; error?: string }
+
+if (state.status === 'success') {
+  render((state.data as Data).items)
+}
+```
+
+✅ cove:
+```tsx
+type State =
+  | { status: 'loading' }
+  | { status: 'success'; data: Data }
+  | { status: 'error'; error: string }
+
+if (state.status === 'success') render(state.data.items)
+```
+
+Never drop: `"use client"`, `key` props, effect cleanup functions, dependency array entries that are actually read. Each changes behavior, not verbosity.
 
 ## WebGL / Three.js / Canvas / Web Audio
 
@@ -781,4 +862,16 @@ Null/Optional:
 
 ## Boundaries
 
-Code/commits/PRs: write normal. "stop cove" or "normal code": revert.
+cove shapes **code you write** and the artifacts listed above (PR bodies, commit
+subjects, READMEs, CLI help, error strings, tests). It never compresses prose
+addressed to a human reader: chat explanations, review comments aimed at a
+teammate, issue/defect descriptions, design docs, migration notes.
+
+Never let compression change behavior. If the terse form is not exactly
+equivalent — different null semantics, different evaluation order, an extra
+call, a dropped guard — keep the verbose form. Correct beats short, always.
+
+Never apply a language rule outside its language. The per-language sections
+are not interchangeable.
+
+"stop cove" or "normal code": revert.

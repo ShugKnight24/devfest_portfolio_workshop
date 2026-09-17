@@ -27,7 +27,7 @@ const viewportSizes = [
 const difficultyColors = {
   Challenge: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",
   Beginner:
-    "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400",
+    "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400",
   Intermediate:
     "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400",
   Advanced:
@@ -64,7 +64,7 @@ export const ComponentComparer = ({ variants, title, description }) => {
   if (!LeftComponent || !RightComponent) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center">
-        <p className="text-gray-500">Loading components...</p>
+        <p className="text-gray-500 dark:text-gray-400">Loading components...</p>
       </div>
     );
   }
@@ -169,7 +169,7 @@ export const ComponentComparer = ({ variants, title, description }) => {
             </select>
             <button
               onClick={() => setPreviewPanel("left")}
-              className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 border border-gray-300 dark:border-gray-600"
+              className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 border border-gray-300 dark:border-gray-600"
               title="Open in Preview Mode"
             >
               {Icons.preview}
@@ -188,7 +188,7 @@ export const ComponentComparer = ({ variants, title, description }) => {
                 onClick={() => setLeftViewport(vp)}
                 className={`p-1.5 rounded transition-colors cursor-pointer ${
                   leftViewport.name === vp.name
-                    ? "bg-(--color-primary) text-white"
+                    ? "bg-(--color-primary) text-(--color-primary-text)"
                     : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
                 }`}
                 title={`${vp.name}${
@@ -223,7 +223,7 @@ export const ComponentComparer = ({ variants, title, description }) => {
               </select>
               <button
                 onClick={() => setPreviewPanel("right")}
-                className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 border border-gray-300 dark:border-gray-600"
+                className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 border border-gray-300 dark:border-gray-600"
                 title="Open in Preview Mode"
               >
                 {Icons.preview}

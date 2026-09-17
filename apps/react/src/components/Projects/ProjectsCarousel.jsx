@@ -17,6 +17,8 @@
  */
 
 import { useState } from "react";
+import { EmojiIcon } from "@portfolio/icons/react";
+import { ChevronRight } from "../Icons";
 
 export const ProjectsCarousel = ({ projects }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -36,16 +38,24 @@ export const ProjectsCarousel = ({ projects }) => {
   const currentProject = projects[currentIndex];
 
   return (
-    <section className="section-container bg-(--color-surface-highlight) text-(--color-text-primary)">
-      <h2 className="section-title text-(--color-text-primary)">
+    <section
+      id="projects"
+      aria-labelledby="projects-heading"
+      aria-roledescription="carousel"
+      className="section-container bg-(--color-surface-highlight) text-(--color-text-primary)"
+    >
+      <h2 id="projects-heading" className="section-title text-(--color-text-primary)">
         Featured Projects
       </h2>
 
       <div className="max-w-6xl mx-auto relative">
         {/* Main Carousel */}
         <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-          {/* Project Display */}
-          <div className="grid md:grid-cols-2 gap-0 bg-(--color-surface) text-(--color-text-primary)">
+          {/* Project Display Article */}
+          <article
+            aria-label={currentProject.title}
+            className="grid md:grid-cols-2 gap-0 bg-(--color-surface) dark:bg-(--color-surface-dark) text-(--color-text-primary)"
+          >
             {/* Image Side */}
             <div className="relative h-96 md:h-auto">
               <img
@@ -55,8 +65,9 @@ export const ProjectsCarousel = ({ projects }) => {
               />
               {currentProject.featured && (
                 <div className="absolute top-4 left-4">
-                  <span className="bg-(--color-accent) text-(--color-text-inverse) px-3 py-1 rounded-full text-sm font-bold">
-                    ⭐ Featured
+                  <span className="inline-flex items-center gap-1 bg-(--color-accent) text-(--color-text-inverse) px-3 py-1 rounded-full text-sm font-bold">
+                    <EmojiIcon name="star" className="w-3.5 h-3.5" />
+                    Featured
                   </span>
                 </div>
               )}
@@ -97,9 +108,12 @@ export const ProjectsCarousel = ({ projects }) => {
                     href={currentProject.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 text-center px-6 py-3 bg-(--color-text-primary) text-(--color-text-inverse) rounded-lg hover:bg-(--color-text-secondary) transition-colors font-semibold"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-6 py-3 bg-(--color-text-primary) text-(--color-text-inverse) rounded-lg hover:bg-(--color-text-secondary) transition-colors font-semibold"
                   >
-                    View Code →
+                    View Code
+                    <span aria-hidden="true">
+                      <ChevronRight className="w-4 h-4" />
+                    </span>
                   </a>
                 )}
                 {currentProject.liveUrl && (
@@ -107,19 +121,22 @@ export const ProjectsCarousel = ({ projects }) => {
                     href={currentProject.liveUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 text-center px-6 py-3 bg-(--color-primary) text-(--color-text-inverse) rounded-lg hover:bg-(--color-secondary) transition-colors font-semibold"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-6 py-3 bg-(--color-primary) text-(--color-text-inverse) rounded-lg hover:bg-(--color-secondary) transition-colors font-semibold"
                   >
-                    Live Demo →
+                    Live Demo
+                    <span aria-hidden="true">
+                      <ChevronRight className="w-4 h-4" />
+                    </span>
                   </a>
                 )}
               </div>
             </div>
-          </div>
+          </article>
 
           {/* Navigation Arrows */}
           <button
             onClick={goToPrevious}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-(--color-surface)/90 hover:bg-(--color-surface) rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-(--color-surface) dark:bg-(--color-surface-dark)/90 hover:bg-(--color-surface) dark:bg-(--color-surface-dark) rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
             aria-label="Previous project"
           >
             <svg
@@ -139,7 +156,7 @@ export const ProjectsCarousel = ({ projects }) => {
 
           <button
             onClick={goToNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-(--color-surface)/90 hover:bg-(--color-surface) rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-(--color-surface) dark:bg-(--color-surface-dark)/90 hover:bg-(--color-surface) dark:bg-(--color-surface-dark) rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
             aria-label="Next project"
           >
             <svg
@@ -164,6 +181,7 @@ export const ProjectsCarousel = ({ projects }) => {
             <button
               key={index}
               onClick={() => goToSlide(index)}
+              aria-current={index === currentIndex ? "true" : undefined}
               className={`transition-all duration-300 rounded-full ${
                 index === currentIndex
                   ? "w-8 h-3 bg-(--color-primary)"

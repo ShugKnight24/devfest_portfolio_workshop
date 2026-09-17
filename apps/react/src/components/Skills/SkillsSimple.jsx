@@ -19,7 +19,7 @@ import { SkillBadge } from "../SkillBadge";
 
 export const SkillsSimple = ({ levelColors, skills }) => {
   return (
-    <section className="section-container bg-(--color-surface)">
+    <section className="section-container bg-(--color-surface) dark:bg-(--color-surface-dark)">
       <h2 className="section-title">Skills & Technologies</h2>
 
       <div className="flex flex-wrap gap-3 justify-center max-w-4xl mx-auto">

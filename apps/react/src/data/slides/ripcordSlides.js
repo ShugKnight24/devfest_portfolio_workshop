@@ -4,19 +4,18 @@
  * Metaphor: Generative AI tools are like Devils—they grant immense,
  * reality-bending power, but if you don't manage contracts and curate chaos,
  * they will eat your codebase alive:
- * - Denji: Momentum over whiteboard theory; pull the cord and vibe code.
- * - Aki: Disciplined contracts; dependencies are deals with devils.
- * - Power: Pure generative chaos; hallucinates with extreme confidence, requires audits.
- * - Makima: The Master Orchestrator; directs agentic squads, taste & curation bottleneck.
- * - Kishibe: The grizzled veteran; burn the resume, build bespoke tools for an Audience of One.
+ * - Denji: The Ripcord — Vibe coding. Stop 3-week whiteboarding; pull the cord and start swinging.
+ * - Aki: The Contracts — Dependency devil. Every random NPM install trades codebase lifespan.
+ * - Makima: The Orchestrator — Agents as tools for macro vision; generate 5, discard 4, merge winner.
+ * - Power: The LLM — Pathological liar. Confidently hallucinates non-existent APIs; point her at enemy & verify kill.
  *
  * 60-Minute Masterclass Flow:
- * - Phase 01: Contract Initialized (Manage The Chaos)
- * - Phase 02: Momentum vs Contracts (The Denji Ripcord vs. The Aki Contracts)
- * - Phase 03: Generative AI (The Power Paradigm vs. The Hallucination)
- * - Phase 04: The Orchestrator (Makima's Orchestration vs. The Kishibe Truth)
- * - Phase 05: The Reality (The Telemetry Devil vs. Sovereign Truth)
- * - The Final Mandate: What is your dream?
+ * - Phase 01: Contract Initialized (Curate The Chaos)
+ * - Phase 02: Momentum vs Contracts (The Denji Ripcord vs Aki's Tech Debt Contracts)
+ * - Phase 03: Power the Pathological Liar (LLM Hallucinations & The Compiler Execution)
+ * - Phase 04: The Master Orchestrator (Makima's Multi-Agent Curation)
+ * - Phase 05: Telemetry Devils vs Sovereign Truth (Synthetic Web Bots vs Human Intent)
+ * - The Final Mandate: What is your dream? Pull the cord.
  */
 
 export const ripcordDeckMeta = {
@@ -33,12 +32,12 @@ export const ripcordDeckMeta = {
 };
 
 export const ripcordPresenterNotes = {
-  0: "NOTES: Welcome them. Set the stage: The tech industry right now is chaotic. Just like CSM, the ones who survive are the ones who learn how to wield the chaos, not hide from it. [Press N to hide/show notes]",
-  1: "NOTES: Contrast Denji's raw momentum with Aki's rigid contracts. Tell them to move fast like Denji, but be careful of the 'Tech Debt Devils' like Aki. Keep the stack lean.",
-  2: "NOTES: The crowd will love the Power analogy. We all know LLMs act exactly like her. They lie to our faces to look good. We have to be the adults in the room auditing the compiler.",
-  3: "NOTES: You are Makima (hopefully less evil). You aren't laying bricks; you are directing the team. Kishibe is the ultimate senior dev. You have to be fearless to throw away old habits.",
-  4: "NOTES: Defeat the 'Telemetry Devil' (bot traffic). We have to own our data with sovereign auditing.",
-  5: "NOTES: End on massive inspiration. Computers don't have dreams, humans do. Use the tools to build your life with absolute fire.",
+  0: "NOTES: Welcome to Public Safety Division 4. AI gives developers devil powers. If you don't manage contracts and curate chaos, it eats your project alive. [Press N for notes]",
+  1: "NOTES: Contrast Denji and Aki. Denji is 'vibe coding'—stop whiteboarding for 3 weeks, pull the cord, and prototype. But Aki reminds us: every random NPM install signs away your codebase's life.",
+  2: "NOTES: The crowd will roar for Power. Power is the perfect metaphor for LLMs: immense raw strength, but a pathological liar. She will hallucinate functions with 100% confidence. Verify every kill.",
+  3: "NOTES: Makima is orchestration. She doesn't write every line of code; she directs agents toward a macro vision. Generate 5 variations, discard 4, merge the winner. Your taste is the bottleneck.",
+  4: "NOTES: Telemetry devil: synthetic bot traffic is exploding. We need sovereign auditing like Datamoon.com to isolate authentic human signal.",
+  5: "NOTES: Final Mandate: Denji fought for autonomy and breakfast. You have the ultimate creative engine. Pull the ripcord and build for an Audience of One.",
 };
 
 export const ripcordSlides = [
@@ -46,34 +45,34 @@ export const ripcordSlides = [
     id: "ripcord-01",
     type: "statement",
     phase: "Contract Initialized",
-    title: "Manage The\nChaos.",
+    title: "Curate The\nChaos.",
     description:
-      "We are making contracts with AI entities that code better than we do. The blank page is a trap. The modern developer doesn't write syntax; they curate chaos.",
+      "We are signing contracts with AI entities that generate syntax faster than humans can read. The modern software engineer is no longer a typist; they are a Curator of Chaos.",
     notes: ripcordPresenterNotes[0],
   },
   {
     id: "ripcord-02",
     type: "comparison",
     phase: "Phase 02 // Momentum vs Contracts",
-    title: "Momentum vs Contracts",
+    title: "Momentum vs Contracts: The Denji Ripcord & Aki",
     description:
-      "Move fast with the ripcord, but audit your dependency contracts before they eat your codebase.",
+      "Move with raw momentum, but beware signing Faustian bargains with unnecessary NPM packages.",
     columns: [
       {
-        character: "The Denji Ripcord",
+        character: "Denji (The Ripcord)",
         narrative:
-          "Denji has no formal training. He just pulls the cord and swings. Stop whiteboarding architecture for 3 weeks. 'Vibe code.' Get the prototype on screen and iterate with momentum.",
+          '"Vibe coding." Denji doesn\'t whiteboard system architecture for three weeks. Pull the cord, tell the AI what you want, and start swinging. Get running software on screen in seconds.',
         type: "character",
         boxContent:
-          "// The Ripcord Loop\nconst prototype = generatePrototype(idea);\nrenderLiveFeedback(prototype);",
+          "// The Denji Ripcord Loop\nconst prototype = generateOperative({\n  intent: 'Scrape school newsletter for deadlines',\n  speed: 'speed-of-thought'\n});\nrenderLive(prototype);",
       },
       {
-        character: "The Aki Contracts",
+        character: "Aki (The Contracts)",
         narrative:
-          "Aki pays a physical price for his power. Dependencies are contracts. Every time you let an AI hallucinate 10 NPM packages into your code, you trade your codebase's lifespan for a shortcut.",
+          "Every time you let an AI install a random NPM dependency, you are signing a contract with the Tech Debt Devil. You trade your codebase's lifespan for a 5-minute shortcut. Keep your stack lean.",
         type: "character",
         boxContent:
-          "// Audit the Contract\nconst deps = auditPackageJson();\nassert(deps.length === 0, 'No Faustian dependencies');",
+          "// Audit the Devil Contract\nconst packageJson = readLocalFile('package.json');\nassert(packageJson.dependencies.length <= 5, 'Reject Faustian dependencies');",
       },
     ],
     notes: ripcordPresenterNotes[1],
@@ -81,23 +80,25 @@ export const ripcordSlides = [
   {
     id: "ripcord-03",
     type: "comparison",
-    phase: "Phase 03 // Generative AI",
-    title: "Generative AI & Hallucinations",
+    phase: "Phase 03 // The LLM Reality",
+    title: "Power (The Pathological LLM)",
     description:
-      "Power is raw capability coupled with confident deception. Audit every line.",
+      "Power is immensely capable, but she lies constantly. Treat your LLM like Power: point her at the enemy and verify the kill.",
     columns: [
       {
-        character: "The Power Paradigm",
+        character: "Power (The LLM)",
         narrative:
-          "Power is pure chaos. She's incredibly strong, but she lies about her stats and needs constant babysitting. This is your LLM. It will confidently hallucinate functions that don't exist. You must point it at the enemy and verify the kill.",
+          "Power boasts she has an IQ of 500 and conquered the universe, but she is a pathological liar. This is exactly what an LLM is: it will confidently invent non-existent APIs with plausible variable names. Never take its word without a compiler.",
         type: "character",
+        boxContent:
+          "// What Power Claims:\nimport { autoReconcileAllTaxes } from 'chase-enterprise-magic';\nautoReconcileAllTaxes(); // Hallucinated package!",
       },
       {
-        tag: "The Hallucination",
+        tag: "The Compiler Execution",
         type: "bad",
         content:
-          'AI: "I imported the proprietary API you asked for!"\n\nYou: "This repository hasn\'t existed since 2019."',
-        result: "-> Result: Confident falsehood requiring compiler audit.",
+          "AI: \"I implemented the native WebUSB bluetooth bridge you requested!\"\n\nCompiler: \"Error: ReferenceError: WebUSB is not defined in Node.js runtime.\"\n\nVerification: Point the agent at the test suite. If tests fail, send it back.",
+        result: "-> Result: Never trust. Always verify with automated compiler gates.",
       },
     ],
     notes: ripcordPresenterNotes[2],
@@ -106,25 +107,25 @@ export const ripcordSlides = [
     id: "ripcord-04",
     type: "comparison",
     phase: "Phase 04 // The Orchestrator",
-    title: "The Orchestrator",
+    title: "Makima (The Orchestrator)",
     description:
-      "Taste and curation are the only bottlenecks. Direct your agents fearlessly.",
+      "Direct your squad with cold precision. Your personal taste and curation are the only real bottlenecks.",
     columns: [
       {
         character: "Makima's Orchestration",
         narrative:
-          "Makima views agents as tools to achieve a macro vision. Your taste and curation are now the only bottlenecks. Be the orchestrator. Generate 4 architecture variations, discard 3, merge the winner.",
+          "Makima views everyone as a tool to achieve a macro vision. In the age of agentic software, you don't fight in the trenches of syntax. You generate 5 candidate architectures, discard 4, and merge the winner.",
         type: "character",
         boxContent:
-          "// Agent Orchestration Loop\nconst candidates = await Promise.all(agents.map(a => a.propose()));\nconst winner = curateBestArchitecture(candidates);",
+          "// Multi-Agent Curation\nconst [archA, archB, archC] = await Promise.all([\n  spawnAgent('Minimal Vanilla JS'),\n  spawnAgent('State Machine Micro-Loop'),\n  spawnAgent('Native SQLite Engine')\n]);\nreturn mergeWinner(archB);",
       },
       {
-        character: "The Kishibe Truth",
+        character: "Kishibe's Truth",
         narrative:
-          '"The devils fear the hunters with a screw loose." To survive the AI wave, you have to be slightly crazy. Burn the resume. Build bespoke software for an Audience of One.',
+          '"The hunters the devils fear most are the ones with a screw loose." Stop writing software to please enterprise recruiters with buzzword-stuffed portfolios. Build weird, potent, bespoke software that solves your life.',
         type: "character",
         boxContent:
-          "// Bespoke Sovereignty\nbuildForAudienceOfOne({\n  targetUser: 'myself',\n  moat: 'uncompromising taste'\n});",
+          "// Bespoke Sovereignty\nbuildForAudienceOfOne({\n  target: 'My acute daily friction',\n  corporateApproval: false,\n  taste: 'uncompromising'\n});",
       },
     ],
     notes: ripcordPresenterNotes[3],
@@ -132,24 +133,24 @@ export const ripcordSlides = [
   {
     id: "ripcord-05",
     type: "comparison",
-    phase: "Phase 05 // The Reality",
-    title: "The Reality",
+    phase: "Phase 05 // The Telemetry Devil",
+    title: "Synthetic Chaos vs Sovereign Truth",
     description:
-      "The web is flooded with synthetic agent noise. Sovereign auditing is required.",
+      "Synthetic bot traffic is poisoning web metrics. Forensic telemetry isolates genuine human signal.",
     columns: [
       {
         tag: "The Telemetry Devil",
         type: "bad",
         content:
-          "Bot traffic is destroying web analytics. The agentic loops are creating synthetic noise everywhere.",
-        result: "-> Result: Poisoned dashboards and hallucinated growth metrics.",
+          "AI crawlers and scraping loops now account for >50% of web traffic. Web analytics dashboards are lying to developers about user growth and engagement.",
+        result: "-> Result: Synthetic hallucinations corrupting product roadmaps.",
       },
       {
         tag: "Sovereign Truth",
         type: "good",
         content:
-          "You need sovereign truth. Sovereign forensic telemetry is how we survive the noise and prove our proof of work is real.",
-        result: "-> Result: 100% verified human intent isolated from bot clutter.",
+          "Sovereign telemetry (Datamoon.com): Client-side behavioral heuristics that isolate human mouse movement and authentic intent from synthetic headless browsers.",
+        result: "-> Result: 100% verified human proof of work.",
       },
     ],
     notes: ripcordPresenterNotes[4],
@@ -159,10 +160,11 @@ export const ripcordSlides = [
     type: "statement",
     phase: "The Mandate",
     title: "What is\nyour dream?",
+    subtitle: "PULL THE RIPCORD // BUILD FOR AN AUDIENCE OF ONE",
     description:
-      "Denji fought for basic autonomy. You have the most powerful creative engine in human history at your fingertips. Stop waiting. Pull the cord.",
+      "Denji fought for basic autonomy, good food, and a decent life. You have the most powerful creative engine in human history at your fingertips. Stop asking for permission. Pull the cord.",
     signature:
-      "github.com/shugknight24\n[ VERIFIED ] ¯\\_(ツ)_/¯ jackpot ¯\\_(ツ)_/¯ [ VERIFIED ]",
+      "github.com/shugknight24 // Datamoon.com\n[ VERIFIED ] ¯\\_(ツ)_/¯ jackpot ¯\\_(ツ)_/¯ [ VERIFIED ]",
     notes: ripcordPresenterNotes[5],
     center: true,
   },

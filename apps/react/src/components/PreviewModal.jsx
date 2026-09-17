@@ -76,7 +76,7 @@ export const PreviewModal = ({
                   onClick={() => onChangeViewport(vp)}
                   className={`p-2 rounded-md transition-colors cursor-pointer ${
                     viewport.name === vp.name
-                      ? "bg-(--color-primary) text-white"
+                      ? "bg-(--color-primary) text-(--color-primary-text)"
                       : "text-gray-400 hover:text-white hover:bg-gray-600"
                   }`}
                   title={`${vp.name}${
@@ -89,7 +89,7 @@ export const PreviewModal = ({
                 </button>
               ))}
             </div>
-            <span className="text-sm text-gray-500 hidden sm:inline">
+            <span className="text-sm text-gray-500 dark:text-gray-400 hidden sm:inline">
               {viewport.width === "100%" ? "Auto" : `${viewport.width}px`}
             </span>
           </div>

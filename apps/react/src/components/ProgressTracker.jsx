@@ -300,7 +300,7 @@ export const ProgressTracker = () => {
               className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all duration-200 text-left group cursor-pointer
                 ${
                   isComplete
-                    ? "bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30"
+                    ? "bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-100 dark:bg-green-900/30"
                     : "hover:bg-gray-100 dark:hover:bg-gray-700/50"
                 }
                 active:scale-[0.98]
@@ -311,7 +311,7 @@ export const ProgressTracker = () => {
                 className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200
                   ${
                     isComplete
-                      ? "bg-green-500 text-white shadow-md shadow-green-500/30"
+                      ? "bg-green-700 text-white shadow-md shadow-green-500/30"
                       : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 group-hover:bg-gray-300 dark:group-hover:bg-gray-600 group-hover:scale-110"
                   }
                 `}
@@ -337,7 +337,7 @@ export const ProgressTracker = () => {
                     ${
                       isComplete
                         ? "text-green-600/70 dark:text-green-500/70"
-                        : "text-gray-500 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400"
+                        : "text-gray-500 dark:text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-400"
                     }
                   `}
                 >
@@ -351,7 +351,7 @@ export const ProgressTracker = () => {
                   ${
                     isComplete
                       ? "bg-red-100 dark:bg-red-900/30 text-red-500"
-                      : "bg-green-100 dark:bg-green-900/30 text-green-500"
+                      : "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-500"
                   }
                 `}
               >
@@ -382,7 +382,7 @@ export const ProgressTracker = () => {
       {completed.length > 0 && (
         <button
           onClick={() => setCompleted([])}
-          className="mt-3 w-full text-xs text-gray-500 hover:text-red-500 dark:hover:text-red-400 py-2 border-t border-gray-200 dark:border-gray-700 transition-colors hover:bg-red-50 dark:hover:bg-red-900/10 rounded-b-lg"
+          className="mt-3 w-full text-xs text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-800 dark:text-red-400 py-2 border-t border-gray-200 dark:border-gray-700 transition-colors hover:bg-red-50 dark:hover:bg-red-100 dark:bg-red-900/10 rounded-b-lg"
         >
           Reset Progress
         </button>

@@ -364,7 +364,7 @@ export const useChallenges = () => {
 // Difficulty badge colors
 const difficultyColors = {
   beginner:
-    "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
   intermediate:
     "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
   advanced: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
@@ -412,13 +412,13 @@ export const ChallengeCard = ({ challenge, onStart }) => {
       </p>
 
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4 text-sm text-gray-500">
+        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
           <span>
-            <EmojiIcon emoji="⏱️" className="w-4 h-4 inline" />{" "}
+            <EmojiIcon name="timer" className="w-4 h-4 inline" />{" "}
             {challenge.timeLimit}s
           </span>
           <span>
-            <EmojiIcon emoji="⭐" className="w-4 h-4 inline" />{" "}
+            <EmojiIcon name="star" className="w-4 h-4 inline" />{" "}
             {challenge.points} pts
           </span>
         </div>
@@ -427,7 +427,7 @@ export const ChallengeCard = ({ challenge, onStart }) => {
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             isCompleted
               ? "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
-              : "bg-blue-500 hover:bg-blue-600 text-white"
+              : "bg-blue-600 hover:bg-blue-700 text-white"
           }`}
         >
           {isCompleted ? "Retry" : "Start"}
@@ -592,7 +592,7 @@ export const ChallengeModal = ({ isOpen, onClose }) => {
                 className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg cursor-pointer"
                 aria-label="Close challenge"
               >
-                <Close className="w-5 h-5 text-gray-500" />
+                <Close className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
           )}
@@ -611,13 +611,13 @@ export const ChallengeModal = ({ isOpen, onClose }) => {
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 You earned{" "}
-                <span className="text-yellow-500 font-bold">
+                <span className="text-yellow-700 dark:text-yellow-500 font-bold">
                   {earnedPoints} points
                 </span>
               </p>
               <button
                 onClick={handleClose}
-                className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium"
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
               >
                 Continue
               </button>
@@ -639,7 +639,7 @@ export const ChallengeModal = ({ isOpen, onClose }) => {
                         key={i}
                         className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300"
                       >
-                        <span className="text-blue-500 font-bold">
+                        <span className="text-blue-700 dark:text-blue-500 font-bold">
                           {i + 1}.
                         </span>
                         {instruction}
@@ -732,7 +732,7 @@ export const ChallengeModal = ({ isOpen, onClose }) => {
                             key={i}
                             className="text-sm text-red-600 dark:text-red-400 flex items-start gap-2"
                           >
-                            <span className="text-red-400">•</span>
+                            <span className="text-red-800 dark:text-red-400">•</span>
                             {error}
                           </li>
                         ))}
@@ -751,7 +751,7 @@ export const ChallengeModal = ({ isOpen, onClose }) => {
                   <button
                     onClick={runTests}
                     disabled={isRunningTests}
-                    className="flex-1 px-4 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white rounded-lg font-medium flex items-center justify-center gap-2"
+                    className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg font-medium flex items-center justify-center gap-2"
                   >
                     {isRunningTests ? (
                       <>
@@ -771,8 +771,8 @@ export const ChallengeModal = ({ isOpen, onClose }) => {
                     disabled={!canComplete}
                     className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${
                       canComplete
-                        ? "bg-green-500 hover:bg-green-600 text-white"
-                        : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                        ? "bg-green-700 hover:bg-green-800 text-white"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-400 cursor-not-allowed"
                     }`}
                     title={!canComplete ? "Run tests and pass them first!" : ""}
                   >
@@ -840,19 +840,19 @@ export const ChallengeModePanel = () => {
       {/* Stats Header */}
       <div className="grid grid-cols-3 gap-4">
         <div className="p-4 bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow text-center">
-          <p className="text-2xl font-bold text-yellow-500">
+          <p className="text-2xl font-bold text-yellow-700 dark:text-yellow-500">
             {challengeStats.totalPoints}
           </p>
           <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Total Points</p>
         </div>
         <div className="p-4 bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow text-center">
-          <p className="text-2xl font-bold text-blue-500">
+          <p className="text-2xl font-bold text-blue-700 dark:text-blue-500">
             {challengeStats.attempts}
           </p>
           <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Challenges Done</p>
         </div>
         <div className="p-4 bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow text-center">
-          <p className="text-2xl font-bold text-green-500">
+          <p className="text-2xl font-bold text-green-700 dark:text-green-500">
             {challengeStats.totalTime > 0
               ? `${Math.floor(challengeStats.totalTime / 60)}m`
               : "0m"}

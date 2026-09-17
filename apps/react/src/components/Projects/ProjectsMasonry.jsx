@@ -15,6 +15,8 @@
  * Perfect for: Visual portfolios with lots of projects
  */
 
+import { EmojiIcon } from "../Icons";
+
 export const ProjectsMasonry = ({ projects }) => {
   return (
     <section className="section-container bg-(--color-surface-highlight)">
@@ -24,7 +26,7 @@ export const ProjectsMasonry = ({ projects }) => {
       <div className="columns-1 md:columns-2 lg:columns-3 gap-6 max-w-7xl mx-auto">
         {projects.map((project) => (
           <div key={project.id} className="break-inside-avoid mb-6 group">
-            <div className="bg-(--color-surface) rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300">
+            <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300">
               {/* Image with overlay */}
               <div className="relative overflow-hidden">
                 <img
@@ -34,8 +36,9 @@ export const ProjectsMasonry = ({ projects }) => {
                 />
                 {project.featured && (
                   <div className="absolute top-4 right-4">
-                    <span className="bg-(--color-accent) text-(--color-text-inverse) text-xs font-bold px-3 py-1 rounded-full">
-                      ⭐ Featured
+                    <span className="bg-(--color-accent) text-(--color-text-inverse) text-xs font-bold px-3 py-1 rounded-full inline-flex items-center gap-1.5">
+                      <EmojiIcon name="star" className="w-3.5 h-3.5 shrink-0" />
+                      Featured
                     </span>
                   </div>
                 )}
@@ -47,7 +50,7 @@ export const ProjectsMasonry = ({ projects }) => {
                       href={project.githubUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-4 py-2 bg-(--color-surface) text-(--color-text-primary) rounded-lg font-medium hover:bg-(--color-surface-highlight) transition-colors"
+                      className="px-4 py-2 bg-(--color-surface) dark:bg-(--color-surface-dark) text-(--color-text-primary) rounded-lg font-medium hover:bg-(--color-surface-highlight) transition-colors"
                     >
                       View Code
                     </a>

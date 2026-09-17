@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import VercelDeployment from "../../assets/instructions/vercel_root_directory.png";
 import { EmojiIcon } from "@portfolio/icons/react";
-import { Checkmark } from "../Icons";
+import { Checkmark, ChevronLeft, ChevronRight } from "../Icons";
 import { Link } from "react-router-dom";
 
 export const InstructionSteps = () => {
@@ -34,7 +34,7 @@ export const InstructionSteps = () => {
           title: "3. Component Anatomy: Skeleton, Clothing, Brain",
           component: "HTML (Skeleton) + Tailwind (Clothing) + React (Brain)",
           description:
-            "Mental model for modern web apps: HTML defines the DOM nodes (<header>, <section>); Tailwind CSS applies utility classes (bg-gray-900, text-blue-400); React manages the state (useState) and dynamic data mapping (.map()).",
+            "Mental model for modern web apps: HTML defines the DOM nodes (<header>, <section>); Tailwind CSS applies utility classes (bg-gray-900, text-blue-800 dark:text-blue-400); React manages the state (useState) and dynamic data mapping (.map()).",
           note: "Open src/components/About/AboutSkills.jsx to see this triad in action.",
         },
         {
@@ -186,14 +186,14 @@ export const InstructionSteps = () => {
               className={`px-6 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center gap-2.5 border cursor-pointer ${
                 isActive
                   ? "bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-500/20 scale-105"
-                  : "bg-gray-900/60 text-gray-400 border-gray-800 hover:border-gray-700 hover:text-white"
+                  : "bg-(--color-surface) dark:bg-gray-900/60 text-(--color-muted-text) dark:text-gray-400 border-(--color-border) dark:border-gray-800 hover:border-gray-400 dark:hover:border-gray-700 hover:text-(--color-text) dark:hover:text-white"
               }`}
             >
               <EmojiIcon name={data.icon} className="w-4 h-4 shrink-0" />
               <span>{data.name}</span>
               <span
                 className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
-                  isActive ? "bg-blue-800/80 text-blue-200" : "bg-gray-800 text-gray-400"
+                  isActive ? "bg-blue-800/80 text-blue-200" : "bg-(--color-surface-hover) dark:bg-gray-800 text-(--color-muted-text) dark:text-gray-400"
                 }`}
               >
                 {data.badge}
@@ -205,8 +205,8 @@ export const InstructionSteps = () => {
 
       <div className="max-w-4xl mx-auto">
         {/* Track Header Card */}
-        <div className="p-4 rounded-2xl bg-gray-900/80 border border-gray-800 mb-6 text-center text-xs text-gray-300">
-          <strong className="text-blue-400 font-mono">{currentTrackData.name}:</strong>{" "}
+        <div className="p-4 rounded-2xl bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) mb-6 text-center text-xs text-(--color-text) dark:text-(--color-text-dark)">
+          <strong className="text-(--color-primary) font-mono">{currentTrackData.name}:</strong>{" "}
           {currentTrackData.description}
         </div>
 
@@ -226,42 +226,42 @@ export const InstructionSteps = () => {
               />
             ))}
           </div>
-          <div className="flex justify-between items-center text-xs font-mono text-gray-400">
+          <div className="flex justify-between items-center text-xs font-mono text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
             <span>
               Step {currentStep + 1} of {steps.length}
             </span>
-            <span className="text-gray-500">← → arrow keys navigate</span>
+            <span className="text-(--color-muted-text) dark:text-(--color-muted-text-dark)">← → arrow keys navigate</span>
           </div>
         </div>
 
         {/* Current Step Content Box */}
-        <div className="bg-gray-900/90 border border-gray-800 p-8 rounded-3xl shadow-2xl text-left">
+        <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) p-8 rounded-3xl shadow-2xl text-left">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-mono font-bold text-blue-400 px-3 py-1 rounded bg-blue-950/60 border border-blue-800">
+            <span className="text-xs font-mono font-bold text-(--color-primary) px-3 py-1 rounded bg-blue-100 dark:bg-blue-950/60 border border-blue-800">
               STAGE 0{currentStep + 1}
             </span>
-            <span className="text-xs text-gray-500 font-mono">
+            <span className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) font-mono">
               {currentTrackData.name}
             </span>
           </div>
 
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+          <h2 className="text-2xl md:text-3xl font-bold text-(--color-text) dark:text-(--color-text-dark) mb-4">
             {steps[currentStep].title}
           </h2>
 
           {steps[currentStep].component && (
-            <div className="bg-black/80 border border-gray-800 p-3 rounded-xl mb-4 font-mono text-xs text-emerald-400 overflow-x-auto flex items-center justify-between gap-2">
+            <div className="bg-black/80 border border-(--color-border) dark:border-(--color-border-dark) p-3 rounded-xl mb-4 font-mono text-xs text-emerald-400 overflow-x-auto flex items-center justify-between gap-2">
               <code>{steps[currentStep].component}</code>
             </div>
           )}
 
-          <p className="text-gray-300 text-sm md:text-base leading-relaxed mb-6">
+          <p className="text-(--color-text) dark:text-(--color-text-dark) text-sm md:text-base leading-relaxed mb-6">
             {steps[currentStep].description}
           </p>
 
           {steps[currentStep].note && (
-            <div className="p-4 rounded-xl bg-amber-950/20 border-l-4 border-amber-500 text-xs text-amber-200/90 mb-6 leading-relaxed">
-              <strong className="text-amber-400 font-mono uppercase tracking-wider block mb-1">
+            <div className="p-4 rounded-xl bg-amber-100 dark:bg-amber-950/20 border-l-4 border-amber-500 text-xs text-amber-900 dark:text-amber-200/90 mb-6 leading-relaxed">
+              <strong className="text-amber-800 dark:text-amber-400 font-mono uppercase tracking-wider block mb-1">
                 The Sovereign Rule / Tip:
               </strong>
               {steps[currentStep].note}
@@ -269,7 +269,7 @@ export const InstructionSteps = () => {
           )}
 
           {steps[currentStep].img && (
-            <div className="my-6 p-2 rounded-2xl bg-black/60 border border-gray-800 flex justify-center">
+            <div className="my-6 p-2 rounded-2xl bg-black/60 border border-(--color-border) dark:border-(--color-border-dark) flex justify-center">
               <img
                 src={steps[currentStep].img}
                 alt={steps[currentStep].title}
@@ -279,16 +279,19 @@ export const InstructionSteps = () => {
           )}
 
           {/* Step Navigation Controls */}
-          <div className="flex justify-between items-center pt-6 border-t border-gray-800 mt-6">
+          <div className="flex justify-between items-center pt-6 border-t border-(--color-border) dark:border-(--color-border-dark) mt-6">
             <button
               onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
               disabled={currentStep === 0}
-              className="px-5 py-2.5 rounded-xl text-xs font-mono font-bold bg-gray-800 text-gray-300 hover:text-white disabled:opacity-30 disabled:hover:text-gray-300 transition-all cursor-pointer"
+              className="px-5 py-2.5 rounded-xl text-xs font-mono font-bold bg-(--color-surface-hover) dark:bg-(--color-surface-hover-dark) text-(--color-text) dark:text-(--color-text-dark) hover:text-(--color-text) dark:text-(--color-text-dark) disabled:opacity-30 disabled:hover:text-(--color-text) dark:text-(--color-text-dark) transition-all cursor-pointer inline-flex items-center gap-1.5"
             >
-              ← Previous Step
+              <span aria-hidden="true">
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </span>
+              Previous Step
             </button>
 
-            <span className="text-xs font-mono text-gray-500">
+            <span className="text-xs font-mono text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
               {currentStep + 1} / {steps.length}
             </span>
 
@@ -297,9 +300,12 @@ export const InstructionSteps = () => {
                 setCurrentStep(Math.min(steps.length - 1, currentStep + 1))
               }
               disabled={currentStep === steps.length - 1}
-              className="px-6 py-2.5 rounded-xl text-xs font-mono font-bold bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-30 transition-all shadow-md shadow-blue-600/30 cursor-pointer"
+              className="px-6 py-2.5 rounded-xl text-xs font-mono font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-30 transition-all shadow-md shadow-blue-600/30 cursor-pointer inline-flex items-center gap-1.5"
             >
-              Next Step →
+              Next Step
+              <span aria-hidden="true">
+                <ChevronRight className="w-3.5 h-3.5" />
+              </span>
             </button>
           </div>
         </div>
@@ -308,21 +314,21 @@ export const InstructionSteps = () => {
         <div className="mt-8 flex flex-wrap justify-center gap-4 text-xs font-mono">
           <Link
             to="/slides/lhm"
-            className="px-4 py-2 rounded-xl bg-gray-900 border border-gray-800 text-blue-400 hover:border-blue-500 transition-colors flex items-center gap-2"
+            className="px-4 py-2 rounded-xl bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) text-(--color-primary) hover:border-blue-500 transition-colors flex items-center gap-2"
           >
             <EmojiIcon name="presentation" className="w-3.5 h-3.5" />
             Launch LHM Keynote Slides (Sept 19)
           </Link>
           <Link
             to="/slides/devfest"
-            className="px-4 py-2 rounded-xl bg-gray-900 border border-gray-800 text-emerald-400 hover:border-emerald-500 transition-colors flex items-center gap-2"
+            className="px-4 py-2 rounded-xl bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) text-emerald-800 dark:text-emerald-400 hover:border-emerald-500 transition-colors flex items-center gap-2"
           >
             <EmojiIcon name="rocket" className="w-3.5 h-3.5" />
             Launch DevFest AI Hackathon Slides (Nov 2026)
           </Link>
           <Link
             to="/agentic-studio"
-            className="px-4 py-2 rounded-xl bg-gray-900 border border-gray-800 text-purple-400 hover:border-purple-500 transition-colors flex items-center gap-2"
+            className="px-4 py-2 rounded-xl bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) text-purple-800 dark:text-purple-400 hover:border-purple-500 transition-colors flex items-center gap-2"
           >
             <EmojiIcon name="sparkles" className="w-3.5 h-3.5" />
             Audience of One Studio

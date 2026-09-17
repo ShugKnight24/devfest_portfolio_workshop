@@ -36,9 +36,9 @@ export const SkillsIcons = ({ skills }) => {
   };
 
   const levelColors = {
-    beginner: "border-(--color-secondary) bg-(--color-surface)",
-    intermediate: "border-(--color-primary) bg-(--color-surface)",
-    advanced: "border-(--color-accent) bg-(--color-surface)",
+    beginner: "border-(--color-secondary) bg-(--color-surface) dark:bg-(--color-surface-dark)",
+    intermediate: "border-(--color-primary) bg-(--color-surface) dark:bg-(--color-surface-dark)",
+    advanced: "border-(--color-accent) bg-(--color-surface) dark:bg-(--color-surface-dark)",
   };
 
   const dotColors = {

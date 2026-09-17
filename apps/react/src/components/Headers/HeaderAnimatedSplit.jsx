@@ -67,8 +67,10 @@ export const HeaderAnimatedSplit = ({ personal }) => {
     },
   ];
 
+  // Always dark, in either mode, so it is scoped `dark`: the brand tokens then
+  // resolve to their dark-canvas values rather than the light-mode ones.
   return (
-    <header className="relative bg-(--color-dark) text-white overflow-hidden">
+    <header className="dark relative bg-(--color-dark) text-white overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-(--color-primary) rounded-full blur-3xl animate-pulse"></div>

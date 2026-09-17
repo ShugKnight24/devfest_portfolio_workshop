@@ -33,7 +33,7 @@ export const ProjectsFilterable = ({ projects }) => {
       : projects.filter((p) => p.tags.includes(activeFilter));
 
   return (
-    <section className="section-container bg-(--color-surface)">
+    <section className="section-container bg-(--color-surface) dark:bg-(--color-surface-dark)">
       <h2 className="section-title">My Projects</h2>
 
       <div className="max-w-7xl mx-auto">

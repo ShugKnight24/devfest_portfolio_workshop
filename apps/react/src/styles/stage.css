@@ -1,0 +1,261 @@
+/**
+ * Stage Layer — Cyber-Brutalist Presentation Tokens
+ *
+ * One source of truth for every colour, size, and motion value used on stage.
+ * Before this file the slide engine carried 130+ inline hex literals and
+ * duplicated the Reze Override as a ternary on every element. Now the override
+ * is a single attribute flip on the stage root:
+ *
+ *   <div class="stage" data-stage-mode="protocol">   default cyan / amber
+ *   <div class="stage" data-stage-mode="reze">       magenta / lime
+ *
+ * Sizes are projector-first: a slide is read from the back of a room, not from
+ * a laptop 18in away. The `--stage-fs-*` ramp is tuned for 1080p at ~30ft.
+ */
+
+@layer base {
+  .stage {
+    /* ---- Palette: PROTOCOL (default) ---- */
+    --stage-accent: #00ffcc;
+    --stage-accent-alt: #ffcc00;
+    --stage-accent-deep: #00e5ff;
+    --stage-accent-rgb: 0 255 204;
+    --stage-accent-alt-rgb: 255 204 0;
+
+    /* ---- Surfaces ---- */
+    --stage-bg: #05070a;
+    --stage-bg-deep: #020304;
+    --stage-surface: #0a0d14;
+    --stage-surface-raised: #101622;
+    --stage-border: rgb(var(--stage-accent-rgb) / 0.22);
+    --stage-border-strong: rgb(var(--stage-accent-rgb) / 0.55);
+
+    /* ---- Text ---- */
+    --stage-text: #ffffff;
+    /* Measured against --stage-bg: muted 8.9:1, dim 5.5:1. Both clear WCAG AA
+       for normal text. Do not darken `dim` — it was 4.39:1 and failed. */
+    --stage-text-muted: #a3adbd;
+    --stage-text-dim: #7b8698;
+    --stage-on-accent: #020304;
+
+    /* ---- Signal colours (constant across modes) ---- */
+    --stage-danger: #ef4444;
+    --stage-ok: #22c55e;
+
+    /* ---- Glow / depth ---- */
+    --stage-glow-sm: 0 0 12px rgb(var(--stage-accent-rgb) / 0.25);
+    --stage-glow-md: 0 0 28px rgb(var(--stage-accent-rgb) / 0.3);
+    --stage-glow-lg: 0 0 60px rgb(var(--stage-accent-rgb) / 0.35);
+
+    /* ---- Geometry: brutalist means one radius, used sparingly ---- */
+    --stage-radius: 2px;
+    --stage-radius-lg: 4px;
+    --stage-hairline: 1px;
+    --stage-rule: 3px;
+
+    /* ---- Projector type ramp ---- */
+    --stage-fs-kicker: clamp(0.7rem, 0.45vw + 0.55rem, 0.95rem);
+    --stage-fs-body: clamp(1rem, 0.85vw + 0.75rem, 1.6rem);
+    --stage-fs-lead: clamp(1.25rem, 1.4vw + 0.9rem, 2.25rem);
+    --stage-fs-h2: clamp(1.9rem, 3.2vw + 1rem, 4rem);
+    --stage-fs-h1: clamp(2.6rem, 6vw + 1rem, 7.5rem);
+    --stage-fs-code: clamp(0.85rem, 0.7vw + 0.6rem, 1.35rem);
+
+    /* ---- Rhythm ---- */
+    --stage-gap-xs: 0.5rem;
+    --stage-gap-sm: 1rem;
+    --stage-gap-md: 1.75rem;
+    --stage-gap-lg: 3rem;
+    --stage-gap-xl: 5rem;
+
+    /* ---- Motion ---- */
+    --stage-dur-fast: 140ms;
+    --stage-dur: 320ms;
+    --stage-dur-slow: 700ms;
+    --stage-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+    /* ---- Fonts ---- */
+    --stage-font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --stage-font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+    background-color: var(--stage-bg);
+    color: var(--stage-text);
+  }
+
+  /* ---- Palette: REZE OVERRIDE ----
+     The whole room changes on one attribute. No per-element ternaries. */
+  .stage[data-stage-mode="reze"] {
+    --stage-accent: #ff0055;
+    --stage-accent-alt: #c6ff00;
+    --stage-accent-deep: #ff4d8d;
+    --stage-accent-rgb: 255 0 85;
+    --stage-accent-alt-rgb: 198 255 0;
+    --stage-bg: #0a0004;
+    --stage-bg-deep: #050001;
+    --stage-surface: #12030a;
+    --stage-surface-raised: #1c0510;
+    --stage-on-accent: #ffffff;
+  }
+
+  /* High-contrast fallback for hostile projectors / accessibility requests */
+  .stage[data-stage-contrast="high"] {
+    --stage-bg: #000000;
+    --stage-bg-deep: #000000;
+    --stage-surface: #0a0a0a;
+    --stage-text-muted: #d4d4d4;
+    --stage-text-dim: #a8a8a8;
+    --stage-border: rgb(var(--stage-accent-rgb) / 0.6);
+  }
+}
+
+@layer components {
+  /* Hairline grid — texture without weight. Pure CSS, no image request. */
+  .stage-grid-bg {
+    background-image:
+      linear-gradient(rgb(var(--stage-accent-rgb) / 0.045) var(--stage-hairline), transparent var(--stage-hairline)),
+      linear-gradient(90deg, rgb(var(--stage-accent-rgb) / 0.045) var(--stage-hairline), transparent var(--stage-hairline));
+    background-size: 64px 64px;
+  }
+
+  /* Section eyebrow: mono, caps, boxed. The deck's connective tissue. */
+  .stage-kicker {
+    font-family: var(--stage-font-mono);
+    font-size: var(--stage-fs-kicker);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--stage-accent);
+    border: var(--stage-hairline) solid var(--stage-border-strong);
+    background-color: rgb(var(--stage-accent-rgb) / 0.08);
+    border-radius: var(--stage-radius);
+    padding: 0.35em 0.85em;
+    display: inline-block;
+  }
+
+  .stage-h1 {
+    font-family: var(--stage-font-display);
+    font-size: var(--stage-fs-h1);
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    color: var(--stage-accent);
+    text-wrap: balance;
+  }
+
+  .stage-h2 {
+    font-family: var(--stage-font-display);
+    font-size: var(--stage-fs-h2);
+    font-weight: 900;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--stage-text);
+    text-wrap: balance;
+  }
+
+  .stage-lead {
+    font-size: var(--stage-fs-lead);
+    line-height: 1.3;
+    color: var(--stage-accent-alt);
+    font-weight: 700;
+    text-wrap: balance;
+  }
+
+  .stage-body {
+    font-size: var(--stage-fs-body);
+    line-height: 1.55;
+    color: var(--stage-text-muted);
+    max-width: 62ch;
+    text-wrap: pretty;
+  }
+
+  /* Brutalist card: hard edge, one accent rule, no rounded softness. */
+  .stage-card {
+    background-color: var(--stage-surface);
+    border: var(--stage-hairline) solid var(--stage-border);
+    border-left: var(--stage-rule) solid var(--stage-accent);
+    border-radius: var(--stage-radius);
+    padding: var(--stage-gap-md);
+    transition: border-color var(--stage-dur) var(--stage-ease),
+      background-color var(--stage-dur) var(--stage-ease),
+      transform var(--stage-dur) var(--stage-ease);
+  }
+
+  .stage-card:hover {
+    background-color: var(--stage-surface-raised);
+    border-color: var(--stage-border-strong);
+    border-left-color: var(--stage-accent-alt);
+  }
+
+  .stage-rule {
+    height: var(--stage-rule);
+    background: linear-gradient(90deg, var(--stage-accent), transparent);
+    border: 0;
+  }
+
+  /* Primary stage control. Used by presenter HUD + in-slide triggers. */
+  .stage-btn {
+    font-family: var(--stage-font-mono);
+    font-size: var(--stage-fs-kicker);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.6em 1.1em;
+    border-radius: var(--stage-radius);
+    border: var(--stage-hairline) solid var(--stage-border-strong);
+    background-color: rgb(var(--stage-accent-rgb) / 0.1);
+    color: var(--stage-accent);
+    cursor: pointer;
+    transition: background-color var(--stage-dur-fast) var(--stage-ease),
+      color var(--stage-dur-fast) var(--stage-ease);
+  }
+
+  .stage-btn:hover {
+    background-color: var(--stage-accent);
+    color: var(--stage-on-accent);
+  }
+
+  .stage-btn[aria-pressed="true"] {
+    background-color: var(--stage-accent);
+    color: var(--stage-on-accent);
+  }
+}
+
+@layer utilities {
+  .stage-glow-text {
+    text-shadow: var(--stage-glow-md);
+  }
+
+  /* Chromatic split. Only fires in Reze mode; decorative, so it is hidden
+     from assistive tech by the element that uses it. */
+  .stage[data-stage-mode="reze"] .stage-glitch {
+    animation: stage-glitch 2.4s steps(2, end) infinite;
+  }
+
+  @keyframes stage-glitch {
+    0%, 92%, 100% { text-shadow: 2px 0 var(--stage-accent), -2px 0 var(--stage-accent-alt); transform: translate(0); }
+    94% { text-shadow: -3px 0 var(--stage-accent), 3px 0 var(--stage-accent-alt); transform: translate(2px, -1px); }
+    96% { text-shadow: 3px 0 var(--stage-accent-alt), -3px 0 var(--stage-accent); transform: translate(-2px, 1px); }
+  }
+
+  .stage-enter {
+    animation: stage-enter var(--stage-dur-slow) var(--stage-ease) both;
+  }
+
+  @keyframes stage-enter {
+    from { opacity: 0; transform: translateY(1.5rem); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* Honour the OS setting. A seizure risk on a 20ft screen is not a flourish. */
+  @media (prefers-reduced-motion: reduce) {
+    .stage *,
+    .stage *::before,
+    .stage *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

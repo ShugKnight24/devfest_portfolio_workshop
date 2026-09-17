@@ -332,6 +332,16 @@ export const AchievementNotification = () => {
 
   if (!notification) return null;
 
+  /*
+   * Never over a slide. This mounts outside the router (App.jsx), so it has no
+   * route context and read the whole app as fair game — on a fresh load it
+   * dropped "Achievement Unlocked!" straight across the title slide. The unlock
+   * and its points still count; only the popup is withheld while presenting.
+   */
+  if (typeof window !== "undefined" && window.location.pathname.startsWith("/slides")) {
+    return null;
+  }
+
   return (
     <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-200 animate-slide-down">
       <div className="bg-linear-to-r from-yellow-400 via-orange-500 to-pink-500 p-1 rounded-2xl shadow-2xl">
@@ -421,7 +431,7 @@ export const AchievementsPanel = () => {
           </p>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-bold text-amber-500">
+          <p className="text-2xl font-bold text-amber-700 dark:text-amber-500">
             {getTotalPoints()}
           </p>
           <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Total Points</p>
@@ -451,10 +461,12 @@ export const AchievementsPanel = () => {
               className={`p-4 rounded-xl border-2 transition-all ${
                 isUnlocked
                   ? "border-amber-400/80 bg-amber-400/10"
-                  : "border-(--color-border) dark:border-(--color-border-dark) bg-(--color-surface) dark:bg-(--color-surface-dark) opacity-60"
+                  : "border-dashed border-(--color-border) dark:border-(--color-border-dark) bg-(--color-surface) dark:bg-(--color-surface-dark)"
               }`}
             >
-              <div className="mb-2 text-(--color-primary)">
+              {/* Locked cards dim the icon only. Fading the whole card took its
+                  text under AA in both modes. */}
+              <div className={`mb-2 text-(--color-primary) ${isUnlocked ? "" : "opacity-40 grayscale"}`}>
                 <EmojiIcon emoji={achievement.icon} className="w-8 h-8" />
               </div>
               <h3
@@ -470,7 +482,7 @@ export const AchievementsPanel = () => {
                 {isUnlocked ? achievement.description : "Keep exploring!"}
               </p>
               {isUnlocked && (
-                <p className="text-xs text-yellow-600 dark:text-yellow-400 font-medium mt-2">
+                <p className="text-xs text-yellow-800 dark:text-yellow-400 font-medium mt-2">
                   +{achievement.points} pts
                 </p>
               )}
@@ -483,7 +495,7 @@ export const AchievementsPanel = () => {
       {achievementList.filter(
         (a) => a.secret && !unlockedAchievements.includes(a.id),
       ).length > 0 && (
-        <p className="text-center text-sm text-gray-400 mt-6">
+        <p className="text-center text-sm text-(--color-muted-text) dark:text-gray-400 mt-6">
           <EmojiIcon
             name="lock"
             className="w-4 h-4 inline-block align-text-bottom mr-1.5 text-gray-400"

@@ -22,7 +22,7 @@ export const FooterDefault = () => {
   return (
     <footer className="p-8 border-t-2 border-dashed border-gray-300 mt-12">
       <div className="text-center space-y-4">
-        <p className="text-gray-500 italic">
+        <p className="text-gray-500 dark:text-gray-400 italic">
           Footer Component: Add your links here!
         </p>
 

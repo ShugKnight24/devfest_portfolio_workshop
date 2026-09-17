@@ -18,6 +18,7 @@
  */
 
 import { EmojiIcon } from "@portfolio/icons/react";
+import { ChevronRight } from "../Icons";
 
 export const AboutAnimated = ({ avatar, aboutImage, bio }) => {
   const journey = [
@@ -71,8 +72,8 @@ export const AboutAnimated = ({ avatar, aboutImage, bio }) => {
   ];
 
   return (
-    <section className="section-container bg-(--color-background) dark:bg-(--color-dark)">
-      <h2 className="section-title text-(--color-primary)">About Me</h2>
+    <section id="about" aria-labelledby="about-heading" className="section-container bg-(--color-background) dark:bg-(--color-dark)">
+      <h2 id="about-heading" className="section-title text-(--color-primary)">About Me</h2>
 
       <div className="max-w-6xl mx-auto">
         {/* Main About Section */}
@@ -103,7 +104,7 @@ export const AboutAnimated = ({ avatar, aboutImage, bio }) => {
               <span className="inline-flex items-center px-4 py-2 bg-(--color-primary)/10 text-(--color-primary) rounded-full text-sm font-semibold mb-4">
                 <EmojiIcon name="wave" className="w-4 h-4 inline-block mr-1.5" /> Hello!
               </span>
-              <p className="text-xl text-(--color-text) dark:text-(--color-textDark) leading-relaxed mb-4">
+              <p className="text-xl text-(--color-text) dark:text-(--color-text-dark) leading-relaxed mb-4">
                 {bio}
               </p>
             </div>
@@ -126,9 +127,12 @@ export const AboutAnimated = ({ avatar, aboutImage, bio }) => {
             {/* CTA Button */}
             <a
               href="#contact"
-              className="inline-block px-6 py-3 bg-(--color-primary) text-white rounded-full font-semibold hover:opacity-90 hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200"
+              className="inline-flex items-center gap-1.5 px-6 py-3 bg-(--color-primary) text-(--color-primary-text) rounded-full font-semibold hover:opacity-90 hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200"
             >
-              Let's Connect →
+              Let's Connect
+              <span aria-hidden="true">
+                <ChevronRight className="w-4 h-4" />
+              </span>
             </a>
           </div>
         </div>
@@ -147,7 +151,7 @@ export const AboutAnimated = ({ avatar, aboutImage, bio }) => {
                 className="relative bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-200 hover:-translate-y-2"
               >
                 {/* Year Badge */}
-                <div className="absolute -top-4 left-6 px-4 py-1 bg-(--color-primary) text-white text-sm font-bold rounded-full">
+                <div className="absolute -top-4 left-6 px-4 py-1 bg-(--color-primary) text-(--color-primary-text) text-sm font-bold rounded-full">
                   {milestone.year}
                 </div>
 

@@ -16,6 +16,8 @@
  * Perfect for: Storytelling and showcasing growth
  */
 
+import { EmojiIcon } from "../Icons";
+
 export const ProjectsTimeline = ({ projects }) => {
   // You could enhance projects data to include dates
   // For now, we'll use the order as a timeline
@@ -49,7 +51,7 @@ export const ProjectsTimeline = ({ projects }) => {
                     isEven ? "md:pr-12" : "md:pl-12"
                   }`}
                 >
-                  <div className="bg-(--color-surface) rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+                  <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
                     {/* Number Badge */}
                     <div
                       className={`absolute -top-4 ${
@@ -68,8 +70,9 @@ export const ProjectsTimeline = ({ projects }) => {
                       />
                       {project.featured && (
                         <div className="absolute top-4 right-4">
-                          <span className="bg-(--color-accent) text-(--color-text-inverse) px-3 py-1 rounded-full text-xs font-bold">
-                            ⭐ Featured
+                          <span className="bg-(--color-accent) text-(--color-text-inverse) px-3 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1.5">
+                            <EmojiIcon name="star" className="w-3.5 h-3.5 shrink-0" />
+                            Featured
                           </span>
                         </div>
                       )}

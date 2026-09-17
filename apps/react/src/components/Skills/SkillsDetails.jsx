@@ -45,7 +45,7 @@ export const SkillsDetails = ({ skills }) => {
         {enhancedSkills.map((skill) => (
           <div
             key={skill.name}
-            className="group relative bg-(--color-surface) rounded-lg p-4 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer"
+            className="group relative bg-(--color-surface) dark:bg-(--color-surface-dark) rounded-lg p-4 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer"
           >
             {/* Front side - Always visible */}
             <div className="text-center">

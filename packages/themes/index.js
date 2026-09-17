@@ -1,4 +1,66 @@
 export const themes = {
+  // === THE TALK THEME (DEFAULT) ===
+  // "Pull the Cord. Bring Backup." Orange is the pull: Pochita's ripcord, the
+  // moment you commit. Steel-denim blue is the backup: Reacher's worn jeans and
+  // cold read, complementary to the orange so the two never blur. Red is what
+  // happens after the pull. The canvas is oil-stained gunmetal, warm rather than
+  // plum, and light mode is a manila case file. Every token is hand-authored and
+  // clears WCAG AA without the resolver touching it — see themeContrast.test.js.
+  pullTheCord: {
+    name: "Pull the Cord",
+    description: "Pochita's ripcord meets Reacher's denim. The talk's palette.",
+    colors: {
+      primary: "#FF7A1A", // Pochita/chainsaw orange — the pull
+      secondary: "#86A8CC", // Reacher's worn denim-steel blue — the backup
+      accent: "#F03A3A", // Chainsaw blood red — what the cord starts
+      background: "#EFE2C2", // Manila case-file folder, Reacher's dossiers
+      dark: "#0F0D0B", // Oil-stained gunmetal black, warm undertone
+      surface: "#FBF6EA", // The typed sheet inside the folder
+      surfaceDark: "#1A1714", // Engine-block iron lift off the canvas
+      surfaceHover: "#F3E9D1", // Thumbed, handled paper
+      surfaceHoverDark: "#25201C",
+      border: "#D6C49C", // Folder tab edge
+      borderDark: "#3A322B", // Worn chain-guard steel
+      borderSubtle: "#FF7A1A26",
+      text: "#1C1611", // Typewriter ink
+      textDark: "#F6EFE3", // Paper white, not screen white
+      mutedText: "#5E5243", // Faded carbon copy
+      mutedTextDark: "#B3A796", // Sawdust grey
+      primaryText: "#150A02", // Near-black on the orange pull
+    },
+  },
+
+  // === THE SIGNATURE THEME ===
+  // Reacher's tactical precision fused with Chainsaw Man's visceral energy.
+  // Cyan is deduction: cold, exact, the read before the strike. Gold is Pochita.
+  // Crimson is overwhelming force. The canvas is obsidian with a blood
+  // undertone rather than clinical black, so it reads as a devil's dark, not a
+  // dashboard's. Every token is hand-authored and verified against WCAG AA —
+  // see tokens.test.js.
+  reacherChainsaw: {
+    name: "Reacher \u00d7 Chainsaw",
+    description: "Tactical deduction meets devil-hunter momentum. The house palette.",
+    colors: {
+      primary: "#00F0C0", // Tactical cyan-teal — deduction, precision
+      secondary: "#F0A830", // Pochita gold — the little devil dog
+      accent: "#FF1744", // Chainsaw blood crimson — overwhelming force
+      background: "#F4EFE8", // Bone/cream, Chainsaw Man's paper stock
+      dark: "#0A0509", // Obsidian with a blood undertone
+      surface: "#FFFDFA",
+      surfaceDark: "#140B12", // Faint plum-blood lift off the canvas
+      surfaceHover: "#F0E9E0",
+      surfaceHoverDark: "#1E1019",
+      border: "#D8CEC2",
+      borderDark: "#2A1A24",
+      borderSubtle: "#00F0C026",
+      text: "#1A1418", // Warm charcoal, not pure black
+      textDark: "#FFFFFF",
+      mutedText: "#5E5158",
+      mutedTextDark: "#A89BA4", // Warm steel grey
+      primaryText: "#05100D",
+    },
+  },
+
   // === THE REACHER PROTOCOL ===
   reacher: {
     name: "Reacher Protocol",
@@ -518,17 +580,19 @@ export const themes = {
   },
 };
 
-export const defaultTheme = "reacher";
+export const defaultTheme = "pullTheCord";
 
 // Theme categories for the theme switcher UI
 export const themeCategories = {
   tactical: {
     name: "Tactical & Keynote",
-    themes: ["reacher", "chainsawDark"],
+    themes: ["pullTheCord", "reacherChainsaw", "reacher", "chainsawDark"],
   },
   anime: {
     name: "Anime Inspired",
     themes: [
+      "pullTheCord",
+      "reacherChainsaw",
       "pochita",
       "chainsaw",
       "chainsawDark",

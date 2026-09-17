@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CopyButton } from "./CopyButton";
 import { EmojiIcon } from "./Icons/EmojiIcon";
+import { ChevronRight, Refresh } from "./Icons";
 
 export const Playground = ({
   title,
@@ -47,7 +48,7 @@ export const Playground = ({
         <textarea
           value={code}
           onChange={(e) => setCode(e.target.value)}
-          className="w-full h-32 p-3 font-mono text-sm bg-gray-900 text-green-400 rounded-lg border border-gray-600 focus:ring-2 focus:ring-(--color-primary) outline-none"
+          className="w-full h-32 p-3 font-mono text-sm bg-gray-900 text-green-800 dark:text-green-400 rounded-lg border border-gray-600 focus:ring-2 focus:ring-(--color-primary) outline-none"
           spellCheck="false"
         />
 
@@ -55,15 +56,18 @@ export const Playground = ({
         <div className="flex gap-3 mt-4">
           <button
             onClick={runCode}
-            className="px-4 py-2 bg-(--color-primary) text-white rounded-lg hover:opacity-90 transition-opacity font-medium"
+            className="px-4 py-2 bg-(--color-primary) text-(--color-primary-text) rounded-lg hover:opacity-90 transition-opacity font-medium"
           >
             ▶ Run Code
           </button>
           <button
             onClick={() => setCode(initialCode)}
-            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors inline-flex items-center gap-1.5"
           >
-            ↺ Reset
+            <span aria-hidden="true">
+              <Refresh className="w-4 h-4" />
+            </span>
+            <span>Reset</span>
           </button>
           {hints.length > 0 && (
             <button
@@ -102,9 +106,12 @@ export const Playground = ({
                 onClick={() =>
                   setCurrentHint((prev) => (prev + 1) % hints.length)
                 }
-                className="mt-2 text-xs text-yellow-600 hover:underline"
+                className="mt-2 text-xs text-yellow-600 hover:underline inline-flex items-center gap-1"
               >
-                Next Hint →
+                Next Hint
+                <span aria-hidden="true">
+                  <ChevronRight className="w-3 h-3" />
+                </span>
               </button>
             )}
           </div>

@@ -57,11 +57,11 @@ const QuizPage = () => {
       return {
         level: "Skilled Developer",
         icon: "star",
-        color: "text-blue-400",
+        color: "text-blue-800 dark:text-blue-400",
       };
     if (accuracy >= 60)
-      return { level: "Learning Fast", icon: "books", color: "text-green-400" };
-    return { level: "Getting Started", icon: "target", color: "text-purple-400" };
+      return { level: "Learning Fast", icon: "books", color: "text-green-800 dark:text-green-400" };
+    return { level: "Getting Started", icon: "target", color: "text-purple-800 dark:text-purple-400" };
   };
 
   const mastery = getMasteryLevel();
@@ -172,13 +172,13 @@ const QuizPage = () => {
                 </p>
               </div>
               <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow-lg p-6 text-center">
-                <p className="text-3xl font-bold text-emerald-500">
+                <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-500">
                   {quizStats.correctAnswers}
                 </p>
                 <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark) mt-1">Correct Answers</p>
               </div>
               <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow-lg p-6 text-center">
-                <p className="text-3xl font-bold text-amber-500">
+                <p className="text-3xl font-bold text-amber-700 dark:text-amber-500">
                   {quizStats.pointsEarned}
                 </p>
                 <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark) mt-1">Points Earned</p>
@@ -215,10 +215,10 @@ const QuizPage = () => {
                             <span
                               className={`font-medium ${
                                 correct / answered >= 0.8
-                                  ? "text-emerald-500"
+                                  ? "text-emerald-700 dark:text-emerald-500"
                                   : correct / answered >= 0.6
-                                    ? "text-amber-500"
-                                    : "text-rose-500"
+                                    ? "text-amber-700 dark:text-amber-500"
+                                    : "text-rose-700 dark:text-rose-500"
                               }`}
                             >
                               {Math.round((correct / answered) * 100)}% correct

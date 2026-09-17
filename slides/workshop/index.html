@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Reacher Protocol // Workshop Dashboard</title>
+    <title>Audience of One Workshop // Sovereign Operatives Lab</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
         
@@ -24,7 +24,7 @@
         }
 
         .sidebar-title {
-            color: #fff; margin: 0; font-weight: 900; font-size: 1.25rem; text-transform: uppercase; font-family: 'JetBrains Mono'; letter-spacing: 1px;
+            color: #fff; margin: 0; font-weight: 900; font-size: 1.15rem; text-transform: uppercase; font-family: 'JetBrains Mono'; letter-spacing: 1px;
         }
 
         .sidebar-toggle-btn {
@@ -74,79 +74,87 @@
     </style>
 </head>
 <body>
-    <!-- Floating toggle when sidebar is folded -->
     <button id="sidebar-expand-btn" class="floating-sidebar-btn" style="display: none;" title="Show Sidebar">
-        [ MENU ]
+        [ LAB MENU ]
     </button>
 
     <div class="sidebar" id="workshop-sidebar">
-        <div class="sidebar-header">
-            <h3 class="sidebar-title">WORKSHOP SETUP</h3>
-            <button id="sidebar-collapse-btn" class="sidebar-toggle-btn" title="Collapse Sidebar (Save Space)">&lt;</button>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px solid #27272a;">
+            <a href="../../" style="color: #a1a1aa; text-decoration: none; font-size: 0.75rem; font-family: 'JetBrains Mono';">← PORTFOLIO</a>
+            <span style="color: #444;">|</span>
+            <a href="../combined/index.html" style="color: #00ffcc; text-decoration: none; font-size: 0.75rem; font-family: 'JetBrains Mono'; font-weight: bold;">★ UNIFIED</a>
         </div>
-        <div class="nav-item active" onclick="showSlide(0)">01. The Sandbox Clone</div>
-        <div class="nav-item" onclick="showSlide(1)">02. Data Audit</div>
-        <div class="nav-item" onclick="showSlide(2)">03. Assembly Blocks</div>
-        <div class="nav-item" onclick="showSlide(3)">04. Skeptic Protocol Gate</div>
+        <div class="sidebar-header">
+            <h3 class="sidebar-title">OPERATIVE LAB</h3>
+            <button id="sidebar-collapse-btn" class="sidebar-toggle-btn" title="Collapse Sidebar">&lt;</button>
+        </div>
+        <div class="nav-item active" onclick="showSlide(0)">01. Friction Audit</div>
+        <div class="nav-item" onclick="showSlide(1)">02. Prompt Clinic</div>
+        <div class="nav-item" onclick="showSlide(2)">03. 30m Vibe Sprint</div>
+        <div class="nav-item" onclick="showSlide(3)">04. Show &amp; Tell</div>
     </div>
 
     <div class="content">
-        <!-- LAB 01 -->
+        <!-- STAGE 01 -->
         <div class="slide active">
-            <div class="module-badge">LAB 01 // INITIATE</div>
-            <h1>Clone the Sandbox</h1>
-            <p>First step: secure your local environment and drop the dead weight.</p>
+            <div class="module-badge">STAGE 01 // AUDIT</div>
+            <h1>The Friction Audit</h1>
+            <p>Write down the 3 most soul-crushing, repetitive digital tasks in your personal life. Stop building for hypothetical corporate managers—reclaim your own time.</p>
             <div class="lab-box">
-                <p style="color: #fff; font-weight: bold;">Objective: Establish Sovereign Architecture.</p>
+                <p style="color: #fff; font-weight: bold;">Target: Identify 3 Acute Personal Friction Points</p>
                 <div class="terminal">
-                    &gt; git clone github.com/shugknight24/devfest_portfolio_workshop<br>
-                    &gt; cd devfest_portfolio_workshop &amp;&amp; npm install<br>
-                    &gt; <span style="color: #ff0055;">Warning: Strip all unnecessary NPM dependencies. Keep it lean.</span>
+                    &gt; echo '1. Parsing Chase bank CSV exports into monthly category totals' &gt;&gt; audit.txt<br>
+                    &gt; echo '2. Scraping elementary school newsletter PDFs for permission deadlines' &gt;&gt; audit.txt<br>
+                    &gt; echo '3. Compiling weekly grocery weights to hit protein targets' &gt;&gt; audit.txt<br>
+                    &gt; <span style="color: #ff0055;">[AUDIT COMPLETE] Target locked. Building for an Audience of One.</span>
                 </div>
             </div>
         </div>
 
-        <!-- LAB 02 -->
+        <!-- STAGE 02 -->
         <div class="slide">
-            <div class="module-badge" style="background: rgba(0, 255, 204, 0.15); color: #00ffcc; border-color: #00ffcc;">LAB 02 // DEDUCE</div>
-            <h1>Audit your Data</h1>
-            <p>Open <code>portfolioData.js</code>. Inject your authentic story. Don't let an LLM write a generic, soulless biography for you. Authenticity is your moat.</p>
+            <div class="module-badge" style="background: rgba(0, 255, 204, 0.15); color: #00ffcc; border-color: #00ffcc;">STAGE 02 // CLINIC</div>
+            <h1>The Prompt Clinic</h1>
+            <p>The Finlay &amp; Neagley Method: Do not write conversational prose. Define explicit targets, input/output schemas, and zero external dependency constraints.</p>
             <div class="lab-box">
-                <p style="color: #fff; font-weight: bold;">File: apps/react/src/data/portfolioData.js</p>
+                <p style="color: #fff; font-weight: bold;">Constraint Blueprint Structure</p>
                 <div class="terminal">
-                    &gt; vim apps/react/src/data/portfolioData.js<br>
-                    &gt; // Define your true narrative, custom projects, and sovereign skills<br>
-                    &gt; <span style="color: #00ffcc;">[OK] Local data layer updated. Zero third-party telemetry leak.</span>
+                    &gt; Target: Python 3 script / Native Web API<br>
+                    &gt; Goal: Parse local CSVs and group transactions by category and date<br>
+                    &gt; Constraints: Native OS libraries only, ZERO external dependencies<br>
+                    &gt; Output: Diffs or single-file executable script only<br>
+                    &gt; <span style="color: #00ffcc;">[VERIFIED] Hallucination vectors eliminated. Zero bloat.</span>
                 </div>
             </div>
         </div>
 
-        <!-- LAB 03 -->
+        <!-- STAGE 03 -->
         <div class="slide">
-            <div class="module-badge" style="background: rgba(198, 255, 0, 0.15); color: #c6ff00; border-color: #c6ff00;">LAB 03 // BUILD</div>
-            <h1>Modular Assembly</h1>
-            <p>Launch the Audience of One Maker Studio. Blueprint your bespoke tool by assembling Header, About, Skills, Projects, and Footer blocks.</p>
+            <div class="module-badge" style="background: rgba(198, 255, 0, 0.15); color: #c6ff00; border-color: #c6ff00;">STAGE 03 // SPRINT</div>
+            <h1>The 30-Minute Sprint</h1>
+            <p>Vibe-code with Cursor, Windsurf, or Claude Code. Pull the cord like Denji and get working software running locally in 30 minutes.</p>
             <div class="lab-box">
-                <p style="color: #fff; font-weight: bold;">Component Tree Architecture</p>
+                <p style="color: #fff; font-weight: bold;">Live Execution Sprint</p>
                 <div class="terminal">
-                    &gt; App &rarr; ThemeProvider &rarr; LayoutEngine &rarr; PortfolioBuilder<br>
-                    &gt; Scaffolding 5 modular UI variants...<br>
-                    &gt; <span style="color: #c6ff00;">[READY] Interactive state machine compiled.</span>
+                    &gt; cursor .<br>
+                    &gt; python3 bank_operative.py chase_2026.csv<br>
+                    &gt; Categories reconciled in 18ms.<br>
+                    &gt; <span style="color: #c6ff00;">[RUNNING] Personal operative verified and working offline.</span>
                 </div>
             </div>
         </div>
 
-        <!-- LAB 04 -->
+        <!-- STAGE 04 -->
         <div class="slide">
-            <div class="module-badge" style="background: rgba(255, 255, 255, 0.1); color: #fff; border-color: #555;">LAB 04 // VERIFY</div>
-            <h1>The Skeptic Protocol</h1>
-            <p>Never trust the machine blindly. Run your tests, pass Vitest, and deploy live on Vercel.</p>
+            <div class="module-badge" style="background: rgba(255, 255, 255, 0.1); color: #fff; border-color: #555;">STAGE 04 // SHOW &amp; TELL</div>
+            <h1>Show &amp; Tell // The Movement</h1>
+            <p>Demonstrate your personal operative on stage. Share the blueprint into the open-source community catalog.</p>
             <div class="lab-box">
                 <div class="terminal" style="color: #c6ff00;">
-                    &gt; npm --prefix apps/react run test:run<br>
-                    &gt; 54 tests passed. 0 failed. (820ms)<br>
-                    &gt; vercel deploy --prod<br>
-                    &gt; <span style="color: #fff;">[ DEPLOYMENT SECURED: Audience of One Live. ]</span>
+                    &gt; git add operatives/ &amp;&amp; git commit -m 'feat: add my personal operative'<br>
+                    &gt; git push origin feat/personal-agent<br>
+                    &gt; <span style="color: #fff;">[COMMUNITY SYNC] Blueprint registered to Sovereign Catalog.</span><br>
+                    &gt; ¯\_(ツ)_/¯ jackpot ¯\_(ツ)_/¯
                 </div>
             </div>
         </div>
@@ -178,7 +186,6 @@
             }
         });
 
-        // Sidebar collapse / expand
         const sidebar = document.getElementById('workshop-sidebar');
         const collapseBtn = document.getElementById('sidebar-collapse-btn');
         const expandBtn = document.getElementById('sidebar-expand-btn');

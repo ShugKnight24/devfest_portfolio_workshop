@@ -1,109 +1,116 @@
 /**
- * Builder's Workshop Dashboard Slides
+ * Builder's Workshop: Audience of One Workshop Format
  * Detroit LHM & DevFest 2026
  *
- * Hands-on 4-lab workshop architecture.
+ * Pivot away from the standard "Let's build a React App" template:
+ * - Stage 01: The Friction Audit — Write down the 3 most annoying digital tasks in personal life.
+ * - Stage 02: The Prompt Clinic — Teach strict constraints (The Finlay/Neagley method).
+ * - Stage 03: The Sprint — 30 minutes to vibe-code with Cursor/Windsurf to build personal operative.
+ * - Stage 04: The Show & Tell — Demonstrate operatives, share blueprints, cultivate community of builders.
  */
 
 export const workshopDeckMeta = {
   id: "workshop",
-  title: "Builder's Workshop Labs",
-  subtitle: "Interactive All-Day Developer Lab Dashboard",
+  title: "Builder's Workshop Labs // Audience of One",
+  subtitle: "Sovereign Personal Operatives Lab Dashboard",
   conference: "Detroit LHM & DevFest 2026",
   organization: "Google GDG Detroit",
   date: "September 19 & November 2026",
-  duration: "All-Day",
+  duration: "Half-Day / All-Day Lab",
   url: "https://gdg.community.dev/events/details/google-gdg-detroit-presents-detroit-latin-heritage-month-innovation-summit/cohost-gdg-detroit/",
 };
 
 export const workshopSlides = [
   {
-    id: "lab-01",
+    id: "stage-01",
     type: "lab",
     labNumber: "01",
-    badge: "LAB 01 // INITIATE",
-    title: "Clone the Sandbox",
-    subtitle: "Establish Sovereign Architecture",
+    badge: "STAGE 01 // AUDIT",
+    title: "The Friction Audit",
+    subtitle: "Identify 3 Acute Personal Bottlenecks",
     description:
-      "First step: secure your local environment and drop the dead weight. Strip out bloat, verify package signatures, and lock your dependencies.",
-    objective: "Establish Sovereign Architecture & Zero-Bloat Environment.",
-    fileTarget: "apps/react/package.json",
+      "Stop whiteboarding hypothetical SaaS products. Open your notebook and write down the 3 most soul-crushing, repetitive digital tasks in your personal life.",
+    objective: "Identify acute personal friction (bank CSVs, school newsletters, meal prep macros).",
+    fileTarget: "personal_friction_audit.txt",
     terminalLines: [
-      "> git clone git@github.com:shugknight24/devfest_portfolio_workshop.git",
-      "> cd devfest_portfolio_workshop/apps/react && npm install",
-      "> npm run dev",
-      "[WARNING] Strip unnecessary NPM dependencies. Keep it sovereign and lean.",
+      "> echo '1. Parsing Chase bank CSV exports into monthly totals' >> friction.txt",
+      "> echo '2. Digesting 4-page weekly elementary school newsletters' >> friction.txt",
+      "> echo '3. Calculating protein and whole-food grocery weights' >> friction.txt",
+      "[AUDIT COMPLETE] Target identified. You are building for an Audience of One.",
     ],
-    actionLink: "/guide",
-    actionLabel: "View Setup Guide →",
+    actionLink: "/operatives",
+    actionLabel: "Launch Operatives Sandbox",
   },
   {
-    id: "lab-02",
+    id: "stage-02",
     type: "lab",
     labNumber: "02",
-    badge: "LAB 02 // DEDUCE",
-    title: "Audit Your Data",
-    subtitle: "Centralized Data Layer Injection",
+    badge: "STAGE 02 // CLINIC",
+    title: "The Prompt Clinic",
+    subtitle: "The Finlay & Neagley Method",
     description:
-      "Open portfolioData.js. Inject your authentic story. Don't let an LLM write a generic, soulless biography for you. Authenticity is your competitive moat.",
-    objective: "Refactor to Centralized Local Data Store (Zero Telemetry Leaks).",
-    fileTarget: "apps/react/src/data/portfolioData.js",
+      "Teach attendees how to formulate strict constraint prompts instead of polite civilian requests. Define the runtime target, explicit inputs/outputs, and zero external dependencies.",
+    objective: "Master constraint-driven prompting: Target, Goal, Strict Constraints, Output format.",
+    fileTarget: "prompt_blueprint.md",
     terminalLines: [
-      "> vim apps/react/src/data/portfolioData.js",
-      "> // Define your genuine narrative, custom projects, and sovereign skills",
-      "> [OK] Local data layer updated. Zero third-party telemetry leak.",
-    ],
-    actionLink: "/builder",
-    actionLabel: "Launch Portfolio Builder →",
-  },
-  {
-    id: "lab-03",
-    type: "lab",
-    labNumber: "03",
-    badge: "LAB 03 // BUILD",
-    title: "Modular Assembly",
-    subtitle: "Audience of One Maker Studio",
-    description:
-      "Launch the Audience of One Maker Studio. Blueprint your bespoke tool by assembling Header, About, Skills, Projects, and Footer blocks dynamically.",
-    objective: "Assemble dynamic layout variants & multi-tier components.",
-    fileTarget: "apps/react/src/data/layout.js",
-    terminalLines: [
-      "> App → ThemeProvider → LayoutEngine → PortfolioBuilder",
-      "> Scaffolding 5 modular UI variants...",
-      "> [READY] Interactive state machine compiled.",
+      "> Target: Python 3 CLI / Native Web API",
+      "> Goal: Extract dates and action items from unstructured newsletter text",
+      "> Constraints: Native libraries only (csv, re, datetime), ZERO external dependencies",
+      "> Output: Diffs or single-file executable script only",
+      "[PROMPT VERIFIED] Zero hallucination vector. Ready for execution.",
     ],
     actionLink: "/agentic-studio",
-    actionLabel: "Open Agentic Studio →",
+    actionLabel: "Open Agentic Studio Clinic",
   },
   {
-    id: "lab-04",
+    id: "stage-03",
+    type: "lab",
+    labNumber: "03",
+    badge: "STAGE 03 // SPRINT",
+    title: "The 30-Minute Sprint",
+    subtitle: "Vibe-Code Your Personal Operative",
+    description:
+      "Fire up Cursor, Windsurf, or Claude Code. Pull the ripcord like Denji. Attendees have 30 uninterrupted minutes to generate, test, and iterate on their personal operative.",
+    objective: "Build and verify a working personal agent (Python script, HTML widget, or macro).",
+    fileTarget: "apps/react/src/data/portfolioData.js",
+    terminalLines: [
+      "> cursor .",
+      "> // Prompt: Execute personal operative with strict Neagley isolation",
+      "> python3 operative.py test_input.csv",
+      "> [SUCCESS] Execution complete in 240ms. Zero dependencies installed.",
+    ],
+    actionLink: "/operatives",
+    actionLabel: "Test in Operatives Sandbox",
+  },
+  {
+    id: "stage-04",
     type: "lab",
     labNumber: "04",
-    badge: "LAB 04 // VERIFY",
-    title: "The Skeptic Protocol",
-    subtitle: "Automated Verification Gates",
+    badge: "STAGE 04 // SHOW & TELL",
+    title: "Show & Tell // The Movement",
+    subtitle: "Share Blueprints & Cultivate Community",
     description:
-      "Never trust the machine blindly. The Reacher Protocol demands rigorous verification: run tests, pass Vitest gates, and deploy production-ready code.",
-    objective: "100% Green CI Gate: Vitest Suite + Clean Production Build.",
-    fileTarget: "apps/react/src/pages/WorkshopSlides.test.jsx",
+      "Step up to the podium. Attendees project their screen, run their personal operative, and export the blueprint into the shared community catalog.",
+    objective: "Demonstrate live operative, share architectural blueprint, and join the builder network.",
+    fileTarget: "blueprints/operative_export.json",
     terminalLines: [
-      "> npm --prefix apps/react run test:run",
-      "> 54 tests passed. 0 failed. (820ms)",
-      "> npm --prefix apps/react run build",
-      "[DEPLOYMENT SECURED] Audience of One Live.",
+      "> git add operatives/ && git commit -m 'feat: add school email operative'",
+      "> git push origin feat/my-personal-agent",
+      "> [COMMUNITY SYNC] Blueprint registered to Sovereign Catalog.",
+      "[VERIFIED] ¯\\_(ツ)_/¯ jackpot ¯\\_(ツ)_/¯",
     ],
-    actionLink: "/challenges",
-    actionLabel: "View Coding Challenges →",
+    actionLink: "/showcase",
+    actionLabel: "View Community Blueprints",
   },
 ];
 
 export const workshopPresenterNotes = {
-  "lab-01":
-    "Walk attendees through cloning and running without external services. Emphasize zero lock-in.",
-  "lab-02":
-    "Guide participants to write their authentic story. No corporate boilerplate.",
-  "lab-03":
-    "Demonstrate variant swapping live in the browser using the Portfolio Builder and Agentic Studio.",
-  "lab-04":
-    "Show how automated gates give developers the confidence to let subagents build safely.",
+  "stage-01":
+    "STAGE 01 (15m): Circulate the room. Push attendees to pick REAL personal friction. Disqualify any ideas like 'I want to build a CRM for my manager'. Force them to solve their own life.",
+  "stage-02":
+    "STAGE 02 (20m): Break down the Finlay/Neagley prompt structure on the big screen. Show why adding 'Constraints: native libraries only' eliminates 95% of hallucinated NPM packages.",
+  "stage-03":
+    "STAGE 03 (30m): Put a live 30-minute countdown on the screen. Walk around, spot attendees when their AI gets stuck, and remind them to keep it lean and isolated.",
+  "stage-04":
+    "STAGE 04 (30m): Call up 4-5 volunteers. Have them show the input, hit enter, and show the output. Celebrate every working operative. Drop the GitHub link to exchange blueprints.",
 };

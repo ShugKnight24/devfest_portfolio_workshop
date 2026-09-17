@@ -33,13 +33,13 @@
 
 export const SkillsDefault = () => {
   return (
-    <section className="section-container bg-white">
+    <section className="section-container bg-white dark:bg-(--color-surface-dark)">
       <h2 className="section-title">My Skills</h2>
       <div className="flex flex-wrap gap-3 justify-center">
         {/* 
             TODO: Replace this static message with a map function.
         */}
-        <div className="p-4 border-2 border-dashed border-slate-300 rounded-lg text-slate-500">
+        <div className="p-4 border-2 border-dashed border-(--color-border) dark:border-(--color-border-dark) rounded-lg text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
           Skills will appear here once you map over the array!
         </div>
       </div>

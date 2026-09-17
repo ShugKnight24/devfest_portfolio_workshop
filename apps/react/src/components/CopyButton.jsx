@@ -56,7 +56,7 @@ export const CopyButton = ({
         ${sizeClasses[size]}
         ${
           copied
-            ? "bg-green-100! dark:bg-green-900/50! text-green-600! dark:text-green-400!"
+            ? "bg-green-100! dark:bg-green-900/50! text-green-800! dark:text-green-400!"
             : ""
         }
         ${className}

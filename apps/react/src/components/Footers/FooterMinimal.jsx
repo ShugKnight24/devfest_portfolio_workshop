@@ -10,7 +10,7 @@
 
 export const FooterMinimal = ({ currentYear, name, socialLinks }) => {
   return (
-    <footer className="bg-(--color-surface) border-t border-(--color-border)">
+    <footer className="bg-(--color-surface) dark:bg-(--color-surface-dark) border-t border-(--color-border)">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           {/* Left: Copyright */}

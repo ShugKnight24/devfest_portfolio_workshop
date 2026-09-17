@@ -4,105 +4,18 @@ import { trackEvent } from "@portfolio/telemetry";
 
 const ThemeContext = createContext();
 
-// Color helper to calculate luminance and derive surface/border/text
-const hexToRgb = (hex) => {
-  if (!hex || typeof hex !== "string") return [0, 0, 0];
-  const cleaned = hex.replace("#", "").trim();
-  const num = parseInt(
-    cleaned.length === 3
-      ? cleaned.split("").map((c) => c + c).join("")
-      : cleaned,
-    16
-  );
-  if (isNaN(num)) return [0, 0, 0];
-  return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
-};
-
-const rgbToHex = (r, g, b) =>
-  `#${[r, g, b]
-    .map((x) => Math.min(255, Math.max(0, Math.round(x))).toString(16).padStart(2, "0"))
-    .join("")}`;
-
-// Lighten color towards white (factor 0 to 1)
-const lightenColor = (hex, factor) => {
-  const [r, g, b] = hexToRgb(hex);
-  return rgbToHex(r + (255 - r) * factor, g + (255 - g) * factor, b + (255 - b) * factor);
-};
-
-// Darken color towards black (factor 0 to 1)
-const darkenColor = (hex, factor) => {
-  const [r, g, b] = hexToRgb(hex);
-  return rgbToHex(r * (1 - factor), g * (1 - factor), b * (1 - factor));
-};
-
-// Relative luminance calculation according to WCAG
-const getLuminance = (hex) => {
-  const [r, g, b] = hexToRgb(hex).map((v) => {
-    const val = v / 255;
-    return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
-  });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-};
-
-// Calculate all tokens for a theme
-export const resolveThemeTokens = (theme) => {
-  const c = theme?.colors || {};
-  const darkCanvas = c.dark || "#020304";
-  const lightCanvas = c.background || "#F9FAFB";
-  const primary = c.primary || "#3B82F6";
-
-  const isDarkCanvasLight = getLuminance(darkCanvas) > 0.2;
-  const isLightCanvasDark = getLuminance(lightCanvas) < 0.3;
-
-  // 1. Surface Dark (Cards, panels in dark mode)
-  const surfaceDark =
-    c.surfaceDark || (isDarkCanvasLight ? darkenColor(darkCanvas, 0.06) : lightenColor(darkCanvas, 0.05));
-  const surfaceHoverDark =
-    c.surfaceHoverDark || (isDarkCanvasLight ? darkenColor(darkCanvas, 0.12) : lightenColor(darkCanvas, 0.09));
-
-  // 2. Surface Light (Cards, panels in light mode)
-  const surface =
-    c.surface || (isLightCanvasDark ? lightenColor(lightCanvas, 0.08) : "#FFFFFF");
-  const surfaceHover =
-    c.surfaceHover || (isLightCanvasDark ? lightenColor(lightCanvas, 0.14) : darkenColor(surface, 0.03));
-
-  // 3. Borders
-  const borderDark =
-    c.borderDark || (isDarkCanvasLight ? darkenColor(darkCanvas, 0.2) : lightenColor(darkCanvas, 0.12));
-  const border =
-    c.border || (isLightCanvasDark ? lightenColor(lightCanvas, 0.22) : darkenColor(lightCanvas, 0.12));
-  const borderSubtle = c.borderSubtle || `${primary}26`;
-
-  // 4. Text & Muted Text
-  const text = c.text || "#1F2937";
-  const textDark = c.textDark || "#FFFFFF";
-  const mutedText = c.mutedText || darkenColor(text, 0.35);
-  const mutedTextDark = c.mutedTextDark || lightenColor(darkCanvas, 0.55);
-
-  // 5. Primary button contrast text
-  const primaryLuminance = getLuminance(primary);
-  const primaryText = c.primaryText || (primaryLuminance > 0.45 ? "#050608" : "#FFFFFF");
-
-  return {
-    primary,
-    secondary: c.secondary || primary,
-    accent: c.accent || primary,
-    background: lightCanvas,
-    dark: darkCanvas,
-    surface,
-    surfaceDark,
-    surfaceHover,
-    surfaceHoverDark,
-    border,
-    borderDark,
-    borderSubtle,
-    text,
-    textDark,
-    mutedText,
-    mutedTextDark,
-    primaryText,
-  };
-};
+/*
+ * Token resolution lives in @portfolio/themes/tokens.js so it can be unit
+ * tested without a DOM and shared with the vanilla starter. It is re-exported
+ * here because existing imports pull `resolveThemeTokens` from this module.
+ *
+ * That resolver is contrast-aware: 27 of the themes in this package declare
+ * only 7 of the 17 tokens, and deriving the rest with plain arithmetic left 28
+ * of 34 themes failing WCAG AA. It now measures each derived pair and corrects
+ * it. See tokens.test.js, which fails the build if any theme regresses.
+ */
+export { resolveThemeTokens, contrastRatio, getLuminance } from "@portfolio/themes/tokens";
+import { resolveThemeTokens } from "@portfolio/themes/tokens";
 
 export function ThemeProvider({ children }) {
   // Theme State
@@ -142,12 +55,31 @@ export function ThemeProvider({ children }) {
     const tokens = resolveThemeTokens(rawTheme);
     const root = document.documentElement;
 
-    // Apply all kebab-case and camelCase CSS custom properties
+    /*
+     * `primary` is tuned for the DARK canvas and measures ~1.3:1 as text on the
+     * light one, which is why light mode was unreadable. `secondary` and
+     * `accent` have the same problem (Pochita gold is 2:1 on bone). So the
+     * mode-sensitive tokens are not written inline here: they are published as
+     * `--brand-*` pairs and index.css picks the right one per mode. Writing
+     * them inline would beat both rules and pin the dark value everywhere.
+     */
+    const MODE_SENSITIVE = new Set(["primary", "primaryText", "secondary", "accent"]);
+
     Object.entries(tokens).forEach(([key, value]) => {
+      if (MODE_SENSITIVE.has(key)) return;
       const kebab = key.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
       root.style.setProperty(`--color-${kebab}`, value);
       root.style.setProperty(`--color-${key}`, value);
     });
+
+    root.style.setProperty("--brand-primary-dark", tokens.primary);
+    root.style.setProperty("--brand-primary-light", tokens.primaryOnLight);
+    root.style.setProperty("--brand-primary-text-dark", tokens.primaryText);
+    root.style.setProperty("--brand-primary-text-light", tokens.primaryTextOnLight);
+    root.style.setProperty("--brand-secondary-dark", tokens.secondary);
+    root.style.setProperty("--brand-secondary-light", tokens.secondaryOnLight);
+    root.style.setProperty("--brand-accent-dark", tokens.accent);
+    root.style.setProperty("--brand-accent-light", tokens.accentOnLight);
 
     trackEvent("theme_changed", { theme: currentTheme });
   }, [currentTheme]);

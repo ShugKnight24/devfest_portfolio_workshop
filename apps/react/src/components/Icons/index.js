@@ -31,9 +31,12 @@ import { Mobile } from "./Mobile";
 import { Moon } from "./Moon";
 import { PaletteSwatch } from "./PaletteSwatch";
 import { Plus } from "./Plus";
+import { Refresh } from "./Refresh";
 import { RightArrow } from "./RightArrow";
 import { Settings } from "./Settings";
 import { Share } from "./Share";
+import { SpeakerOff } from "./SpeakerOff";
+import { SpeakerOn } from "./SpeakerOn";
 import { Star } from "./Star";
 import { Stars } from "./Stars";
 import { Sun } from "./Sun";
@@ -78,9 +81,12 @@ export {
   Moon,
   PaletteSwatch,
   Plus,
+  Refresh,
   RightArrow,
   Settings,
   Share,
+  SpeakerOff,
+  SpeakerOn,
   Star,
   Stars,
   Sun,

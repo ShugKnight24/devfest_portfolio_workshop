@@ -11,6 +11,7 @@ import { Footer } from "../components/Footer";
 import { StarterInstructions } from "../components/StarterInstructions";
 import { PortfolioExportImport } from "../components/PortfolioExportImport";
 import { useToast } from "../components/Toast";
+import { ErrorBoundary } from "../components/ErrorBoundary";
 
 export const PortfolioBuilder = () => {
   /**
@@ -72,23 +73,41 @@ export const PortfolioBuilder = () => {
         />
         <button
           onClick={() => setShowInstructions(!showInstructions)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition-all font-medium text-sm"
+          aria-label={showInstructions ? "Hide Instructions" : "Show Instructions"}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition-all font-medium text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
         >
           {showInstructions ? "Hide Instructions" : "Show Instructions"}
         </button>
       </div>
+
       {showInstructions && <StarterInstructions />}
-      <Header personal={displayData.personal} />
-      <About
-        avatar={displayData.personal.avatar}
-        bio={displayData.personal.bio}
-      />
-      <Skills skills={displayData.skills} />
-      <Projects projects={displayData.projects} />
-      <Footer
-        social={displayData.personal.social}
-        name={displayData.personal.name}
-      />
+
+      <ErrorBoundary inline>
+        <Header personal={displayData.personal} />
+      </ErrorBoundary>
+
+      <ErrorBoundary inline>
+        <About
+          avatar={displayData.personal.avatar}
+          aboutImage={displayData.personal.aboutImage}
+          bio={displayData.personal.bio}
+        />
+      </ErrorBoundary>
+
+      <ErrorBoundary inline>
+        <Skills skills={displayData.skills} />
+      </ErrorBoundary>
+
+      <ErrorBoundary inline>
+        <Projects projects={displayData.projects} />
+      </ErrorBoundary>
+
+      <ErrorBoundary inline>
+        <Footer
+          social={displayData.personal.social}
+          name={displayData.personal.name}
+        />
+      </ErrorBoundary>
     </div>
   );
 };

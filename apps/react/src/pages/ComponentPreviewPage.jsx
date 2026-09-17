@@ -28,7 +28,7 @@ const ComponentPreviewPage = () => {
   const [activeComponent, setActiveComponent] = useState("Button");
 
   return (
-    <div className="min-h-screen bg-(--color-background) text-(--color-text) dark:text-(--color-text-dark)">
+    <div className="min-h-screen bg-(--color-background) dark:bg-(--color-dark) text-(--color-text) dark:text-(--color-text-dark)">
       {/* Header */}
       <div className="bg-(--color-surface)/90 dark:bg-(--color-surface-dark)/90 backdrop-blur-sm border-b border-(--color-border) dark:border-(--color-border-dark) sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -196,7 +196,7 @@ const ComponentPreviewPage = () => {
             </Link>
             <Link
               to="/challenges"
-              className="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors shadow-lg inline-flex items-center gap-1.5"
+              className="px-6 py-3 bg-orange-700 hover:bg-orange-800 text-white rounded-lg font-medium transition-colors shadow-lg inline-flex items-center gap-1.5"
             >
               <EmojiIcon name="lightning" className="w-4 h-4" /> Try Challenges
             </Link>

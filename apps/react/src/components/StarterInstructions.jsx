@@ -8,31 +8,31 @@ export const StarterInstructions = () => (
     <SpeakingEventsHub />
 
     {/* Hero Workshop Introduction */}
-    <div className="text-center py-10 my-8 rounded-3xl bg-gradient-to-b from-blue-900/10 via-gray-900/40 to-transparent border border-gray-800 p-8">
-      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/10 border border-blue-500/30 text-blue-400 text-xs font-mono font-bold uppercase tracking-wider mb-4">
+    <div className="text-center py-10 my-8 rounded-3xl bg-(--color-surface) dark:bg-transparent dark:bg-gradient-to-b dark:from-blue-900/10 dark:via-gray-900/40 dark:to-transparent border border-(--color-border) dark:border-(--color-border-dark) p-8">
+      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/10 border border-blue-500/30 text-(--color-primary) text-xs font-mono font-bold uppercase tracking-wider mb-4">
         <EmojiIcon name="shield" className="w-4 h-4" />
-        The Reacher Protocol • Workshop Guide
+        Pull the Cord. Bring Backup. • Workshop Guide
       </div>
       <h1 className="text-4xl md:text-6xl font-black text-gray-900 dark:text-white tracking-tight mb-4">
         From Audience of One to Sovereign Software
       </h1>
-      <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-6 max-w-3xl mx-auto leading-relaxed">
+      <p className="text-lg md:text-xl text-gray-600 dark:text-(--color-text) dark:text-(--color-text-dark) mb-6 max-w-3xl mx-auto leading-relaxed">
         Intellect like Sherlock Holmes. Strength of 3 men. Execution speed like Reze.
         Choose your track below to build personal software solutions that eliminate your own friction and empower others.
       </p>
-      <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-mono text-gray-400">
+      <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-mono text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
         <span className="flex items-center gap-1.5">
-          <EmojiIcon name="search" className="w-3.5 h-3.5 text-blue-400" />
+          <EmojiIcon name="search" className="w-3.5 h-3.5 text-(--color-primary)" />
           Sherlockian Root-Cause Deduction
         </span>
         <span>•</span>
         <span className="flex items-center gap-1.5">
-          <EmojiIcon name="lightning" className="w-3.5 h-3.5 text-amber-400" />
+          <EmojiIcon name="lightning" className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
           Overwhelming AI Leverage
         </span>
         <span>•</span>
         <span className="flex items-center gap-1.5">
-          <EmojiIcon name="rocket" className="w-3.5 h-3.5 text-purple-400" />
+          <EmojiIcon name="rocket" className="w-3.5 h-3.5 text-purple-800 dark:text-purple-400" />
           Zero-Bloat Deployment
         </span>
       </div>

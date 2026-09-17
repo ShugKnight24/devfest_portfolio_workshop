@@ -347,9 +347,9 @@ const ResourceCard = ({ resource }) => (
 
 const NextStepCard = ({ step, index }) => {
   const difficultyColors = {
-    Easy: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold",
-    Medium: "bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold",
-    Hard: "bg-rose-500/15 text-rose-600 dark:text-rose-400 font-bold",
+    Easy: "bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 font-bold",
+    Medium: "bg-amber-500/15 text-amber-800 dark:text-amber-400 font-bold",
+    Hard: "bg-rose-500/15 text-rose-800 dark:text-rose-400 font-bold",
   };
 
   return (
@@ -435,7 +435,7 @@ export const WhatsNext = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-(--color-background) text-(--color-text) dark:text-(--color-text-dark) py-24">
+    <div className="min-h-screen bg-(--color-background) dark:bg-(--color-dark) text-(--color-text) dark:text-(--color-text-dark) py-24">
       {/* Hero Section */}
       <div className="section-container text-center mb-16">
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-(--color-primary)/10 text-(--color-primary) rounded-full text-sm font-bold mb-6 border border-(--color-primary)/20">

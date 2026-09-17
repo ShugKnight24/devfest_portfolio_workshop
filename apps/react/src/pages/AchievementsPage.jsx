@@ -13,15 +13,15 @@ const AchievementsPage = () => {
   // Calculate rank based on points
   const getRank = (points) => {
     if (points >= 400)
-      return { name: "Grand Master", color: "text-purple-600 dark:text-purple-400", icon: "crown" };
+      return { name: "Grand Master", color: "text-purple-700 dark:text-purple-400", icon: "crown" };
     if (points >= 300)
-      return { name: "Expert", color: "text-red-600 dark:text-red-400", icon: "fire" };
+      return { name: "Expert", color: "text-red-700 dark:text-red-400", icon: "fire" };
     if (points >= 200)
-      return { name: "Advanced", color: "text-orange-600 dark:text-orange-400", icon: "star" };
+      return { name: "Advanced", color: "text-orange-700 dark:text-orange-400", icon: "star" };
     if (points >= 100)
-      return { name: "Intermediate", color: "text-yellow-600 dark:text-yellow-400", icon: "sparkle" };
+      return { name: "Intermediate", color: "text-yellow-700 dark:text-yellow-400", icon: "sparkle" };
     if (points >= 50)
-      return { name: "Beginner", color: "text-green-600 dark:text-green-400", icon: "seedling" };
+      return { name: "Beginner", color: "text-green-700 dark:text-green-400", icon: "seedling" };
     return { name: "Newcomer", color: "text-gray-600 dark:text-gray-400", icon: "egg" };
   };
 
@@ -29,7 +29,7 @@ const AchievementsPage = () => {
   const rank = getRank(totalPoints);
 
   return (
-    <div className="min-h-screen bg-(--color-background) text-(--color-text) dark:text-(--color-text-dark) py-12 px-4">
+    <div className="min-h-screen bg-(--color-background) dark:bg-(--color-dark) text-(--color-text) dark:text-(--color-text-dark) py-12 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-12">
@@ -44,7 +44,7 @@ const AchievementsPage = () => {
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow-lg p-6 text-center">
-            <p className="text-4xl font-bold text-amber-500">{totalPoints}</p>
+            <p className="text-4xl font-bold text-amber-700 dark:text-amber-500">{totalPoints}</p>
             <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark) mt-1">
               Total Points
             </p>
@@ -58,7 +58,7 @@ const AchievementsPage = () => {
             </p>
           </div>
           <div className="bg-(--color-surface) dark:bg-(--color-surface-dark) border border-(--color-border) dark:border-(--color-border-dark) rounded-xl shadow-lg p-6 text-center">
-            <p className="text-4xl font-bold text-emerald-500">
+            <p className="text-4xl font-bold text-emerald-700 dark:text-emerald-500">
               {getProgress()}%
             </p>
             <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark) mt-1">
@@ -92,19 +92,19 @@ const AchievementsPage = () => {
               <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) mt-1">Themes Tried</p>
             </div>
             <div className="p-4 bg-(--color-border)/20 dark:bg-(--color-border-dark)/30 border border-(--color-border)/40 dark:border-(--color-border-dark)/40 rounded-lg">
-              <p className="text-2xl font-bold text-indigo-500">
+              <p className="text-2xl font-bold text-indigo-700 dark:text-indigo-500">
                 {stats.lessonsCompleted?.length || 0}
               </p>
               <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) mt-1">Lessons Completed</p>
             </div>
             <div className="p-4 bg-(--color-border)/20 dark:bg-(--color-border-dark)/30 border border-(--color-border)/40 dark:border-(--color-border-dark)/40 rounded-lg">
-              <p className="text-2xl font-bold text-pink-500">
+              <p className="text-2xl font-bold text-pink-700 dark:text-pink-500">
                 {stats.playgroundRuns || 0}
               </p>
               <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) mt-1">Code Runs</p>
             </div>
             <div className="p-4 bg-(--color-border)/20 dark:bg-(--color-border-dark)/30 border border-(--color-border)/40 dark:border-(--color-border-dark)/40 rounded-lg">
-              <p className="text-2xl font-bold text-cyan-500">
+              <p className="text-2xl font-bold text-cyan-700 dark:text-cyan-500">
                 {stats.keyboardShortcuts || 0}
               </p>
               <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) mt-1">Shortcuts Used</p>

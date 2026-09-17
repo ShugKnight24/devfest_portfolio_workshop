@@ -30,7 +30,7 @@ export const SkillsProgress = ({ skills }) => {
   };
 
   return (
-    <section className="section-container bg-(--color-surface)">
+    <section className="section-container bg-(--color-surface) dark:bg-(--color-surface-dark)">
       <h2 className="section-title">Skills & Technologies</h2>
 
       <div className="max-w-4xl mx-auto space-y-6">

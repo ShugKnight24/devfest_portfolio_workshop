@@ -33,7 +33,7 @@ export const CodeBlock = ({
             <span className="text-sm text-gray-400 ml-2">{title}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500 uppercase">{language}</span>
+            <span className="text-xs text-gray-400 uppercase">{language}</span>
             <CopyButton text={code} size="xs" />
           </div>
         </div>
@@ -55,7 +55,7 @@ export const CodeBlock = ({
                 <tbody>
                   {lines.map((line, i) => (
                     <tr key={i} className="hover:bg-gray-800/50">
-                      <td className="pr-4 text-right text-gray-500 select-none w-8">
+                      <td className="pr-4 text-right text-gray-500 dark:text-gray-400 select-none w-8">
                         {i + 1}
                       </td>
                       <td className="whitespace-pre">{line}</td>

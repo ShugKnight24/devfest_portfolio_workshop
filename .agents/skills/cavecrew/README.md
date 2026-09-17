@@ -35,6 +35,19 @@ Locate → fix → verify (most common):
 
 Parallel scout: spawn 2-3 `cavecrew-investigator` calls in one message with different angles (defs, callers, tests). Aggregate in main.
 
+## Install
+
+Manual install (no plugin): the skill needs three agent files alongside it.
+
+```
+~/.claude/skills/cavecrew/SKILL.md
+~/.claude/agents/cavecrew-investigator.md
+~/.claude/agents/cavecrew-builder.md
+~/.claude/agents/cavecrew-reviewer.md
+```
+
+The skill is inert without the agents.
+
 ## Model overrides
 
 By default, `cavecrew-reviewer` and `cavecrew-investigator` pin `model: haiku` in their frontmatter; `cavecrew-builder` has no `model:` line (uses the API session default). Set env vars in your shell before launching Claude Code to override per-agent:
@@ -52,6 +65,9 @@ export CAVECREW_REVIEWER_MODEL=sonnet
 ```
 
 Use the same model name strings you'd use in any Claude Code agent frontmatter (e.g. `haiku`, `sonnet`, `opus`).
+
+**These env vars only work for plugin installs.** On a manual install, edit the
+`model:` line in the agent file directly.
 
 Overrides patch only `model:` line in installed agent frontmatter; prompt body
 stays untouched and continues receiving upstream updates. Only plugin installs

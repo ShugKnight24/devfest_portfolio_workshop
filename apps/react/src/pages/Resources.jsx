@@ -351,7 +351,7 @@ const CategoryCard = ({ category }) => (
     className="bg-(--color-surface) dark:bg-(--color-surface-dark) rounded-xl shadow-lg border border-(--color-border) dark:border-(--color-border-dark) overflow-hidden hover:shadow-xl transition-shadow duration-300"
   >
     {/* Category header */}
-    <div className="px-6 py-5 border-b border-(--color-border) dark:border-(--color-border-dark) bg-(--color-surface-dark)/20">
+    <div className="px-6 py-5 border-b border-(--color-border) dark:border-(--color-border-dark) bg-(--color-surface-hover) dark:bg-(--color-surface-dark)/20">
       <div className="flex items-center gap-3">
         <span className="text-2xl text-(--color-primary)">
           <EmojiIcon name={category.icon || category.emoji} emoji={category.emoji} className="w-7 h-7" />
@@ -413,7 +413,7 @@ export const Resources = () => {
   );
 
   return (
-    <div className="min-h-screen bg-(--color-background) text-(--color-text) dark:text-(--color-text-dark) py-24">
+    <div className="min-h-screen bg-(--color-background) dark:bg-(--color-dark) text-(--color-text) dark:text-(--color-text-dark) py-24">
       {/* Hero Section */}
       <div className="section-container text-center mb-12">
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-(--color-primary)/10 text-(--color-primary) rounded-full text-sm font-semibold mb-6 border border-(--color-primary)/20">

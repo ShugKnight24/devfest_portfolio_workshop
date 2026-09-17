@@ -299,7 +299,7 @@ export const ${themeKey} = {
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
             aria-label="Close Theme Builder"
           >
-            <Close className="w-5 h-5 text-gray-500" />
+            <Close className="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </button>
         </div>
 
@@ -419,7 +419,7 @@ export const ${themeKey} = {
               <div className="flex flex-col gap-3">
                 <button
                   onClick={previewTheme}
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
                 >
                   <Eye className="w-4 h-4" />
                   Apply Theme Preview
@@ -473,7 +473,7 @@ export const ${themeKey} = {
             <div className="flex gap-3">
               <button
                 onClick={copyToClipboard}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
               >
                 {copied ? <Checkmark className="w-4 h-4" /> : null}
                 {copied ? "Copied!" : "Copy Code"}
@@ -491,7 +491,7 @@ export const ${themeKey} = {
               onClick={() => setShowExportModal(false)}
               className="absolute top-4 right-4 p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
-              <Close className="w-5 h-5 text-gray-500" />
+              <Close className="w-5 h-5 text-gray-500 dark:text-gray-400" />
             </button>
           </div>
         </div>

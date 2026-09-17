@@ -19,6 +19,7 @@ import { TelemetryDashboard } from "./pages/TelemetryDashboard";
 import { LandingPage } from "./pages/LandingPage";
 import { Resources } from "./pages/Resources";
 import { AgenticStudio } from "./pages/AgenticStudio";
+import { OperativesPage } from "./pages/OperativesPage";
 import { SpeakingEventsHub } from "./components/SpeakingEventsHub";
 
 // Components
@@ -29,6 +30,7 @@ import { ScrollToTop } from "./components/ScrollToTop";
 import { StarterInstructions } from "./components/StarterInstructions";
 import { KonamiEasterEgg } from "./components/KonamiEasterEgg";
 import { KeyboardShortcutsModal } from "./components/KeyboardShortcutsModal";
+import { CommandPalette } from "./components/CommandPalette";
 import { SkeletonStyles } from "./components/Skeleton";
 import {
   AchievementNotification,
@@ -37,6 +39,7 @@ import {
 
 // Context
 import { useTheme } from "./context/ThemeContext";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 import "./App.css";
 
@@ -97,15 +100,20 @@ export const App = () => {
         return;
       }
 
-      // ? or Cmd+K / Ctrl+K for shortcuts modal
-      if (e.key === "?" || ((e.metaKey || e.ctrlKey) && e.key === "k")) {
+      // ? for the shortcuts modal. Cmd+K / Ctrl+K belongs to the command palette.
+      if (e.key === "?") {
         e.preventDefault();
         setShowShortcutsModal(true);
         trackAction("keyboard_shortcut");
       }
 
-      // D for dark mode toggle
+      // D for dark mode toggle — except while presenting. The deck binds D to
+      // its own directory, and both listeners are on `window`, so without this
+      // guard one keypress opens the directory AND flips the app theme behind
+      // it. Read from `window.location` because this effect sits outside the
+      // Router, so `useLocation` is not available here.
       if (e.key === "d" || e.key === "D") {
+        if (window.location.pathname.startsWith("/slides")) return;
         toggleDarkMode();
         trackAction("dark_mode_toggle");
         trackAction("keyboard_shortcut");
@@ -143,54 +151,67 @@ export const App = () => {
        * This is not required, but will explain how we create different pages in a React app
        */}
       <BrowserRouter>
+        {/* WCAG AA Keyboard Accessibility: Skip to Content */}
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         <TelemetryTracker />
+        {/* Cmd+K palette. Lives inside BrowserRouter: it navigates. */}
+        <CommandPalette />
         <div className="font-sans antialiased text-(--color-text) dark:text-(--color-text-dark)">
           {/* Global Navigation for the Workshop */}
           <Navigation />
 
-          <Routes>
-            {/* Landing Page & Course Selector */}
-            <Route path="/" element={<LandingPage />} />
-            {/* The Portfolio Building Workspace */}
-            <Route path="/builder" element={<PortfolioBuilder />} />
-            {/* A Demo of the "Final Product" */}
-            <Route path="/demo" element={<Demo />} />
-            {/* A dedicated instructions page */}
-            <Route path="/guide" element={<StarterInstructions />} />
-            {/* A dedicated lessons section */}
-            <Route path="/lessons" element={<Lessons />} />
-            {/* Deep link -> Go directly to a specific lesson */}
-            <Route path="/lessons/:lessonId" element={<Lessons />} />
-            {/* A Showcase of different portfolio styles - Compare how different components would look */}
-            <Route path="/showcase" element={<Showcase />} />
-            {/* What's Next - Learning resources and next steps */}
-            <Route path="/whats-next" element={<WhatsNext />} />
-            {/* Troubleshooting - Help for common issues */}
-            <Route path="/help" element={<TroubleshootingPage />} />
-            {/* Resources - Curated developer resources */}
-            <Route path="/resources" element={<Resources />} />
-            {/* Achievements - Track progress and unlock rewards */}
-            <Route path="/achievements" element={<AchievementsPage />} />
-            {/* Challenges - Timed coding challenges */}
-            <Route path="/challenges" element={<ChallengesPage />} />
-            {/* Progress Dashboard - Track overall progress */}
-            <Route path="/dashboard" element={<ProgressDashboard />} />
-            {/* Telemetry Dashboard */}
-            <Route path="/dashboard/telemetry" element={<TelemetryDashboard />} />
-            {/* Quiz - Interactive knowledge quizzes */}
-            <Route path="/quiz" element={<QuizPage />} />
-            {/* Component Preview - Interactive component playground */}
-            <Route path="/components" element={<ComponentPreviewPage />} />
-            {/* Workshop Slides - Interactive cinematic presentation */}
-            <Route path="/slides" element={<WorkshopSlides />} />
-            <Route path="/slides/:deckId" element={<WorkshopSlides />} />
-            {/* Speaking Events & Conference Hub */}
-            <Route path="/events" element={<SpeakingEventsHub />} />
-            {/* Agentic Studio & Audience of One Software */}
-            <Route path="/agentic-studio" element={<AgenticStudio />} />
-            {/* Catch-all route for 404 Not Found */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          {/* Semantic Main Content with Fault Isolation */}
+          <main id="main-content" tabIndex={-1} className="outline-none focus:outline-none">
+            <ErrorBoundary>
+              <Routes>
+                {/* Landing Page & Course Selector */}
+                <Route path="/" element={<LandingPage />} />
+                {/* The Portfolio Building Workspace */}
+                <Route path="/builder" element={<PortfolioBuilder />} />
+                {/* A Demo of the "Final Product" */}
+                <Route path="/demo" element={<Demo />} />
+                {/* A dedicated instructions page */}
+                <Route path="/guide" element={<StarterInstructions />} />
+                {/* A dedicated lessons section */}
+                <Route path="/lessons" element={<Lessons />} />
+                {/* Deep link -> Go directly to a specific lesson */}
+                <Route path="/lessons/:lessonId" element={<Lessons />} />
+                {/* A Showcase of different portfolio styles - Compare how different components would look */}
+                <Route path="/showcase" element={<Showcase />} />
+                {/* What's Next - Learning resources and next steps */}
+                <Route path="/whats-next" element={<WhatsNext />} />
+                {/* Troubleshooting - Help for common issues */}
+                <Route path="/help" element={<TroubleshootingPage />} />
+                {/* Resources - Curated developer resources */}
+                <Route path="/resources" element={<Resources />} />
+                {/* Achievements - Track progress and unlock rewards */}
+                <Route path="/achievements" element={<AchievementsPage />} />
+                {/* Challenges - Timed coding challenges */}
+                <Route path="/challenges" element={<ChallengesPage />} />
+                {/* Progress Dashboard - Track overall progress */}
+                <Route path="/dashboard" element={<ProgressDashboard />} />
+                {/* Telemetry Dashboard */}
+                <Route path="/dashboard/telemetry" element={<TelemetryDashboard />} />
+                {/* Quiz - Interactive knowledge quizzes */}
+                <Route path="/quiz" element={<QuizPage />} />
+                {/* Component Preview - Interactive component playground */}
+                <Route path="/components" element={<ComponentPreviewPage />} />
+                {/* Workshop Slides - Interactive cinematic presentation */}
+                <Route path="/slides" element={<WorkshopSlides />} />
+                <Route path="/slides/:deckId" element={<WorkshopSlides />} />
+                {/* Speaking Events & Conference Hub */}
+                <Route path="/events" element={<SpeakingEventsHub />} />
+                {/* Agentic Studio & Audience of One Software */}
+                <Route path="/agentic-studio" element={<AgenticStudio />} />
+                {/* Sovereign Operatives & Audience of One Personal Agents */}
+                <Route path="/operatives" element={<OperativesPage />} />
+                {/* Catch-all route for 404 Not Found */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </ErrorBoundary>
+          </main>
         </div>
       </BrowserRouter>
       <ScrollToTop isVisible={showScrollToTop} onClick={scrollToTop} />

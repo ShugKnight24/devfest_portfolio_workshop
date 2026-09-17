@@ -21,6 +21,13 @@
  *   Power                  fluent is not correct
  *   Makima / Kishibe       direct the crew, stay able to do the work yourself
  *
+ * BEATS
+ * -----
+ * A slide may carry `beats`: on-screen pulls (the chainsaw ripcord, Reacher's
+ * evidence thread) that the next click performs before it advances. They are
+ * there to wake the room up at the moments that matter — the title, the fence,
+ * the live build, the call for backup, the close — not on every slide.
+ *
  * THE COMMUNITY THROUGHLINE
  * -------------------------
  * This talk follows Umelo Onyejiaka's "AI Won't Replace Community: Why We Still
@@ -98,6 +105,23 @@ export const combinedSlides = [
     description:
       "In a few minutes this room is going to name something that annoys you, out loud, and we are going to build it on stage. Then we are going to find out what it got confidently wrong, together.",
     conferenceBadge: "GDG Detroit • Latin Heritage Month Innovation Summit",
+    // One beat per title line: the first click revs the chainsaw, the second
+    // runs Reacher's thread and calls in the 110th.
+    beats: [
+      { kind: "ripcord", variant: "hero", label: "PULL THE CORD", firedLabel: "RUNNING" },
+      {
+        kind: "thread",
+        variant: "hero",
+        label: "BRING BACKUP",
+        stamp: "BACKUP ARRIVED",
+        items: [
+          { label: "REACHER", sub: "arrives alone" },
+          { label: "NEAGLEY", sub: "110th MP" },
+          { label: "DIXON", sub: "the numbers" },
+          { label: "O'DONNELL", sub: "the muscle" },
+        ],
+      },
+    ],
   },
 
   {
@@ -237,6 +261,20 @@ export const combinedSlides = [
     description:
       "When an agent calls a block dead, unreachable, or safe to remove, it is reporting a pattern, not a reason. It has never seen the outage that put the line there. Make it show you the blame line, the ticket, the test — or go ask the person who was there. If nobody can say why the fence is there, that is not permission. That is the investigation.",
     characters: ["finlay"],
+    beats: [
+      {
+        kind: "thread",
+        variant: "compact",
+        label: "PULL THE THREAD",
+        stamp: "REASON FOUND",
+        items: [
+          { label: "THE LINE", sub: "nine, no comment" },
+          { label: "BLAME", sub: "who, when" },
+          { label: "TICKET", sub: "why" },
+          { label: "A PERSON", sub: "who was there" },
+        ],
+      },
+    ],
   },
 
   {
@@ -358,6 +396,7 @@ export const combinedSlides = [
     ],
     speakerCue: "KICK OFF THE BUILD. THEN OPEN THE FLEX ZONE — F KEY — AND TALK.",
     ctaText: "Open Operatives Sandbox",
+    beats: [{ kind: "ripcord", variant: "compact", label: "START THE BUILD", firedLabel: "BUILDING" }],
     ctaLink: "/operatives",
     opensZone: "while-it-builds",
   },
@@ -553,6 +592,19 @@ export const combinedSlides = [
     speakerCue: "BE HONEST ABOUT THE FLAWS. THE AUDIT IS THE DEMO.",
     ctaText: "Open the build",
     ctaLink: "/builder",
+    beats: [
+      {
+        kind: "thread",
+        variant: "compact",
+        label: "READ IT TOGETHER",
+        stamp: "AUDITED",
+        items: [
+          { label: "RIGHT", sub: "what it nailed" },
+          { label: "WRONG", sub: "what it hid" },
+          { label: "MISSED", sub: "what you'd miss" },
+        ],
+      },
+    ],
   },
 
   // ─────────── LAB (both workshops): the room does what it just watched ──────
@@ -993,6 +1045,20 @@ export const combinedSlides = [
     title: "Agents are the crew. People are the unit.",
     description:
       "An agent multiplies how much one person can build. It does not decide what is worth building, and it cannot catch the mistake it is confident about. Those are jobs for people who know you.",
+    beats: [
+      {
+        kind: "thread",
+        variant: "compact",
+        label: "CALL THE UNIT",
+        stamp: "BACKUP ARRIVED",
+        items: [
+          { label: "THE CREW", sub: "agents" },
+          { label: "YOU", sub: "direct it" },
+          { label: "THE UNIT", sub: "people" },
+          { label: "SHIP IT", sub: "with backup" },
+        ],
+      },
+    ],
     columns: [
       {
         character: "The crew — agents",
@@ -1285,6 +1351,7 @@ export const combinedSlides = [
       "Before you leave: meet the person next to you and ask what they still do by hand. This month, help one person get unstuck. Then ship one thing a stranger can run and build on. Everything on screen today is open — clone it, break it, make it yours. The hands-on version runs at Michigan DevFest in November.",
     ctaText: "Start here",
     ctaLink: "/guide",
+    beats: [{ kind: "ripcord", variant: "compact", label: "YOUR TURN", firedLabel: "GO BUILD" }],
   },
 ];
 
@@ -1296,7 +1363,7 @@ export const combinedSlides = [
  */
 export const combinedPresenterNotes = {
   title:
-    "Cold open. Say the title, then promise the live build inside the first twenty seconds so the room knows something is going to happen to them. Do NOT introduce yourself yet: the next slide explains the title, and you introduce yourself straight after it. [Press N for notes]",
+    "Cold open. Two clicks before you move on. Click once and say 'pull the cord' as the chainsaw revs; click again and say 'bring backup' as the thread runs and the 110th lights up. Then promise the live build inside the first twenty seconds so the room knows something is going to happen to them. Do NOT introduce yourself yet: the next slide explains the title, and you introduce yourself straight after it. [Press N for notes]",
   "the-title":
     "CORE. The only place you explain the title, and the whole talk on one slide. Assume nobody has seen either show and give each one a single clause. Pull the cord is Denji: he starts the chainsaw before he is ready. Bring backup is Reacher: he arrives alone and never closes a case alone. Then say the subtitle out loud as the thesis: stop typing boilerplate, start directing the crew. Admit that most of this room is building alone with AI right now, you included. Under two minutes.",
   "umelo-bridge":
@@ -1306,7 +1373,7 @@ export const combinedPresenterNotes = {
   "reacher-formula":
     "Three beats: deduce, then force, then no hesitation. About ninety seconds. Plant the phrase 'the people you trust' in the force beat — it pays off in the community act. This is setup; do not linger.",
   "chestertons-fence":
-    "CORE and load-bearing. Tell the parable straight, with no setup, and let it sit before you name Finlay. Then make the turn concrete: the agent says the code is dead, and the agent has never seen the outage that put it there. If you have one line, it is 'if nobody can say why the fence is there, that is not permission — that is the investigation.' Point out that the fastest way to learn why is often a person, not a tool. Show of hands: who has deleted something and found out why a week later.",
+    "CORE and load-bearing. Tell the parable straight, with no setup, and let it sit before you name Finlay. Then make the turn concrete: the agent says the code is dead, and the agent has never seen the outage that put it there. If you have one line, it is 'if nobody can say why the fence is there, that is not permission — that is the investigation.' Point out that the fastest way to learn why is often a person, not a tool. Show of hands: who has deleted something and found out why a week later. BEAT: after the parable, click once — the thread runs from the line to the blame, the ticket and the person — and land on 'reason found'.",
   "incident-story":
     "DEEP. The fence slide with a bill attached. Tell it as a story, in past tense, and own that you approved the diff. Do not soften it — the room trusts the rest of the talk more once you have paid for one of these. Land on 'it was wrong about the history.'",
   "pair-finlay-roscoe":
@@ -1316,7 +1383,7 @@ export const combinedPresenterNotes = {
   "the-ask":
     "TAKE 2-3 ANSWERS FROM THE ROOM. Pick the most SPECIFIC one, never the most ambitious — 'track my water intake' beats 'an app for healthcare.' If the room is quiet for four seconds, use your own fallback friction and move on; do not let the silence stretch. Thank the person by name if they give it — you are building for them now, not for yourself.",
   "launch-build":
-    "Write the prompt where they can see it and narrate what you are deliberately leaving out. Kick the build off, then press F to open the flex zone and keep talking. Do not watch the progress bar with them. If you want a bigger swing, take an audience condition live — 'what should happen when the timer hits zero' — and speak the prompt out loud.",
+    "BEAT: the first click pulls the cord on screen. Do it at the exact moment you start the real build and say 'pulling the cord'. Write the prompt where they can see it and narrate what you are deliberately leaving out. Kick the build off, then press F to open the flex zone and keep talking. Do not watch the progress bar with them. If you want a bigger swing, take an audience condition live — 'what should happen when the timer hits zero' — and speak the prompt out loud.",
   "pair-reacher-neagley":
     "FLEX. Best opener for the zone because it explains the prompt they just watched you write. Read the civilian prompt in a cheerful voice; it gets the laugh and makes the point for free.",
   "pair-denji-aki":
@@ -1330,7 +1397,7 @@ export const combinedPresenterNotes = {
   "meet-your-row":
     "FLEX, DEEP. The best use of a slow build: the agent is working, so the room should be too. Give them a real ninety seconds, time it, and do not talk over it. Pick ONE question if the room is shy — the first one works best. Walk to the front row and do it yourself. When the build lands, ask one pair what they found in common.",
   payoff:
-    "Come back to the build. BE HONEST ABOUT WHAT IS WRONG WITH IT — the audit IS the demo. If the build failed outright, that is still a win: show the failure, read the error out loud, and deduce the cause in front of them. That is a better talk than a clean success. Ask the person whose friction it was whether it would actually fix their week.",
+    "Come back to the build. BE HONEST ABOUT WHAT IS WRONG WITH IT — the audit IS the demo. If the build failed outright, that is still a win: show the failure, read the error out loud, and deduce the cause in front of them. That is a better talk than a clean success. Ask the person whose friction it was whether it would actually fix their week. BEAT: click once after the audit questions; the stamp says 'audited' only once you have actually named a flaw.",
   "lab-friction-pairs":
     "LAB, SHORT TRACK (10m). Both workshops. Make them pair with someone they did NOT arrive with — say it twice. Circulate and disqualify 'a CRM for my manager': the test is whether they have complained about it out loud before today. At the eight-minute mark, tell them to keep the same partner for the build lab.",
   "prompt-anatomy":
@@ -1366,7 +1433,7 @@ export const combinedPresenterNotes = {
   "speed-of-thought":
     "DEEP. This is the title of the whole thesis, arriving late on purpose. Slow right down. 'Judgement got expensive because syntax got cheap' is the sentence to land. Then the pivot into the next act: 'and one person at that speed is still one person.'",
   "crew-and-unit":
-    "EXTENDED. The community act starts here, and it is the slide that ties the talk back to Umelo. Agents amplify one person's reach; people decide what is worth building and catch what the agent gets confidently wrong. Call back explicitly to two earlier beats: the fence (someone remembers why) and Power (someone asks whether you ran it). Do not moralise — describe the division of labour.",
+    "EXTENDED. The community act starts here, and it is the slide that ties the talk back to Umelo. Agents amplify one person's reach; people decide what is worth building and catch what the agent gets confidently wrong. Call back explicitly to two earlier beats: the fence (someone remembers why) and Power (someone asks whether you ran it). Do not moralise — describe the division of labour. BEAT: click once at the end; the thread runs crew, you, unit, ship, and the stamp says backup arrived.",
   "the-110th":
     "DEEP. Reframe the characters: these were never lone heroes. Collaboration, accountability, local knowledge. If Umelo's session is fresh, say that two of his five — collaboration and accountability — are right here. Roscoe's line about already shipping to your users works best if you point at the room.",
   "division-4":
@@ -1387,5 +1454,5 @@ export const combinedPresenterNotes = {
   "the-way":
     "CORE. The slide that should outlive the talk. Musashi wrote that if you know the Way broadly, you see it in everything, and the point is that nothing in this talk was really about AI. Three questions, one per verb: what is the detail nobody wrote down, what did I just agree to, who will tell me I am wrong. Give one example from outside code for each, from your own life if you have one: a lease, a job offer, a doctor's visit. Tell them to ask all three the next time something feels too easy. The card rules paraphrase three of Musashi's nine (perceive what cannot be seen, distinguish gain from loss, know the ways of all professions); do not present them as a word-for-word translation.",
   close:
-    "CORE. The call to action, in order: meet the person next to you right now, help one person get unstuck this month, ship one thing a stranger can build on. Then the DevFest invite. Last line, flat, in these exact words: 'Your AI will never tell you you're wrong. Find the people who will, and be that person for someone else.' Leave the repo URL on screen while you take questions, and if time allows, literally pause for fifteen seconds so people turn to their neighbour.",
+    "CORE. The call to action, in order: meet the person next to you right now, help one person get unstuck this month, ship one thing a stranger can build on. Then the DevFest invite. Last line, flat, in these exact words: 'Your AI will never tell you you're wrong. Find the people who will, and be that person for someone else.' Leave the repo URL on screen while you take questions, and if time allows, literally pause for fifteen seconds so people turn to their neighbour. BEAT: the very last click revs the chainsaw under 'your turn'; say nothing while it runs.",
 };

@@ -190,3 +190,37 @@ describe("SpeakingEventsHub integration", () => {
     );
   });
 });
+
+describe("stage beats", () => {
+  const combined = getDeck("combined");
+  const beatSlides = combined.slides.filter((s) => s.beats?.length);
+
+  it("should only use beat kinds the stage knows how to draw", () => {
+    for (const slide of beatSlides) {
+      for (const beat of slide.beats) {
+        expect(["ripcord", "thread"], `${slide.id}`).toContain(beat.kind);
+        expect(["hero", "compact"], `${slide.id}`).toContain(beat.variant);
+        expect(beat.label, `${slide.id} beat needs a call to action`).toBeTruthy();
+        if (beat.kind === "thread") {
+          const max = beat.variant === "hero" ? 5 : 4;
+          expect(beat.items.length, `${slide.id}`).toBeGreaterThanOrEqual(2);
+          expect(beat.items.length, `${slide.id}`).toBeLessThanOrEqual(max);
+        }
+      }
+    }
+  });
+
+  it("should open on a pull per title line: the cord, then backup", () => {
+    const title = combined.slides[0];
+    expect(title.title.split("\n")).toEqual(["Pull the Cord.", "Bring Backup."]);
+    expect(title.beats.map((b) => b.kind)).toEqual(["ripcord", "thread"]);
+  });
+
+  it("should keep beats rare: the moments that matter, all in the lightning cut", () => {
+    expect(beatSlides.length).toBeLessThanOrEqual(8);
+    for (const slide of beatSlides) {
+      expect(slide.tier, `${slide.id} beat would vanish from the short talk`).toBeLessThanOrEqual(2);
+      expect(combined.presenterNotes[slide.id], `${slide.id} note should cue its beat`).toMatch(/BEAT|click/i);
+    }
+  });
+});

@@ -7,6 +7,8 @@ import { EMBLEMS } from "../components/Icons/CharacterEmblems";
 import { trackEvent } from "@portfolio/telemetry";
 import { getDeck, getLiveDecks, getShelvedDecks, DEFAULT_DECK_ID } from "../data/slides";
 import { StageSidebar } from "../components/StageSidebar";
+import { RipcordStarter } from "../components/stage/RipcordStarter";
+import { EvidenceThread } from "../components/stage/EvidenceThread";
 import { getCharacters } from "../data/slides/characters";
 import {
   RUNTIMES,
@@ -32,44 +34,114 @@ import {
  * picks a max tier and the flex zone opens on demand mid-talk.
  */
 
-// Slide 1: Title Slide (Tactical Cyberpunk)
-const TitleSlide = ({ slide, isActive }) => (
+/**
+ * Beats — physical pulls the next click performs before it advances.
+ *
+ * A slide's `beats` are fired in order by the clicker (see `nextSlide`), or
+ * directly by pulling the handle on screen. Each beat component draws itself
+ * from `fired` alone, so re-entering a slide re-arms it.
+ */
+const BEAT_COMPONENTS = { ripcord: RipcordStarter, thread: EvidenceThread };
+
+const Beat = ({ beat, fired, onPull }) => {
+  const Component = BEAT_COMPONENTS[beat.kind];
+  if (!Component) return null;
+  const { kind: _kind, ...props } = beat;
+  return <Component {...props} fired={fired} onPull={onPull} />;
+};
+
+/**
+ * Beats for any slide type that does not place its own. Pinned above the HUD,
+ * bottom-right, rather than appended below the slide: most slides already fill
+ * the viewport, and a beat below the fold is a click the room never sees land.
+ */
+const BeatDock = ({ beats, beatStep, onBeat }) => (
   <div
-    className={`flex flex-col items-center justify-center min-h-[70vh] text-center transition-all duration-700 max-w-5xl mx-auto px-4 ${
-      isActive ? "opacity-100 scale-100" : "opacity-0 scale-95"
-    }`}
+    className="print-hide fixed right-4 bottom-20 z-30 flex flex-col items-end gap-3 rounded-[4px] border p-3 backdrop-blur-md"
+    style={{
+      width: "min(440px, calc(100vw - 2rem))",
+      borderColor: "var(--stage-border)",
+      backgroundColor: "rgb(5 7 10 / 0.82)",
+    }}
   >
-    {slide.conferenceBadge && (
-      <div className="stage-kicker inline-flex items-center gap-2 mb-6">
-        <EmojiIcon name="mic" className="w-3.5 h-3.5" />
-        {slide.conferenceBadge}
+    {beats.map((beat, i) => (
+      <div key={i} className="w-full">
+        <Beat beat={beat} fired={beatStep > i} onPull={() => onBeat(i)} />
       </div>
-    )}
-    <div className="relative">
-      <h1 className="stage-h1 stage-glitch stage-glow-text mb-4">{slide.title}</h1>
-      <div
-        className="absolute -inset-4 opacity-25 blur-3xl -z-10 transition-colors"
-        style={{ backgroundColor: "var(--stage-accent)" }}
-      />
-    </div>
-    <p className="stage-lead mt-2 max-w-4xl tracking-wide uppercase font-mono">
-      {slide.subtitle}
-    </p>
-    <p className="stage-body mt-6 mx-auto">{slide.description}</p>
-    <div className="mt-10 flex gap-2">
-      {[...Array(3)].map((_, i) => (
-        <div
-          key={i}
-          className="w-3 h-3 rounded-[2px] animate-bounce"
-          style={{
-            backgroundColor: "var(--stage-accent)",
-            animationDelay: `${i * 0.2}s`,
-          }}
-        />
-      ))}
-    </div>
+    ))}
   </div>
 );
+
+// Slide 1: Title Slide (Tactical Cyberpunk)
+const TitleSlide = ({ slide, isActive, beatStep = 0, onBeat = () => {} }) => {
+  const lines = slide.title.split("\n");
+  // One beat per title line: each line lights when its own pull lands.
+  const paired = Array.isArray(slide.beats) && slide.beats.length === lines.length && lines.length > 1;
+
+  return (
+    <div
+      className={`flex flex-col items-center justify-center min-h-[70vh] text-center transition-all duration-700 max-w-5xl mx-auto px-4 ${
+        isActive ? "opacity-100 scale-100" : "opacity-0 scale-95"
+      }`}
+    >
+      {slide.conferenceBadge && (
+        <div className="stage-kicker inline-flex items-center gap-2 mb-6">
+          <EmojiIcon name="mic" className="w-3.5 h-3.5" />
+          {slide.conferenceBadge}
+        </div>
+      )}
+      {paired ? (
+        <div className="relative w-full">
+          <h1 className="sr-only">{lines.join(" ")}</h1>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            {lines.map((line, i) => (
+              <div key={line} className="flex flex-col items-center gap-4">
+                <p
+                  aria-hidden="true"
+                  className="stage-h1 stage-glow-text transition-opacity duration-500"
+                  style={{ opacity: beatStep > i ? 1 : 0.4, fontSize: "clamp(2.25rem, 4.6vw, 5rem)" }}
+                >
+                  {line}
+                </p>
+                <div className="w-full">
+                  <Beat beat={slide.beats[i]} fired={beatStep > i} onPull={() => onBeat(i)} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div
+            className="absolute -inset-4 opacity-25 blur-3xl -z-10 transition-colors"
+            style={{ backgroundColor: "var(--stage-accent)" }}
+          />
+        </div>
+      ) : (
+        <div className="relative">
+          <h1 className="stage-h1 stage-glitch stage-glow-text mb-4">{slide.title}</h1>
+          <div
+            className="absolute -inset-4 opacity-25 blur-3xl -z-10 transition-colors"
+            style={{ backgroundColor: "var(--stage-accent)" }}
+          />
+        </div>
+      )}
+      <p className="stage-lead mt-2 max-w-4xl tracking-wide uppercase font-mono">
+        {slide.subtitle}
+      </p>
+      <p className="stage-body mt-6 mx-auto">{slide.description}</p>
+      <div className="mt-10 flex gap-2">
+        {[...Array(3)].map((_, i) => (
+          <div
+            key={i}
+            className="w-3 h-3 rounded-[2px] animate-bounce"
+            style={{
+              backgroundColor: "var(--stage-accent)",
+              animationDelay: `${i * 0.2}s`,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
 
 // Slide 2: Reacher Formula Intro Slide
 const ReacherIntroSlide = ({ slide, isActive }) => (
@@ -1272,10 +1344,35 @@ export const WorkshopSlides = () => {
     [slides, activeDeckId]
   );
 
-  const nextSlide = useCallback(
-    () => goToSlide(currentSlide + 1),
-    [currentSlide, goToSlide]
+  /*
+   * Beat progress is keyed by slide id, not reset in an effect: an effect runs
+   * after the new slide has already painted with the old slide's step, which
+   * would flash its beats as fired for a frame.
+   */
+  const [beatState, setBeatState] = useState({ slideId: null, step: 0 });
+  const beatSlideId = slides[currentSlide]?.id;
+  const beatStep = beatState.slideId === beatSlideId ? beatState.step : 0;
+
+  const fireBeat = useCallback(
+    (index) => {
+      setBeatState((prev) => ({
+        slideId: beatSlideId,
+        step: Math.max(prev.slideId === beatSlideId ? prev.step : 0, index + 1),
+      }));
+      trackEvent("slide_beat", { deck: activeDeckId, slideId: beatSlideId, beat: index });
+    },
+    [beatSlideId, activeDeckId]
   );
+
+  /** A slide's unfired beats take the click before the slide advances. */
+  const nextSlide = useCallback(() => {
+    const beats = slides[currentSlide]?.beats ?? [];
+    if (beatStep < beats.length) {
+      fireBeat(beatStep);
+      return;
+    }
+    goToSlide(currentSlide + 1);
+  }, [slides, currentSlide, beatStep, fireBeat, goToSlide]);
   const prevSlide = useCallback(
     () => goToSlide(currentSlide - 1),
     [currentSlide, goToSlide]
@@ -1641,7 +1738,12 @@ export const WorkshopSlides = () => {
               isRezeMode={isRezeMode}
               onToggleReze={() => setIsRezeMode(!isRezeMode)}
               onOpenZone={toggleZone}
+              beatStep={beatStep}
+              onBeat={fireBeat}
             />
+          )}
+          {SlideComponent !== TitleSlide && slide.beats?.length > 0 && (
+            <BeatDock beats={slide.beats} beatStep={beatStep} onBeat={fireBeat} />
           )}
         </div>
       </main>

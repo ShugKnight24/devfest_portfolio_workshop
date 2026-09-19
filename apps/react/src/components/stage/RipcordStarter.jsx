@@ -25,6 +25,10 @@ import { useBeatClock, useIdleClock, span, easeOutCubic, easeOutBack, shake } fr
  * bar's stadium outline by arc length, which is what lets them lap the bar as
  * a function of `t` instead of a CSS animation.
  *
+ * `bleeding` is the other input: it wets the chain, hangs drips off the bar and
+ * throws spray off the nose while the chain turns. It is driven by the track
+ * playing, not by the pull, so the saw can be bloody before it ever starts.
+ *
  * The whole drawing is the button (a big target for a presenter), but the drag
  * gesture tracks horizontal pointer travel: past a threshold it pulls. The only
  * CSS animation is the armed handle's idle bob, switched off for reduced motion.
@@ -47,6 +51,8 @@ const STEEL_DARK = "#6B7482";
 const CHAIN = "#1B2029";
 const INK = "#14181F";
 const ROPE = "#E9E3D2";
+const BLOOD = "#D7263D";
+const BLOOD_DARK = "#8E1128";
 
 const VARIANTS = {
   hero: {
@@ -91,6 +97,51 @@ const LAPS = 3;
    the idle picks up at exactly the speed the beat handed over. */
 const IDLE_LAPS_PER_SECOND = ((LAPS / 0.9) * 2) / (DURATION / 1000);
 const IDLE_BUZZ_HZ = 13;
+
+/* Blood. Each drip hangs from the underside of the bar at its own x, swells,
+   lets go and falls on its own period, so the loop never pulses in unison.
+   Phase, not state — the whole thing is a function of the gore clock. */
+const WET_IN = 0.6;
+const DRIPS = [
+  { x: -196, period: 1.7, delay: 0.0, fall: 60 },
+  { x: -150, period: 2.3, delay: 0.7, fall: 76 },
+  { x: -104, period: 1.9, delay: 1.2, fall: 54 },
+  { x: -64, period: 2.6, delay: 0.3, fall: 68 },
+  { x: X0 - 4, period: 2.1, delay: 1.5, fall: 84 },
+];
+/* Flung off the nose once the chain is turning. Angles fan up and back, the
+   way a saw throws it. */
+const SPRAY = [
+  { angle: 202, speed: 190, period: 0.55, delay: 0.0, r: 3.4 },
+  { angle: 218, speed: 240, period: 0.7, delay: 0.12, r: 2.6 },
+  { angle: 186, speed: 210, period: 0.62, delay: 0.26, r: 3 },
+  { angle: 232, speed: 170, period: 0.78, delay: 0.4, r: 2.2 },
+  { angle: 168, speed: 230, period: 0.66, delay: 0.55, r: 2.8 },
+  { angle: 245, speed: 200, period: 0.72, delay: 0.68, r: 2 },
+];
+const GRAVITY = 320;
+const SPATTER = [
+  { x: X0 - 34, y: CY + 30, r: 3.2 },
+  { x: X0 - 52, y: CY + 12, r: 2.1 },
+  { x: X0 - 22, y: CY + 44, r: 1.6 },
+  { x: X0 - 62, y: CY - 22, r: 2.6 },
+  { x: X0 - 12, y: CY - 36, r: 1.9 },
+];
+
+/* A drip: bead swells while it holds on, then falls and stretches. */
+const dripAt = (phase, fall) => {
+  if (phase < 0.45) {
+    const hold = phase / 0.45;
+    return { drop: 0, r: 1.6 + hold * 2.6, stretch: 1 + hold * 0.5, opacity: 1 };
+  }
+  const f = (phase - 0.45) / 0.55;
+  return {
+    drop: fall * f * f,
+    r: 3.6 - f * 1.2,
+    stretch: 1 + f * 2.4,
+    opacity: 1 - f * f,
+  };
+};
 
 const CORD_Y = 10;
 const EXIT_X = 76;
@@ -177,6 +228,7 @@ export function RipcordStarter({
   variant = "hero",
   label = "PULL THE CORD",
   firedLabel = "RUNNING",
+  bleeding = false,
   frame,
 }) {
   const v = VARIANTS[variant] ?? VARIANTS.hero;
@@ -184,6 +236,9 @@ export function RipcordStarter({
   /* A frozen `frame` is for previews and tests; never idle under one. */
   const running = t >= 1 && typeof frame !== "number";
   const idle = useIdleClock(running);
+  /* Blood runs on its own clock, not the engine's: the track can start before
+     the cord is pulled, and the saw should already be wet when it catches. */
+  const gore = useIdleClock(bleeding && typeof frame !== "number");
   const svgRef = useRef(null);
   const pulledRef = useRef(false);
   const dragRef = useRef(null);
@@ -287,12 +342,16 @@ export function RipcordStarter({
   const tilt = kick * 5 + shake(catchP, 5) * 2.5;
 
   const chainOffset = PERIM * (LAPS * chainTravel(revP) + IDLE_LAPS_PER_SECOND * idle);
+  /* Reduced motion pins `gore` at 0, so the saw goes wet and stays wet rather
+     than never bleeding at all. */
+  const wet = bleeding ? Math.min(1, gore / WET_IN || 1) : 0;
   const armed = t === 0;
   const eyesOpen = t >= 0.32;
   const burstP = span(t, 0.3, 0.46);
   const [ox, oy] = v.origin;
 
   const teeth = [];
+  const wetTips = [];
   for (let i = 0; i < TOOTH_COUNT; i += 1) {
     const p = pointOnBar(i * TOOTH_STEP + chainOffset);
     const back = [p.x - p.tx * 4.5, p.y - p.ty * 4.5];
@@ -305,7 +364,58 @@ export function RipcordStarter({
         fill={CHAIN}
       />,
     );
+    if (wet > 0) {
+      wetTips.push(
+        <circle key={i} cx={tip[0].toFixed(2)} cy={tip[1].toFixed(2)} r={1.7} fill={BLOOD} opacity={wet} />,
+      );
+    }
   }
+
+  const drips =
+    wet > 0
+      ? DRIPS.map((d, i) => {
+          const phase = (((gore + d.delay) % d.period) + d.period) % d.period / d.period;
+          const { drop, r, stretch, opacity } = dripAt(phase, d.fall);
+          return (
+            <g key={i} opacity={opacity * wet}>
+              {drop < 2 && (
+                <path
+                  d={`M ${d.x - r * 0.8} ${CY + R} Q ${d.x} ${CY + R + r * 1.4} ${d.x + r * 0.8} ${CY + R} Z`}
+                  fill={BLOOD_DARK}
+                />
+              )}
+              <ellipse
+                cx={d.x}
+                cy={CY + R + r + drop}
+                rx={r}
+                ry={r * stretch}
+                fill={BLOOD}
+              />
+            </g>
+          );
+        })
+      : null;
+
+  /* Spray only once the chain is actually turning — a still saw drips, a
+     running one throws it. */
+  const spray =
+    wet > 0 && running
+      ? SPRAY.map((sp, i) => {
+          const phase = (((gore + sp.delay) % sp.period) + sp.period) % sp.period / sp.period;
+          const life = phase * sp.period;
+          const rad = (sp.angle * Math.PI) / 180;
+          return (
+            <circle
+              key={i}
+              cx={X0 - R * 0.4 + Math.cos(rad) * sp.speed * life}
+              cy={CY + Math.sin(rad) * sp.speed * life + GRAVITY * life * life}
+              r={sp.r * (1 - phase * 0.4)}
+              fill={BLOOD}
+              opacity={(1 - phase) * wet}
+            />
+          );
+        })
+      : null;
 
   const sparks = SPARK_ANGLES.map((deg, i) => {
     const sp = span(t, 0.3 + i * 0.012, 0.54 + i * 0.012);
@@ -430,6 +540,12 @@ export function RipcordStarter({
               </>
             )}
 
+            {/* blood that already landed — behind the bar, like it was thrown */}
+            {wet > 0 &&
+              SPATTER.map((sp, i) => (
+                <circle key={i} cx={sp.x} cy={sp.y} r={sp.r} fill={BLOOD_DARK} opacity={0.75 * wet} />
+              ))}
+
             {/* guide bar */}
             <path d={stadium(R - 1)} fill={STEEL} />
             <path d={`M ${X1} ${CY + 5} L ${X0 + 4} ${CY + 5}`} stroke={STEEL_DARK} strokeWidth={3} strokeLinecap="round" />
@@ -453,6 +569,18 @@ export function RipcordStarter({
               style={{ stroke: glow > 0.5 ? ACCENT : CHAIN }}
             />
             {teeth}
+            {wetTips}
+            {wet > 0 && (
+              <path
+                d={stadium(R)}
+                fill="none"
+                strokeWidth={2}
+                strokeLinecap="round"
+                style={{ stroke: BLOOD, opacity: 0.6 * wet }}
+              />
+            )}
+            {drips}
+            {spray}
 
             {sparks}
             {puffs}
@@ -502,6 +630,13 @@ export function RipcordStarter({
                 <circle cx={18.5} cy={-13} r={2.6} fill="#fff" />
                 <path d="M -18 10 Q -5 26 8 10 Z" fill={INK} />
                 <path d="M -13 11 L -10 16 L -7 11 Z M -1 11 L 2 16 L 5 11 Z" fill="#fff" />
+                {wet > 0 && (
+                  <path
+                    d={`M 6 14 Q 9 ${18 + 7 * wet} 6 ${22 + 9 * wet} Q 3 ${18 + 7 * wet} 6 14 Z`}
+                    fill={BLOOD}
+                    opacity={wet}
+                  />
+                )}
               </g>
             ) : (
               <g fill="none" stroke={INK} strokeWidth={4} strokeLinecap="round">

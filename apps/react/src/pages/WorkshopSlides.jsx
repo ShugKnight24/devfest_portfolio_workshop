@@ -8,6 +8,7 @@ import { trackEvent } from "@portfolio/telemetry";
 import { getDeck, getLiveDecks, getShelvedDecks, DEFAULT_DECK_ID } from "../data/slides";
 import { StageSidebar } from "../components/StageSidebar";
 import { RipcordStarter } from "../components/stage/RipcordStarter";
+import { TrackPlayer, useStageTrack } from "../components/stage/TrackPlayer";
 import { EvidenceThread } from "../components/stage/EvidenceThread";
 import { getCharacters } from "../data/slides/characters";
 import {
@@ -43,11 +44,11 @@ import {
  */
 const BEAT_COMPONENTS = { ripcord: RipcordStarter, thread: EvidenceThread };
 
-const Beat = ({ beat, fired, onPull }) => {
+const Beat = ({ beat, fired, onPull, ...rest }) => {
   const Component = BEAT_COMPONENTS[beat.kind];
   if (!Component) return null;
   const { kind: _kind, ...props } = beat;
-  return <Component {...props} fired={fired} onPull={onPull} />;
+  return <Component {...props} {...rest} fired={fired} onPull={onPull} />;
 };
 
 /**
@@ -55,7 +56,7 @@ const Beat = ({ beat, fired, onPull }) => {
  * bottom-right, rather than appended below the slide: most slides already fill
  * the viewport, and a beat below the fold is a click the room never sees land.
  */
-const BeatDock = ({ beats, beatStep, onBeat }) => (
+const BeatDock = ({ beats, beatStep, onBeat, bleeding = false }) => (
   <div
     className="print-hide fixed right-4 bottom-20 z-30 flex flex-col items-end gap-3 rounded-[4px] border p-3 backdrop-blur-md"
     style={{
@@ -66,14 +67,23 @@ const BeatDock = ({ beats, beatStep, onBeat }) => (
   >
     {beats.map((beat, i) => (
       <div key={i} className="w-full">
-        <Beat beat={beat} fired={beatStep > i} onPull={() => onBeat(i)} />
+        <Beat beat={beat} fired={beatStep > i} onPull={() => onBeat(i)} bleeding={bleeding} />
       </div>
     ))}
   </div>
 );
 
 // Slide 1: Title Slide (Tactical Cyberpunk)
-const TitleSlide = ({ slide, isActive, beatStep = 0, onBeat = () => {} }) => {
+const TitleSlide = ({
+  slide,
+  isActive,
+  beatStep = 0,
+  onBeat = () => {},
+  track,
+  trackPlaying = false,
+  trackSilent = false,
+  onToggleTrack,
+}) => {
   const lines = slide.title.split("\n");
   // One beat per title line: each line lights when its own pull lands.
   const paired = Array.isArray(slide.beats) && slide.beats.length === lines.length && lines.length > 1;
@@ -104,7 +114,24 @@ const TitleSlide = ({ slide, isActive, beatStep = 0, onBeat = () => {} }) => {
                   {line}
                 </p>
                 <div className="w-full">
-                  <Beat beat={slide.beats[i]} fired={beatStep > i} onPull={() => onBeat(i)} />
+                  {/* The track hangs over the chainsaw, because that is the one
+                      it bleeds for. */}
+                  {track && slide.beats[i].kind === "ripcord" && (
+                    <div className="mb-3">
+                      <TrackPlayer
+                        track={track}
+                        playing={trackPlaying}
+                        silent={trackSilent}
+                        onToggle={onToggleTrack}
+                      />
+                    </div>
+                  )}
+                  <Beat
+                    beat={slide.beats[i]}
+                    fired={beatStep > i}
+                    onPull={() => onBeat(i)}
+                    bleeding={trackPlaying}
+                  />
                 </div>
               </div>
             ))}
@@ -1583,6 +1610,14 @@ export const WorkshopSlides = () => {
     [slides, currentSlide, allSlides, openZones, activeDeckId, reanchor]
   );
 
+  const deckTrack = currentDeck.meta?.track;
+  const { playing: trackPlaying, silent: trackSilent, toggle: rawToggleTrack } = useStageTrack(deckTrack);
+
+  const toggleTrack = useCallback(() => {
+    rawToggleTrack();
+    trackEvent("stage_track_toggle", { deck: activeDeckId, track: deckTrack?.title });
+  }, [rawToggleTrack, activeDeckId, deckTrack?.title]);
+
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
       containerRef.current?.requestFullscreen();
@@ -1637,6 +1672,10 @@ export const WorkshopSlides = () => {
         toggleFullscreen();
       } else if (e.key === "n" || e.key === "N") {
         setShowNotes((prev) => !prev);
+      } else if ((e.key === "m" || e.key === "M") && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        // M starts or stops the walk-on track from anywhere in the deck.
+        e.preventDefault();
+        toggleTrack();
       } else if (e.key === "t" || e.key === "T") {
         setIsTimerRunning((prev) => !prev);
       } else if (e.key === "r" || e.key === "R") {
@@ -1675,7 +1714,7 @@ export const WorkshopSlides = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [nextSlide, prevSlide, toggleFullscreen, isFullscreen, goToSlide, slides.length, handlePrint, navigate, showSidebar, flexZones, toggleZone, changeRuntime]);
+  }, [nextSlide, prevSlide, toggleFullscreen, isFullscreen, goToSlide, slides.length, handlePrint, navigate, showSidebar, flexZones, toggleZone, changeRuntime, toggleTrack]);
 
   // Touch/swipe support
   useEffect(() => {
@@ -1896,10 +1935,14 @@ export const WorkshopSlides = () => {
               onOpenZone={toggleZone}
               beatStep={beatStep}
               onBeat={fireBeat}
+              track={deckTrack}
+              trackPlaying={trackPlaying}
+              trackSilent={trackSilent}
+              onToggleTrack={toggleTrack}
             />
           )}
           {SlideComponent !== TitleSlide && slide.beats?.length > 0 && (
-            <BeatDock beats={slide.beats} beatStep={beatStep} onBeat={fireBeat} />
+            <BeatDock beats={slide.beats} beatStep={beatStep} onBeat={fireBeat} bleeding={trackPlaying} />
           )}
         </div>
       </main>

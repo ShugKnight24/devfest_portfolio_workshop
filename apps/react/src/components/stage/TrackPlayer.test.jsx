@@ -1,16 +1,22 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
-import { TrackPlayer, useStageTrack } from "./TrackPlayer";
+import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
+import { TrackEmbed, TrackPlayer, useStageTrack } from "./TrackPlayer";
 
-const TRACK = { title: "Power in the Blood", artist: "Polyphia", src: "/assets/audio/track.mp3" };
+const TRACK = {
+  title: "Power in the Blood",
+  artist: "Polyphia",
+  src: "/assets/audio/track.mp3",
+  youtubeId: "fDltPLFdkYI",
+};
 
-/* The hook and the control, wired the way the deck wires them. */
+/* The hook, the control and the embed, wired the way the deck wires them. */
 const Harness = ({ track = TRACK }) => {
-  const { playing, silent, toggle } = useStageTrack(track);
+  const { playing, source, toggle } = useStageTrack(track);
   return (
     <>
-      <TrackPlayer track={track} playing={playing} silent={silent} onToggle={toggle} />
-      <span data-testid="state">{playing ? "playing" : "paused"}</span>
+      <TrackPlayer track={track} playing={playing} source={source} onToggle={toggle} />
+      <TrackEmbed track={track} playing={playing} source={source} />
+      <span data-testid="state">{playing ? `${source}:playing` : "paused"}</span>
     </>
   );
 };
@@ -20,67 +26,136 @@ describe("TrackPlayer", () => {
     vi.unstubAllGlobals();
   });
 
-  /** A media element whose file never arrives: play() rejects and it stays paused. */
-  const stubBrokenAudio = () => {
-    const instance = {
-      paused: true,
-      loop: false,
-      volume: 1,
-      play: vi.fn(() => Promise.reject(new Error("404"))),
-      pause: vi.fn(),
-      addEventListener: vi.fn(),
-    };
-    /* A plain function, not an arrow: arrows are not constructable and `new
-       Audio()` would throw before the component ever called play(). */
+  /**
+   * Stands in for the media element, which is the only thing that can answer
+   * whether a file decodes. `decodes` is the answer the probe gets.
+   */
+  const stubAudio = ({ decodes, playRejects = false } = {}) => {
+    const made = [];
     vi.stubGlobal(
       "Audio",
       vi.fn(function FakeAudio() {
+        const listeners = {};
+        const instance = {
+          paused: true,
+          loop: false,
+          volume: 1,
+          preload: "",
+          src: "",
+          listeners,
+          load: vi.fn(),
+          play: vi.fn(() =>
+            playRejects ? Promise.reject(new Error("no codec")) : Promise.resolve(),
+          ),
+          pause: vi.fn(),
+          addEventListener: (name, fn) => {
+            listeners[name] = fn;
+          },
+          removeEventListener: (name) => {
+            delete listeners[name];
+          },
+        };
+        made.push(instance);
         return instance;
       }),
     );
-    return instance;
+
+    return {
+      made,
+      settleProbe: async () => {
+        await waitFor(() => expect(made[0]?.listeners.loadedmetadata).toBeTypeOf("function"));
+        act(() => {
+          made[0].listeners[decodes ? "loadedmetadata" : "error"]();
+        });
+      },
+    };
   };
 
   it("names the track and credits the artist before anything plays", () => {
-    render(<TrackPlayer track={TRACK} playing={false} silent={false} onToggle={() => {}} />);
+    render(<TrackPlayer track={TRACK} playing={false} source="local" onToggle={() => {}} />);
 
     expect(screen.getByText("Power in the Blood")).toBeTruthy();
     expect(screen.getByText("Polyphia")).toBeTruthy();
     expect(screen.getByRole("button", { name: /Play Power in the Blood by Polyphia/ })).toBeTruthy();
   });
 
-  it("starts the track on click", () => {
-    const audio = stubBrokenAudio();
+  it("plays the local file when the file decodes", async () => {
+    const audio = stubAudio({ decodes: true });
     render(<Harness />);
+    await audio.settleProbe();
 
     fireEvent.click(screen.getByRole("button"));
 
-    expect(audio.play).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId("state").textContent).toBe("playing");
+    // The element built by the probe is the one that plays; nothing loads twice.
+    expect(audio.made[0].play).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("state").textContent).toBe("local:playing");
+    expect(screen.getByText("NOW PLAYING")).toBeTruthy();
   });
 
-  it("still turns off when the file never loaded, because the control has to be trustworthy on stage", async () => {
-    const audio = stubBrokenAudio();
-    render(<Harness />);
+  it("falls back to the video when the file is not in the build", async () => {
+    const audio = stubAudio({ decodes: false });
+    const { container } = render(<Harness />);
+    await audio.settleProbe();
+
+    fireEvent.click(screen.getByRole("button"));
+
+    expect(screen.getByTestId("state").textContent).toBe("youtube:playing");
+    const frame = container.querySelector("iframe");
+    expect(frame.getAttribute("src")).toContain("/embed/fDltPLFdkYI");
+    expect(frame.getAttribute("src")).toContain("autoplay=1");
+    expect(screen.getByText("PLAYING VIA YOUTUBE")).toBeTruthy();
+    expect(audio.made.every((a) => a.play.mock.calls.length === 0)).toBe(true);
+  });
+
+  it("hands off to the video when the file decodes but will not play", async () => {
+    const audio = stubAudio({ decodes: true, playRejects: true });
+    const { container } = render(<Harness />);
+    await audio.settleProbe();
+
+    fireEvent.click(screen.getByRole("button"));
+
+    await waitFor(() => expect(container.querySelector("iframe")).not.toBeNull());
+    expect(screen.getByTestId("state").textContent).toBe("youtube:playing");
+  });
+
+  it("takes the embed down on pause, because a song you cannot stop is worse than no song", async () => {
+    const audio = stubAudio({ decodes: false });
+    const { container } = render(<Harness />);
+    await audio.settleProbe();
     const button = screen.getByRole("button");
 
     fireEvent.click(button);
-    await screen.findByText("NO AUDIO FILE — VISUAL ONLY");
+    expect(container.querySelector("iframe")).not.toBeNull();
 
-    // The element is still `paused: true` — a toggle keyed off that would never stop.
     fireEvent.click(button);
 
-    expect(audio.pause).toHaveBeenCalledTimes(1);
+    expect(container.querySelector("iframe")).toBeNull();
     expect(screen.getByTestId("state").textContent).toBe("paused");
     expect(screen.getByText("Polyphia")).toBeTruthy();
   });
 
-  it("runs the visual with no src at all, so a forgotten file never costs the beat", () => {
+  it("still turns off when nothing can play, because the control has to be trustworthy on stage", async () => {
+    const audio = stubAudio({ decodes: true, playRejects: true });
+    render(<Harness track={{ title: "Power in the Blood", artist: "Polyphia", src: "/gone.mp3" }} />);
+    await audio.settleProbe();
+    const button = screen.getByRole("button");
+
+    fireEvent.click(button);
+    await screen.findByText("NO AUDIO — VISUAL ONLY");
+
+    // The element never left `paused: true` — a toggle keyed off that would never stop.
+    fireEvent.click(button);
+
+    expect(audio.made[0].pause).toHaveBeenCalled();
+    expect(screen.getByTestId("state").textContent).toBe("paused");
+  });
+
+  it("runs the visual with no source at all, so a forgotten file never costs the beat", () => {
     render(<Harness track={{ title: "Power in the Blood", artist: "Polyphia" }} />);
 
     fireEvent.click(screen.getByRole("button"));
 
-    expect(screen.getByTestId("state").textContent).toBe("playing");
+    expect(screen.getByTestId("state").textContent).toBe("silent:playing");
   });
 
   it("renders nothing without a track", () => {

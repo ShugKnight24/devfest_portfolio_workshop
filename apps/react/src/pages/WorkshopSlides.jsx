@@ -8,7 +8,7 @@ import { trackEvent } from "@portfolio/telemetry";
 import { getDeck, getLiveDecks, getShelvedDecks, DEFAULT_DECK_ID } from "../data/slides";
 import { StageSidebar } from "../components/StageSidebar";
 import { RipcordStarter } from "../components/stage/RipcordStarter";
-import { TrackPlayer, useStageTrack } from "../components/stage/TrackPlayer";
+import { TrackEmbed, TrackPlayer, useStageTrack } from "../components/stage/TrackPlayer";
 import { EvidenceThread } from "../components/stage/EvidenceThread";
 import { getCharacters } from "../data/slides/characters";
 import {
@@ -81,7 +81,7 @@ const TitleSlide = ({
   onBeat = () => {},
   track,
   trackPlaying = false,
-  trackSilent = false,
+  trackSource,
   onToggleTrack,
 }) => {
   const lines = slide.title.split("\n");
@@ -121,7 +121,7 @@ const TitleSlide = ({
                       <TrackPlayer
                         track={track}
                         playing={trackPlaying}
-                        silent={trackSilent}
+                        source={trackSource}
                         onToggle={onToggleTrack}
                       />
                     </div>
@@ -1611,12 +1611,12 @@ export const WorkshopSlides = () => {
   );
 
   const deckTrack = currentDeck.meta?.track;
-  const { playing: trackPlaying, silent: trackSilent, toggle: rawToggleTrack } = useStageTrack(deckTrack);
+  const { playing: trackPlaying, source: trackSource, toggle: rawToggleTrack } = useStageTrack(deckTrack);
 
   const toggleTrack = useCallback(() => {
     rawToggleTrack();
-    trackEvent("stage_track_toggle", { deck: activeDeckId, track: deckTrack?.title });
-  }, [rawToggleTrack, activeDeckId, deckTrack?.title]);
+    trackEvent("stage_track_toggle", { deck: activeDeckId, track: deckTrack?.title, source: trackSource });
+  }, [rawToggleTrack, activeDeckId, deckTrack?.title, trackSource]);
 
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
@@ -1937,7 +1937,7 @@ export const WorkshopSlides = () => {
               onBeat={fireBeat}
               track={deckTrack}
               trackPlaying={trackPlaying}
-              trackSilent={trackSilent}
+              trackSource={trackSource}
               onToggleTrack={toggleTrack}
             />
           )}
@@ -1946,6 +1946,8 @@ export const WorkshopSlides = () => {
           )}
         </div>
       </main>
+
+      <TrackEmbed track={deckTrack} playing={trackPlaying} source={trackSource} />
 
       {/* Presenter Notes Overlay */}
       {showNotes && (

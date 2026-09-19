@@ -94,13 +94,16 @@ export const combinedDeckMeta = {
   accentAlt: "#ffcc00",
   variant: "combined",
   url: "https://gdg.community.dev/events/details/google-gdg-detroit-presents-detroit-latin-heritage-month-innovation-summit/cohost-gdg-detroit/",
-  /* The walk-on track. Drop your own copy of the file at this path — nothing in
-     the repo ships the audio. Starting it wets the chainsaw on the title slide;
-     `M` toggles it from any slide once the talk is running. */
+  /* The walk-on track. Starting it wets the chainsaw on the title slide; `M`
+     toggles it from any slide once the talk is running.
+     `src` is the file you present from — gitignored, so it lives on your machine
+     and never in the repo. Everyone else (a clone, the deployed deck) falls back
+     to the official video, chosen automatically when the file is not there. */
   track: {
     title: "Power in the Blood",
     artist: "Polyphia",
     src: "/assets/audio/power-in-the-blood.mp3",
+    youtubeId: "fDltPLFdkYI",
     volume: 0.55,
   },
 };

@@ -3,24 +3,52 @@ import { useCallback, useEffect, useRef, useState } from "react";
 /**
  * TrackPlayer — the one piece of music in the talk, and the switch that starts it.
  *
- * The audio lives in a ref on the page, not in an element in the slide tree, so
- * advancing off the title slide never unmounts it: you start the track once and
- * it plays under the whole talk. `useStageTrack` owns that ref; `TrackPlayer` is
- * only the control.
+ * Two sources, because this deck lives in two places:
  *
- * The file is yours to supply — drop it at the `src` the deck declares. When it
- * is missing, or the browser refuses to decode it, the control says so and the
- * click still fires: the beat that hangs off "playing" (the chainsaw bleeding)
- * happens either way, so a missing file costs you the music, never the move.
+ *   local    an audio file at `track.src`. What you present from. The file is
+ *            gitignored, so it exists on the speaker's machine and nowhere else.
+ *   youtube  the official video, embedded. What anyone who clones the repo or
+ *            opens the deployed deck gets, since they have no file.
+ *
+ * Which one is decided before the click, not during it. On mount the file is
+ * handed to a media element with `preload="metadata"`: if it decodes, that is
+ * the source, and the same element is the one that plays. Asking the server
+ * instead — a HEAD, a content-type — answers the wrong question and answers it
+ * badly: a missing file under an SPA rewrite comes back as the index page with
+ * status 200, and Vite's dev server labels a real audio file `text/html` on a
+ * HEAD anyway. Only the decoder knows. Deciding inside the click would also
+ * spend the user gesture browsers require to start sound, leaving the fallback
+ * muted.
+ *
+ * The audio element lives in a ref on the page, not in an element in the slide
+ * tree, so advancing off the title slide never unmounts it: start it once and it
+ * plays under the whole talk. The YouTube iframe is rendered by the page for the
+ * same reason.
+ *
+ * If neither source works the click still fires. Whatever hangs off "playing" —
+ * the chainsaw bleeding — happens anyway, so a missing file costs the music,
+ * never the move.
  */
 
+const YT_ORIGIN = "https://www.youtube-nocookie.com";
+
+const SOURCE = { local: "local", youtube: "youtube", silent: "silent" };
+
+const fallbackFor = (track) => (track?.youtubeId ? SOURCE.youtube : SOURCE.silent);
+
 /**
- * @param {{ title: string, artist?: string, src?: string, loop?: boolean, volume?: number }} [track]
+ * @param {{ title: string, artist?: string, src?: string, youtubeId?: string,
+ *           loop?: boolean, volume?: number, start?: number }} [track]
  */
 export const useStageTrack = (track) => {
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
-  const [silent, setSilent] = useState(false);
+  const [source, setSource] = useState(() =>
+    track?.src ? SOURCE.local : fallbackFor(track),
+  );
+
+  const src = track?.src;
+  const youtubeId = track?.youtubeId;
 
   /* Leaving the deck stops the music. Nothing else does — not a slide change,
      not a runtime change, not opening a flex zone. */
@@ -32,58 +60,129 @@ export const useStageTrack = (track) => {
     [],
   );
 
-  const src = track?.src;
-
   useEffect(() => {
     audioRef.current?.pause();
     audioRef.current = null;
     setPlaying(false);
-    setSilent(false);
-  }, [src]);
+
+    if (!src || typeof Audio !== "function") {
+      setSource(fallbackFor({ youtubeId }));
+      return undefined;
+    }
+
+    setSource(SOURCE.local);
+
+    const audio = new Audio();
+    audio.preload = "metadata";
+    audio.src = src;
+
+    let cancelled = false;
+    const decoded = () => {
+      if (cancelled) return;
+      audioRef.current = audio;
+      setSource(SOURCE.local);
+    };
+    const failed = () => {
+      if (cancelled) return;
+      setSource(fallbackFor({ youtubeId }));
+    };
+
+    audio.addEventListener("loadedmetadata", decoded);
+    audio.addEventListener("error", failed);
+    audio.load?.();
+
+    return () => {
+      cancelled = true;
+      audio.removeEventListener?.("loadedmetadata", decoded);
+      audio.removeEventListener?.("error", failed);
+    };
+  }, [src, youtubeId]);
 
   const toggle = useCallback(() => {
-    if (!src || typeof Audio !== "function") {
-      setSilent(true);
-      setPlaying((prev) => !prev);
-      return;
-    }
-
-    let audio = audioRef.current;
-    if (!audio) {
-      audio = new Audio(src);
-      audio.loop = track.loop ?? false;
-      audio.volume = track.volume ?? 1;
-      audio.addEventListener("ended", () => setPlaying(false));
-      audioRef.current = audio;
-    }
-
-    /* Drive off our own state, not `audio.paused`: an element whose file is
-       missing can sit in either state, and a control that will not turn off is
-       worse on stage than one that plays nothing. */
     if (playing) {
-      audio.pause();
+      audioRef.current?.pause();
       setPlaying(false);
       return;
     }
 
     setPlaying(true);
-    /* A rejected play() is a missing file or a codec the browser will not
-       take. Say so, and leave the visual running. */
-    audio.play().then(
-      () => setSilent(false),
-      () => setSilent(true),
-    );
-  }, [src, playing, track?.loop, track?.volume]);
 
-  return { playing, silent, toggle };
+    if (source !== SOURCE.local || !src || typeof Audio !== "function") return;
+
+    let audio = audioRef.current;
+    if (!audio) {
+      audio = new Audio(src);
+      audioRef.current = audio;
+    }
+    audio.loop = track.loop ?? false;
+    audio.volume = track.volume ?? 1;
+    audio.onended = () => setPlaying(false);
+
+    /* The probe said this was audio and the browser disagrees — a codec it will
+       not take, or a file that vanished between the two. Hand off to the video
+       if there is one; the click that got us here is recent enough to count as
+       the gesture the iframe needs. */
+    audio.play().catch(() => setSource(fallbackFor({ youtubeId })));
+  }, [playing, source, src, youtubeId, track?.loop, track?.volume]);
+
+  return { playing, source, toggle };
 };
 
-export const TrackPlayer = ({ track, playing, silent, onToggle, align = "center" }) => {
+/**
+ * The YouTube half, rendered by the page so it outlives the slide.
+ *
+ * Stopping unmounts the iframe rather than messaging it, because an unmounted
+ * iframe is silent for certain and a postMessage that misses is a song you
+ * cannot turn off in front of a room.
+ */
+export const TrackEmbed = ({ track, playing, source }) => {
+  if (source !== SOURCE.youtube || !playing || !track?.youtubeId) return null;
+
+  const params = new URLSearchParams({
+    autoplay: "1",
+    rel: "0",
+    modestbranding: "1",
+    playsinline: "1",
+    ...(track.start ? { start: String(track.start) } : {}),
+  });
+
+  return (
+    <div
+      className="print-hide fixed left-4 bottom-20 z-30 overflow-hidden"
+      style={{
+        width: "min(240px, 40vw)",
+        aspectRatio: "16 / 9",
+        borderRadius: "var(--stage-radius)",
+        border: "var(--stage-hairline) solid var(--stage-border-strong)",
+        backgroundColor: "#000",
+      }}
+    >
+      <iframe
+        title={`${track.title}${track.artist ? ` — ${track.artist}` : ""}`}
+        src={`${YT_ORIGIN}/embed/${track.youtubeId}?${params}`}
+        width="100%"
+        height="100%"
+        style={{ display: "block", border: 0 }}
+        allow="autoplay; encrypted-media; picture-in-picture"
+        referrerPolicy="strict-origin-when-cross-origin"
+        allowFullScreen
+      />
+    </div>
+  );
+};
+
+const STATUS = {
+  [SOURCE.local]: "NOW PLAYING",
+  [SOURCE.youtube]: "PLAYING VIA YOUTUBE",
+  [SOURCE.silent]: "NO AUDIO — VISUAL ONLY",
+};
+
+export const TrackPlayer = ({ track, playing, source, onToggle, align = "center" }) => {
   if (!track?.title) return null;
 
-  /* The missing-file note is only true while it is trying to play; paused, the
-     line goes back to being a credit. */
-  const status = !playing ? track.artist : silent ? "NO AUDIO FILE — VISUAL ONLY" : "NOW PLAYING";
+  /* Paused, the line is a credit. Only while it is trying to play does how it
+     is playing matter. */
+  const status = playing ? STATUS[source] ?? STATUS[SOURCE.silent] : track.artist;
 
   return (
     <div
@@ -127,7 +226,10 @@ export const TrackPlayer = ({ track, playing, silent, onToggle, align = "center"
         </p>
         <p
           className="font-mono uppercase tracking-wider m-0 mt-1 leading-none text-[10px]"
-          style={{ color: playing && !silent ? "var(--stage-accent)" : "var(--stage-text-dim)" }}
+          style={{
+            color:
+              playing && source !== SOURCE.silent ? "var(--stage-accent)" : "var(--stage-text-dim)",
+          }}
         >
           {status}
         </p>

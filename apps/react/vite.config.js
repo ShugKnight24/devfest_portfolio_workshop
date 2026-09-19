@@ -83,6 +83,12 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "happy-dom",
+    // happy-dom loads iframe documents for real. The deck embeds YouTube, so
+    // without this the suite makes a network request per render and fails on a
+    // machine that is offline.
+    environmentOptions: {
+      happyDOM: { settings: { disableIframePageLoading: true } },
+    },
     setupFiles: "./src/test/setup.js",
     css: true,
     include: ["src/**/*.{test,spec}.{js,jsx,ts,tsx}"],

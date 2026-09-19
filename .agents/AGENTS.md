@@ -50,19 +50,29 @@ Every change must pass:
 Length is a VIEW over one deck, never a separate deck. `src/data/slides/runtime.js` owns this.
 
 - Every slide declares a `tier`: `CORE` (1) → `EXTENDED` (2) → `DEEP` (3) → `LAB` (4).
-- A `runtime` picks a max tier: `lightning` 15m / `standard` 30m / `keynote` 60m / `workshop` full day.
+- A `runtime` picks a max tier: `lightning` 30m / `keynote` 40m / `standard` 60m / `workshopShort` 90m
+  / `workshopFull` 3h. `keynote` is not the longest cut — it is concept-only, filtered by `altitude`.
 - `selectSlides(slides, { runtime, openZones, dropped })` returns what actually presents.
 - **Flex zones**: a slide with `flex: true` + `zone` sits in a named zone the speaker opens mid-talk
   (`Z` on stage). Built for the live-build beat, where you need standing room for an unknown number
   of minutes while an agent works. A flex slide with a `tier` also auto-includes at that runtime.
 - `budget` (seconds) drives the presenter HUD's pacing drift. Set it when a slide's length is atypical.
 
-Two decks are live: `lhm` (the elastic keynote) and `devfest` (the workshop, `continuesFrom: "lhm"`).
+Two decks are live: `combined` (the talk you give — "Pull the Cord. Bring Backup.") and `devfest`
+(the workshop). `lhm-spine` is the original spine, now shelved and folded into `combined`.
 The other seven are `shelf: true` source material — reachable, grouped below the fold, each with a
 `shelfReason`. Use `getLiveDecks()` / `getShelvedDecks()`.
 
-**Adding a slide**: give it an `id`, a `type` registered in `SlideComponents`, a `tier`, and an entry
-in that deck's `presenterNotes`. A test asserts notes exist for every slide — decks get given live.
+**Adding a slide**: give it an `id`, a `type` registered in `SlideComponents`, a `tier`, an `altitude`
+(or a `labTrack` for labs), and an entry in that deck's `presenterNotes`. Tests assert all of those —
+decks get given live, and an untagged slide silently vanishes from the keynote. Adding a slide also
+moves every runtime's clock: `runtime.test.js` holds each one to its advertised length, so budget the
+new slide against the headroom rather than assuming there is some.
+
+**Slide imagery**: files live in `apps/react/public/assets/images/`, referenced as
+`/assets/images/<file>`. Convert phone photos out of HEIC first — Chrome will not render it. A test
+walks every live deck and fails on a path that is not on disk, because a dead image only shows up on
+the projector.
 
 ### Stage design tokens
 
@@ -92,7 +102,17 @@ projector type ramp, and the `.stage-*` component classes.
 Vendored under `.agents/skills/` (synced from `~/.agents/skills`). Beyond the caveman/cove/cavecrew
 family: `design-system`, `tailwind-design-system`, `frontend-design`, `ui-styling`, `brand`,
 `creating-svg-illustrations`, `improve-animations`, `accessibility`, `best-practices`, `performance`,
-`core-web-vitals`, `slides`, `requesting-code-review`.
+`core-web-vitals`, `seo`, `slides`, `requesting-code-review`, `code-review`, `vitest`.
+
+This repo is a talk before it is an app, so the speaking skills are vendored too: `tech-talk-outline`
+(turn an accepted abstract into a rehearsable outline), `public-speaking` (delivery, storytelling,
+stage presence), `conference-cfp-submission` (the next CFP), and `copywriting` (slide and page copy
+that has to persuade in one read).
+
+Workflow skills pair with a cavecrew agent (see the table in `.agents/skills/cavecrew/SKILL.md`):
+`investigate-first` (cause unknown), `surgical-patch` (known bug, narrow fix), `safe-refactor`
+(move code, behavior fixed), `lean-build` (new behavior, overbuilding risk), `verify-and-stop`
+(claimed done, need proof).
 
 ### Subagent Delegation (`cavecrew`)
 - `cavecrew-investigator`: Locate symbols and line numbers without full file dumps

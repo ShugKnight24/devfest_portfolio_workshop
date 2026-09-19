@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import { RipcordStarter } from "./RipcordStarter";
 
 describe("RipcordStarter", () => {
@@ -50,6 +50,57 @@ describe("RipcordStarter", () => {
 
     expect(onPull).not.toHaveBeenCalled();
     expect(button.getAttribute("aria-disabled")).toBe("true");
+  });
+
+  /* Drives rAF and the clock by hand, so "a second later" is a real assertion
+     and not a sleep. */
+  const manualFrames = () => {
+    let now = 0;
+    let queue = [];
+    vi.spyOn(performance, "now").mockImplementation(() => now);
+    vi.stubGlobal("requestAnimationFrame", (cb) => queue.push(cb));
+    vi.stubGlobal("cancelAnimationFrame", () => {});
+    return {
+      advance(ms) {
+        now += ms;
+        const due = queue;
+        queue = [];
+        act(() => due.forEach((cb) => cb(now)));
+      },
+      restore() {
+        vi.unstubAllGlobals();
+        vi.restoreAllMocks();
+      },
+    };
+  };
+
+  it("keeps the chain turning after the engine catches", () => {
+    const clock = manualFrames();
+    try {
+      const { container } = render(<RipcordStarter fired />);
+      const chain = () => container.querySelector("path[stroke-dasharray]").getAttribute("stroke-dashoffset");
+
+      clock.advance(1800); // the pull lands; the beat clock is done at t = 1
+      const landed = chain();
+
+      clock.advance(120); // …and the saw is still running
+      const idling = chain();
+      expect(idling).not.toBe(landed);
+
+      clock.advance(120);
+      expect(chain()).not.toBe(idling);
+    } finally {
+      clock.restore();
+    }
+  });
+
+  it("holds still under an explicit frame, so previews and PDF export never drift", () => {
+    const first = render(<RipcordStarter fired frame={1} />);
+    const markup = first.container.innerHTML;
+    first.unmount();
+
+    const second = render(<RipcordStarter fired frame={1} />);
+    expect(second.container.innerHTML).toBe(markup);
   });
 
   it("renders the armed and finished frames for both variants", () => {

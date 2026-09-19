@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 .turbo
+# The walk-on track: present from your own local copy, never commit the audio.
+# Without it the deck falls back to the official video (see combinedDeckMeta.track).
+apps/react/public/assets/audio/*
+!apps/react/public/assets/audio/.gitkeep

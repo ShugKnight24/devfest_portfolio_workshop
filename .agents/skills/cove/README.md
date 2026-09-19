@@ -11,7 +11,9 @@ returns over deep nesting, `?`/`?.`/`??` over manual null ladders.
 Also shapes short-form code artifacts: commit subjects, PR bodies (2-5 bullets),
 README, CLI help, error strings, tests.
 
-Languages: Rust, Python, C++, Java, JavaScript, HTML/CSS, Shell.
+Languages: Rust, Python, C++, Java, JavaScript, TypeScript/React, HTML/CSS, Shell.
+Also: CSS Modules, accessible control contracts (roles that oblige keyboard
+behaviour), JS module structure and code splitting.
 
 | Level | What change |
 |-------|-------------|

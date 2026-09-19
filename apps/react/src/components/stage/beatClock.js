@@ -54,6 +54,47 @@ export const useBeatClock = (fired, duration, frame) => {
   return typeof frame === "number" ? Math.min(1, Math.max(0, frame)) : t;
 };
 
+/**
+ * Seconds elapsed since `active` turned true, ticking every frame.
+ *
+ * The beat clock ends at t = 1 and holds there, which is right for a stamp and
+ * wrong for an engine: a chainsaw that has caught should keep running until the
+ * slide moves on. Callers layer this on top of `t` for the part of the drawing
+ * that never settles. Returns 0 while inactive and under reduced motion, so the
+ * held frame stays the fallback for everyone.
+ *
+ * @param {boolean} active  run the clock
+ * @returns {number} seconds since activation
+ */
+export const useIdleClock = (active) => {
+  const [seconds, setSeconds] = useState(0);
+
+  useEffect(() => {
+    if (!active) {
+      setSeconds(0);
+      return undefined;
+    }
+    if (
+      prefersReducedMotion() ||
+      typeof window === "undefined" ||
+      typeof window.requestAnimationFrame !== "function"
+    ) {
+      return undefined;
+    }
+
+    let raf = 0;
+    const start = performance.now();
+    const tick = (now) => {
+      setSeconds((now - start) / 1000);
+      raf = window.requestAnimationFrame(tick);
+    };
+    raf = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(raf);
+  }, [active]);
+
+  return seconds;
+};
+
 /** Progress through the sub-span [a, b] of t, clamped to [0, 1]. */
 export const span = (t, a, b) => (b <= a ? (t >= b ? 1 : 0) : Math.min(1, Math.max(0, (t - a) / (b - a))));
 

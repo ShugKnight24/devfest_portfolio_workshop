@@ -8,6 +8,7 @@ import { trackEvent } from "@portfolio/telemetry";
 import { getDeck, getLiveDecks, getShelvedDecks, DEFAULT_DECK_ID } from "../data/slides";
 import { StageSidebar } from "../components/StageSidebar";
 import { RipcordStarter } from "../components/stage/RipcordStarter";
+import { TrackEmbed, TrackPlayer, useStageTrack } from "../components/stage/TrackPlayer";
 import { EvidenceThread } from "../components/stage/EvidenceThread";
 import { getCharacters } from "../data/slides/characters";
 import {
@@ -43,11 +44,11 @@ import {
  */
 const BEAT_COMPONENTS = { ripcord: RipcordStarter, thread: EvidenceThread };
 
-const Beat = ({ beat, fired, onPull }) => {
+const Beat = ({ beat, fired, onPull, ...rest }) => {
   const Component = BEAT_COMPONENTS[beat.kind];
   if (!Component) return null;
   const { kind: _kind, ...props } = beat;
-  return <Component {...props} fired={fired} onPull={onPull} />;
+  return <Component {...props} {...rest} fired={fired} onPull={onPull} />;
 };
 
 /**
@@ -55,7 +56,7 @@ const Beat = ({ beat, fired, onPull }) => {
  * bottom-right, rather than appended below the slide: most slides already fill
  * the viewport, and a beat below the fold is a click the room never sees land.
  */
-const BeatDock = ({ beats, beatStep, onBeat }) => (
+const BeatDock = ({ beats, beatStep, onBeat, bleeding = false }) => (
   <div
     className="print-hide fixed right-4 bottom-20 z-30 flex flex-col items-end gap-3 rounded-[4px] border p-3 backdrop-blur-md"
     style={{
@@ -66,14 +67,23 @@ const BeatDock = ({ beats, beatStep, onBeat }) => (
   >
     {beats.map((beat, i) => (
       <div key={i} className="w-full">
-        <Beat beat={beat} fired={beatStep > i} onPull={() => onBeat(i)} />
+        <Beat beat={beat} fired={beatStep > i} onPull={() => onBeat(i)} bleeding={bleeding} />
       </div>
     ))}
   </div>
 );
 
 // Slide 1: Title Slide (Tactical Cyberpunk)
-const TitleSlide = ({ slide, isActive, beatStep = 0, onBeat = () => {} }) => {
+const TitleSlide = ({
+  slide,
+  isActive,
+  beatStep = 0,
+  onBeat = () => {},
+  track,
+  trackPlaying = false,
+  trackSource,
+  onToggleTrack,
+}) => {
   const lines = slide.title.split("\n");
   // One beat per title line: each line lights when its own pull lands.
   const paired = Array.isArray(slide.beats) && slide.beats.length === lines.length && lines.length > 1;
@@ -104,7 +114,24 @@ const TitleSlide = ({ slide, isActive, beatStep = 0, onBeat = () => {} }) => {
                   {line}
                 </p>
                 <div className="w-full">
-                  <Beat beat={slide.beats[i]} fired={beatStep > i} onPull={() => onBeat(i)} />
+                  {/* The track hangs over the chainsaw, because that is the one
+                      it bleeds for. */}
+                  {track && slide.beats[i].kind === "ripcord" && (
+                    <div className="mb-3">
+                      <TrackPlayer
+                        track={track}
+                        playing={trackPlaying}
+                        source={trackSource}
+                        onToggle={onToggleTrack}
+                      />
+                    </div>
+                  )}
+                  <Beat
+                    beat={slide.beats[i]}
+                    fired={beatStep > i}
+                    onPull={() => onBeat(i)}
+                    bleeding={trackPlaying}
+                  />
                 </div>
               </div>
             ))}
@@ -300,7 +327,9 @@ const ZeroBloatSlide = ({ slide, isActive }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center w-full">
       {/* Left Column: Photo Drop Zone */}
       <div
-        className="rounded-[2px] border-2 border-dashed flex flex-col items-center justify-center p-8 min-h-[340px] relative overflow-hidden text-center transition-all"
+        className={`rounded-[2px] border-2 flex flex-col items-center justify-center min-h-[340px] relative overflow-hidden text-center transition-all ${
+          slide.image ? "border-solid" : "border-dashed p-8"
+        }`}
         style={{
           backgroundColor: "var(--stage-surface)",
           borderColor: "var(--stage-border-strong)",
@@ -316,16 +345,27 @@ const ZeroBloatSlide = ({ slide, isActive }) => (
             }}
           />
         ) : null}
-        <div
-          className="z-10 flex flex-col items-center gap-3 font-mono text-xs uppercase tracking-wider font-semibold"
-          style={{ color: "var(--stage-text)" }}
-        >
-          <EmojiIcon name="camera" className="w-8 h-8 opacity-80" />
-          <span>{slide.photoZoneText || "[ DROP DEADLIFT / TECH PHOTO HERE ]"}</span>
-          <span className="text-[10px] font-medium" style={{ color: "var(--stage-text-muted)" }}>
-            Sovereign Physical Rigor &bull; Lean Architecture
-          </span>
-        </div>
+        {slide.image ? (
+          slide.photoCaption && (
+            <span
+              className="absolute bottom-0 inset-x-0 z-10 p-3 font-mono text-xs text-center"
+              style={{ backgroundColor: "rgb(0 0 0 / 0.65)", color: "var(--stage-text)" }}
+            >
+              {slide.photoCaption}
+            </span>
+          )
+        ) : (
+          <div
+            className="z-10 flex flex-col items-center gap-3 font-mono text-xs uppercase tracking-wider font-semibold"
+            style={{ color: "var(--stage-text)" }}
+          >
+            <EmojiIcon name="camera" className="w-8 h-8 opacity-80" />
+            <span>{slide.photoZoneText || "[ DROP DEADLIFT / TECH PHOTO HERE ]"}</span>
+            <span className="text-[10px] font-medium" style={{ color: "var(--stage-text-muted)" }}>
+              Sovereign Physical Rigor &bull; Lean Architecture
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Right Column: Zero Bloat Narrative */}
@@ -404,16 +444,54 @@ const ParadigmSlide = ({ slide, isActive }) => (
       isActive ? "opacity-100" : "opacity-0"
     }`}
   >
-    <div className="text-center mb-8">
-      <span className="stage-kicker mb-3">
-        {slide.subtitle || "PARADIGM SHIFT // EXECUTE"}
-      </span>
-      <h2 className="stage-h2 mb-2" style={{ color: "var(--stage-accent)" }}>
-        {slide.title}
-      </h2>
-      <p className="stage-body mx-auto">
-        {slide.description || "Traditional advice: spend weeks polishing a static resume. Burn the resume. Build bespoke software to eliminate your own acute daily friction."}
-      </p>
+    <div
+      className={
+        slide.image
+          ? "w-full mb-6 grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-center"
+          : "text-center mb-8"
+      }
+    >
+      <div className={slide.image ? "text-left" : undefined}>
+        <span className="stage-kicker mb-3">
+          {slide.subtitle || "PARADIGM SHIFT // EXECUTE"}
+        </span>
+        <h2 className="stage-h2 mb-2" style={{ color: "var(--stage-accent)" }}>
+          {slide.title}
+        </h2>
+        <p className={`stage-body ${slide.image ? "" : "mx-auto"}`}>
+          {slide.description || "Traditional advice: spend weeks polishing a static resume. Burn the resume. Build bespoke software to eliminate your own acute daily friction."}
+        </p>
+      </div>
+
+      {slide.image && (
+        <figure className="m-0">
+          <div
+            className="w-full overflow-hidden h-[clamp(110px,19vh,210px)]"
+            style={{
+              borderRadius: "var(--stage-radius)",
+              border: "var(--stage-hairline) solid var(--stage-border-strong)",
+            }}
+          >
+            <img
+              src={slide.image}
+              alt={slide.imageAlt || slide.title}
+              className="w-full h-full object-cover"
+              style={{ objectPosition: slide.imagePosition || "center" }}
+              onError={(e) => {
+                e.currentTarget.parentElement.style.display = "none";
+              }}
+            />
+          </div>
+          {slide.imageCaption && (
+            <figcaption
+              className="mt-2 text-[11px] font-mono leading-snug"
+              style={{ color: "var(--stage-text-muted)" }}
+            >
+              {slide.imageCaption}
+            </figcaption>
+          )}
+        </figure>
+      )}
     </div>
 
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
@@ -583,6 +661,106 @@ const ProcessSlide = ({ slide, isActive }) => (
   </div>
 );
 
+// Slide: Source Material (the covers the talk is built on, under Musashi's rule)
+const SourceMaterialSlide = ({ slide, isActive }) => (
+  <div
+    className={`flex flex-col items-center justify-center min-h-[70vh] transition-all duration-700 max-w-6xl mx-auto px-4 ${
+      isActive ? "opacity-100" : "opacity-0"
+    }`}
+  >
+    <div className="text-center mb-4">
+      <span className="stage-kicker mb-2">{slide.subtitle}</span>
+      <h2 className="stage-h2 mb-2" style={{ color: "var(--stage-accent)" }}>
+        {slide.title}
+      </h2>
+      {slide.lede && (
+        <p
+          className="stage-body mx-auto"
+          style={{ fontSize: "calc(var(--stage-fs-body) * 0.88)", lineHeight: 1.45 }}
+        >
+          {slide.lede}
+        </p>
+      )}
+    </div>
+
+    {/* Cover art carries the argument here: none of these is a software book. */}
+    <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3 w-full list-none p-0 m-0 mb-4">
+      {slide.sources.map((src) => (
+        <li
+          key={src.label}
+          className="stage-card flex flex-col gap-2"
+          style={{ padding: "var(--stage-gap-xs)" }}
+        >
+          <div
+            className="w-full overflow-hidden h-[clamp(88px,15vh,168px)] p-1"
+            style={{
+              borderRadius: "var(--stage-radius)",
+              backgroundColor: "var(--stage-bg-deep)",
+              border: "var(--stage-hairline) solid var(--stage-border-strong)",
+            }}
+          >
+            <img
+              src={src.image}
+              alt={src.alt}
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          </div>
+          <div>
+            <h3
+              className="font-mono font-black uppercase tracking-tight"
+              style={{ fontSize: "var(--stage-fs-body)", lineHeight: 1.1, color: "var(--stage-text)" }}
+            >
+              {src.label}
+            </h3>
+            <p
+              className="text-[10px] font-mono uppercase tracking-wider mt-1"
+              style={{ color: "var(--stage-text-dim)" }}
+            >
+              {src.meta}
+            </p>
+            <p className="text-xs leading-snug mt-1.5" style={{ color: "var(--stage-text-muted)" }}>
+              {src.lesson}
+            </p>
+          </div>
+        </li>
+      ))}
+    </ul>
+
+    {slide.quotes?.length ? (
+      <div className="grid gap-4 md:grid-cols-2 w-full">
+        {slide.quotes.map((q) => (
+          <blockquote
+            key={q.text}
+            className="pl-6"
+            style={{ borderLeft: "var(--stage-rule) solid var(--stage-accent-alt)" }}
+          >
+            <p
+              className="italic"
+              style={{
+                fontSize: "calc(var(--stage-fs-body) * 0.92)",
+                lineHeight: 1.3,
+                color: "var(--stage-text)",
+                textWrap: "pretty",
+              }}
+            >
+              &ldquo;{q.text}&rdquo;
+            </p>
+            <cite
+              className="block mt-1 text-[10px] font-mono uppercase tracking-wider not-italic"
+              style={{ color: "var(--stage-text-dim)" }}
+            >
+              {q.source}
+            </cite>
+          </blockquote>
+        ))}
+      </div>
+    ) : null}
+  </div>
+);
+
 // Slide 9: Bio Slide (Admin Clearance Profile)
 const BioSlide = ({ slide, isActive }) => (
   <div
@@ -636,7 +814,9 @@ const BioSlide = ({ slide, isActive }) => (
 
       {/* Right Photo Zone */}
       <div
-        className="p-4 rounded-[2px] border-2 border-dashed flex flex-col items-center justify-center min-h-[380px] relative overflow-hidden text-center"
+        className={`p-4 rounded-[2px] border-2 flex flex-col items-center justify-center min-h-[380px] relative overflow-hidden text-center ${
+          slide.image ? "border-solid" : "border-dashed"
+        }`}
         style={{
           backgroundColor: "var(--stage-surface)",
           borderColor: "var(--stage-border-strong)",
@@ -650,13 +830,15 @@ const BioSlide = ({ slide, isActive }) => (
             e.currentTarget.style.display = "none";
           }}
         />
-        <div
-          className="z-10 flex flex-col items-center gap-2 font-mono text-xs uppercase tracking-wider font-semibold mt-3"
-          style={{ color: "var(--stage-text)" }}
-        >
-          <EmojiIcon name="camera" className="w-5 h-5 opacity-80" />
-          <span>{slide.photoZoneText || "[ DROP PORTRAIT PHOTO HERE ]"}</span>
-        </div>
+        {!slide.image && (
+          <div
+            className="z-10 flex flex-col items-center gap-2 font-mono text-xs uppercase tracking-wider font-semibold mt-3"
+            style={{ color: "var(--stage-text)" }}
+          >
+            <EmojiIcon name="camera" className="w-5 h-5 opacity-80" />
+            <span>{slide.photoZoneText || "[ DROP PORTRAIT PHOTO HERE ]"}</span>
+          </div>
+        )}
       </div>
     </div>
   </div>
@@ -1225,6 +1407,7 @@ const SlideComponents = {
   paradigm: ParadigmSlide,
   "case-studies": CaseStudiesSlide,
   process: ProcessSlide,
+  "source-material": SourceMaterialSlide,
   bio: BioSlide,
   lab: LabSlide,
   poll: PollSlide,
@@ -1427,6 +1610,14 @@ export const WorkshopSlides = () => {
     [slides, currentSlide, allSlides, openZones, activeDeckId, reanchor]
   );
 
+  const deckTrack = currentDeck.meta?.track;
+  const { playing: trackPlaying, source: trackSource, toggle: rawToggleTrack } = useStageTrack(deckTrack);
+
+  const toggleTrack = useCallback(() => {
+    rawToggleTrack();
+    trackEvent("stage_track_toggle", { deck: activeDeckId, track: deckTrack?.title, source: trackSource });
+  }, [rawToggleTrack, activeDeckId, deckTrack?.title, trackSource]);
+
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
       containerRef.current?.requestFullscreen();
@@ -1481,6 +1672,10 @@ export const WorkshopSlides = () => {
         toggleFullscreen();
       } else if (e.key === "n" || e.key === "N") {
         setShowNotes((prev) => !prev);
+      } else if ((e.key === "m" || e.key === "M") && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        // M starts or stops the walk-on track from anywhere in the deck.
+        e.preventDefault();
+        toggleTrack();
       } else if (e.key === "t" || e.key === "T") {
         setIsTimerRunning((prev) => !prev);
       } else if (e.key === "r" || e.key === "R") {
@@ -1519,7 +1714,7 @@ export const WorkshopSlides = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [nextSlide, prevSlide, toggleFullscreen, isFullscreen, goToSlide, slides.length, handlePrint, navigate, showSidebar, flexZones, toggleZone, changeRuntime]);
+  }, [nextSlide, prevSlide, toggleFullscreen, isFullscreen, goToSlide, slides.length, handlePrint, navigate, showSidebar, flexZones, toggleZone, changeRuntime, toggleTrack]);
 
   // Touch/swipe support
   useEffect(() => {
@@ -1740,13 +1935,19 @@ export const WorkshopSlides = () => {
               onOpenZone={toggleZone}
               beatStep={beatStep}
               onBeat={fireBeat}
+              track={deckTrack}
+              trackPlaying={trackPlaying}
+              trackSource={trackSource}
+              onToggleTrack={toggleTrack}
             />
           )}
           {SlideComponent !== TitleSlide && slide.beats?.length > 0 && (
-            <BeatDock beats={slide.beats} beatStep={beatStep} onBeat={fireBeat} />
+            <BeatDock beats={slide.beats} beatStep={beatStep} onBeat={fireBeat} bleeding={trackPlaying} />
           )}
         </div>
       </main>
+
+      <TrackEmbed track={deckTrack} playing={trackPlaying} source={trackSource} />
 
       {/* Presenter Notes Overlay */}
       {showNotes && (

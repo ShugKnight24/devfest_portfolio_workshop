@@ -245,15 +245,16 @@ describe("character pairings", () => {
 });
 
 describe("community throughline", () => {
-  it("should open on the title, its explanation and the speaker, then the Umelo bridge, at every runtime", () => {
+  it("should open on the title, its explanation, the source material and the speaker, then the Umelo bridge, at every runtime", () => {
     const bridge = combinedSlides.find((s) => s.id === "umelo-bridge");
     expect(bridge.tier).toBe(TIER.CORE);
     expect(bridge.altitude).toBe(ALTITUDE.CONCEPT);
     expect(`${bridge.phase} ${bridge.description}`).toContain("Umelo Onyejiaka");
     for (const runtime of Object.keys(RUNTIMES)) {
-      expect(idsFor(runtime).slice(0, 4), `opening moved at ${runtime}`).toEqual([
+      expect(idsFor(runtime).slice(0, 5), `opening moved at ${runtime}`).toEqual([
         "title",
         "the-title",
+        "why-these-two",
         "bio",
         "umelo-bridge",
       ]);
@@ -444,6 +445,57 @@ describe("every live deck", () => {
           expect(slide.altitude, `${id}/${slide.id} has no altitude`).toBeTruthy();
         }
       }
+    }
+  });
+});
+
+describe("the Musashi thread", () => {
+  // The hook only works because the close repeats it. If the two ever drift
+  // apart, the talk opens on a promise it never keeps.
+  it("should plant the quote in the opening and pay it off at the close, at every runtime", () => {
+    const hook = combinedSlides.find((s) => s.id === "why-these-two");
+    const close = combinedSlides.find((s) => s.id === "the-way");
+    expect(hook.tier).toBe(TIER.CORE);
+    expect(hook.altitude).toBe(ALTITUDE.CONCEPT);
+    expect(hook.quotes.map((q) => q.text), "the callback is a different quote").toContain(close.quote);
+    for (const runtime of Object.keys(RUNTIMES)) {
+      const ids = idsFor(runtime);
+      expect(ids, `hook missing at ${runtime}`).toContain("why-these-two");
+      expect(ids.indexOf("why-these-two"), runtime).toBeLessThan(ids.indexOf("the-way"));
+    }
+  });
+
+  it("should put all four covers on screen, captioned and described", () => {
+    const hook = combinedSlides.find((s) => s.id === "why-these-two");
+    expect(hook.sources).toHaveLength(4);
+    for (const src of hook.sources) {
+      expect(src.alt, `${src.label} has no alt text`).toBeTruthy();
+      expect(src.lesson, `${src.label} has no lesson`).toBeTruthy();
+    }
+  });
+});
+
+describe("stage images", () => {
+  // A slide pointing at a file that is not there fails quietly in a browser and
+  // loudly on a projector. Every path a live deck ships has to exist on disk.
+  it("should ship every image a live deck points at", async () => {
+    const { existsSync } = await import("node:fs");
+    const { fileURLToPath } = await import("node:url");
+    const { dirname, join } = await import("node:path");
+    const { getLiveDecks, getDeck } = await import("./index");
+
+    const publicDir = join(dirname(fileURLToPath(import.meta.url)), "../../../public");
+    const referenced = [];
+    for (const { id } of getLiveDecks()) {
+      for (const slide of getDeck(id).slides) {
+        const paths = [slide.image, ...(slide.sources ?? []).map((s) => s.image)];
+        for (const path of paths) if (path) referenced.push([`${id}/${slide.id}`, path]);
+      }
+    }
+
+    expect(referenced.length).toBeGreaterThan(0);
+    for (const [where, path] of referenced) {
+      expect(existsSync(join(publicDir, path)), `${where} points at missing ${path}`).toBe(true);
     }
   });
 });

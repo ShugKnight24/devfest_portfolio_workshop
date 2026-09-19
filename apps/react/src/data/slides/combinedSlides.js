@@ -9,8 +9,12 @@
  * Stop typing boilerplate; start directing the crew. Denji pulls the cord and
  * commits before he is ready. Reacher arrives alone and never closes a case
  * without backup. `the-title` takes the title apart right after the title
- * slide; `the-way` hands the moves back through Musashi as questions that work
- * far beyond code. Every slide between is evidence, and the character
+ * slide, and `why-these-two` immediately answers the question the room is
+ * actually asking — why a manga and a thriller series — with Musashi's rule
+ * about knowing the ways of all professions, and the covers on screen. The
+ * second quote there is planted, not spent: `the-way` closes the talk on the
+ * same line, handing the moves back as questions that work far beyond code.
+ * Every slide between is evidence, and the character
  * pairings are the shape the evidence takes: two habits held against each
  * other until the engineering rule between them is obvious.
  *
@@ -35,6 +39,7 @@
  * this deck is what you build for each other. The bridge opens the talk once the
  * title and the speaker are introduced, and the thread closes it:
  *
+ *   why-these-two     Musashi opens the door: know the ways of all professions
  *   umelo-bridge      Umelo gave the why. This is the what.
  *   crew-and-unit     agents are the crew, people are the unit
  *   the-110th         collaboration, accountability, local knowledge
@@ -42,7 +47,7 @@
  *   audience-of-one   Audience of One -> Audience of Many is the community move
  *   build-on-it       what makes a thing someone else can build on
  *   find-your-110th   how the unit actually forms
- *   the-way           Musashi: read the terms, pull the cord, bring backup — in all things
+ *   the-way           Musashi again, promise kept: read the terms, pull the cord, bring backup
  *   close             help, meet, ship something others can build on
  *
  * ELASTIC
@@ -89,6 +94,18 @@ export const combinedDeckMeta = {
   accentAlt: "#ffcc00",
   variant: "combined",
   url: "https://gdg.community.dev/events/details/google-gdg-detroit-presents-detroit-latin-heritage-month-innovation-summit/cohost-gdg-detroit/",
+  /* The walk-on track. Starting it wets the chainsaw on the title slide; `M`
+     toggles it from any slide once the talk is running.
+     `src` is the file you present from — gitignored, so it lives on your machine
+     and never in the repo. Everyone else (a clone, the deployed deck) falls back
+     to the official video, chosen automatically when the file is not there. */
+  track: {
+    title: "Power in the Blood",
+    artist: "Polyphia",
+    src: "/assets/audio/power-in-the-blood.mp3",
+    youtubeId: "fDltPLFdkYI",
+    volume: 0.55,
+  },
 };
 
 export const combinedSlides = [
@@ -155,6 +172,59 @@ export const combinedSlides = [
         detail:
           "Agents are the crew: tireless, parallel, and sure of themselves when they are wrong. You are no longer the person who types the boilerplate. You name the problem, set the constraints, pull the cord, and bring the unit that checks the work.",
         rule: "This talk",
+      },
+    ],
+  },
+
+  {
+    id: "why-these-two",
+    type: "source-material",
+    tier: TIER.CORE,
+    altitude: CONCEPT,
+    budget: 60,
+    subtitle: "WHY THESE TWO // MIYAMOTO MUSASHI, THE BOOK OF FIVE RINGS, 1645",
+    title: "A chainsaw, a drifter, and a swordsman.",
+    lede:
+      "A manga about a kid who starts a chainsaw in his own chest, and a drifter who owns one folding toothbrush. Neither is a software book, and that is the point. Musashi spent his life on one craft and still wrote down the rule that the craft alone was never enough.",
+    sources: [
+      {
+        image: "/assets/images/reacher_prime.jpg",
+        alt: "Key art for the Prime Video series Reacher",
+        label: "Reacher",
+        meta: "Prime Video",
+        lesson: "Arrives alone. Never closes a hard case without the 110th.",
+      },
+      {
+        image: "/assets/images/killing_floor.jpg",
+        alt: "Hardcover of Killing Floor by Lee Child, the first Jack Reacher novel",
+        label: "Killing Floor",
+        meta: "Lee Child, 1997",
+        lesson: "Book one. Deduce first, then overwhelming force.",
+      },
+      {
+        image: "/assets/images/chainsaw.jpg",
+        alt: "Key art for the Chainsaw Man anime",
+        label: "Chainsaw Man",
+        meta: "MAPPA",
+        lesson: "Pull the cord and the engine starts, ready or not.",
+      },
+      {
+        image: "/assets/images/chainsaw_man_vol_1.jpg",
+        alt: "Cover of Chainsaw Man volume 1 by Tatsuki Fujimoto",
+        label: "Chainsaw Man, vol. 1",
+        meta: "Tatsuki Fujimoto",
+        lesson: "Every shortcut is a contract. Somebody wrote the terms.",
+      },
+    ],
+    // Quote two comes back verbatim on `the-way` at the close. Plant it here.
+    quotes: [
+      {
+        text: "Know the ways of all professions.",
+        source: "Musashi — one of the nine rules",
+      },
+      {
+        text: "If you know the Way broadly, you will see it in everything.",
+        source: "Musashi — hold on to this one, we end on it",
       },
     ],
   },
@@ -517,7 +587,8 @@ export const combinedSlides = [
     description:
       "Eighty packages for a date helper is not productivity, it is a loan against a codebase you have not finished writing. Modern CSS and the native web platform cover more than most people check before they install.",
     photoZoneText: "[ DROP DEADLIFT / TECH PHOTO HERE ]",
-    image: "",
+    image: "/assets/images/gym_crew_pair.jpg",
+    photoCaption: "No machine here does the lift for you either.",
   },
 
   {
@@ -1279,6 +1350,11 @@ export const combinedSlides = [
         desc: "Review a stranger's pull request. Answer the question you were stuck on last year. The way into a unit is being useful to it before you need it.",
       },
     ],
+    image: "/assets/images/gym_crew_trio.jpg",
+    imageAlt: "Shug and two training partners at the gym, all three flexing",
+    imageCaption:
+      "My other unit. Nobody here has ever read my code — same three rules: show up, bring something real, spot the other guy first.",
+    imagePosition: "center 32%",
   },
 
   {
@@ -1366,6 +1442,8 @@ export const combinedPresenterNotes = {
     "Cold open. Two clicks before you move on. Click once and say 'pull the cord' as the chainsaw revs; click again and say 'bring backup' as the thread runs and the 110th lights up. Then promise the live build inside the first twenty seconds so the room knows something is going to happen to them. Do NOT introduce yourself yet: the next slide explains the title, and you introduce yourself straight after it. [Press N for notes]",
   "the-title":
     "CORE. The only place you explain the title, and the whole talk on one slide. Assume nobody has seen either show and give each one a single clause. Pull the cord is Denji: he starts the chainsaw before he is ready. Bring backup is Reacher: he arrives alone and never closes a case alone. Then say the subtitle out loud as the thesis: stop typing boilerplate, start directing the crew. Admit that most of this room is building alone with AI right now, you included. Under two minutes.",
+  "why-these-two":
+    "CORE, and the hook. Sixty seconds, no more. Point at the covers and admit the obvious out loud: none of these is a software book. Read the first Musashi line — know the ways of all professions — and make the turn immediately: a swordsman who spent his whole life on one craft still wrote down that the craft alone was not enough. Then read the second line and TELL THEM YOU ARE COMING BACK TO IT at the end; that promise is what makes `the-way` land. If the room skews anime, the Chainsaw Man covers get a reaction — take it, then move. Do not summarise either story. Nobody needs the plot, they need the two habits.",
   "umelo-bridge":
     "CORE. Say his full name out loud — Umelo Onyejiaka — and the title of his session, 'AI Won't Replace Community.' Then reference ONE specific point from it: his argument that AI can provide answers, but community provides mentorship, accountability, shared experience, collaboration and access to opportunity. Pick whichever of those he actually spent the most time on in the room and name that one. Do not quote him unless you heard the exact words yourself. Then the hand-off, flat: 'Umelo gave you the why. I am going to show you the what.' Under ninety seconds; do not re-argue his talk.",
   thesis:
@@ -1391,7 +1469,7 @@ export const combinedPresenterNotes = {
   "pair-power":
     "FLEX. Reliable laugh, serious point. 'This is your agent on a bad day.' Land on the rule: confidence is a writing style, not evidence. If you did not run it, it did not happen.",
   "zero-bloat":
-    "FLEX, DEEP. The folding toothbrush. Short. Good one to drop first if the build comes back early.",
+    "FLEX, DEEP. The folding toothbrush, next to a photo of the other place nothing gets carried for you. Short. Good one to drop first if the build comes back early.",
   "roster-reserves":
     "FLEX, DEEP. Three cards, so it stretches or compresses. Use it only if the build is running genuinely long. Franz is the one for a security-minded room; Pochita for anyone maintaining a platform; Reze for the room that wants permission to go fast.",
   "meet-your-row":
@@ -1447,12 +1525,12 @@ export const combinedPresenterNotes = {
   "lab-publish":
     "LAB, FULL TRACK (15m). Three-hour workshop only. The partner clones cold and is not allowed to ask questions — every question they would have asked goes into the README. Celebrate the first pair who gets a clean cold run.",
   "find-your-110th":
-    "DEEP. Practical and specific, not inspirational. Show up twice; bring something that runs; be someone's Neagley first. Mention GDG Detroit by name as a real place to show up twice. Keep it under ninety seconds.",
+    "DEEP. Practical and specific, not inspirational. Show up twice; bring something that runs; be someone's Neagley first. Mention GDG Detroit by name as a real place to show up twice. The photo is your other unit — name it as that in one line, because the three rules are the same ones and nobody in that picture has read your code. Keep it under ninety seconds.",
   "lab-show-and-tell":
     "LAB, FULL TRACK (20m). Three-hour workshop only. Call up volunteers, two minutes each, hard stop. Input, enter, output. Celebrate every working tool, including the ugly ones. Insist on the two sentences: what the partner caught, and who should fork it next. That credit is the whole workshop in miniature.",
   bio: "CORE, third slide. The title is explained, so now the room wants to know who is telling them this. Forty-five seconds at most: one line on who you are, one on why you care (pulling the cord is easy, bringing backup is the job), point at the GitHub link, then go straight into Umelo.",
   "the-way":
-    "CORE. The slide that should outlive the talk. Musashi wrote that if you know the Way broadly, you see it in everything, and the point is that nothing in this talk was really about AI. Three questions, one per verb: what is the detail nobody wrote down, what did I just agree to, who will tell me I am wrong. Give one example from outside code for each, from your own life if you have one: a lease, a job offer, a doctor's visit. Tell them to ask all three the next time something feels too easy. The card rules paraphrase three of Musashi's nine (perceive what cannot be seen, distinguish gain from loss, know the ways of all professions); do not present them as a word-for-word translation.",
+    "CORE. The payoff for `why-these-two` — the quote you told them to hold on to is on screen again, and they should notice. The slide that should outlive the talk. Musashi wrote that if you know the Way broadly, you see it in everything, and the point is that nothing in this talk was really about AI. Three questions, one per verb: what is the detail nobody wrote down, what did I just agree to, who will tell me I am wrong. Give one example from outside code for each, from your own life if you have one: a lease, a job offer, a doctor's visit. Tell them to ask all three the next time something feels too easy. The card rules paraphrase three of Musashi's nine (perceive what cannot be seen, distinguish gain from loss, know the ways of all professions); do not present them as a word-for-word translation.",
   close:
     "CORE. The call to action, in order: meet the person next to you right now, help one person get unstuck this month, ship one thing a stranger can build on. Then the DevFest invite. Last line, flat, in these exact words: 'Your AI will never tell you you're wrong. Find the people who will, and be that person for someone else.' Leave the repo URL on screen while you take questions, and if time allows, literally pause for fifteen seconds so people turn to their neighbour. BEAT: the very last click revs the chainsaw under 'your turn'; say nothing while it runs.",
 };

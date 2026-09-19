@@ -29,7 +29,7 @@ Default: **full**. Switch: `/cove lite|full`.
 Drop:
 - `let` when type inferred or obvious
 - unnecessary `mut`
-- redundant closures: `|x| x` → `.identity()`
+- redundant closures: `.map(|x| f(x))` → `.map(f)`; `|x| x` → `std::convert::identity`
 - verbose error handling when `?` suffices
 - `-> ()` when obvious
 
@@ -43,7 +43,7 @@ Pattern: `[what] [how].`
 Drop:
 - struct names in struct init when Type already known
 - braces around single-line arms
-- unnecessary `self` in impl blocks
+- repeated type name inside its own `impl`: use `Self`
 - doc comments on obvious internals
 - empty lines between trivial lines
 - `Mutex<T>` when single-threaded: use `Rc<RefCell<T>>`
@@ -108,9 +108,7 @@ fn process_items(items: &[Item]) -> Result<Vec<ProcessedItem>, ProcessingError> 
 ## Python
 
 Drop:
-- `self` in method bodies (already in class)
-- `return` when last expression
-- `None` checks: `if x is None` → `if not x` (only when x not falsy primitive)
+- `None` checks: `if x is None` → `if not x` ONLY when `0`, `""`, `[]`, `False` are impossible values of `x`
 - redundant parentheses: `if (a and b):` → `if a and b:`
 - explicit `list()` / `dict()` / `set()` when comprehension works
 - `== True` / `== False`
@@ -145,8 +143,7 @@ def process_items(items):
 ## C++
 
 Drop:
-- `this->` (already in class)
-- `return` when last expression
+- `this->` (already in class) unless a parameter or local shadows the member
 - `std::` when `using namespace std;` or type obvious
 - redundant `()` around lambda return: `[]() { return x; }` → `[] { return x; }`
 - empty destructors
@@ -203,11 +200,41 @@ Drop:
 
 Use:
 - semantic HTML: `<main>`, `<nav>`, `<article>`, `<section>`
+- multi-tone sprite icons: fills on `<symbol>` children read custom properties (`style="fill: var(--mark-leaf, currentColor)"`). Properties inherit into the `<use>` shadow tree, so each surface colors one symbol differently
 - CSS custom properties for theming
 - shorthand properties: `margin: 10px 5px` over `margin-top: 10px; margin-right: 5px; ...`
 - `clip-path` / `filter` over images for effects
 - `aspect-ratio` over padding hacks
 - `gap` for spacing in flex/grid
+- `<dialog>` + `showModal()` for modals/lightboxes: native Esc, focus trap, `::backdrop`. No hand-rolled overlay + keydown ladder — but see the `margin: 0` trap below
+- `inert` on closed off-canvas panels instead of `aria-hidden` + tabindex juggling
+- `<img srcset sizes width height loading="lazy">` — dimensions stop CLS, `srcset` stops shipping 1600px photos to phones
+- event delegation for repeated triggers: `document.addEventListener("click", e => e.target.closest("[data-x]") && open(...))`
+- `IntersectionObserver` on a 1px sentinel for "nav scrolled" state, not a scroll listener
+
+Never:
+- a global `* { margin: 0 }` reset next to `<dialog>` + `showModal()`. The UA centres a modal with `margin: auto`; the reset zeroes it and the dialog parks at the top-left corner, looking like a broken layout rather than a CSS reset. Put `margin: auto` back on the dialog itself
+- `backdrop-filter` / `filter` / `transform` on an ancestor of a `position: fixed` child. It becomes the containing block and the fixed panel collapses into the header. Put the blur on `::before`
+- `display: none` toggles on things that should animate: use `opacity` + `visibility` with delayed `visibility` transition
+- theme overrides on `:root` or `body.theme-x` when themes are keyed on `html[data-theme]`. `html[data-theme="light"]` is (0,1,1) and beats `:root` (0,1,0), so the override silently loses. Set palette and derived tokens on the same selector the theme switch writes
+- alias tokens (`--bg: var(--paper)`) on a different element than the palette. `var()` resolves where declared, then children inherit the resolved value. Declare aliases on `html[data-theme]` next to the palette; a scoped override lower down (`[data-mode-panel] { --paper: … }`) does not re-resolve them
+- `box-shadow` on off-canvas panels parked at `left: 100vw`. The shadow bleeds into view. Add `visibility: hidden` when closed, or apply the shadow only in the open state
+- hard-coded chrome offsets (`top: 92px`) repeated across files. One `--nav-h` / `--toolbar-h` / `--chrome-h` token, overridden in the mobile media query
+- a class that sets `display` on an element toggled with the `hidden` attribute. `.x { display: flex }` beats the UA `[hidden]` rule and the "hidden" control shows. Add `[hidden] { display: none !important }` once; elements that animate out opt back in with a more specific `.x[hidden]` rule
+- flex sidebars without `flex: none`. A wide sibling shrinks a `width: 240px` sidebar to a sliver
+- an IndexedDB `put` whose keyPath value can be null (a doc with no path/id). It throws `DataError`; guard before writing
+- a service worker cache shared by data that must survive (saved texts) and data that churns (search shards). One capped cache evicts the other; give each its own name and cap
+- modules that `document.body.appendChild` their UI in an app shell of fixed panels. The node lands below the viewport and scrolling a child `scrollIntoView` scrolls the whole document. Mount into the owning panel; `document.documentElement.scrollHeight > innerHeight` in an app shell means something escaped
+- rename a class in a render function without renaming it in the stylesheet. Nothing throws: the element still renders, just unstyled, so a rewritten module degrades to raw HTML on the page background and reads as bad design rather than as a broken selector
+- restyle a component that a global remediation block targets with `!important` (a "WCAG contrast fixes" section at the end of the file is the usual one) without reading that block first. It was written against the component's OLD fill — an active tab that used to be solid emerald gets `color: #022c22 !important`, and your new dark tab paints its label near-black
+- a `speak()` / toast / tooltip helper whose `duration` timeout only removes a highlight or animation class. The element itself never hides; if it is `position: fixed` it then covers the same corner of every view for the rest of the session. The timeout must hide the element, not just un-decorate it
+- template a field the data layer does not define (`region.minLevel` where the data says `levelReq`). It renders the string "undefined", and every comparison against it is `NaN`, so `floor <= state.floor + 1` is false for all floors and the feature is silently unreachable — not just mislabelled
+
+Verify:
+- a static dev server should send `Cache-Control: no-store` (subclass `SimpleHTTPRequestHandler.end_headers`). Plain `python3 -m http.server` sends no cache headers, so the browser keeps stale CSS after edits. Check a computed value (`getComputedStyle(el).backgroundColor`) before trusting a screenshot; refetch with `fetch(url, {cache: "reload"})` then reload
+- find undefined tokens before restyling: list every `var(--x` used, subtract every `--x:` declared. Undefined tokens fall back to per-file hex and are the usual cause of a "broken" theme
+- find orphaned classes before restyling, the same way: list every class the JS emits (`grep -ohE 'class="[^"$]*"' src/**/*.js`), subtract every `.x` the stylesheet declares. What is left is markup that was renamed without the CSS. A module whose class list is mostly orphans is not designed badly, it is unstyled
+- after any change to a data shape, walk the rendered DOM for `undefined`, `NaN` and `[object Object]` in text nodes, across every view and sub-tab. A `TreeWalker` over `document.body` in a headless browser finds in one pass what reading templates misses, and catches the field renames that a type-free codebase will not
 
 ❌ verbose:
 ```html
@@ -257,12 +284,47 @@ Use:
 }
 ```
 
+## CSS Modules
+
+A component stylesheet, not a utility soup. Same compression rules, plus:
+
+Drop:
+- `style={{}}` for anything static. Inline styles beat the module, do not theme, and cannot be overridden in a media query. Keep inline style ONLY for a genuinely dynamic value (a swatch colour, a computed dimension) — and pass it as a custom property (`style={{ '--swatch': hex }}`) so the rule that consumes it stays in the stylesheet
+- raw hex in a themed codebase. `#0f172a` is a decision copied into 40 files; `var(--color-text-primary)` is one decision. Raw hex in JS is different — swatch tables and canvas fill strings are data, not theme
+- BEM-ish prefixes on module classes. The module already scopes them: `.cardTitle` not `.studioCard__title`
+- a wrapper `div` that exists only to hold one class. Put the class on the element that is already there
+
+Use:
+- one module per component, imported as `styles`
+- `composes:` for shared local rules instead of copying a block between modules
+- a `--component-x` custom property where a parent needs to vary a child's layout (`grid-template-columns: repeat(var(--grid-cols, 3), 1fr)`)
+- `:focus-visible`, never `:focus`, for rings — `:focus` rings on mouse click read as a bug and get deleted, taking keyboard users with them
+- `@media (prefers-reduced-motion: reduce)` next to every transition/transform block you write, in the same file
+
+Never:
+- copy a block between two component modules "for now". Two studios that each grew their own swatch row is how selection state ends up conveyed by CSS class alone, with no `aria-checked` in either
+- convey state by colour or opacity alone (`.itemHidden { opacity: .45 }` with an unchanged icon). The class is invisible to assistive tech and to anyone not comparing two rows side by side
+- ship `opacity: 0.3` disabled states. They fail contrast; use a token colour
+
+## Accessible controls (JS/React)
+
+A role is a contract. Claiming one and not honouring it is worse than a bare
+`div`, because assistive tech now promises the user behaviour that is absent.
+
+- `role="radiogroup"` + `role="radio"` obliges `aria-checked` on every option, **roving `tabIndex`** (0 on the active one, -1 on the rest — one tab stop for the group, not twelve), and arrow-key movement that moves focus with selection. Write the key handler in the same commit as the role
+- `role="tab"` obliges `aria-selected`, `aria-controls`, and a `role="tabpanel"` that exists. A row of buttons that merely looks like tabs should stay buttons
+- `title` is not an accessible name. Icon-only and glyph-only buttons (`✕`, `▲`, an eye toggle) need `aria-label`
+- selection conveyed by CSS class needs `aria-pressed` or `aria-current` alongside it
+- a `<label>` with no `htmlFor` next to an input with no `id` is decoration. Pair them, or use `useId()`
+- `<canvas>` is opaque: give it a role, an `aria-label` describing the current state, a `tabIndex`, and a keyboard path to whatever the pointer can do. Drag-only editing has no keyboard equivalent by default
+- announce state the user cannot see happen (item added, export finished, design saved) in a `role="status"` live region
+- do not make thousands of nodes focusable to fix one click handler — give each row one real control instead
+
 ## Java
 
 Drop:
-- `this.field` (already in class)
-- `return` when last expression
-- redundant `()` around lambdas: `x -> { return x; }` → `x -> x`
+- `this.field` (already in class) unless a parameter shadows it (constructors, setters)
+- block lambdas with one return: `x -> { return x; }` → `x -> x`
 - empty constructor / initializer blocks `{}`
 - `public` on interface methods (implicit)
 - explicit type args on the right of `new`: `new ArrayList<Integer>()` -> `new ArrayList<>()`
@@ -403,8 +465,8 @@ process_files() {
 ## JavaScript
 
 Drop:
-- `function` keyword when arrow functions cleaner
-- `return` when last expression
+- `function` keyword when arrow functions cleaner (keep it when `this`, `arguments`, hoisting or `new` is used)
+- block body with a single `return`: `x => { return x * 2 }` → `x => x * 2`
 - redundant `=== true` / `=== false`
 - `new Array()` / `new Object()` → `[]` / `{}`
 - verbose `if (x !== null && x !== undefined)` → `if (x != null)`
@@ -458,7 +520,7 @@ const getFullName = (user) => {
 ✅ cove:
 ```js
 const getFullName = ({ firstName, lastName }) =>
-    firstName ? `${firstName} ${lastName}` : 'Unknown'
+    firstName != null ? `${firstName} ${lastName}` : 'Unknown'
 ```
 
 ## TypeScript / React
@@ -539,7 +601,48 @@ type State =
 if (state.status === 'success') render(state.data.items)
 ```
 
+Never:
+- call `setState` in an effect body. `eslint-plugin-react-hooks` v6, which ships
+  in Next 16's default config, fails it as `react-hooks/set-state-in-effect`, and
+  no dependency tweak clears it. State that lives outside React — a URL
+  parameter, `localStorage`, a media query, a clock — belongs in
+  `useSyncExternalStore`, whose server snapshot also fixes the hydration
+  mismatch the effect was working around. A `setState` inside a `setTimeout` or
+  event callback that the effect *registers* is fine; only the synchronous body
+  is rejected
+- put `role="slider"` / `role="tab"` / `role="button"` on a `div` without the
+  `tabIndex` and the key handler that role promises. The role is a contract: a
+  slider arrows cannot move is worse than an unlabelled `div`
+- make thousands of nodes focusable to "fix" a click handler. Per-word seeking
+  on a 2,000-cue transcript stays a mouse affordance; give each row one real
+  control — its timestamp — instead of 2,000 tab stops
+- derive an id from `Date.now()` alone. Two records created in the same
+  millisecond collide, and colliding ids silently share one row of state. Same
+  for a human-readable timestamp used as a delete key: `"14:32"` is not unique
+- leave a `setTimeout` un-refed when a second call can land inside its window.
+  The first timer clears the second one's state early, and a pending timer
+  outlives the component. One ref, cleared on each call and on unmount
+
 Never drop: `"use client"`, `key` props, effect cleanup functions, dependency array entries that are actually read. Each changes behavior, not verbosity.
+
+## Modules / code splitting (JS)
+
+Drop:
+- god files: one module owning input, simulation, rendering and UI. Split by responsibility, not by size alone
+- `export` on symbols no other module imports
+- import cycles (`a` imports `b` imports `a`) — move the shared piece into a third module
+- side effects at import time (DOM queries, listeners, timers) — export an `init()` and call it once from the entry point
+- duplicated lookup tables and constants across files — one source, imported
+- dead branches behind flags that never change
+
+Use:
+- one default direction for imports: entry, then orchestration, then systems, then data/utils. Utils never import systems
+- pure functions for game rules (damage, scoring, spawn picks) so unit tests need no DOM or canvas
+- dynamic `import()` for rarely-entered modes (editor, builder, cutscenes) so the boot bundle stays small
+- a `dispose()` that removes every listener, timer and rAF the module added
+- a named constant in the owning module over the same literal in 3+ places
+
+Behavior-preserving split order: move code verbatim, re-export from the old path, run tests, then update importers and delete the re-export.
 
 ## WebGL / Three.js / Canvas / Web Audio
 
@@ -554,6 +657,8 @@ Use:
 - Particle pooling (`reset()` over `new`)
 - Web Audio API parametric nodes (Oscillators, BiquadFilter, Gain, Noise buffers)
 - RequestAnimationFrame with delta-time easing
+- `gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)` around `texImage2D(..., canvasOrImage)` when the shader samples with `gl_FragCoord` / bottom-up UVs, then reset it. DOM sources upload top row first; skipping this mirrors the whole frame vertically
+- test GPU paths with GPU flags (`--use-gl=angle --enable-gpu`). Default headless Chromium has no WebGL, so a GL-only bug never shows in screenshots
 
 ❌ verbose:
 ```js
@@ -573,6 +678,85 @@ const sphereMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 16), new THREE
 scene.add(sphereMesh);
 const animate = () => { requestAnimationFrame(animate); sphereMesh.rotation.y += 0.01; renderer.render(scene, camera); };
 ```
+
+## Game loop / Canvas 2D
+
+Per-frame code is the hot path. Terseness here must never cost frame time.
+
+Drop:
+- allocation inside the frame: `{x,y}`, array literals, `.map`/`.filter` chains in update/render
+- `ctx.save()`/`ctx.restore()` pairs used only to change one property — set and reset it
+- `shadowBlur` for glow — it is a per-pixel blur and murders fill rate. Layer translucent fills instead
+- string building per frame (`` `${hp}/${max}` ``) when the value did not change — cache it
+- `Math.hypot` in inner loops — compare squared distances
+- re-reading `canvas.width` / `getBoundingClientRect()` every frame — it forces layout
+
+Use:
+- object pools with `reset()` over `new` for particles, projectiles, damage numbers
+- typed arrays (`Float32Array`) for large homogeneous per-entity data
+- offscreen canvas for anything static: vignette, noise, textures, gradients — draw once, blit after
+- `dt` clamped (`Math.min(dt, 1/30)`) so an alt-tab stall cannot tunnel entities through walls
+- integer-snapped destination coords for blits; subpixel blits are a silent slow path
+- one batched pass per material/state instead of interleaving `fillStyle` changes
+- accumulate fixed-step physics, interpolate render — never scale physics by a variable `dt`
+- gate a frame cap on a running deadline with half a display period of slack, never on
+  `now - lastRender >= 1000 / cap`. vsync timestamps land a fraction of a millisecond
+  early, so the bare comparison drops every other frame: a 60 fps cap renders at 30 on a
+  60 Hz panel and at 43 on a 120 Hz one. After a stall, set the deadline forward from
+  `now` instead of burst-rendering the deadlines already past
+- an FPS-driven quality governor must target the *active* cap, not a constant. A fixed
+  55 fps target plus a deliberate 30 fps cap reads as a slow machine, and the render
+  scale spirals to the floor the moment the player enables battery saver
+- count hit-stop, i-frames and freeze windows in milliseconds, not frames. Frame counts
+  are 2.4x shorter on a 144 Hz panel than on 60 Hz, and twice as long under a 30 fps cap
+- a loop's `catch` must keep calling `requestAnimationFrame`. Returning without
+  rescheduling ends the session permanently — a frozen canvas, often still holding
+  pointer lock. Throttle the logging, then recover the app to a screen that can draw
+- vector art: rasterize SVG once per size bucket (`data:image/svg+xml` → `Image`, `img.decode()`), blit per frame. Split parts that move into separate layers and animate them with canvas transforms/alpha. Never rebuild SVG markup per frame
+- one horizon offset (crouch, slide, camera punch) for walls, floor and sprites alike, or props float off the floor
+
+❌ verbose and slow:
+```js
+update(dt) {
+  this.particles = this.particles
+    .map(p => ({ ...p, x: p.x + p.vx * dt, y: p.y + p.vy * dt, life: p.life - dt }))
+    .filter(p => p.life > 0);
+}
+render(ctx) {
+  for (const p of this.particles) {
+    ctx.save();
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = p.color;
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x, p.y, 2, 2);
+    ctx.restore();
+  }
+}
+```
+
+✅ cove:
+```js
+update(dt) {
+  for (let i = this.count - 1; i >= 0; i--) {
+    const p = this.pool[i];
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    if ((p.life -= dt) <= 0) this.release(i);   // swap-pop, no realloc
+  }
+}
+render(ctx) {
+  for (let i = 0; i < this.count; i++) {
+    const p = this.pool[i];
+    ctx.fillStyle = p.glow;                      // pre-baked rgba, wider + fainter
+    ctx.fillRect(p.x - 2, p.y - 2, 6, 6);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x, p.y, 2, 2);
+  }
+}
+```
+
+Never let compression change frame behavior. A chain that reads better but allocates per
+particle per frame is the wrong trade in a render loop — and only in a render loop.
 
 ## Contextual Formatting 
 

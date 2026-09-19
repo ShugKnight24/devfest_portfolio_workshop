@@ -583,6 +583,106 @@ const ProcessSlide = ({ slide, isActive }) => (
   </div>
 );
 
+// Slide: Source Material (the covers the talk is built on, under Musashi's rule)
+const SourceMaterialSlide = ({ slide, isActive }) => (
+  <div
+    className={`flex flex-col items-center justify-center min-h-[70vh] transition-all duration-700 max-w-6xl mx-auto px-4 ${
+      isActive ? "opacity-100" : "opacity-0"
+    }`}
+  >
+    <div className="text-center mb-4">
+      <span className="stage-kicker mb-2">{slide.subtitle}</span>
+      <h2 className="stage-h2 mb-2" style={{ color: "var(--stage-accent)" }}>
+        {slide.title}
+      </h2>
+      {slide.lede && (
+        <p
+          className="stage-body mx-auto"
+          style={{ fontSize: "calc(var(--stage-fs-body) * 0.88)", lineHeight: 1.45 }}
+        >
+          {slide.lede}
+        </p>
+      )}
+    </div>
+
+    {/* Cover art carries the argument here: none of these is a software book. */}
+    <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3 w-full list-none p-0 m-0 mb-4">
+      {slide.sources.map((src) => (
+        <li
+          key={src.label}
+          className="stage-card flex flex-col gap-2"
+          style={{ padding: "var(--stage-gap-xs)" }}
+        >
+          <div
+            className="w-full overflow-hidden h-[clamp(88px,15vh,168px)] p-1"
+            style={{
+              borderRadius: "var(--stage-radius)",
+              backgroundColor: "var(--stage-bg-deep)",
+              border: "var(--stage-hairline) solid var(--stage-border-strong)",
+            }}
+          >
+            <img
+              src={src.image}
+              alt={src.alt}
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          </div>
+          <div>
+            <h3
+              className="font-mono font-black uppercase tracking-tight"
+              style={{ fontSize: "var(--stage-fs-body)", lineHeight: 1.1, color: "var(--stage-text)" }}
+            >
+              {src.label}
+            </h3>
+            <p
+              className="text-[10px] font-mono uppercase tracking-wider mt-1"
+              style={{ color: "var(--stage-text-dim)" }}
+            >
+              {src.meta}
+            </p>
+            <p className="text-xs leading-snug mt-1.5" style={{ color: "var(--stage-text-muted)" }}>
+              {src.lesson}
+            </p>
+          </div>
+        </li>
+      ))}
+    </ul>
+
+    {slide.quotes?.length ? (
+      <div className="grid gap-4 md:grid-cols-2 w-full">
+        {slide.quotes.map((q) => (
+          <blockquote
+            key={q.text}
+            className="pl-6"
+            style={{ borderLeft: "var(--stage-rule) solid var(--stage-accent-alt)" }}
+          >
+            <p
+              className="italic"
+              style={{
+                fontSize: "calc(var(--stage-fs-body) * 0.92)",
+                lineHeight: 1.3,
+                color: "var(--stage-text)",
+                textWrap: "pretty",
+              }}
+            >
+              &ldquo;{q.text}&rdquo;
+            </p>
+            <cite
+              className="block mt-1 text-[10px] font-mono uppercase tracking-wider not-italic"
+              style={{ color: "var(--stage-text-dim)" }}
+            >
+              {q.source}
+            </cite>
+          </blockquote>
+        ))}
+      </div>
+    ) : null}
+  </div>
+);
+
 // Slide 9: Bio Slide (Admin Clearance Profile)
 const BioSlide = ({ slide, isActive }) => (
   <div
@@ -1225,6 +1325,7 @@ const SlideComponents = {
   paradigm: ParadigmSlide,
   "case-studies": CaseStudiesSlide,
   process: ProcessSlide,
+  "source-material": SourceMaterialSlide,
   bio: BioSlide,
   lab: LabSlide,
   poll: PollSlide,

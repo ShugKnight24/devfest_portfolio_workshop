@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useBeatClock, span, easeOutCubic, easeOutBack, shake } from "./beatClock";
+import { useBeatClock, useIdleClock, span, easeOutCubic, easeOutBack, shake } from "./beatClock";
 
 /**
  * RipcordStarter — the "pull the cord" stage beat.
@@ -12,6 +12,12 @@ import { useBeatClock, span, easeOutCubic, easeOutBack, shake } from "./beatCloc
  *   0    -> 0.3   pull: handle yanked out, cord taut, housing kicks back
  *   0.3  -> 0.55  catch: cord snaps home, engine shakes, exhaust and sparks
  *   0.5  -> 1     rev: teeth race round the bar, hot glow, "VRRRMM", RUNNING
+ *
+ * Past t = 1 the saw does not stop. An idle clock takes over the parts of a
+ * running engine that should never settle — the chain, the housing buzz, the
+ * heat in the glow — at the exact chain speed the rev ended on, so the handover
+ * is invisible. It runs until the component leaves the screen, which is what
+ * unmounts it: the saw idles for as long as the slide is up.
  *
  * The saw is drawn once in "saw space" (hero scale, origin at the housing
  * centre) and placed per variant with a single transform, so hero and compact
@@ -80,6 +86,11 @@ const PERIM = 2 * LEN + 2 * Math.PI * R;
 const TOOTH_COUNT = 26;
 const TOOTH_STEP = PERIM / TOOTH_COUNT;
 const LAPS = 3;
+
+/* Laps per second the chain is doing as the rev ends — derived, not guessed, so
+   the idle picks up at exactly the speed the beat handed over. */
+const IDLE_LAPS_PER_SECOND = ((LAPS / 0.9) * 2) / (DURATION / 1000);
+const IDLE_BUZZ_HZ = 13;
 
 const CORD_Y = 10;
 const EXIT_X = 76;
@@ -170,6 +181,9 @@ export function RipcordStarter({
 }) {
   const v = VARIANTS[variant] ?? VARIANTS.hero;
   const t = useBeatClock(fired, DURATION, frame);
+  /* A frozen `frame` is for previews and tests; never idle under one. */
+  const running = t >= 1 && typeof frame !== "number";
+  const idle = useIdleClock(running);
   const svgRef = useRef(null);
   const pulledRef = useRef(false);
   const dragRef = useRef(null);
@@ -250,6 +264,7 @@ export function RipcordStarter({
   const revP = span(t, 0.5, 1);
   const lit = easeOutCubic(span(t, 0.42, 0.7));
   const glow = easeOutCubic(span(t, 0.5, 0.8));
+  const heat = running ? 1 + 0.16 * Math.sin(idle * Math.PI * 2 * 2.6) : 1;
   const vroomP = span(t, 0.55, 0.8);
   const labelOut = span(t, 0.44, 0.52);
   const labelIn = span(t, 0.52, 0.64);
@@ -265,11 +280,13 @@ export function RipcordStarter({
 
   const kick = easeOutBack(pullP) * (1 - easeOutCubic(span(t, 0.3, 0.44)));
   const hum = Math.sin(t * 220) * 0.9 * span(t, 0.55, 0.7) * (1 - span(t, 0.9, 1));
-  const shakeX = shake(catchP, 7) * 6 + kick * 7 + hum;
-  const shakeY = shake(catchP, 9) * 3.5 + hum * 0.6;
+  const buzz = running ? Math.sin(idle * IDLE_BUZZ_HZ * Math.PI * 2) : 0;
+  const buzzY = running ? Math.sin(idle * IDLE_BUZZ_HZ * Math.PI * 2 * 1.7) : 0;
+  const shakeX = shake(catchP, 7) * 6 + kick * 7 + hum + buzz * 1.2;
+  const shakeY = shake(catchP, 9) * 3.5 + hum * 0.6 + buzzY * 0.6;
   const tilt = kick * 5 + shake(catchP, 5) * 2.5;
 
-  const chainOffset = PERIM * LAPS * chainTravel(revP);
+  const chainOffset = PERIM * (LAPS * chainTravel(revP) + IDLE_LAPS_PER_SECOND * idle);
   const armed = t === 0;
   const eyesOpen = t >= 0.32;
   const burstP = span(t, 0.3, 0.46);
@@ -408,8 +425,8 @@ export function RipcordStarter({
             {/* hot glow behind the bar */}
             {glow > 0 && (
               <>
-                <path d={stadium(R + 12)} style={{ fill: ACCENT, opacity: 0.12 * glow }} />
-                <path d={stadium(R + 6)} style={{ fill: ACCENT, opacity: 0.22 * glow }} />
+                <path d={stadium(R + 12)} style={{ fill: ACCENT, opacity: 0.12 * glow * heat }} />
+                <path d={stadium(R + 6)} style={{ fill: ACCENT, opacity: 0.22 * glow * heat }} />
               </>
             )}
 
@@ -566,7 +583,17 @@ export function RipcordStarter({
               style={{ fill: TEXT }}
             >
               {vroomLetters.map((ch, i) => (
-                <tspan key={i} dy={i === 0 ? 0 : (i % 2 ? -1 : 1) * shake(vroomP, 2) * v.vroom.size * 0.08}>
+                <tspan
+                  key={i}
+                  dy={
+                    i === 0
+                      ? 0
+                      : (i % 2 ? -1 : 1) *
+                        (running ? buzz * 0.5 : shake(vroomP, 2)) *
+                        v.vroom.size *
+                        0.08
+                  }
+                >
                   {ch}
                 </tspan>
               ))}

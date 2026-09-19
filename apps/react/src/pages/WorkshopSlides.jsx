@@ -300,7 +300,9 @@ const ZeroBloatSlide = ({ slide, isActive }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center w-full">
       {/* Left Column: Photo Drop Zone */}
       <div
-        className="rounded-[2px] border-2 border-dashed flex flex-col items-center justify-center p-8 min-h-[340px] relative overflow-hidden text-center transition-all"
+        className={`rounded-[2px] border-2 flex flex-col items-center justify-center min-h-[340px] relative overflow-hidden text-center transition-all ${
+          slide.image ? "border-solid" : "border-dashed p-8"
+        }`}
         style={{
           backgroundColor: "var(--stage-surface)",
           borderColor: "var(--stage-border-strong)",
@@ -316,16 +318,27 @@ const ZeroBloatSlide = ({ slide, isActive }) => (
             }}
           />
         ) : null}
-        <div
-          className="z-10 flex flex-col items-center gap-3 font-mono text-xs uppercase tracking-wider font-semibold"
-          style={{ color: "var(--stage-text)" }}
-        >
-          <EmojiIcon name="camera" className="w-8 h-8 opacity-80" />
-          <span>{slide.photoZoneText || "[ DROP DEADLIFT / TECH PHOTO HERE ]"}</span>
-          <span className="text-[10px] font-medium" style={{ color: "var(--stage-text-muted)" }}>
-            Sovereign Physical Rigor &bull; Lean Architecture
-          </span>
-        </div>
+        {slide.image ? (
+          slide.photoCaption && (
+            <span
+              className="absolute bottom-0 inset-x-0 z-10 p-3 font-mono text-xs text-center"
+              style={{ backgroundColor: "rgb(0 0 0 / 0.65)", color: "var(--stage-text)" }}
+            >
+              {slide.photoCaption}
+            </span>
+          )
+        ) : (
+          <div
+            className="z-10 flex flex-col items-center gap-3 font-mono text-xs uppercase tracking-wider font-semibold"
+            style={{ color: "var(--stage-text)" }}
+          >
+            <EmojiIcon name="camera" className="w-8 h-8 opacity-80" />
+            <span>{slide.photoZoneText || "[ DROP DEADLIFT / TECH PHOTO HERE ]"}</span>
+            <span className="text-[10px] font-medium" style={{ color: "var(--stage-text-muted)" }}>
+              Sovereign Physical Rigor &bull; Lean Architecture
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Right Column: Zero Bloat Narrative */}
@@ -404,16 +417,54 @@ const ParadigmSlide = ({ slide, isActive }) => (
       isActive ? "opacity-100" : "opacity-0"
     }`}
   >
-    <div className="text-center mb-8">
-      <span className="stage-kicker mb-3">
-        {slide.subtitle || "PARADIGM SHIFT // EXECUTE"}
-      </span>
-      <h2 className="stage-h2 mb-2" style={{ color: "var(--stage-accent)" }}>
-        {slide.title}
-      </h2>
-      <p className="stage-body mx-auto">
-        {slide.description || "Traditional advice: spend weeks polishing a static resume. Burn the resume. Build bespoke software to eliminate your own acute daily friction."}
-      </p>
+    <div
+      className={
+        slide.image
+          ? "w-full mb-6 grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-center"
+          : "text-center mb-8"
+      }
+    >
+      <div className={slide.image ? "text-left" : undefined}>
+        <span className="stage-kicker mb-3">
+          {slide.subtitle || "PARADIGM SHIFT // EXECUTE"}
+        </span>
+        <h2 className="stage-h2 mb-2" style={{ color: "var(--stage-accent)" }}>
+          {slide.title}
+        </h2>
+        <p className={`stage-body ${slide.image ? "" : "mx-auto"}`}>
+          {slide.description || "Traditional advice: spend weeks polishing a static resume. Burn the resume. Build bespoke software to eliminate your own acute daily friction."}
+        </p>
+      </div>
+
+      {slide.image && (
+        <figure className="m-0">
+          <div
+            className="w-full overflow-hidden h-[clamp(110px,19vh,210px)]"
+            style={{
+              borderRadius: "var(--stage-radius)",
+              border: "var(--stage-hairline) solid var(--stage-border-strong)",
+            }}
+          >
+            <img
+              src={slide.image}
+              alt={slide.imageAlt || slide.title}
+              className="w-full h-full object-cover"
+              style={{ objectPosition: slide.imagePosition || "center" }}
+              onError={(e) => {
+                e.currentTarget.parentElement.style.display = "none";
+              }}
+            />
+          </div>
+          {slide.imageCaption && (
+            <figcaption
+              className="mt-2 text-[11px] font-mono leading-snug"
+              style={{ color: "var(--stage-text-muted)" }}
+            >
+              {slide.imageCaption}
+            </figcaption>
+          )}
+        </figure>
+      )}
     </div>
 
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
@@ -736,7 +787,9 @@ const BioSlide = ({ slide, isActive }) => (
 
       {/* Right Photo Zone */}
       <div
-        className="p-4 rounded-[2px] border-2 border-dashed flex flex-col items-center justify-center min-h-[380px] relative overflow-hidden text-center"
+        className={`p-4 rounded-[2px] border-2 flex flex-col items-center justify-center min-h-[380px] relative overflow-hidden text-center ${
+          slide.image ? "border-solid" : "border-dashed"
+        }`}
         style={{
           backgroundColor: "var(--stage-surface)",
           borderColor: "var(--stage-border-strong)",
@@ -750,13 +803,15 @@ const BioSlide = ({ slide, isActive }) => (
             e.currentTarget.style.display = "none";
           }}
         />
-        <div
-          className="z-10 flex flex-col items-center gap-2 font-mono text-xs uppercase tracking-wider font-semibold mt-3"
-          style={{ color: "var(--stage-text)" }}
-        >
-          <EmojiIcon name="camera" className="w-5 h-5 opacity-80" />
-          <span>{slide.photoZoneText || "[ DROP PORTRAIT PHOTO HERE ]"}</span>
-        </div>
+        {!slide.image && (
+          <div
+            className="z-10 flex flex-col items-center gap-2 font-mono text-xs uppercase tracking-wider font-semibold mt-3"
+            style={{ color: "var(--stage-text)" }}
+          >
+            <EmojiIcon name="camera" className="w-5 h-5 opacity-80" />
+            <span>{slide.photoZoneText || "[ DROP PORTRAIT PHOTO HERE ]"}</span>
+          </div>
+        )}
       </div>
     </div>
   </div>

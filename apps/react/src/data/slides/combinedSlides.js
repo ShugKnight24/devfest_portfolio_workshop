@@ -575,7 +575,8 @@ export const combinedSlides = [
     description:
       "Eighty packages for a date helper is not productivity, it is a loan against a codebase you have not finished writing. Modern CSS and the native web platform cover more than most people check before they install.",
     photoZoneText: "[ DROP DEADLIFT / TECH PHOTO HERE ]",
-    image: "",
+    image: "/assets/images/gym_crew_pair.jpg",
+    photoCaption: "No machine here does the lift for you either.",
   },
 
   {
@@ -1337,6 +1338,11 @@ export const combinedSlides = [
         desc: "Review a stranger's pull request. Answer the question you were stuck on last year. The way into a unit is being useful to it before you need it.",
       },
     ],
+    image: "/assets/images/gym_crew_trio.jpg",
+    imageAlt: "Shug and two training partners at the gym, all three flexing",
+    imageCaption:
+      "My other unit. Nobody here has ever read my code — same three rules: show up, bring something real, spot the other guy first.",
+    imagePosition: "center 32%",
   },
 
   {
@@ -1451,7 +1457,7 @@ export const combinedPresenterNotes = {
   "pair-power":
     "FLEX. Reliable laugh, serious point. 'This is your agent on a bad day.' Land on the rule: confidence is a writing style, not evidence. If you did not run it, it did not happen.",
   "zero-bloat":
-    "FLEX, DEEP. The folding toothbrush. Short. Good one to drop first if the build comes back early.",
+    "FLEX, DEEP. The folding toothbrush, next to a photo of the other place nothing gets carried for you. Short. Good one to drop first if the build comes back early.",
   "roster-reserves":
     "FLEX, DEEP. Three cards, so it stretches or compresses. Use it only if the build is running genuinely long. Franz is the one for a security-minded room; Pochita for anyone maintaining a platform; Reze for the room that wants permission to go fast.",
   "meet-your-row":
@@ -1507,7 +1513,7 @@ export const combinedPresenterNotes = {
   "lab-publish":
     "LAB, FULL TRACK (15m). Three-hour workshop only. The partner clones cold and is not allowed to ask questions — every question they would have asked goes into the README. Celebrate the first pair who gets a clean cold run.",
   "find-your-110th":
-    "DEEP. Practical and specific, not inspirational. Show up twice; bring something that runs; be someone's Neagley first. Mention GDG Detroit by name as a real place to show up twice. Keep it under ninety seconds.",
+    "DEEP. Practical and specific, not inspirational. Show up twice; bring something that runs; be someone's Neagley first. Mention GDG Detroit by name as a real place to show up twice. The photo is your other unit — name it as that in one line, because the three rules are the same ones and nobody in that picture has read your code. Keep it under ninety seconds.",
   "lab-show-and-tell":
     "LAB, FULL TRACK (20m). Three-hour workshop only. Call up volunteers, two minutes each, hard stop. Input, enter, output. Celebrate every working tool, including the ugly ones. Insist on the two sentences: what the partner caught, and who should fork it next. That credit is the whole workshop in miniature.",
   bio: "CORE, third slide. The title is explained, so now the room wants to know who is telling them this. Forty-five seconds at most: one line on who you are, one on why you care (pulling the cord is easy, bringing backup is the job), point at the GitHub link, then go straight into Umelo.",

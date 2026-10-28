@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scene Lab</title>
+    <!-- Dev-only: isolates one WebGL scene for art-direction stills. Not in the build. -->
+    <style>
+      html, body { margin: 0; height: 100%; background: #0d0c0c; }
+      #stage, #overlay { position: fixed; inset: 0; }
+      #overlay { pointer-events: none; overflow: hidden; }
+    </style>
+  </head>
+  <body>
+    <div id="stage"></div>
+    <div id="overlay"></div>
+    <script type="module" src="./lab.js"></script>
+  </body>
+</html>

@@ -16,7 +16,7 @@ const TIERS = [
     text: "text-emerald-800 dark:text-emerald-400",
     summary: "Conversational prompt-to-app workflow. Zero setup, instant feedback, and bespoke micro-tools built for yourself.",
     focus: ["Plain-English prompts", "Zero-install web editors", "Audience of One mindset", "Quick visual prototypes"],
-    agentRole: "AI is your lead engineer who writes and runs code while you direct the vision."
+    agentRole: "AI drafts and runs code while you direct the vision; you read what it did before you keep it."
   },
   {
     id: "student",
@@ -40,7 +40,7 @@ const TIERS = [
     text: "text-purple-800 dark:text-purple-400",
     summary: "High-speed feature execution and Context Engineering. CRISP frameworks, refactoring legacy debt, and TDD verification gates.",
     focus: ["CRISP prompt framework", "Context Engineering", "Automated Vitest gates", "Multi-file component systems"],
-    agentRole: "AI is a hyper-fast autonomous junior teammate that drafts features and writes unit tests."
+    agentRole: "AI is a fast junior teammate that drafts features and tests. Trust it, then verify it."
   },
   {
     id: "architect",
@@ -83,12 +83,12 @@ Requirements:
   },
   {
     id: "fitness-state",
-    title: "Jacked Alien: Workout State Machine",
+    title: "Iron Ledger: Workout State Machine",
     category: "Health & Fitness",
     tier: ["student", "experienced", "architect"],
     description: "A modular, distraction-free fitness state engine. Replaces bloated workout apps with finite set/rest timers and PR tracking.",
     tech: "React 19 + Custom Reducer / State Machine + Audio API",
-    scaffold: "npx create-vite jacked-alien --template react && cd jacked-alien && npm i canvas-confetti",
+    scaffold: "npx create-vite iron-ledger --template react && cd iron-ledger && npm i canvas-confetti",
     spec: `## Goal
 Build a zero-latency lifting tracker that transitions between Workout States (Warmup -> Working Set -> Rest Timer -> Next Exercise).
 
@@ -96,7 +96,7 @@ Build a zero-latency lifting tracker that transitions between Workout States (Wa
 - Idle -> ActiveSet -> RestTimer (Auto-beeps on zero) -> SetComplete -> ExerciseDone
 - Dynamic 1RM calculations & progressive overload suggestions
 - Zero ads, zero social feed, zero analytics tracking`,
-    prompt: `Create a distraction-free Workout State Machine React component called "JackedAlienTracker".
+    prompt: `Create a distraction-free Workout State Machine React component called "IronLedgerTracker".
 Requirements:
 1. Finite state machine handling: Setup -> Lifting -> Resting -> Completed.
 2. Rest timer countdown with visual progress ring and Web Audio beep on completion.
@@ -150,11 +150,11 @@ Requirements:
   },
   {
     id: "reacher-checkout",
-    title: "The Reacher Framework: Local High-Frequency Cart (next_shopping_cart)",
+    title: "The Reacher Protocol: Local High-Frequency Cart (next_shopping_cart)",
     category: "E-Commerce & Performance",
     tier: ["student", "experienced", "architect"],
     description: "Speed via Deduction. Eliminate bloated Shopify backends and 45 tracking scripts. State, items, total: a localized, high-frequency checkout engine.",
-    tech: "React 19 + Tailwind CSS + LocalStorage",
+    tech: "Next.js 15 + React 19 + CSS Modules",
     scaffold: "npx create-vite next-cart --template react && cd next-cart && npm i lucide-react",
     spec: `## Goal
 Build a zero-bloat, localized high-frequency shopping cart engine engineered for sub-millisecond mobile checkout.
@@ -177,7 +177,7 @@ Requirements:
     title: "The Chainsaw Ripcord: Live Vibe-Coding Canvas (devfest_portfolio_workshop)",
     category: "Rapid Prototyping & Live Demos",
     tier: ["novice", "student", "experienced", "architect"],
-    description: "Speed via Momentum. A living sandbox canvas. Pull the ripcord on chaos, dump audience prompts into the engine, and curate live in 8 seconds.",
+    description: "Speed via Momentum. A living sandbox canvas. Pull the cord on a running v0, then read what it got wrong.",
     tech: "React 19 + Tailwind v4 + Component Switcher",
     scaffold: "npx create-vite live-canvas --template react && cd live-canvas",
     spec: `## Goal
@@ -201,7 +201,7 @@ Requirements:
     category: "Audience of One & Productivity",
     tier: ["student", "experienced", "architect"],
     description: "Speed via Form & Architecture. An Audience of One app with strict state machine boundaries isolated from the UI, enabling instant precision AI targeting.",
-    tech: "React 19 + Custom State Reducer + Web Audio API",
+    tech: "Vanilla ES modules + Web Audio (zero deps)",
     scaffold: "npx create-vite pomidor --template react && cd pomidor",
     spec: `## Goal
 Build an Audience of One productivity micro-loop (Pomidor) with strict mind-muscle form check and state machine isolation.
@@ -477,7 +477,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
               to="/slides"
               className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold font-mono transition-all text-center shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2"
             >
-              <EmojiIcon name="mic" className="w-4 h-4 text-amber-800 dark:text-amber-300 shrink-0" /> Present Slide Decks
+              <EmojiIcon name="mic" className="w-4 h-4 text-amber-800 dark:text-amber-300 shrink-0" /> Open the DevFest Deck
             </Link>
           </div>
         </div>
@@ -532,7 +532,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                 : "border-transparent text-(--color-muted-text) dark:text-(--color-muted-text-dark) hover:text-(--color-text) dark:hover:text-(--color-text-dark)"
             }`}
           >
-            <EmojiIcon name="lightning" className="w-4 h-4 text-amber-800 dark:text-amber-400" /> 5. Speed of Thought &amp; Stage Tactics
+            <EmojiIcon name="lightning" className="w-4 h-4 text-amber-800 dark:text-amber-400" /> 5. The Three Protocols
           </button>
         </div>
 
@@ -942,7 +942,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                     Vitest failure snippets passed back to agent for closed-loop self-correction.
                   </p>
                 </div>
-                <span className="text-xs font-mono text-emerald-800 dark:text-emerald-400">Zero-Human Gate</span>
+                <span className="text-xs font-mono text-emerald-800 dark:text-emerald-400">Then: Human Gate</span>
               </div>
             </div>
           </div>
@@ -954,10 +954,10 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <h3 className="text-2xl font-bold text-(--color-text) dark:text-(--color-text-dark) flex items-center gap-2">
-                  <EmojiIcon name="check" className="w-5 h-5 text-emerald-800 dark:text-emerald-400 shrink-0" /> Automated Gates &amp; CI Verification Playground
+                  <EmojiIcon name="check" className="w-5 h-5 text-emerald-800 dark:text-emerald-400 shrink-0" /> Verification Gates: Types, Tests, the Diff
                 </h3>
                 <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
-                  Simulate how automated test suites protect your repository from agentic hallucinations, syntax errors, and regressions.
+                  Simulate how automated suites catch agentic hallucinations, syntax errors, and regressions. Green is a claim, not proof: the last gate is you reading the diff.
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -1093,11 +1093,11 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                   <EmojiIcon name="lightning" className="w-3.5 h-3.5" /> Keynote Engine • Live Stage Sovereignty
                 </div>
                 <h2 className="text-3xl md:text-4xl font-black text-(--color-text) dark:text-(--color-text-dark) uppercase font-sans">
-                  The 3 "Speed of Thought" Frameworks
+                  Reacher, Denji, Iron: three ways to build fast without shipping blind
                 </h2>
                 <p className="text-sm md:text-base text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
-                  When you pull up your repositories on stage or build Audience of One apps, frame your work using these three analogies.
-                  Coding at the speed of thought isn't about typing fast—it is about eliminating civilian noise, riding momentum, and enforcing strict architectural boundaries.
+                  Frame your work with these three protocols. Speed isn't about typing fast: it is reading the scene,
+                  riding momentum, and enforcing strict boundaries, then checking what the agent actually did.
                 </p>
               </div>
             </div>
@@ -1109,14 +1109,14 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono font-bold uppercase px-2.5 py-1 rounded bg-cyan-500/20 text-cyan-800 dark:text-cyan-400 border border-cyan-500/40">
-                      Framework 01
+                      Protocol 01
                     </span>
                     <span className="text-xs font-mono text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
                       next_shopping_cart
                     </span>
                   </div>
                   <h3 className="text-xl font-bold text-(--color-text) dark:text-(--color-text-dark)">
-                    The Reacher Framework
+                    The Reacher Protocol
                   </h3>
                   <div className="text-xs font-mono text-cyan-800 dark:text-cyan-400 font-semibold">
                     Speed via Deduction
@@ -1145,7 +1145,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono font-bold uppercase px-2.5 py-1 rounded bg-red-500/20 text-red-800 dark:text-red-400 border border-red-500/40">
-                      Framework 02
+                      Protocol 02
                     </span>
                     <span className="text-xs font-mono text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
                       devfest_portfolio_workshop
@@ -1161,10 +1161,10 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                     <strong>The Angle:</strong> Denji doesn't whiteboard a fight for three weeks. He pulls the cord and adapts in real time.
                   </p>
                   <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
-                    <strong>The Application:</strong> Vibe coding. Asking the audience for an idea, dumping it into the engine, and letting taste curate 500 lines of fast working code.
+                    <strong>The Application:</strong> Pull the cord on a running v0 the same day, then read the diff before you keep any of it. Momentum gets you a draft; your partner tells you if it works.
                   </p>
                   <div className="p-3 bg-black/60 rounded-xl border border-gray-800 text-[11px] font-mono text-gray-300">
-                    <code>// The Ripcord: Living Canvas{"\n"}promptEngine(audienceChaos) -&gt; 8s UI</code>
+                    <code>// The Ripcord: Living Canvas{"\n"}ship(v0) -&gt; readDiff() -&gt; partnerSaysYes()</code>
                   </div>
                 </div>
                 <div className="pt-4 mt-4 border-t border-(--color-border) dark:border-(--color-border-dark)">
@@ -1181,14 +1181,14 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono font-bold uppercase px-2.5 py-1 rounded bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-500/40">
-                      Framework 03
+                      Protocol 03
                     </span>
                     <span className="text-xs font-mono text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
                       pomidor
                     </span>
                   </div>
                   <h3 className="text-xl font-bold text-(--color-text) dark:text-(--color-text-dark)">
-                    The Iron Framework
+                    The Iron Protocol
                   </h3>
                   <div className="text-xs font-mono text-amber-800 dark:text-amber-400 font-semibold">
                     Speed via Form &amp; Architecture
@@ -1283,7 +1283,7 @@ ${customFeatures.split(",").map(f => `  - ${f.trim()}`).join("\n")}
             Ready to Build Your First "Audience of One" Tool?
           </h3>
           <p className="text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark) max-w-xl mx-auto">
-            Choose a template above or craft a custom spec, copy the CRISP prompt into Antigravity or Gemini, and deploy live in 15 minutes.
+            Choose a template above or craft a custom spec, write the prompt, run it in the agent you use, and ship once your partner says it works on their input.
           </p>
           <div className="flex justify-center gap-4 pt-2">
             <Link

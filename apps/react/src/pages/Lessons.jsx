@@ -2368,16 +2368,17 @@ Create an implementation plan with:
         </p>
         <h3>The 15-Minute POC Speedrun:</h3>
         <ol>
-          <li><strong>Identify the exact friction point:</strong> Don't build a generic CRM; build a conference networking badge scanner with 1-click email drafts.</li>
+          <li><strong>Identify the exact problem:</strong> Don't build a generic CRM; build a conference networking badge scanner with 1-click email drafts.</li>
           <li><strong>Choose zero-friction storage:</strong> Use browser <code>localStorage</code> or simple JSON exports. Skip complex databases for personal utilities.</li>
           <li><strong>Scaffold in one command:</strong> <code>npx create-vite my-tool --template react</code></li>
           <li><strong>Prompt the agent:</strong> Feed a concise CRISP prompt with your exact design requirements.</li>
-          <li><strong>Deploy instantly:</strong> Ship live with <code>vercel --prod</code> or GitHub Pages.</li>
+          <li><strong>Verify:</strong> Run it on the real input (yours or your partner's) and read the diff before you keep it.</li>
+          <li><strong>Deploy:</strong> Ship live with <code>vercel --prod</code> or GitHub Pages.</li>
         </ol>
         <h3>Real-World Case Studies:</h3>
         <ul>
-          <li><strong>Jacked Alien:</strong> A finite state machine workout tracker with audio beeps and zero ads.</li>
-          <li><strong>Criminal Cookies:</strong> A guerilla high-frequency checkout engine bypassing legacy ecommerce bloat.</li>
+          <li><strong>Clockwork Carnage:</strong> A DOOM-inspired FPS drawn entirely in HTML5 Canvas — no engine, no sprite sheets.</li>
+          <li><strong>Cart Commerce:</strong> A high-frequency Next.js checkout engine bypassing legacy ecommerce bloat.</li>
           <li><strong>J. Simmons Productions:</strong> Automated distribution hooks turning transcripts into social assets.</li>
         </ul>
       </div>
@@ -2418,7 +2419,7 @@ Create an implementation plan with:
           <li><strong>Investigator / Scout:</strong> Scans code to locate exact line numbers and symbol references without loading full files into context.</li>
           <li><strong>Builder:</strong> Executes surgical diffs on ≤2 files at a time.</li>
           <li><strong>Reviewer:</strong> Audits the diff for unintended regressions and security vulnerabilities.</li>
-          <li><strong>Verification Gate:</strong> Automated CI test harness (Vitest) guarantees zero broken builds.</li>
+          <li><strong>Verification Gate:</strong> Types, tests, then a human reads the diff. A green check is a claim, not proof.</li>
         </ul>
         <h3>Token Hygiene (Caveman & Cove):</h3>
         <p>

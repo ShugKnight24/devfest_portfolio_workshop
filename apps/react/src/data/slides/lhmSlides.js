@@ -318,21 +318,21 @@ function protocol() {
     subtitle: "Proof of Work // Things I actually run",
     items: [
       {
-        category: "Guerilla E-Commerce",
-        title: "Criminal Cookies",
-        problem: "Plugin bloat, monthly SaaS rent, and a checkout that took seconds to respond.",
+        category: "High-Frequency Commerce",
+        title: "Cart Commerce",
+        problem: "Plugin bloat, monthly SaaS rent, and a storefront shipping 40+ tracking scripts before it showed a price.",
         solution:
-          "Localized high-frequency checkout compiled to micro-components. No platform tax.",
-        impact: "Sub-second purchases with direct inventory sync.",
+          "Next.js 15 storefront where the cart is a plain reducer and the styling is CSS Modules over design tokens. No platform tax.",
+        impact: "A checkout path I own end to end. 129 tests, zero Sass.",
         icon: "shopping",
       },
       {
-        category: "Fitness State Machine",
-        title: "Jacked Alien",
-        problem: "Every workout app I tried lagged mid-set or needed a network round trip.",
+        category: "Offline State Machine",
+        title: "Pomidor",
+        problem: "Every focus timer I tried wanted an account, a subscription, and a network round trip.",
         solution:
-          "Modular finite state machine driving workout cadence. Zero external deps. Runs offline.",
-        impact: "Zero-latency state, fully local, on any device.",
+          "Zero-dependency vanilla ES modules. Every tenant's state sits in its own client-storage partition.",
+        impact: "Installable PWA. Works on a plane, tracks nothing.",
         icon: "activity",
       },
       {

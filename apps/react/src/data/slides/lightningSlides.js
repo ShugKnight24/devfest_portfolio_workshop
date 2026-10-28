@@ -118,7 +118,7 @@ export const lightningSlides = [
           "She doesn't like to be touched. Pure isolated efficiency. Real deployed proof: pomidor (tactical focus timer) & next_shopping_cart (high-frequency checkout).",
         type: "character",
         boxContent:
-          "// Verified Sovereign Repos\nimport { Pomidor } from 'shugknight24/pomodoro';\nimport { Cart } from 'shugknight24/criminal-cookies';",
+          "// Verified Sovereign Repos\nimport { Pomidor } from 'ShugKnight24/pomidor';\nimport { Cart } from 'ShugKnight24/next_shopping_cart';",
       },
     ],
   },
@@ -163,7 +163,7 @@ export const lightningPresenterNotes = {
   "lightning-live-demo":
     "4:00 - Switch slides off. Mirror IDE. Solicit real audience digital task. Type strict constraint prompt. Generate in 15 seconds and run it live.",
   "lightning-architecture":
-    "15:00 - Explain how you prevent chaos: Makima curates multiple drafts; Neagley demands zero NPM dependencies. Show real repos: pomidor & criminal-cookies.",
+    "15:00 - Explain how you prevent chaos: Makima curates multiple drafts; Neagley demands zero NPM dependencies. Show real repos: pomidor & next_shopping_cart.",
   "lightning-community":
     "20:00 - Rally the room. We are building an open-source collective of sovereign operatives. Point to GitHub & Datamoon. Tell them: Pull the ripcord.",
   "lightning-clearance":

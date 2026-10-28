@@ -753,7 +753,7 @@ export const combinedSlides = [
       "[REVIEWED] Partner added: dates arrive as 'Tues 9/23', never ISO.",
     ],
     actionLink: "/agentic-studio",
-    actionLabel: "Open the Prompt Clinic",
+    actionLabel: "Open the prompt templates",
   },
 
   {
@@ -1049,7 +1049,7 @@ export const combinedSlides = [
     altitude: TACTICAL,
     budget: 120,
     subtitle: "CASE FILE // ONE PROJECT, ALL THREE LENSES",
-    title: "Criminal Cookies, end to end.",
+    title: "Cart Commerce, end to end.",
     quote:
       "The same method you just watched on stage, with more time and a real customer at the end of it.",
     stages: [
@@ -1505,7 +1505,7 @@ export const combinedPresenterNotes = {
   "pair-makima-kishibe":
     "EXTENDED. Orchestration plus fundamentals. The warning inside the Makima half is the important part — direct the crew, do not become one of them. Kishibe is the answer to 'will juniors ever learn anything': you drill the loop by hand until it is reflex. Both come back in the community act, so do not spend them fully here.",
   "case-deep-dive":
-    "DEEP, tactical. Criminal Cookies through all three lenses. The 2.4 seconds to 40ms number is the hook — say it before you explain it. Admit that you also blamed the database first. Name-check Jacked Alien and the J. Simmons pipeline in one sentence as the other tools you run daily.",
+    "DEEP, tactical. Cart Commerce through all three lenses. The 2.4 seconds to 40ms number is the hook — say it before you explain it. Admit that you also blamed the database first. Name-check Pomidor and the J. Simmons pipeline in one sentence as the other tools you run daily.",
   "system-warning":
     "DEEP. Dramatic turn. Trigger the Reze Override from the top right and let the room react for a beat before you say anything.",
   "speed-of-thought":

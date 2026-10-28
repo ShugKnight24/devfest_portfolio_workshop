@@ -170,33 +170,6 @@ export const OperativesPage = () => {
     return `${m}:${s}`;
   };
 
-  // --- Operative 5: Criminal Cookies Localized Cart ---
-  const [cartItems, setCartItems] = useState([
-    { id: "cookie-reacher", name: "The Reacher Batch (High Protein)", price: 4.5, qty: 2 },
-    { id: "cookie-chainsaw", name: "Division 4 Espresso Chunk", price: 4.0, qty: 1 },
-  ]);
-
-  const addCartItem = (item) => {
-    setCartItems((prev) => {
-      const exists = prev.find((i) => i.id === item.id);
-      if (exists) {
-        return prev.map((i) => (i.id === item.id ? { ...i, qty: i.qty + 1 } : i));
-      }
-      return [...prev, { ...item, qty: 1 }];
-    });
-    playTacticalBeep(520, 0.08);
-  };
-
-  const removeCartItem = (id) => {
-    setCartItems((prev) =>
-      prev
-        .map((i) => (i.id === id ? { ...i, qty: i.qty - 1 } : i))
-        .filter((i) => i.qty > 0)
-    );
-  };
-
-  const cartTotal = cartItems.reduce((acc, i) => acc + i.price * i.qty, 0);
-
   // --- Custom Operative Blueprint Creator ---
   const [customName, setCustomName] = useState("Bespoke Daily Utility");
   const [customRuntime, setCustomRuntime] = useState("Python 3 Native");
@@ -312,10 +285,10 @@ Generated via DevFest Sovereign Sandbox.
               2. Custom Blueprint Builder
             </button>
             <Link
-              to="/slides/workshop"
+              to="/slides/devfest"
               className="px-4 py-2 rounded-lg text-xs font-mono uppercase tracking-wider text-gray-400 hover:text-[#00ffcc] transition-colors border border-transparent hover:border-[#1f2430] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00ffcc]"
             >
-              Workshop Deck &rarr;
+              DevFest Deck &rarr;
             </Link>
           </nav>
         </div>
@@ -637,58 +610,6 @@ Generated via DevFest Sovereign Sandbox.
 
                       <div className="text-xs font-mono text-gray-400">
                         Rounds Completed Today: {pomidorState.rounds}
-                      </div>
-                    </article>
-                  )}
-
-                  {/* 5. CRIMINAL COOKIES CART */}
-                  {selectedOperative.id === "criminal-cookies-cart" && (
-                    <article className="space-y-4">
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            addCartItem({
-                              id: `cookie-${Date.now()}`,
-                              name: "Specialty Batch Cookie",
-                              price: 4.5,
-                            })
-                          }
-                          className="px-3 py-2 bg-[#121721] border border-[#00ffcc]/40 text-[#00ffcc] rounded-lg font-mono text-xs font-bold hover:bg-[#00ffcc] hover:text-black transition-all cursor-pointer"
-                        >
-                          + Quick Add Specialty Cookie ($4.50)
-                        </button>
-                      </div>
-
-                      <div className="p-4 bg-black/60 border border-[#1f2430] rounded-xl space-y-2 font-mono text-xs">
-                        <div className="flex justify-between text-[#00ffcc] font-bold uppercase tracking-widest pb-2 border-b border-gray-800">
-                          <span>Item</span>
-                          <span>Qty / Subtotal</span>
-                        </div>
-                        {cartItems.map((item) => (
-                          <div
-                            key={item.id}
-                            className="flex items-center justify-between text-gray-300 py-1"
-                          >
-                            <span>{item.name}</span>
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-white">
-                                {item.qty} &times; ${item.price.toFixed(2)}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => removeCartItem(item.id)}
-                                className="text-red-800 dark:text-red-400 hover:text-red-800 dark:text-red-300 px-1 font-bold"
-                              >
-                                &minus;
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                        <div className="pt-3 border-t border-gray-800 flex justify-between font-bold text-sm text-white">
-                          <span>Total (0% Third-party telemetry):</span>
-                          <span className="text-[#00ffcc]">${cartTotal.toFixed(2)}</span>
-                        </div>
                       </div>
                     </article>
                   )}

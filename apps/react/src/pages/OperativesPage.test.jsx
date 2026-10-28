@@ -8,14 +8,13 @@ describe("OperativesPage & Audience of One Operatives", () => {
   it("should verify portfolioData contains isolated operatives schema", () => {
     expect(portfolioData.operatives).toBeDefined();
     expect(Array.isArray(portfolioData.operatives)).toBe(true);
-    expect(portfolioData.operatives.length).toBeGreaterThanOrEqual(5);
+    expect(portfolioData.operatives.length).toBeGreaterThanOrEqual(4);
 
     const ids = portfolioData.operatives.map((o) => o.id);
     expect(ids).toContain("bank-csv-parser");
     expect(ids).toContain("school-email-scraper");
     expect(ids).toContain("meal-prep-compiler");
     expect(ids).toContain("pomidor-micro-loop");
-    expect(ids).toContain("criminal-cookies-cart");
   });
 
   it("should render OperativesPage with pre-built operatives and cyber-brutalist badge", () => {

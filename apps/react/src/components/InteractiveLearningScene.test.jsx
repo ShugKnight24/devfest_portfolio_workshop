@@ -1,59 +1,43 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { InteractiveLearningScene } from "./InteractiveLearningScene";
 
+const renderScene = () =>
+  render(
+    <MemoryRouter>
+      <InteractiveLearningScene />
+    </MemoryRouter>,
+  );
+
 describe("InteractiveLearningScene Component", () => {
-  it("renders the interactive learning scene with stats and default mode", () => {
-    render(
-      <MemoryRouter>
-        <InteractiveLearningScene />
-      </MemoryRouter>
-    );
+  beforeEach(() => localStorage.removeItem("devfest_learning_xp"));
 
-    expect(screen.getByText("Interactive Learning Scene")).toBeDefined();
-    expect(screen.getAllByText("Flow State").length).toBeGreaterThan(0);
-    expect(screen.getByText(/Streak/)).toBeDefined();
-    expect(screen.getByText(/Tap to Hack Code/)).toBeDefined();
+  it("renders the desk with its mode, its one action and XP progress", () => {
+    renderScene();
+
+    expect(screen.getByRole("heading", { name: /Your desk\. Flow State\./ })).toBeDefined();
+    expect(screen.getByRole("button", { name: /Ship a commit/ })).toBeDefined();
+    expect(screen.getByRole("progressbar", { name: "Progress to next milestone" })).toBeDefined();
   });
 
-  it("switches mindset modes when mode buttons are clicked", () => {
-    render(
-      <MemoryRouter>
-        <InteractiveLearningScene />
-      </MemoryRouter>
-    );
+  it("switches mindset modes from the segmented control", () => {
+    renderScene();
 
-    const focusBtn = screen.getByRole("button", { name: /Deductive Focus/ });
-    fireEvent.click(focusBtn);
-    expect(screen.getAllByText("The Reacher Protocol").length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole("radio", { name: /Deductive Focus/ }));
+    expect(screen.getByText("The Reacher Protocol")).toBeDefined();
+    expect(screen.getByRole("radio", { name: /Deductive Focus/ }).getAttribute("aria-checked")).toBe("true");
 
-    const disciplineBtn = screen.getByRole("button", { name: /Iron Discipline/ });
-    fireEvent.click(disciplineBtn);
-    expect(screen.getAllByText("Cognitive Hypertrophy").length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole("radio", { name: /Iron Discipline/ }));
+    expect(screen.getByText("Cognitive Hypertrophy")).toBeDefined();
   });
 
-  it("increments XP when tap to hack code is clicked", () => {
-    render(
-      <MemoryRouter>
-        <InteractiveLearningScene />
-      </MemoryRouter>
-    );
+  it("earns XP for each commit shipped", () => {
+    renderScene();
 
-    const hackBtn = screen.getByText(/Tap to Hack Code/);
-    fireEvent.click(hackBtn);
-    expect(screen.getByText(/Tap to Hack Code \(1\)/)).toBeDefined();
-  });
-
-  it("updates recommended path when dream goal is selected", () => {
-    render(
-      <MemoryRouter>
-        <InteractiveLearningScene />
-      </MemoryRouter>
-    );
-
-    const careerGoalBtn = screen.getByText("Land My Dream Tech Role");
-    fireEvent.click(careerGoalBtn);
-    expect(screen.getByText(/Start React 19 Workshop/)).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: /Ship a commit/ }));
+    expect(screen.getByRole("button", { name: /Ship a commit \(1\)/ })).toBeDefined();
+    expect(screen.getByText("165 XP")).toBeDefined();
+    expect(localStorage.getItem("devfest_learning_xp")).toBe("165");
   });
 });

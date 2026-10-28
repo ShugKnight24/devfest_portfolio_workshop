@@ -449,6 +449,104 @@ const FacialHair = ({ style, base, shadow }) => {
 /* --------------------------------------------------------------------------
  * Hands — palm plus five separable digits, drawn once and mirrored.
  * ------------------------------------------------------------------------ */
+const Glasses = ({ accent }) => (
+  <g>
+    <rect x={376} y={161} width={23} height={18} rx={6} fill={accent} opacity={0.08} />
+    <rect x={401} y={161} width={23} height={18} rx={6} fill={accent} opacity={0.08} />
+    <rect
+      x={376}
+      y={161}
+      width={23}
+      height={18}
+      rx={6}
+      fill="none"
+      stroke="#1F2933"
+      strokeWidth={2}
+    />
+    <rect
+      x={401}
+      y={161}
+      width={23}
+      height={18}
+      rx={6}
+      fill="none"
+      stroke="#1F2933"
+      strokeWidth={2}
+    />
+    <path d="M399 168 L401 168" stroke="#1F2933" strokeWidth={2} strokeLinecap="round" />
+    <path d="M376 167 L370 170" stroke="#1F2933" strokeWidth={2} strokeLinecap="round" />
+    <path d="M424 167 L430 170" stroke="#1F2933" strokeWidth={2} strokeLinecap="round" />
+    {/* screen reflected in the lenses */}
+    <path d="M380 176 L392 163" stroke="#FFFFFF" strokeWidth={2} opacity={0.35} strokeLinecap="round" />
+    <path d="M405 176 L417 163" stroke="#FFFFFF" strokeWidth={2} opacity={0.35} strokeLinecap="round" />
+  </g>
+);
+
+const Headphones = ({ accent }) => (
+  <g>
+    <path
+      d="M364 168 C362 126, 438 126, 436 168"
+      fill="none"
+      stroke="#22262E"
+      strokeWidth={7}
+      strokeLinecap="round"
+    />
+    <path
+      d="M366 158 C366 132, 434 132, 434 158"
+      fill="none"
+      stroke="#3C424E"
+      strokeWidth={2.4}
+      strokeLinecap="round"
+    />
+    <rect x={356} y={160} width={15} height={28} rx={7} fill="#22262E" />
+    <rect x={429} y={160} width={15} height={28} rx={7} fill="#22262E" />
+    <rect x={359} y={164} width={9} height={20} rx={4.5} fill="#3C424E" />
+    <rect x={432} y={164} width={9} height={20} rx={4.5} fill="#3C424E" />
+    <rect x={357} y={184} width={13} height={2.5} rx={1.2} fill={accent} opacity={0.8} />
+    <rect x={430} y={184} width={13} height={2.5} rx={1.2} fill={accent} opacity={0.8} />
+  </g>
+);
+
+/* --------------------------------------------------------------------------
+ * Studio previews — the Studio's tiles show the real art, not a word for it:
+ * a head-and-shoulders bust for every look option, and each prop, companion
+ * and plushie framed by the box it occupies in the scene.
+ * ------------------------------------------------------------------------ */
+export const HeadPreview = ({ skin, hair, top, hairStyle, facialHair, glasses, headphones, accent }) => (
+  <svg viewBox="338 112 124 124" className="h-full w-full" aria-hidden="true">
+    <HairBack style={hairStyle} base={hair.base} shadow={hair.shadow} />
+    <path d={TORSO_PATH} style={{ fill: top.base }} />
+    <path d={NECK_PATH} fill={skin.shadow} />
+    <ellipse cx={371} cy={174} rx={5.5} ry={9} fill={skin.base} />
+    <ellipse cx={429} cy={174} rx={5.5} ry={9} fill={skin.base} />
+    <path d={HEAD_PATH} fill={skin.base} />
+    <ellipse cx={382} cy={182} rx={9} ry={7} fill={skin.shadow} opacity={0.25} />
+    <ellipse cx={418} cy={182} rx={9} ry={7} fill={skin.shadow} opacity={0.25} />
+    <path d="M381 162 Q388 157 396 160" fill="none" stroke={hair.shadow} strokeWidth={2.2} strokeLinecap="round" />
+    <path d="M404 160 Q412 157 419 162" fill="none" stroke={hair.shadow} strokeWidth={2.2} strokeLinecap="round" />
+    <ellipse cx={388} cy={EYE_Y} rx={2.6} ry={3} fill="#1B1B21" />
+    <ellipse cx={412} cy={EYE_Y} rx={2.6} ry={3} fill="#1B1B21" />
+    <path d="M395 184 Q400 188 405 184" fill="none" stroke={skin.shadow} strokeWidth={1.6} strokeLinecap="round" />
+    <path d="M390 191 Q400 195 410 191" fill="none" stroke="#5E3129" strokeWidth={1.7} strokeLinecap="round" />
+    <FacialHair style={facialHair} base={hair.base} shadow={hair.shadow} />
+    <HairFront style={hairStyle} base={hair.base} shadow={hair.shadow} />
+    {glasses && <Glasses accent={accent} />}
+    {headphones && <Headphones accent={accent} />}
+  </svg>
+);
+
+/** An SVG framed on a box `{ dx, dy, w, h }` around an anchor, with a little air. */
+const Framed = ({ x = 0, y = 0, box, pad = 6, children }) => (
+  <svg
+    viewBox={`${x + box.dx - pad} ${y + box.dy - pad} ${box.w + pad * 2} ${box.h + pad * 2}`}
+    className="h-full w-full"
+    aria-hidden="true"
+    overflow="visible"
+  >
+    {children}
+  </svg>
+);
+
 const Hand = ({ skin, flip }) => (
   <g transform={flip ? mirror : undefined}>
     {/* contact shadow where the hand meets the deck */}
@@ -999,6 +1097,10 @@ export const StudentBuildingScene = ({
   className = "",
   avatar: avatarProp,
   customizable = true,
+  /** The mood light: lamp glow, screen accents and the room's ambient tint. */
+  accent: accentProp,
+  /** Rendered under the illustration, in the scene's column (mood chips). */
+  footer = null,
 }) => {
   const rawId = useId();
   const uid = rawId.replace(/[^a-zA-Z0-9]/g, "");
@@ -1007,7 +1109,6 @@ export const StudentBuildingScene = ({
   const [storedAvatar, setStoredAvatar] = useState(() =>
     avatarProp ? normalizeAvatar(avatarProp) : loadAvatar(),
   );
-  const [panelOpen, setPanelOpen] = useState(false);
   /** Live drag state. `null` whenever nothing is being dragged. */
   const [drag, setDrag] = useState(null);
   const [focusedProp, setFocusedProp] = useState(null);
@@ -1029,28 +1130,37 @@ export const StudentBuildingScene = ({
 
   /**
    * Turning a prop on puts it in the first free slot rather than on a fixed
-   * literal that something else may already occupy.
+   * literal that something else may already occupy. Takes one `(key, value)`
+   * or a whole patch object (a Studio look), applied in a single commit.
    */
   const handleChange = useCallback(
-    (key, value) => {
-      const next = { ...avatar, [key]: value };
-      const propId = PROP_FOR_TOGGLE[key];
+    (keyOrPatch, value) => {
+      const patch = typeof keyOrPatch === "string" ? { [keyOrPatch]: value } : keyOrPatch;
+      let next = avatar;
+      let message = "";
 
-      if (propId && !isPropEnabled(avatar, propId) && isPropEnabled(next, propId)) {
-        const slot = findFreeSlot(next, propId);
-        next.positions = { ...avatar.positions, [propId]: slot };
-        const prop = findProp(propId);
-        const moved = Math.round(slot.x) !== Math.round(readPosition(avatar, propId).x);
-        setStatus(
-          `${prop.label} added${moved ? " in the nearest free space" : ""}. ` +
-            "Drag it, or focus it and use the arrow keys, to move it.",
-        );
-      } else if (propId && isPropEnabled(avatar, propId) && !isPropEnabled(next, propId)) {
-        setStatus(`${findProp(propId).label} removed.`);
-      } else if (key === "bookcase") {
-        setStatus(value ? "Bookcase added beside the desk." : "Bookcase removed, and its plushies with it.");
+      for (const [key, val] of Object.entries(patch)) {
+        const before = next;
+        next = { ...before, [key]: val };
+        const propId = PROP_FOR_TOGGLE[key];
+
+        if (propId && !isPropEnabled(before, propId) && isPropEnabled(next, propId)) {
+          const slot = findFreeSlot(next, propId);
+          next.positions = { ...before.positions, [propId]: slot };
+          const prop = findProp(propId);
+          const moved = Math.round(slot.x) !== Math.round(readPosition(before, propId).x);
+          message =
+            `${prop.label} added${moved ? " in the nearest free space" : ""}. ` +
+            "Drag it, or focus it and use the arrow keys, to move it.";
+        } else if (propId && isPropEnabled(before, propId) && !isPropEnabled(next, propId)) {
+          message = `${findProp(propId).label} removed.`;
+        } else if (key === "bookcase" && Boolean(before.bookcase) !== Boolean(val)) {
+          message = val ? "Bookcase added beside the desk." : "Bookcase removed, and its plushies with it.";
+        }
       }
 
+      if (typeof keyOrPatch !== "string") message = "Look applied.";
+      if (message) setStatus(message);
       commit(next);
     },
     [avatar, commit],
@@ -1254,7 +1364,7 @@ export const StudentBuildingScene = ({
   const desk = findOption(DESK_SURFACES, avatar.deskSurface);
   const chair = findOption(CHAIR_COLORS, avatar.chairColor);
 
-  const accent = "var(--color-primary, #00FFCC)";
+  const accent = accentProp || "var(--color-primary, #00FFCC)";
   const isNight = avatar.backdrop === "night";
   /** The accent is legible on the dark backdrop; daylight needs real ink. */
   const motifInk = isNight ? accent : "#0E7490";
@@ -1329,6 +1439,51 @@ export const StudentBuildingScene = ({
     );
   };
 
+  /** What the Studio's tiles draw: the same art, at thumbnail size. */
+  const previews = {
+    head: (patch = {}) => {
+      const look = { ...avatar, ...patch };
+      return (
+        <HeadPreview
+          skin={findOption(SKIN_TONES, look.skinTone)}
+          hair={findOption(HAIR_COLORS, look.hairColor)}
+          top={findOption(TOP_COLORS, look.topColor)}
+          hairStyle={look.hairStyle}
+          facialHair={look.facialHair}
+          glasses={look.glasses}
+          headphones={look.headphones}
+          accent={accent}
+        />
+      );
+    },
+    prop: (toggleId) => {
+      const prop = findProp(PROP_FOR_TOGGLE[toggleId]);
+      if (!prop) return null;
+      const art = toggleId === "mechKeyboard" ? <Keyboard mech accent={accent} /> : propArt[prop.id];
+      return (
+        <Framed x={prop.x} y={prop.y} box={prop.box}>
+          {art}
+        </Framed>
+      );
+    },
+    companion: (kind, variant) => {
+      const Art = PET_ART[kind.id] || SIDEKICK_ART[kind.id] || CHARACTER_ART[kind.id];
+      return Art ? (
+        <Framed box={kind.box}>
+          <Art variant={variant} mode="figure" />
+        </Framed>
+      ) : null;
+    },
+    plush: (kind) => {
+      const Plush = kind.id === "luna" ? LunaPlush : SIDEKICK_ART[kind.id] || CHARACTER_ART[kind.id];
+      return Plush ? (
+        <Framed box={kind.box}>
+          <Plush mode="plush" />
+        </Framed>
+      ) : null;
+    },
+  };
+
   const propsBehindDisplay = visibleItems.filter((item) => item.depth < DISPLAY_DEPTH);
   const propsInFrontOfDisplay = visibleItems.filter((item) => item.depth >= DISPLAY_DEPTH);
 
@@ -1361,12 +1516,16 @@ export const StudentBuildingScene = ({
       `}</style>
 
       {/*
-       * Scene and panel share a row once the container is wide enough and
-       * stack — panel underneath — when it is not. The panel is a sibling of
-       * the illustration, never an overlay on it.
+       * The Studio sits BESIDE the scene once there is room, at the scene's
+       * height, so every change lands where you are already looking. On a
+       * narrow screen the scene pins to the top and the Studio scrolls under
+       * it — never a panel that drops below the fold.
        */}
-      <div className="flex flex-col gap-4 @3xl:flex-row @3xl:items-start">
-        <div className="relative min-w-0 flex-1">
+      <div className={interactive ? "grid gap-0 @3xl:grid-cols-[minmax(0,1fr)_26rem]" : ""}>
+        <div
+          className={`relative z-10 flex min-w-0 flex-col justify-center gap-3 p-3 @3xl:p-5 ${interactive ? "sticky top-14 @3xl:static" : ""}`}
+          style={interactive ? { backgroundColor: "var(--stage-bg, #05070a)" } : undefined}
+        >
           <svg
             ref={svgRef}
             viewBox="0 0 1000 500"
@@ -1803,63 +1962,9 @@ export const StudentBuildingScene = ({
 
               <HairFront style={avatar.hairStyle} base={hair.base} shadow={hair.shadow} />
 
-              {avatar.glasses && (
-                <g>
-                  <rect x={376} y={161} width={23} height={18} rx={6} fill={accent} opacity={0.08} />
-                  <rect x={401} y={161} width={23} height={18} rx={6} fill={accent} opacity={0.08} />
-                  <rect
-                    x={376}
-                    y={161}
-                    width={23}
-                    height={18}
-                    rx={6}
-                    fill="none"
-                    stroke="#1F2933"
-                    strokeWidth={2}
-                  />
-                  <rect
-                    x={401}
-                    y={161}
-                    width={23}
-                    height={18}
-                    rx={6}
-                    fill="none"
-                    stroke="#1F2933"
-                    strokeWidth={2}
-                  />
-                  <path d="M399 168 L401 168" stroke="#1F2933" strokeWidth={2} strokeLinecap="round" />
-                  <path d="M376 167 L370 170" stroke="#1F2933" strokeWidth={2} strokeLinecap="round" />
-                  <path d="M424 167 L430 170" stroke="#1F2933" strokeWidth={2} strokeLinecap="round" />
-                  {/* screen reflected in the lenses */}
-                  <path d="M380 176 L392 163" stroke="#FFFFFF" strokeWidth={2} opacity={0.35} strokeLinecap="round" />
-                  <path d="M405 176 L417 163" stroke="#FFFFFF" strokeWidth={2} opacity={0.35} strokeLinecap="round" />
-                </g>
-              )}
+              {avatar.glasses && <Glasses accent={accent} />}
 
-              {avatar.headphones && (
-                <g>
-                  <path
-                    d="M364 168 C362 126, 438 126, 436 168"
-                    fill="none"
-                    stroke="#22262E"
-                    strokeWidth={7}
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M366 158 C366 132, 434 132, 434 158"
-                    fill="none"
-                    stroke="#3C424E"
-                    strokeWidth={2.4}
-                    strokeLinecap="round"
-                  />
-                  <rect x={356} y={160} width={15} height={28} rx={7} fill="#22262E" />
-                  <rect x={429} y={160} width={15} height={28} rx={7} fill="#22262E" />
-                  <rect x={359} y={164} width={9} height={20} rx={4.5} fill="#3C424E" />
-                  <rect x={432} y={164} width={9} height={20} rx={4.5} fill="#3C424E" />
-                  <rect x={357} y={184} width={13} height={2.5} rx={1.2} fill={accent} opacity={0.8} />
-                  <rect x={430} y={184} width={13} height={2.5} rx={1.2} fill={accent} opacity={0.8} />
-                </g>
-              )}
+              {avatar.headphones && <Headphones accent={accent} />}
             </g>
 
             {/* ---------- LEGS ----------
@@ -1950,22 +2055,24 @@ export const StudentBuildingScene = ({
             <Hand skin={skin} />
             <Hand skin={skin} flip />
           </svg>
+          {footer}
         </div>
 
         {interactive && (
-          <SceneCustomizer
-            avatar={avatar}
-            open={panelOpen}
-            onToggle={() => setPanelOpen((prev) => !prev)}
-            onChange={handleChange}
-            onRandomize={handleRandomize}
-            onReset={handleReset}
-            onAddCompanion={handleAddCompanion}
-            onRemoveCompanion={handleRemoveCompanion}
-            onCompanionVariant={handleCompanionVariant}
-            onTogglePlush={handleTogglePlush}
-            description={label}
-          />
+          <div className="relative @3xl:min-h-[30rem]">
+            <SceneCustomizer
+              avatar={avatar}
+              previews={previews}
+              onChange={handleChange}
+              onRandomize={handleRandomize}
+              onReset={handleReset}
+              onAddCompanion={handleAddCompanion}
+              onRemoveCompanion={handleRemoveCompanion}
+              onCompanionVariant={handleCompanionVariant}
+              onTogglePlush={handleTogglePlush}
+              description={label}
+            />
+          </div>
         )}
       </div>
 

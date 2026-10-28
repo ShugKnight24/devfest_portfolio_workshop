@@ -1,91 +1,54 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Link } from "react-router-dom";
 import { EmojiIcon } from "./Icons/EmojiIcon";
 import { SpeakerOff, SpeakerOn } from "./Icons";
 import StudentBuildingScene from "./StudentBuildingScene";
 
 /**
- * InteractiveLearningScene — Engaging Gamified Stage for Learning
+ * InteractiveLearningScene — your desk, on the same stage as the factory.
  *
- * Hooks, retains, and inspires attendees by turning learning into
- * an interactive, tactile experience. Connects foundational skill building
- * to their real-world dreams with Web Audio feedback, XP progression,
- * and mindset power-up modes (Flow, Focus, Discipline).
+ * The factory above shows the crew building other people's software; this is
+ * where the visitor sits. The illustrated desk (avatar, Luna, companions, the
+ * plushie shelf — all customisable) leads, and one control rail beside it
+ * holds the rest: the mindset you are working in and the one action, ship a
+ * commit.
+ *
+ * Everything is in the stage's art direction (dark panel, hairlines, mono
+ * kickers) in both themes, so the home page reads as one designed object.
+ * Sound is parametric Web Audio, off until asked for.
  */
 
 const MODES = {
   flow: {
     id: "flow",
-    name: "Flow State",
+    name: "Flow",
+    title: "Flow State",
     subtitle: "Chainsaw Man Momentum",
-    color: "from-pink-500 to-cyan-400",
-    accent: "#ff0055",
-    glow: "rgba(255, 0, 85, 0.25)",
-    tagIcon: "lightning",
-    tag: "Speed via Momentum",
-    tagline: "Don't let perfection stall your momentum. Pull the ripcord and build live.",
+    accent: "#ff3d6e",
+    accentRgb: "255 61 110",
+    tagline: "Don't let perfection stall your momentum. Pull the cord and build live.",
     audioTone: 520,
   },
   focus: {
     id: "focus",
-    name: "Deductive Focus",
+    name: "Focus",
+    title: "Deductive Focus",
     subtitle: "The Reacher Protocol",
-    color: "from-cyan-400 to-blue-500",
     accent: "#00e5ff",
-    glow: "rgba(0, 229, 255, 0.25)",
-    tagIcon: "search",
-    tag: "Speed via Deduction",
-    tagline: "Cut the civilian noise. Isolate root causes and master the fundamental core.",
+    accentRgb: "0 229 255",
+    tagline: "Cut the noise. Read the scene, isolate the root cause, then act.",
     audioTone: 440,
   },
   discipline: {
     id: "discipline",
-    name: "Iron Discipline",
+    name: "Form",
+    title: "Iron Discipline",
     subtitle: "Cognitive Hypertrophy",
-    color: "from-amber-400 to-red-500",
-    accent: "#f59e0b",
-    glow: "rgba(245, 158, 11, 0.25)",
-    tagIcon: "dumbbell",
-    tag: "Speed via Form",
+    accent: "#ffb300",
+    accentRgb: "255 179 0",
     tagline: "Every tricky bug conquered builds permanent mental muscle. Strict form wins.",
     audioTone: 330,
   },
 };
-
-const DREAMS = [
-  {
-    id: "startup",
-    title: "Launch My Startup / Product",
-    desc: "Move from idea to live deployment in hours, not months.",
-    recommended: "React 19 + Agentic Studio",
-    link: "/agentic-studio",
-    icon: "rocket",
-  },
-  {
-    id: "career",
-    title: "Land My Dream Tech Role",
-    desc: "Build a distinctive, production-grade portfolio that outshines generic resumes.",
-    recommended: "React 19 Workshop",
-    link: "/builder",
-    icon: "trophy",
-  },
-  {
-    id: "bespoke",
-    title: "Build for an Audience of One",
-    desc: "Create bespoke sovereign micro-tools tailored specifically to your daily life.",
-    recommended: "Agentic Dev & Labs",
-    link: "/lessons?track=agentic",
-    icon: "target",
-  },
-  {
-    id: "foundations",
-    title: "Master Core Web Fundamentals",
-    desc: "Zero-dependency HTML5, CSS3, and DOM architecture that never goes out of style.",
-    recommended: "Vanilla JS Workshop",
-    link: "/guide",
-    icon: "sparkles",
-  },
-];
 
 // Celebration particles: SVG icon names plus literal code-syntax fragments
 const PARTICLE_SYMBOLS = [
@@ -107,361 +70,230 @@ const DEV_TRUTHS = [
   "Code at the speed of thought: eliminate noise, ride momentum, and keep your form flawless.",
 ];
 
-export const InteractiveLearningScene = () => {
-  const [activeMode, setActiveMode] = useState("flow");
-  const [selectedDream, setSelectedDream] = useState("startup");
-  const [xp, setXp] = useState(() => {
+const XP_PER_COMMIT = 15;
+const MILESTONE = 60;
+
+const readXp = () => {
+  try {
     const saved = localStorage.getItem("devfest_learning_xp");
     return saved ? parseInt(saved, 10) : 150;
-  });
-  const [streak] = useState(3);
-  const [burstCount, setBurstCount] = useState(0);
+  } catch {
+    return 150;
+  }
+};
+
+export const InteractiveLearningScene = () => {
+  const [activeMode, setActiveMode] = useState("flow");
+  const [xp, setXp] = useState(readXp);
+  const [commits, setCommits] = useState(0);
   const [floatingParticles, setFloatingParticles] = useState([]);
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [quoteIndex, setQuoteIndex] = useState(0);
-  const [bannerNotice, setBannerNotice] = useState(null);
+  const [notice, setNotice] = useState("");
   const audioCtxRef = useRef(null);
 
-  const currentMode = MODES[activeMode];
-  const currentDream = DREAMS.find((d) => d.id === selectedDream) || DREAMS[0];
+  const mode = MODES[activeMode];
+  const toNext = MILESTONE - (xp % MILESTONE);
+  const progress = (xp % MILESTONE) / MILESTONE;
 
-  // Rotate motivational quotes smoothly
+  // Rotate the dev truths slowly; they are a footnote, not a feature.
   useEffect(() => {
-    const timer = setInterval(() => {
-      setQuoteIndex((prev) => (prev + 1) % DEV_TRUTHS.length);
-    }, 7000);
+    const timer = setInterval(() => setQuoteIndex((prev) => (prev + 1) % DEV_TRUTHS.length), 9000);
     return () => clearInterval(timer);
   }, []);
 
   // Web Audio parametric synthesis (zero audio dependencies)
-  const playBeep = useCallback((freq = 440, type = "sine", duration = 0.08) => {
-    if (!soundEnabled) return;
+  const playBeep = useCallback(
+    (freq = 440, type = "sine", duration = 0.08) => {
+      if (!soundEnabled) return;
+      try {
+        if (!audioCtxRef.current) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          audioCtxRef.current = new AudioContext();
+        }
+        const ctx = audioCtxRef.current;
+        if (ctx.state === "suspended") ctx.resume();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch {
+        // Audio autoplay policy fallback
+      }
+    },
+    [soundEnabled],
+  );
+
+  const shipCommit = () => {
+    const next = xp + XP_PER_COMMIT;
+    setXp(next);
     try {
-      if (!audioCtxRef.current) {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        audioCtxRef.current = new AudioContext();
-      }
-      const ctx = audioCtxRef.current;
-      if (ctx.state === "suspended") {
-        ctx.resume();
-      }
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, ctx.currentTime);
-      gain.gain.setValueAtTime(0.12, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + duration);
+      localStorage.setItem("devfest_learning_xp", String(next));
     } catch {
-      // Audio autoplay policy fallback
+      // Private mode: XP just will not persist.
     }
-  }, [soundEnabled]);
+    setCommits((n) => n + 1);
+    playBeep(mode.audioTone, "triangle", 0.12);
 
-  // Click-to-build gamification action
-  const handleCodeClick = () => {
-    const newXp = xp + 15;
-    setXp(newXp);
-    localStorage.setItem("devfest_learning_xp", newXp.toString());
-    setBurstCount((prev) => prev + 1);
+    const sym = PARTICLE_SYMBOLS[Math.floor(Math.random() * PARTICLE_SYMBOLS.length)];
+    const id = `${Date.now()}-${Math.random()}`;
+    setFloatingParticles((prev) => [...prev.slice(-5), { id, ...sym, x: 15 + Math.floor(Math.random() * 70) }]);
+    setTimeout(() => setFloatingParticles((prev) => prev.filter((p) => p.id !== id)), 1400);
 
-    // Audio feedback
-    playBeep(currentMode.audioTone, "triangle", 0.12);
-
-    // Spawn floating celebration symbol
-    const sym =
-      PARTICLE_SYMBOLS[Math.floor(Math.random() * PARTICLE_SYMBOLS.length)];
-    const particleId = Date.now() + Math.random();
-    const newParticle = {
-      id: particleId,
-      ...sym,
-      x: Math.floor(Math.random() * 60) + 20, // percentage
-    };
-    setFloatingParticles((prev) => [...prev.slice(-6), newParticle]);
-    setTimeout(() => {
-      setFloatingParticles((prev) => prev.filter((p) => p.id !== particleId));
-    }, 1400);
-
-    // Trigger milestone announcements
-    if (newXp % 60 === 0) {
-      setBannerNotice(`Milestone Reached! ${newXp} XP • Coding Momentum Active!`);
-      playBeep(currentMode.audioTone * 1.5, "sine", 0.2);
-      setTimeout(() => setBannerNotice(null), 3000);
+    // Crossing a milestone gets one line of acknowledgement, then gets out of the way.
+    if (Math.floor(next / MILESTONE) > Math.floor(xp / MILESTONE)) {
+      setNotice(`Milestone: ${next} XP`);
+      playBeep(mode.audioTone * 1.5, "sine", 0.2);
+      setTimeout(() => setNotice(""), 2600);
     }
   };
 
   return (
-    <div className="relative w-full max-w-6xl mx-auto rounded-3xl overflow-hidden border border-(--color-border) dark:border-(--color-border-dark) bg-(--color-surface) dark:bg-transparent dark:bg-gradient-to-b dark:from-(--color-surface)/90 dark:to-(--color-surface-dark)/90 backdrop-blur-xl shadow-2xl transition-all duration-500">
-      {/* Dynamic Ambient Background Glow */}
+    <section
+      aria-labelledby="desk-heading"
+      className="stage relative w-full overflow-clip border"
+      style={{
+        // The mood re-tints the whole desk: borders, focus rings and the studio follow it.
+        "--stage-accent": mode.accent,
+        "--stage-accent-rgb": mode.accentRgb,
+        borderColor: "var(--stage-border)",
+        borderRadius: "var(--stage-radius-lg)",
+        backgroundColor: "var(--stage-bg)",
+        color: "var(--stage-text)",
+      }}
+    >
+      {/* The mode's colour, as light from off-stage rather than a tinted box. */}
       <div
-        className="absolute inset-0 opacity-20 pointer-events-none transition-all duration-700 blur-3xl"
-        style={{ backgroundColor: currentMode.glow }}
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-32 left-1/3 h-72 w-[60%] rounded-full opacity-25 blur-3xl transition-colors duration-700"
+        style={{ backgroundColor: mode.accent }}
       />
 
-      {/* Floating Particles Overlay */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
-        {floatingParticles.map((p) => (
-          <div
-            key={p.id}
-            className="absolute flex items-center gap-1.5 text-lg font-mono font-bold animate-bounce transition-all duration-1000"
-            style={{
-              left: `${p.x}%`,
-              bottom: "35%",
-              animation: "slide-up 1.2s ease-out forwards",
-              color: currentMode.accent,
-              textShadow: `0 0 10px ${currentMode.accent}`,
-            }}
-          >
-            {p.icon ? (
-              <EmojiIcon name={p.icon} className="w-5 h-5 shrink-0" />
-            ) : (
-              <span>{p.text}</span>
-            )}
-            <span>+15 XP</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Top Header Bar: Stats, Sound Toggle & Mindset Mode */}
-      <div className="p-6 md:p-8 flex flex-wrap items-center justify-between gap-4 border-b border-(--color-border)/60 dark:border-(--color-border-dark)/60 relative z-10">
-        <div className="flex items-center gap-3">
-          <span className="flex h-3 w-3 relative">
-            <span
-              className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-              style={{ backgroundColor: currentMode.accent }}
-            />
-            <span
-              className="relative inline-flex rounded-full h-3 w-3"
-              style={{ backgroundColor: currentMode.accent }}
-            />
-          </span>
-          <div>
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
-              Interactive Learning Scene
-            </span>
-            <div className="text-sm font-bold text-(--color-text) dark:text-(--color-text-dark) flex items-center gap-2">
-              <span>{currentMode.name}</span>
-              <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-(--color-surface-hover) dark:bg-white/5 border border-(--color-border) dark:border-white/10 text-(--color-muted-text) dark:text-gray-300">
-                {currentMode.subtitle}
-              </span>
-            </div>
-          </div>
+      {/* Header: what this is, and the one piece of state worth showing. */}
+      <header className="relative flex flex-wrap items-end justify-between gap-4 border-b px-5 py-4 md:px-7" style={{ borderColor: "var(--stage-border)" }}>
+        <div>
+          <p className="font-mono text-[11px] uppercase tracking-[0.25em]" style={{ color: "var(--stage-text-muted)" }}>
+            <span style={{ color: "var(--stage-accent)" }}>//</span> Interactive Learning Scene
+          </p>
+          <h2 id="desk-heading" className="mt-1 text-xl font-black tracking-tight md:text-2xl">
+            Your desk. <span style={{ color: mode.accent }}>{mode.title}.</span>
+          </h2>
         </div>
-
-        {/* Live Badges: XP, Streak, Audio */}
-        <div className="flex items-center gap-3">
-          <div className="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-black/40 border border-amber-200 dark:border-gray-800 text-xs font-mono flex items-center gap-1.5 text-amber-800 dark:text-amber-400 shadow-inner">
-            <EmojiIcon name="fire" className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 shrink-0" />
-            <span>{streak} Day Streak</span>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* The one action: a small pill, not a panel. Particles rise out of it. */}
+          <div className="relative">
+            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-full h-24 overflow-visible">
+              {floatingParticles.map((p) => (
+                <span
+                  key={p.id}
+                  className="absolute flex items-center gap-1 font-mono text-sm font-bold"
+                  style={{ left: `${p.x}%`, bottom: 0, color: mode.accent, animation: "slide-up 1.2s ease-out forwards" }}
+                >
+                  {p.icon ? <EmojiIcon name={p.icon} className="h-4 w-4" /> : p.text} +{XP_PER_COMMIT}
+                </span>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={shipCommit}
+              className="relative flex h-9 items-center gap-2.5 overflow-hidden rounded-full pl-3.5 pr-4 font-mono text-[11px] font-bold uppercase tracking-widest transition-transform active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              style={{ backgroundColor: mode.accent, color: "#05070a" }}
+            >
+              <EmojiIcon name="keyboard" className="h-4 w-4" />
+              Ship a commit ({commits})
+              <span className="font-black opacity-70">{xp} XP</span>
+              {/* Progress to the next milestone, as the pill's own baseline. */}
+              <span
+                className="absolute inset-x-0 bottom-0 h-[3px]"
+                style={{ backgroundColor: "rgb(0 0 0 / 0.2)" }}
+                role="progressbar"
+                aria-label="Progress to next milestone"
+                aria-valuemin={0}
+                aria-valuemax={MILESTONE}
+                aria-valuenow={xp % MILESTONE}
+              >
+                <span className="block h-full transition-[width] duration-500" style={{ width: `${Math.max(4, progress * 100)}%`, backgroundColor: "rgb(0 0 0 / 0.55)" }} />
+              </span>
+            </button>
+            <span className="sr-only" aria-live="polite">
+              {notice || `${toNext} XP to next milestone`}
+            </span>
           </div>
-
-          <div className="px-3 py-1.5 rounded-xl bg-cyan-50 dark:bg-black/40 border border-cyan-200 dark:border-gray-800 text-xs font-mono flex items-center gap-1.5 text-cyan-800 dark:text-cyan-400 shadow-inner">
-            <EmojiIcon name="sparkles" className="w-3.5 h-3.5 text-cyan-800 dark:text-cyan-400 shrink-0" />
-            <span className="font-bold">{xp} XP</span>
-          </div>
-
           <button
             type="button"
             onClick={() => {
               setSoundEnabled(!soundEnabled);
               if (!soundEnabled) playBeep(520, "sine", 0.1);
             }}
-            className={`p-2 rounded-xl border text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-(--color-primary) ${
-              soundEnabled
-                ? "bg-purple-600/30 border-purple-500 text-purple-800 dark:text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.3)]"
-                : "bg-(--color-surface-hover) dark:bg-black/40 border-(--color-border) dark:border-gray-800 text-(--color-muted-text) dark:text-gray-400 hover:text-(--color-text) dark:hover:text-white"
-            }`}
-            title={soundEnabled ? "Audio Effects Active" : "Enable Sound FX"}
-            aria-label={soundEnabled ? "Sound enabled" : "Sound disabled"}
+            aria-pressed={soundEnabled}
+            aria-label={soundEnabled ? "Sound on" : "Sound off"}
+            className="grid h-9 w-9 place-items-center rounded-full border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--stage-accent)"
+            style={{
+              borderColor: soundEnabled ? "var(--stage-border-strong)" : "var(--stage-border)",
+              color: soundEnabled ? "var(--stage-text)" : "var(--stage-text-muted)",
+            }}
           >
-            {soundEnabled ? (
-              <SpeakerOn className="w-3.5 h-3.5 shrink-0" />
-            ) : (
-              <SpeakerOff className="w-3.5 h-3.5 shrink-0" />
-            )}
-            <span>{soundEnabled ? "Sound: On" : "Sound: Off"}</span>
+            {soundEnabled ? <SpeakerOn className="h-3.5 w-3.5" /> : <SpeakerOff className="h-3.5 w-3.5" />}
           </button>
         </div>
-      </div>
-
-      {/* Milestone Alert Banner */}
-      {bannerNotice && (
-        <div className="bg-gradient-to-r from-purple-600 to-cyan-500 text-white text-xs font-mono font-bold text-center py-2 px-4 animate-fade-in relative z-20 flex items-center justify-center gap-2">
-          <EmojiIcon name="sparkles" className="w-4 h-4 shrink-0" />
-          <span>{bannerNotice}</span>
-        </div>
-      )}
+      </header>
 
       {/*
-        Scene first, at full width, then the mindset switcher underneath.
-        The scene owns a customize panel that sits BESIDE the illustration, so
-        it needs the whole row: squeezed into two thirds there was nowhere for
-        the panel to go but on top of the artwork.
-      */}
-      <div className="space-y-6 p-6 md:p-8 relative z-10">
-        {/* The Animated Student Building Scene */}
-        <div className="relative rounded-2xl overflow-hidden bg-gray-950 dark:bg-black/50 border border-gray-800 p-2 md:p-4 shadow-inner">
-          {/* Toolbar above the scene — nothing is allowed to sit on the art. */}
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-3 px-1">
-            <span
-              className="px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wider uppercase border backdrop-blur-md"
-              style={{
-                backgroundColor: `${currentMode.accent}18`,
-                borderColor: currentMode.accent,
-                color: currentMode.accent,
-              }}
-            >
-              <span className="inline-flex items-center gap-1.5">
-                <EmojiIcon name={currentMode.tagIcon} className="w-3.5 h-3.5 shrink-0" />
-                {currentMode.tag}
-              </span>
-            </span>
-
-            <button
-              type="button"
-              onClick={handleCodeClick}
-              className="px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all duration-300 shadow-xl flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-              style={{
-                backgroundColor: currentMode.accent,
-                color: "#020304",
-                boxShadow: `0 0 20px ${currentMode.glow}`,
-              }}
-            >
-              <EmojiIcon name="keyboard" className="w-4 h-4" />
-              <span>Tap to Hack Code ({burstCount})</span>
-            </button>
-          </div>
-
-          <StudentBuildingScene className="w-full drop-shadow-2xl" />
-        </div>
-
-        {/* Mindset Power-Up Modes */}
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-(--color-muted-text) dark:text-(--color-muted-text-dark) mb-1">
-              Choose Your Learning Mindset
-            </h3>
-            <p className="text-xs text-(--color-muted-text) dark:text-gray-400 leading-relaxed">
-              Toggle mental models to adapt your flow state:
+       * The scene and its Studio, side by side. The mood is the room's light:
+       * chips under the scene relight the lamp, the screens and the whole desk.
+       */}
+      <StudentBuildingScene
+        className="relative w-full"
+        accent={mode.accent}
+        footer={
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-1">
+            <div role="radiogroup" aria-label="Mood lighting" className="flex gap-1.5">
+              {Object.values(MODES).map((m) => {
+                const on = m.id === activeMode;
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    aria-label={`${m.title}: ${m.subtitle}`}
+                    onClick={() => {
+                      setActiveMode(m.id);
+                      playBeep(m.audioTone, "sine", 0.1);
+                    }}
+                    className="flex h-8 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--stage-accent)"
+                    style={{
+                      borderColor: on ? m.accent : "var(--stage-border)",
+                      backgroundColor: on ? `rgb(${m.accentRgb} / 0.14)` : "transparent",
+                      color: on ? "var(--stage-text)" : "var(--stage-text-muted)",
+                    }}
+                  >
+                    <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: m.accent, boxShadow: on ? `0 0 10px ${m.accent}` : "none" }} />
+                    {m.name}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="m-0 min-w-0 flex-1 truncate text-[12px]" style={{ color: "var(--stage-text-muted)" }}>
+              <span className="font-bold" style={{ color: mode.accent }}>
+                {mode.subtitle}
+              </span>{" "}
+              · {mode.tagline}
             </p>
           </div>
+        }
+      />
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-            {Object.values(MODES).map((mode) => {
-              const isActive = mode.id === activeMode;
-              return (
-                <button
-                  key={mode.id}
-                  type="button"
-                  onClick={() => {
-                    setActiveMode(mode.id);
-                    playBeep(mode.audioTone, "sine", 0.1);
-                  }}
-                  className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary) ${
-                    isActive
-                      ? "dark bg-gray-950 shadow-lg scale-[1.02]"
-                      : "bg-(--color-surface) dark:bg-black/30 border-(--color-border) dark:border-gray-800 hover:border-gray-400 dark:hover:border-gray-700 dark:opacity-75 dark:hover:opacity-100"
-                  }`}
-                  style={{
-                    borderColor: isActive ? mode.accent : undefined,
-                    boxShadow: isActive ? `0 0 20px ${mode.glow}` : undefined,
-                  }}
-                >
-                  <div className="flex items-center justify-between">
-                    <span
-                      className={`text-xs font-mono font-bold uppercase tracking-wider ${
-                        isActive ? "" : "text-(--color-muted-text) dark:text-slate-400"
-                      }`}
-                      style={isActive ? { color: mode.accent } : undefined}
-                    >
-                      {mode.name}
-                    </span>
-                    {isActive && (
-                      <span className="text-xs font-mono text-emerald-800 dark:text-emerald-400 flex items-center gap-1">
-                        Active Mode
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-xs font-bold text-(--color-text) dark:text-(--color-text-dark)">
-                    {mode.subtitle}
-                  </div>
-                  <p className="text-[11px] text-(--color-muted-text) dark:text-(--color-muted-text-dark) leading-relaxed">
-                    {mode.tagline}
-                  </p>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Dream Milestone Selector: "What is your dream?" */}
-      <div className="px-6 md:px-8 py-6 bg-(--color-surface-hover) dark:bg-black/40 border-t border-(--color-border)/60 dark:border-(--color-border-dark)/60 space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-          <div>
-            <h4 className="text-sm font-bold text-(--color-text) dark:text-(--color-text-dark) flex items-center gap-2">
-              <EmojiIcon name="trophy" className="w-4 h-4 text-amber-800 dark:text-amber-400" />
-              <span>Connect Today's Learning to Your Dream</span>
-            </h4>
-            <p className="text-xs text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
-              Learning is not always easy—clarifying your ultimate dream makes the discipline worthwhile.
-            </p>
-          </div>
-
-          <Link
-            to={currentDream.link}
-            className="px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-gray-900 hover:bg-gray-800 dark:bg-white/10 dark:hover:bg-white/20 text-white border border-gray-900 dark:border-white/20 transition-all text-center flex items-center justify-center gap-2 shrink-0 hover:scale-105"
-          >
-            <span>Start {currentDream.recommended}</span>
-            <span>&rarr;</span>
-          </Link>
-        </div>
-
-        {/* 4 Dream Pills */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
-          {DREAMS.map((d) => {
-            const isSelected = d.id === selectedDream;
-            return (
-              <button
-                key={d.id}
-                type="button"
-                onClick={() => {
-                  setSelectedDream(d.id);
-                  playBeep(480, "triangle", 0.08);
-                }}
-                className={`p-3.5 rounded-xl border text-left transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary) ${
-                  isSelected
-                    ? "bg-purple-100 dark:bg-purple-950/40 border-purple-500 shadow-md scale-[1.02]"
-                    : "bg-(--color-surface) dark:bg-black/20 border-(--color-border) dark:border-gray-800/80 hover:border-gray-400 dark:hover:border-gray-700 text-(--color-muted-text) dark:text-gray-400"
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <EmojiIcon name={d.icon} className="w-4 h-4 text-amber-800 dark:text-amber-300 shrink-0" />
-                  <span className="text-xs font-bold text-(--color-text) dark:text-(--color-text-dark)">
-                    {d.title}
-                  </span>
-                </div>
-                <p className="text-[11px] text-(--color-muted-text) dark:text-(--color-muted-text-dark) line-clamp-2 leading-relaxed">
-                  {d.desc}
-                </p>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Motivational Dev Truth Rotating Bar */}
-      <div className="px-6 md:px-8 py-3.5 bg-(--color-surface) dark:bg-black/60 border-t border-(--color-border) dark:border-gray-900 text-center text-xs text-(--color-muted-text) dark:text-gray-400 font-sans italic flex items-center justify-center gap-2">
-        <span className="text-purple-800 dark:text-purple-400 font-bold not-italic font-mono text-[11px]">
-          [DEV TRUTH]
-        </span>
-        <span className="transition-opacity duration-500">
-          "{DEV_TRUTHS[quoteIndex]}"
-        </span>
-      </div>
-    </div>
+      <footer className="relative border-t px-5 py-3 text-center font-mono text-[11px] md:px-7" style={{ borderColor: "var(--stage-border)", color: "var(--stage-text-muted)" }}>
+        <span style={{ color: "var(--stage-accent)" }}>dev truth //</span> {DEV_TRUTHS[quoteIndex]}
+      </footer>
+    </section>
   );
 };
 

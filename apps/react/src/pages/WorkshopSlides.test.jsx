@@ -21,9 +21,9 @@ describe("WorkshopSlides multi-deck registry", () => {
     expect(ids).toContain("pride");
   });
 
-  it("should open on the combined trilogy deck by default", () => {
-    expect(DEFAULT_DECK_ID).toBe("combined");
-    expect(getDeck(undefined).meta.id).toBe("combined");
+  it("should open on the next talk — the DevFest hour — by default", () => {
+    expect(DEFAULT_DECK_ID).toBe("devfest");
+    expect(getDeck(undefined).meta.id).toBe("devfest");
   });
 
   it("should surface only the two presentable decks as live, shelving the rest", () => {
@@ -109,9 +109,9 @@ describe("WorkshopSlides multi-deck registry", () => {
     }
   });
 
-  it("should fall back to the combined deck for unknown ids and keep legacy aliases working", () => {
+  it("should fall back to the default deck for unknown ids and keep legacy aliases working", () => {
     const fallback = getDeck("unknown-deck");
-    expect(fallback.meta.id).toBe("combined");
+    expect(fallback.meta.id).toBe(DEFAULT_DECK_ID);
 
     // `lhm` was the default before the spine was merged into `combined`, so
     // every printed link and QR code from before that has to land here.
@@ -169,9 +169,10 @@ describe("WorkshopSlides multi-deck registry", () => {
     expect(lab1.title).toContain("Friction Audit");
   });
 
-  it("should load devfest deck with hackathon velocity elements", () => {
+  it("should load the devfest hour as chapter two, closing on the combined deck's launch", () => {
     const devfest = getDeck("devfest");
-    expect(devfest.meta.title).toContain("Hackathon Velocity");
+    expect(devfest.meta.continuesFrom).toBe("combined");
+    expect(devfest.meta.fixedRuntime).toBe(true);
     const launchSlide = devfest.slides.find((s) => s.type === "launch");
     expect(launchSlide).toBeDefined();
   });

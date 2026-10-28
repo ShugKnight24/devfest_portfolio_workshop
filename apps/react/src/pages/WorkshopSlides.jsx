@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { EmojiIcon } from "@portfolio/icons/react";
@@ -9,8 +9,13 @@ import { getDeck, getLiveDecks, getShelvedDecks, DEFAULT_DECK_ID } from "../data
 import { StageSidebar } from "../components/StageSidebar";
 import { RipcordStarter } from "../components/stage/RipcordStarter";
 import { TrackEmbed, TrackPlayer, useStageTrack } from "../components/stage/TrackPlayer";
+import { SongSlide } from "../components/stage/SongSlide";
 import { EvidenceThread } from "../components/stage/EvidenceThread";
+import { DiffHuntSlide } from "../components/stage/DiffHunt";
 import { getCharacters } from "../data/slides/characters";
+
+// three.js and the character models load only when a deck reaches a scene.
+const SceneStage = lazy(() => import("../components/three/SceneStage"));
 import {
   RUNTIMES,
   RUNTIME_ORDER,
@@ -29,7 +34,7 @@ import {
  *
  * Two decks are live; the rest are shelved source material (see data/slides).
  * - combined: "Pull the Cord. Bring Backup." — THE talk: 30 / 40 / 60 min, 90 min / 3 h workshop.
- * - devfest:  "Hackathon Velocity" — the same spine, one tier deeper, plus labs.
+ * - devfest:  "Pull the Cord: Chapter Two" — one fixed hour, three acts, three labs.
  *
  * Length is a runtime VIEW over a deck, not a separate deck: the runtime bar
  * picks a max tier and the flex zone opens on demand mid-talk.
@@ -169,6 +174,83 @@ const TitleSlide = ({
     </div>
   );
 };
+
+/**
+ * Scene slide — a full-bleed ink scene with one line under it. The clicker's
+ * next press fires the scene (Pochita revs, the cord is pulled, the Devil
+ * roars) before it advances, through the same beat mechanism as the ripcord.
+ */
+const SceneSlide = ({ slide, isActive, beatStep = 0, onBeat = () => {}, track, trackPlaying = false, trackSource, onToggleTrack }) => {
+  // A `trackPlayer` scene is fired by the deck's track: starting the song is the pull.
+  const withTrack = Boolean(slide.trackPlayer && track);
+  const fired = beatStep > 0 || (withTrack && trackPlaying);
+  const hasBeat = Array.isArray(slide.beats) && slide.beats.length > 0;
+  return (
+    <div className={`w-full transition-opacity duration-500 ${isActive ? "opacity-100" : "opacity-0"}`}>
+      <div
+        className="relative mx-auto w-full overflow-hidden border"
+        style={{ aspectRatio: "16 / 9", maxHeight: slide.quiet ? "76vh" : "58vh", borderColor: "var(--stage-border)", borderRadius: "var(--stage-radius)" }}
+      >
+        <Suspense fallback={<div className="absolute inset-0" style={{ backgroundColor: "#f1ece2" }} />}>
+          {/* ThreeStage positions itself (relative); the box gives it the size. */}
+          <div className="absolute inset-0">
+            <SceneStage scene={slide.scene} fired={fired} label={slide.alt} className="h-full w-full" />
+          </div>
+        </Suspense>
+        {/* With a track, the line goes on the page as a manga caption: the
+            corner player would cover it down below. */}
+        {withTrack && (
+          <p
+            className="absolute left-4 top-4 m-0 max-w-[60%] border-2 px-4 py-2 font-black uppercase leading-tight"
+            style={{ backgroundColor: "#f6f1e7", borderColor: "#111", color: "#111", fontSize: "clamp(1rem, 2.2vw, 2rem)", boxShadow: "4px 4px 0 #111" }}
+          >
+            {slide.title}
+          </p>
+        )}
+      </div>
+      {/* `quiet` scenes speak for themselves: no kicker, no line, no button. */}
+      {!slide.quiet && (
+      <div className={`mt-5 flex flex-wrap items-end gap-4 ${withTrack ? "justify-end" : "justify-between"}`}>
+        <div className="min-w-0">
+          {slide.phase && <p className="stage-kicker mb-1">{slide.phase}</p>}
+          {/* Smaller than a full slide's heading: the scene is the headline here. */}
+          {!withTrack && (
+            <h2 className="stage-h2" style={{ whiteSpace: "pre-line", fontSize: "clamp(1.4rem, 2.5vw, 2.6rem)" }}>
+              {slide.title}
+            </h2>
+          )}
+          {slide.description && (
+            <p className="stage-body mt-2 max-w-4xl" style={{ color: "var(--stage-text-muted)" }}>
+              {slide.description}
+            </p>
+          )}
+        </div>
+        {hasBeat && (
+          <button
+            type="button"
+            onClick={() => !fired && onBeat(0)}
+            aria-disabled={fired}
+            className="stage-kicker shrink-0 border px-4 py-2"
+            style={{
+              borderColor: fired ? "var(--stage-border)" : "var(--stage-accent)",
+              color: fired ? "var(--stage-text-muted)" : "var(--stage-accent)",
+              borderRadius: "var(--stage-radius)",
+            }}
+          >
+            {fired ? slide.firedLabel ?? "Running" : slide.fireLabel ?? "Fire"}
+          </button>
+        )}
+        {withTrack && (
+          <div className="shrink-0">
+            <TrackPlayer track={track} playing={trackPlaying} source={trackSource} onToggle={onToggleTrack} align="end" />
+          </div>
+        )}
+      </div>
+      )}
+    </div>
+  );
+};
+
 
 // Slide 2: Reacher Formula Intro Slide
 const ReacherIntroSlide = ({ slide, isActive }) => (
@@ -459,7 +541,7 @@ const ParadigmSlide = ({ slide, isActive }) => (
           {slide.title}
         </h2>
         <p className={`stage-body ${slide.image ? "" : "mx-auto"}`}>
-          {slide.description || "Traditional advice: spend weeks polishing a static resume. Burn the resume. Build bespoke software to eliminate your own acute daily friction."}
+          {slide.description || "Traditional advice: spend weeks polishing a static resume. Burn the resume. Build bespoke software that solves one real problem of your own."}
         </p>
       </div>
 
@@ -1128,6 +1210,18 @@ const ComparisonSlide = ({ slide, isActive }) => {
           );
         })}
       </div>
+      {/* An outside link (a repo the slide is about), opened in a new tab. */}
+      {slide.link && (
+        <a
+          href={slide.link.href}
+          target="_blank"
+          rel="noreferrer"
+          className="stage-kicker mt-6 inline-flex self-start border px-4 py-2 no-underline"
+          style={{ borderColor: "var(--stage-accent)", color: "var(--stage-accent)", borderRadius: "var(--stage-radius)" }}
+        >
+          {slide.link.label} ↗
+        </a>
+      )}
     </div>
   );
 };
@@ -1394,8 +1488,20 @@ const CharacterRosterSlide = ({ slide, isActive }) => {
   );
 };
 
+/* Beats animate on a clock, not a class: the evidence thread runs 2.2s and the
+   ripcord 1.8s. A sheet printed on the next frame catches every one of them at
+   t=0 — chainsaw asleep, thread at 0/4 — which is the slide with its reveal
+   missing. Wait them out before handing the page to the print dialog. */
+const PRINT_SETTLE_MS = 2400;
+
+// Slide types that draw their own beats; everything else gets the BeatDock.
+const SELF_PLACED_BEATS = new Set([TitleSlide, SceneSlide, DiffHuntSlide]);
+
 const SlideComponents = {
   title: TitleSlide,
+  scene: SceneSlide,
+  song: SongSlide,
+  "diff-hunt": DiffHuntSlide,
   "character-roster": CharacterRosterSlide,
   statement: StatementSlide,
   comparison: ComparisonSlide,
@@ -1458,6 +1564,9 @@ export const WorkshopSlides = () => {
   );
   const [openZones, setOpenZones] = useState([]);
   const runtime = getRuntime(runtimeId);
+  // A deck built to one length (DevFest: one polished hour) offers no runtime
+  // choice: no picker, no 1-5 keys, nothing to fumble on stage.
+  const runtimeLocked = Boolean(currentDeck.meta?.fixedRuntime);
 
   const slides = useMemo(
     () => selectSlides(allSlides, { runtime: runtimeId, openZones }),
@@ -1468,6 +1577,7 @@ export const WorkshopSlides = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const closeSidebar = useCallback(() => setShowSidebar(false), []);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -1556,10 +1666,19 @@ export const WorkshopSlides = () => {
     }
     goToSlide(currentSlide + 1);
   }, [slides, currentSlide, beatStep, fireBeat, goToSlide]);
-  const prevSlide = useCallback(
-    () => goToSlide(currentSlide - 1),
-    [currentSlide, goToSlide]
-  );
+  /**
+   * Back mirrors forward on a slide that reveals in steps (the diff hunt): it
+   * hides the last reveal first, so a point already made can be brought back
+   * up without leaving the slide. A one-beat slide just goes back.
+   */
+  const prevSlide = useCallback(() => {
+    const beats = slides[currentSlide]?.beats ?? [];
+    if (beats.length > 1 && beatStep > 0) {
+      setBeatState({ slideId: beatSlideId, step: beatStep - 1 });
+      return;
+    }
+    goToSlide(currentSlide - 1);
+  }, [slides, currentSlide, beatStep, beatSlideId, goToSlide]);
 
   /**
    * Pull a flex zone in or drop it mid-talk. Opening keeps you on the slide you
@@ -1610,13 +1729,21 @@ export const WorkshopSlides = () => {
     [slides, currentSlide, allSlides, openZones, activeDeckId, reanchor]
   );
 
+  // A deck's one walk-on track (LHM: Power in the Blood). DevFest's songs
+  // play on their own song slides instead, each with its video.
   const deckTrack = currentDeck.meta?.track;
   const { playing: trackPlaying, source: trackSource, toggle: rawToggleTrack } = useStageTrack(deckTrack);
 
   const toggleTrack = useCallback(() => {
     rawToggleTrack();
     trackEvent("stage_track_toggle", { deck: activeDeckId, track: deckTrack?.title, source: trackSource });
-  }, [rawToggleTrack, activeDeckId, deckTrack?.title, trackSource]);
+  }, [rawToggleTrack, activeDeckId, deckTrack, trackSource]);
+
+  // A song slide plays its own video; the deck's track yields to it.
+  const onSongSlide = slides[currentSlide]?.type === "song";
+  useEffect(() => {
+    if (onSongSlide && trackPlaying) rawToggleTrack();
+  }, [onSongSlide, trackPlaying, rawToggleTrack]);
 
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
@@ -1628,9 +1755,23 @@ export const WorkshopSlides = () => {
     }
   }, []);
 
-  const handlePrint = useCallback(() => {
-    window.print();
-  }, []);
+  /* The print sheet is mounted only while printing. Every slide in the
+     selection renders at once, and some of them carry embeds — keeping that
+     tree alive on screen would cost a second full render of the deck for a
+     button most talks never press. */
+  const handlePrint = useCallback(() => setIsPrinting(true), []);
+
+  useEffect(() => {
+    if (!isPrinting) return;
+    // print() blocks the thread, so whatever has not finished animating by
+    // then is what lands in the PDF. PRINT_SETTLE_MS buys the beat clocks
+    // their run.
+    const timer = setTimeout(() => {
+      window.print();
+      setIsPrinting(false);
+    }, PRINT_SETTLE_MS);
+    return () => clearTimeout(timer);
+  }, [isPrinting]);
 
   // Reset the whole presentation state when the deck changes.
   //
@@ -1695,6 +1836,7 @@ export const WorkshopSlides = () => {
         // on stage while an agent is still working.
         if (flexZones[0]) toggleZone(flexZones[0].id);
       } else if (
+        !runtimeLocked &&
         !e.metaKey && !e.ctrlKey && !e.altKey &&
         /^[1-9]$/.test(e.key) && Number(e.key) <= RUNTIME_ORDER.length
       ) {
@@ -1714,7 +1856,7 @@ export const WorkshopSlides = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [nextSlide, prevSlide, toggleFullscreen, isFullscreen, goToSlide, slides.length, handlePrint, navigate, showSidebar, flexZones, toggleZone, changeRuntime, toggleTrack]);
+  }, [nextSlide, prevSlide, toggleFullscreen, isFullscreen, goToSlide, slides.length, handlePrint, navigate, showSidebar, flexZones, toggleZone, changeRuntime, toggleTrack, runtimeLocked]);
 
   // Touch/swipe support
   useEffect(() => {
@@ -1787,15 +1929,52 @@ export const WorkshopSlides = () => {
         .reze-glitch {
           animation: glitch-anim 0.25s infinite;
         }
+        /* Print IS the PDF export.
+           The stage renders one slide at a time, so printing it printed that
+           one slide — on white, in portrait, with the deck's palette thrown
+           away. The print sheet holds the whole runtime selection, one slide
+           per landscape page, and print media swaps the live stage out for it.
+           Colour is forced through: a deck printed white is not the deck
+           anyone in the room saw. */
+        .print-sheet { display: none; }
         @media print {
-          body, .min-h-screen {
-            background: #fff !important;
-            color: #000 !important;
-            background-image: none !important;
+          @page { size: 13.333in 7.5in; margin: 0; }
+          html, body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
-          header, footer, #reze-btn, .print-hide {
-            display: none !important;
+          .stage {
+            display: block !important;
+            overflow: visible !important;
+            min-height: 0 !important;
           }
+          .stage > *:not(.print-sheet) { display: none !important; }
+          .print-sheet { display: block !important; }
+          .print-slide {
+            width: 13.333in;
+            height: 7.5in;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 3rem;
+            box-sizing: border-box;
+            background-color: var(--stage-bg);
+            break-after: page;
+            page-break-after: always;
+          }
+          .print-slide:last-child {
+            break-after: auto;
+            page-break-after: auto;
+          }
+          /* Decorative glow layers. The print rasterizer does not blur them,
+             so each one prints as the hard rectangle it really is. */
+          .print-slide [class*="blur-"] { display: none !important; }
+          /* Same trade for the headline glow: Chrome writes the text-shadow
+             into the PDF as its own layer, and Preview paints that layer as a
+             solid block across the headline. A flat headline beats a teal box
+             sitting on top of one. */
+          .print-slide .stage-glow-text { text-shadow: none; }
         }
       `}</style>
 
@@ -1834,9 +2013,10 @@ export const WorkshopSlides = () => {
           aria-haspopup="dialog"
           className="stage-btn whitespace-nowrap flex items-center gap-2"
           style={{ fontSize: "11px", padding: "0.35em 0.75em" }}
-          title="Deck, runtime and flex zones (S)"
+          title={runtimeLocked ? "Deck and notes (S)" : "Deck, runtime and flex zones (S)"}
         >
-          <span>{runtime.label}</span>
+          {/* A fixed-length deck has no runtime to pick: show only its length. */}
+          {!runtimeLocked && <span>{runtime.label}</span>}
           <span aria-hidden="true" style={{ color: "var(--stage-text-muted)" }}>
             {formatRuntimeLength(runtime.minutes)}
           </span>
@@ -1882,6 +2062,7 @@ export const WorkshopSlides = () => {
         deckTitle={currentDeck.meta.title}
         allSlides={allSlides}
         runtimeId={runtimeId}
+        runtimeLocked={runtimeLocked}
         onRuntimeChange={changeRuntime}
         flexZones={flexZones}
         openZones={openZones}
@@ -1939,9 +2120,11 @@ export const WorkshopSlides = () => {
               trackPlaying={trackPlaying}
               trackSource={trackSource}
               onToggleTrack={toggleTrack}
+              onAdvance={nextSlide}
+              onBack={prevSlide}
             />
           )}
-          {SlideComponent !== TitleSlide && slide.beats?.length > 0 && (
+          {!SELF_PLACED_BEATS.has(SlideComponent) && slide.beats?.length > 0 && (
             <BeatDock beats={slide.beats} beatStep={beatStep} onBeat={fireBeat} bleeding={trackPlaying} />
           )}
         </div>
@@ -2087,6 +2270,43 @@ export const WorkshopSlides = () => {
           </button>
         </div>
       </footer>
+
+      {/*
+        Print sheet: the export, not a preview. One page per slide in the
+        current runtime selection, so the PDF is whatever the runtime bar says
+        it is — 22 pages at lightning, more at standard, flex zones included if
+        they are open.
+
+        Beats are pre-fired (`beatStep` at the slide's full count) because a
+        beat is a reveal, and an unrevealed slide on paper is just a slide with
+        content missing. No track is passed: the walk-on player is a control,
+        and controls do not belong in a PDF.
+      */}
+      <div className="print-sheet" aria-hidden="true">
+        {isPrinting &&
+          slides.map((s) => {
+            const PrintSlideComponent = SlideComponents[s.type] || TitleSlide;
+            return (
+              <section key={s.id} className="print-slide stage-grid-bg">
+                <div className="w-full max-w-6xl">
+                  <PrintSlideComponent
+                    slide={s}
+                    isActive={true}
+                    isRezeMode={isRezeMode}
+                    onToggleReze={() => {}}
+                    onOpenZone={() => {}}
+                    beatStep={s.beats?.length ?? 0}
+                    onBeat={() => {}}
+                    track={null}
+                    trackPlaying={false}
+                    trackSource={null}
+                    onToggleTrack={() => {}}
+                  />
+                </div>
+              </section>
+            );
+          })}
+      </div>
     </div>
   );
 };

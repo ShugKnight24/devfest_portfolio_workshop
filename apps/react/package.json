@@ -15,13 +15,14 @@
   },
   "dependencies": {
     "@portfolio/icons": "workspace:*",
-    "@portfolio/themes": "workspace:*",
     "@portfolio/telemetry": "workspace:*",
+    "@portfolio/themes": "workspace:*",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-router-dom": "^7.9.6"
+    "react-router-dom": "^7.9.6",
+    "three": "^0.183.2"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.16",

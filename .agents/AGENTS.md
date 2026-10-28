@@ -103,6 +103,12 @@ Vendored under `.agents/skills/` (synced from `~/.agents/skills`). Beyond the ca
 family: `design-system`, `tailwind-design-system`, `frontend-design`, `ui-styling`, `brand`,
 `creating-svg-illustrations`, `improve-animations`, `accessibility`, `best-practices`, `performance`,
 `core-web-vitals`, `seo`, `slides`, `requesting-code-review`, `code-review`, `vitest`.
+`ultracave` and `megacave` sit beside `caveman` as its `/caveman ultra` and `/caveman wenyan` targets.
+
+The stage beats are moving into WebGL, so the Three.js set is vendored too: `threejs-fundamentals`,
+`threejs-geometry`, `threejs-materials`, `threejs-lighting`, `threejs-shaders`,
+`threejs-postprocessing`, `threejs-animation`, `threejs-aaa-graphics-builder` (art-direction
+scorecard for "still looks basic"), `interactive-3d-experience`, and `animate`.
 
 This repo is a talk before it is an app, so the speaking skills are vendored too: `tech-talk-outline`
 (turn an accepted abstract into a rehearsable outline), `public-speaking` (delivery, storytelling,

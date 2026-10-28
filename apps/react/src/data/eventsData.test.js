@@ -17,13 +17,13 @@ describe("speakingEvents data", () => {
     expect(lhm.url).toContain("detroit-latin-heritage-month-innovation-summit");
     // combined is the canonical deck; /slides/lhm still aliases onto it.
     expect(lhm.slideDeckRoute).toBe("/slides/combined");
-    expect(lhm.status).toBe("upcoming");
+    expect(lhm.status).toBe("archived");
   });
 
   it("should have correct links and metadata for Michigan DevFest 2026", () => {
     const devfest = getEventById("devfest-2026");
     expect(devfest).toBeDefined();
-    expect(devfest.date).toBe("November 2026");
+    expect(devfest.date).toBe("November 14, 2026");
     expect(devfest.url).toContain("michigan-devfest-ai-hackathon-2026");
     expect(devfest.slideDeckRoute).toBe("/slides/devfest");
     expect(devfest.status).toBe("upcoming");
@@ -31,7 +31,7 @@ describe("speakingEvents data", () => {
 
   it("should filter upcoming events properly", () => {
     const upcoming = getUpcomingEvents();
-    expect(upcoming.length).toBe(2);
+    expect(upcoming.length).toBe(1);
     expect(upcoming.every((e) => e.status === "upcoming")).toBe(true);
   });
 });

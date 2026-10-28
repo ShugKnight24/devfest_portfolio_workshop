@@ -100,7 +100,7 @@ export const SpeakingEventsHub = ({ compact = false }) => {
                   className="flex-1 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold text-center transition-colors shadow-md flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <EmojiIcon name="presentation" className="w-4 h-4 shrink-0" />
-                  Launch Keynote
+                  {isUpcoming ? "Open the Deck" : "Replay the Deck"}
                 </Link>
                 {event.url && (
                   <a

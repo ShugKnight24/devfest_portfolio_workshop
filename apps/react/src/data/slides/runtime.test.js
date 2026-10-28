@@ -372,38 +372,53 @@ describe("clock formatting", () => {
   });
 });
 
-describe("devfest workshop spine", () => {
-  it("opens as a workshop and runs its talk and labs at the right runtimes", async () => {
+describe("devfest one-hour deck", () => {
+  // DevFest is one fixed 35-minute slot, not an elastic deck: one runtime,
+  // every slide shown, thirty minutes talking and five for questions.
+  it("runs as one fixed 35-minute slot with every slide shown and noted", async () => {
     const { devfestSlides, devfestDeckMeta, devfestPresenterNotes } = await import("./devfestSlides");
 
     expect(devfestDeckMeta.continuesFrom).toBe("combined");
-    expect(devfestDeckMeta.defaultRuntime).toBe("workshopFull");
+    expect(devfestDeckMeta.fixedRuntime).toBe(true);
 
-    const talk = selectSlides(devfestSlides, { runtime: "standard" });
-    const shortDay = selectSlides(devfestSlides, { runtime: "workshopShort" });
-    const fullDay = selectSlides(devfestSlides, { runtime: "workshopFull" });
+    const hour = selectSlides(devfestSlides, { runtime: devfestDeckMeta.defaultRuntime });
+    expect(hour.map((s) => s.id)).toEqual(devfestSlides.map((s) => s.id));
 
-    // Assert there IS a talk before asserting it has no labs. The old version of
-    // this test checked "no labs" on its own, which an EMPTY selection satisfies —
-    // so it kept passing while the deck opened on zero slides.
-    expect(talk.length).toBeGreaterThan(0);
-    expect(talk.some((s) => s.type === "lab")).toBe(false);
-
-    expect(shortDay.filter((s) => s.type === "lab")).toHaveLength(2);
-    expect(fullDay.filter((s) => s.type === "lab")).toHaveLength(4);
+    const minutes = hour.reduce((sum, s) => sum + slideBudget(s), 0) / 60;
+    expect(minutes).toBeGreaterThan(30);
+    expect(minutes).toBeLessThanOrEqual(35);
+    // Five of those minutes are questions, at the end of the talk.
+    const qa = hour.find((s) => s.id === "questions");
+    expect(qa.budget).toBe(300);
 
     for (const slide of devfestSlides) {
       expect(devfestPresenterNotes[slide.id], `missing notes for "${slide.id}"`).toBeTruthy();
     }
   });
 
-  it("budgets the labs as the bulk of the full workshop", async () => {
+  it("keeps one hands-on exercise in Act I, the three gaps, and the scenes in story order", async () => {
     const { devfestSlides } = await import("./devfestSlides");
-    const fullDay = selectSlides(devfestSlides, { runtime: "workshopFull" });
-    const labs = fullDay.filter((s) => s.type === "lab");
-    expect(labs.length).toBeGreaterThan(0);
-    const labMinutes = labs.reduce((sum, s) => sum + slideBudget(s), 0) / 60;
-    expect(labMinutes).toBeGreaterThan(80);
+    const ids = devfestSlides.map((s) => s.id);
+    // No labs in thirty minutes: the diff hunt is the one thing the room does.
+    expect(devfestSlides.filter((s) => s.type === "lab")).toHaveLength(0);
+    const hunt = ids.indexOf("read-the-diff");
+    expect(hunt).toBeGreaterThan(ids.indexOf("act-1"));
+    expect(hunt).toBeLessThan(ids.indexOf("act-2"));
+    // What the hype leaves out: the perception gap, skills, the blast radius.
+    for (const id of ["perception-gap", "skills-caveman", "blast-radius"]) expect(ids).toContain(id);
+    expect(devfestSlides.find((s) => s.id === "skills-caveman").link.href).toBe("https://github.com/juliusbrussee/caveman");
+    const scenes = devfestSlides.filter((s) => s.type === "scene").map((s) => s.scene);
+    expect(scenes).toEqual(["pochita", "reacher-investigate", "reacher", "chainsaw-man", "chainsaw-devil", "mice"]);
+    // The pre-show: KICK BACK, IRIS OUT, then the Reze arc in story order; JANE DOE closes.
+    const songs = devfestSlides.filter((s) => s.type === "song");
+    // Pochita's dream clip rides the song slide too (video beside a film), inside the hour.
+    expect(songs.map((s) => s.id)).toEqual(["song-kick-back", "song-iris-out", "song-first-glance", "song-in-the-pool", "song-jane-slept", "pochita-dream", "song-jane-doe"]);
+    expect(ids.slice(ids.indexOf("cold-open"), ids.indexOf("cold-open") + 4)).toEqual(["cold-open", "chainsaw-man-101", "pochita-dream", "your-dream"]);
+    expect(ids.slice(0, 6)).toEqual(["song-kick-back", "song-iris-out", "song-first-glance", "song-in-the-pool", "song-jane-slept", "cold-open"]);
+    expect(ids.slice(-2)).toEqual(["song-jane-doe", "city-or-country"]);
+    // One video per song, and every song has one.
+    songs.forEach((s) => expect(s.song.youtubeId).toMatch(/^[\w-]{11}$/));
+    expect(new Set(songs.map((s) => s.song.youtubeId)).size).toBe(songs.length);
   });
 });
 

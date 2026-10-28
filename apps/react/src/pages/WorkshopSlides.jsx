@@ -34,7 +34,7 @@ import {
  *
  * Two decks are live; the rest are shelved source material (see data/slides).
  * - combined: "Pull the Cord. Bring Backup." — THE talk: 30 / 40 / 60 min, 90 min / 3 h workshop.
- * - devfest:  "Pull the Cord: Chapter Two" — one fixed hour, three acts, three labs.
+ * - devfest:  "Pull the Cord: Chapter Two" — 35 minutes, three acts, one hands-on hunt.
  *
  * Length is a runtime VIEW over a deck, not a separate deck: the runtime bar
  * picks a max tier and the flex zone opens on demand mid-talk.

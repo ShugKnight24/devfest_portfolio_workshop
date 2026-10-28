@@ -21,7 +21,7 @@ const doors = [
     to: "/slides",
     kicker: "Follow the talk",
     title: "Open the deck",
-    desc: "The DevFest deck: one hour, three acts, every lab and speaker note.",
+    desc: "The DevFest deck: three acts in 35 minutes, with every speaker note.",
   },
   {
     id: "build",
@@ -96,7 +96,7 @@ export const LandingPage = () => {
     {
       id: "agentic",
       title: "Agentic Dev & Personalized Software",
-      description: "Prompt anatomy, reading agent diffs, and verification gates — the methods behind the DevFest labs.",
+      description: "Prompt anatomy, reading agent diffs, and verification gates — the methods behind the DevFest talk.",
       difficulty: "All levels",
       duration: "60-90 mins",
       icon: "robot",

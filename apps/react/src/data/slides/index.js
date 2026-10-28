@@ -18,8 +18,8 @@ import { prideDeckMeta, prideSlides, pridePresenterNotes } from "./prideSlides";
  *   combined — THE talk. "Pull the Cord. Bring Backup." Elastic: 30 / 40 / 60
  *              min talk and 90 min / 3 h workshop off one spine (see runtime.js),
  *              built around the character pairings.
- *   devfest  — "Pull the Cord: Chapter Two": one fixed hour, three acts, three
- *              labs, built on that spine (runtime locked).
+ *   devfest  — "Pull the Cord: Chapter Two": 35 minutes (~30 talking, 5 for
+ *              questions), three acts, built on that spine (runtime locked).
  *
  * WHY `combined` AND NOT `lhm`
  * ---------------------------

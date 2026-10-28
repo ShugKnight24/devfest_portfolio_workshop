@@ -36,17 +36,17 @@ export const speakingEvents = [
     organization: "Google GDG Detroit",
     date: "November 14, 2026",
     location: "Detroit, MI",
-    badge: "Upcoming Talk + Workshop",
+    badge: "Upcoming Talk",
     status: "upcoming",
     url: "https://gdg.community.dev/events/details/google-gdg-detroit-presents-michigan-devfest-ai-hackathon-2026/cohost-gdg-detroit/",
     slideDeckRoute: "/slides/devfest",
-    topic: "Pull the Cord: Chapter Two — this time, you build it",
+    topic: "Pull the Cord: Chapter Two — what the hype leaves out",
     abstract:
-      "One hour, three acts, three hands-on labs. Read the scene like Reacher, plan the fight before you prompt, then pull the cord like Denji, and have your partner verify what the agent built. Agents are getting better all the time. They still make mistakes: trust them, then verify them.",
+      "Thirty minutes, three acts, one hands-on hunt, then five minutes of questions. Read the scene like Reacher, plan the fight before you prompt, then pull the cord like Denji, and verify what the agent built. Agents are getting better all the time. They still make mistakes: trust them, then verify them.",
     highlights: [
       "Act I: Read the diff — catch what the agent got confidently wrong",
-      "Act II: The prompt clinic — Goal, Files, Constraint, Done when",
-      "Act III: Build your partner's problem, through three gates",
+      "Act II: Prompt anatomy and skills — Goal, Files, Constraint, Done when",
+      "Act III: Verification gates and blast radius — least privilege for your agents",
     ],
   },
   {

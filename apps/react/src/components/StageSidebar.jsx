@@ -39,6 +39,7 @@ export const StageSidebar = ({
   deckTitle,
   allSlides,
   runtimeId,
+  runtimeLocked = false,
   onRuntimeChange,
   flexZones,
   openZones,
@@ -130,7 +131,7 @@ export const StageSidebar = ({
           <div className="min-w-0">
             <p className="stage-kicker mb-2">Presenter</p>
             <h2 id="stage-sidebar-title" className="text-base font-black uppercase tracking-tight m-0">
-              Deck &amp; runtime
+              {runtimeLocked ? "Deck" : <>Deck &amp; runtime</>}
             </h2>
             <p className="text-xs mt-1 m-0 truncate" style={{ color: "var(--stage-text-muted)" }}>
               {deckTitle}
@@ -149,7 +150,8 @@ export const StageSidebar = ({
         </header>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
-          {/* ---- Runtime ---- */}
+          {/* ---- Runtime ---- (a fixed-length deck has nothing to choose) */}
+          {!runtimeLocked && (
           <fieldset className="m-0 p-0 border-0 space-y-1.5">
             <legend className="stage-kicker mb-2">Runtime</legend>
             {RUNTIME_ORDER.map((id, i) => {
@@ -194,6 +196,7 @@ export const StageSidebar = ({
               );
             })}
           </fieldset>
+          )}
 
           {/* ---- Flex zones ---- */}
           {flexZones.length > 0 && (
@@ -247,7 +250,7 @@ export const StageSidebar = ({
               ))}
             </ul>
 
-            {shelvedDecks.length > 0 && (
+            {!runtimeLocked && shelvedDecks.length > 0 && (
               <details className="mt-3">
                 <summary
                   className="cursor-pointer text-xs font-mono uppercase tracking-wider py-1"
@@ -269,7 +272,7 @@ export const StageSidebar = ({
           className="p-3 text-[11px] font-mono leading-relaxed"
           style={{ borderTop: "var(--stage-hairline) solid var(--stage-border)", color: "var(--stage-text-muted)" }}
         >
-          S sidebar &middot; 1&ndash;5 runtime &middot; Z flex zone &middot; N notes &middot; F fullscreen &middot; Esc close
+          S sidebar &middot; {!runtimeLocked && <>1&ndash;5 runtime &middot; Z flex zone &middot; </>}N notes &middot; F fullscreen &middot; Esc close
         </footer>
       </aside>
     </>

@@ -20,14 +20,14 @@ export const InstructionSteps = () => {
           title: "1. Clone the Sovereign Sandbox Core",
           component: "git clone https://github.com/ShugKnight24/devfest_portfolio_workshop",
           description:
-            "First, make sure Node.js (v18+) is installed. Open your terminal, navigate to your desired directory, and clone the workshop repository. This gives you both the React 19 + Tailwind v4 starter and the zero-dependency Vanilla starter.",
+            "First, make sure Node.js 20.19+ (or 22) and pnpm are installed. Open your terminal, navigate to your desired directory, and clone the workshop repository. This gives you both the React 19 + Tailwind v4 starter and the zero-dependency Vanilla starter.",
           note: "Inspect what you download! A great developer always knows what runs on their machine.",
         },
         {
           title: "2. Ignite the Code Engine",
-          component: "cd devfest_portfolio_workshop/apps/react && npm install && npm run dev",
+          component: "cd devfest_portfolio_workshop && pnpm install && pnpm dev",
           description:
-            "Install project dependencies using 'npm install' and launch the Vite development server with 'npm run dev'. Your site will spin up at http://localhost:3000 with sub-second hot module reloading.",
+            "Install with 'pnpm install' from the repo root (the starters share workspace packages, so npm will not resolve them), then launch the Vite development server with 'pnpm dev'. Your site will spin up at http://localhost:3000 with sub-second hot module reloading.",
           note: "If port 3000 is occupied, Vite will automatically select the next available port.",
         },
         {
@@ -45,11 +45,11 @@ export const InstructionSteps = () => {
           note: "Tip: Add your GitHub and LinkedIn profile links in the personal.social object.",
         },
         {
-          title: "5. Assemble Your Blocks in App.jsx",
-          component: "src/App.jsx",
+          title: "5. Assemble Your Blocks in PortfolioBuilder.jsx",
+          component: "src/pages/PortfolioBuilder.jsx",
           description:
-            "Inspect App.jsx. Notice how each section (Header, About, Skills, Projects, Footer) is a sovereign component. You can swap visual style variants in the respective component folders to choose between Minimal, Glassmorphism, and Animated designs.",
-          note: "Try changing the theme in the top-right switcher to see all 31 built-in palette themes.",
+            "Inspect PortfolioBuilder.jsx. Notice how each section (Header, About, Skills, Projects, Footer) is a sovereign component. You can swap visual style variants in the respective component folders to choose between Minimal, Glassmorphism, and Animated designs.",
+          note: "Try changing the theme in the top-right switcher to see all 36 built-in palette themes.",
         },
         {
           title: "6. Zero-Config Live Vercel Edge Deployment",
@@ -66,10 +66,10 @@ export const InstructionSteps = () => {
       badge: "The Reacher Audit Track",
       icon: "shield",
       description:
-        "The Jack Reacher methodology: Sherlock Holmes root-cause deduction, strict context engineering, subagent pipelines, and zero-human automated testing gates.",
+        "The Jack Reacher methodology: read the scene before you act, strict context engineering, subagent pipelines, and verification gates that end with a human reading the diff.",
       steps: [
         {
-          title: "1. Sherlockian Deduction: 'In an Investigation, Details Matter'",
+          title: "1. Read the Scene: 'In an Investigation, Details Matter'",
           component: "Root Cause over Magic Prompts",
           description:
             "Reacher walks into a room, notices the angle of the door, the mud on a boot, and deduces the truth. In software: never accept unearned wisdom. When an agent hallucinates, do not blindly reprompt—isolate the stack trace, locate the exact symbol, and feed typed constraints.",
@@ -97,11 +97,11 @@ export const InstructionSteps = () => {
           note: "'Travel light.' Keep bundles small and execution instantaneous.",
         },
         {
-          title: "5. Zero-Human Verification Gates",
-          component: "npm run test:run && npm run build",
+          title: "5. Three Gates: Types, Tests, the Diff",
+          component: "pnpm test:run && pnpm build, then read the diff",
           description:
-            "Hope for the best, plan for the worst. Before any agentic code touches production, run automated verification: Vitest asserts behavioral invariants in <1 second; Vite ensures production bundle integrity.",
-          note: "Run 'npm run test:run' right now in your terminal to see all tests pass in ~700ms.",
+            "Hope for the best, plan for the worst. Vitest asserts behavioral invariants and Vite proves the bundle builds, but green is a claim, not proof. The last gate is a person reading the whole diff. An agent can write the code; it cannot be the thing that decides it is correct.",
+          note: "Run 'pnpm test:run' in apps/react right now, then open the diff of your last change and read every line.",
         },
       ],
     },
@@ -110,11 +110,11 @@ export const InstructionSteps = () => {
       badge: "Bespoke Software Makers",
       icon: "tools",
       description:
-        "Moving past resume sites to building bespoke tools for an Audience of One that solve visceral personal frictions and scale to others.",
+        "Moving past resume sites to building bespoke tools for an Audience of One that turn one real problem into a working outcome, then scale to others.",
       steps: [
         {
           title: "1. The Audience of One Doctrine",
-          component: "Solve Your Own Acute Friction",
+          component: "Solve One Real Problem of Your Own",
           description:
             "The best software is born when you build a tool to solve an acute, visceral pain point in your own daily life. It doesn't need to be a venture-backed SaaS. A bespoke workout logger, an automated media pipeline, or a localized checkout engine that runs 100x faster than legacy tools.",
           note: "A bespoke running application is 100x more impressive to employers than a generic template.",
@@ -123,22 +123,22 @@ export const InstructionSteps = () => {
           title: "2. Case Study: J. Simmons Productions",
           component: "Dynamic Media Distribution Pipeline",
           description:
-            "Friction: Video creators spending hours on manual video distribution and clunky cloud uploads. Solution: High-speed dynamic modules processing backend distribution hooks asynchronously.",
+            "Problem: Video creators spending hours on manual video distribution and clunky cloud uploads. Outcome: High-speed dynamic modules processing backend distribution hooks asynchronously.",
           note: "Result: Video channels scale instantly with zero infrastructure maintenance.",
         },
         {
-          title: "3. Case Study: Jacked Alien",
-          component: "Fitness State Machine Engine",
+          title: "3. Case Study: Clockwork Carnage",
+          component: "Procedural FPS Engine",
           description:
-            "Friction: Commercial fitness apps bogged down in subscription paywalls and bloated forms. Solution: Modular finite state machine governing real-time progressive overload with zero external dependencies.",
-          note: "Runs 100% offline in browser localStorage. Fast, private, unbreakable.",
+            "Problem: Game engines and sprite pipelines that cost more setup time than the game does. Outcome: A DOOM-inspired shooter drawn entirely in HTML5 Canvas — no engine, no sprite sheets, every pixel procedural.",
+          note: "Ships as a static page. Nine-level campaign, endless arena, and a level builder that exports JSON.",
         },
         {
-          title: "4. Case Study: Criminal Cookies",
+          title: "4. Case Study: Cart Commerce",
           component: "Localized High-Frequency E-Commerce",
           description:
-            "Friction: Traditional Shopify storefronts loading 40+ analytical tracking scripts that destroy mobile checkout conversion. Solution: Vite + micro-component engine compiling straight to high-frequency mobile checkout.",
-          note: "Sub-second transactions that bypass legacy commercial bloat entirely.",
+            "Problem: Storefronts weighed down by third-party tracking scripts that wreck mobile checkout. Outcome: Next.js 15 with the cart as a plain reducer and CSS Modules over design tokens, so the checkout path stays yours.",
+          note: "Sub-second transactions, 129 tests, zero Sass. Bypasses legacy commercial bloat entirely.",
         },
         {
           title: "5. Packaging for an Audience of Many",

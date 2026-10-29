@@ -4,7 +4,7 @@ import { StudentBuildingScene } from "./StudentBuildingScene";
 import { clearStoredAvatar, loadAvatar } from "../config/avatar";
 import { BOOKCASE, COMPANION_KINDS, PLUSH_KINDS } from "../config/sceneItems";
 
-const openPanel = () => fireEvent.click(screen.getByRole("button", { name: "Customize scene" }));
+const openTab = (name) => fireEvent.click(screen.getByRole("tab", { name }));
 
 describe("StudentBuildingScene companions and plushies", () => {
   afterEach(() => {
@@ -36,7 +36,7 @@ describe("StudentBuildingScene companions and plushies", () => {
 
   it("adds, re-coats and removes a companion from the panel", () => {
     render(<StudentBuildingScene />);
-    openPanel();
+    openTab("Crew");
 
     fireEvent.click(screen.getByRole("button", { name: "Add Cat" }));
     expect(screen.getByRole("button", { name: /^Tabby cat, movable/ })).toBeDefined();
@@ -51,7 +51,7 @@ describe("StudentBuildingScene companions and plushies", () => {
 
   it("shelves and unshelves a plushie, and disables them with the bookcase off", () => {
     render(<StudentBuildingScene />);
-    openPanel();
+    openTab("Shelf");
 
     const power = screen.getByRole("button", { name: "Power plushie" });
     expect(power.getAttribute("aria-pressed")).toBe("false");
@@ -59,9 +59,11 @@ describe("StudentBuildingScene companions and plushies", () => {
     expect(power.getAttribute("aria-pressed")).toBe("true");
     expect(screen.getByRole("button", { name: /^Power plushie, movable/ })).toBeDefined();
 
+    openTab("Room");
     fireEvent.click(screen.getByRole("button", { name: "Bookcase" }));
     expect(screen.queryByRole("button", { name: /plushie, movable/ })).toBe(null);
-    expect(power.closest("fieldset").disabled).toBe(true);
+    openTab("Shelf");
+    expect(screen.getByRole("button", { name: "Power plushie" }).closest("fieldset").disabled).toBe(true);
   });
 
   it("moves a plushie down a shelf with the arrow key", () => {
@@ -76,9 +78,23 @@ describe("StudentBuildingScene companions and plushies", () => {
 
   it("lists companions with a count in the panel", () => {
     render(<StudentBuildingScene />);
-    openPanel();
-    const panel = screen.getByRole("group", { name: "Make it your desk" });
+    openTab("Crew");
+    const panel = screen.getByRole("group", { name: "Studio" });
     expect(within(panel).getByText("1 / 8")).toBeDefined();
+  });
+});
+
+describe("StudentBuildingScene studio", () => {
+  afterEach(() => {
+    clearStoredAvatar();
+  });
+
+  it("applies a look in one click", () => {
+    render(<StudentBuildingScene />);
+    const look = screen.getByRole("button", { name: /^Night shift/ });
+    fireEvent.click(look);
+    expect(look.getAttribute("aria-pressed")).toBe("true");
+    expect(loadAvatar()).toMatchObject({ backdrop: "night", display: "dual", lamp: true });
   });
 });
 
@@ -92,8 +108,8 @@ describe("StudentBuildingScene customizer layout", () => {
     // sr-only radios need a positioned ancestor inside the panel, or focusing
     // one scrolls the scene card out of view (see SceneCustomizer).
     render(<StudentBuildingScene />);
-    openPanel();
-    const panel = screen.getByRole("group", { name: "Make it your desk" });
+    openTab("You");
+    const panel = screen.getByRole("group", { name: "Studio" });
     expect(panel.className.split(/\s+/)).toContain("relative");
     const radio = within(panel).getAllByRole("radio")[0];
     expect(radio.closest('[role="group"]')).toBe(panel);

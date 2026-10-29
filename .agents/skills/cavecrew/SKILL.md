@@ -6,13 +6,14 @@ description: >
   or using `Explore`. Their output is compressed, so main context lasts longer.
 ---
 
-Cavecrew = three subagent presets that emit caveman output. Same job as Anthropic defaults (`Explore`, edit-style agents, reviewer); difference is the tool-result they return is compressed, so main context shrinks per delegation.
+Cavecrew = three subagent presets that answer in ultracave voice (tool runs: one status line in, one out; nothing between routine calls). Same job as Anthropic defaults (`Explore`, edit-style agents, reviewer); difference is the tool-result they return is compressed, so main context shrinks per delegation.
 
 ## When to use cavecrew vs alternatives
 
 | Task | Use |
 |---|---|
 | "Where is X defined / what calls Y / list uses of Z" | `cavecrew-investigator` |
+| Cold-start orientation, or a direct search already failed | `caveman-explore` (haiku, cheap, path:line citations only) |
 | Same but you also want suggestions/architecture commentary | `Explore` (built-in) |
 | Surgical edit, ≤2 files, scope obvious | `cavecrew-builder` |
 | New feature / 3+ files / cross-cutting refactor | Main thread, or the `Plan` agent first |
@@ -76,6 +77,7 @@ Or `No issues.` Findings sorted file → line ascending.
 ## Requires
 
 The three agents must exist as `~/.claude/agents/cavecrew-{investigator,builder,reviewer}.md`
+(plus optional `caveman-explore.md`)
 (or the project's `.claude/agents/`). Without them this skill is inert — the
 Agent tool will not list the subagent types. Check with `ls ~/.claude/agents/`.
 
@@ -88,6 +90,9 @@ Agent tool will not list the subagent types. Check with `ls ~/.claude/agents/`.
 
 **Parallel scout** (when investigation is broad):
 Spawn 2-3 `cavecrew-investigator` calls in one message (different angles: defs vs callers vs tests). Aggregate in main thread.
+
+**Split review** (large PR, 50+ files):
+Spawn one `cavecrew-reviewer` per area in one message. Give each an explicit path list and a hunt list for its domain (e.g. 3D: dispose, context loss, reduced motion; editor: undo history, codec input). Name deleted files so the reviewer checks for lost features. Then verify every 🔴 in main thread before reporting: reviewers over-rate edge cases. Evidence: a 108-file PR came back as 4 lists of 9-21 findings, and 2 of 5 🔴 were edge cases.
 
 **Selector inventory** (before restyling anything):
 Send `cavecrew-investigator` after the stylesheet's selector list for one feature area — it returns `path:line — selector` and nothing else, which is exactly the shape you need to diff against the class names the JS emits. A prose agent spends its budget describing the styles; you only want the names and where they live.
@@ -145,10 +150,10 @@ tool result. Consequences worth internalising:
 - Don't chain `cavecrew-investigator → cavecrew-builder` for a 5-file refactor. Builder will return `too-big.` and you'll have wasted a turn.
 - Don't ask `cavecrew-reviewer` for "general feedback" — it returns findings only, no architecture opinions. Use `/code-review` for that.
 - Don't send whole-file rewrites (e.g. one agent per page in a redesign) to `cavecrew-builder` — that's not surgical. Use `general-purpose` agents in parallel, one file each, all pointed at one shared brief file (rules, snippets, reference file) so output stays consistent. Then `cavecrew-reviewer` the combined diff.
-- Don't let parallel agents share a browser pane or a shared stylesheet. Give each its own page-level CSS file; lead owns shared files and visual verification.
+- Don't let parallel agents share a browser pane, a dev server, or a shared stylesheet. A pane has one active tab: agent B navigates it while agent A is mid-verification, and A screenshots B's page without noticing. If they must verify visually, give each one its own port in the brief and tell it to expect the tab to move under it. Give each its own page-level CSS file; lead owns shared files and visual verification.
 - Don't fan out a restyle before the shared layer exists. Order: back up files, lead writes the token file, lead runs the mechanical sweep (hex to token, font stack to token) across all files, then agents start from that one baseline. Agents that each invent token names drift.
 - Don't give parallel agents overlapping file lists. Name the exact files each owns and the files that belong to the lead in the brief itself.
-- Don't read a parallel agent's `typecheck`/`lint`/test result as proof about *its* changes. Agents share one working tree, so a check run mid-flight covers whatever every sibling has written so far — a pass can hide a failure that only appears once the others land, and a failure can belong to someone else entirely. Treat per-agent checks as smoke tests and run the real verification yourself, once, after the last agent returns.
+- Don't read a parallel agent's `typecheck`/`lint`/test result as proof about *its* changes. Agents share one working tree, so a check run mid-flight covers whatever every sibling has written so far — a pass can hide a failure that only appears once the others land, and a failure can belong to someone else entirely. Treat per-agent checks as smoke tests and run the real verification yourself, once, after the last agent returns. A framework build is worse than neutral here: it compiles the routes that exist *at that moment*, so the first agent to finish gets a clean build of a three-quarters-empty app and reports it as proof. Read the route list in the build output, not the tick.
 - Don't drop an agent's "outside my files" findings. Ask for them in the report, then fix or ticket each one in the main thread; they are often the real bug (double-bound shortcuts, orphaned UI, duplicate prompts).
 - Don't let a long agent die with nothing to resume from. A session rate limit or crash kills the agent mid-task; the files it already wrote stay. Give long agents resumable, idempotent work (skip-if-exists fetchers, backups first), and when one fails, audit the tree before relaunching — it may be 90% done.
 - Don't take `cavecrew-reviewer` line numbers on trust. Its compressed format states a location with full confidence even when the number is invented — a finding cited at `file.ts:1505` in a 240-line file is a tell. Check the claim against the file before acting: some findings are real with a wrong location, and some are wholly false. Cheapest filter: `wc -l` the file, then grep for the symbol the finding names.

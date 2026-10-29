@@ -1,8 +1,12 @@
+import { lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { EmojiIcon } from "../components/Icons/EmojiIcon";
 import { InteractiveLearningScene } from "../components/InteractiveLearningScene";
 import { useShell } from "../context/ShellContext";
 import { getUpcomingEvents } from "../data/eventsData";
+
+// three.js is the heaviest thing in the app; keep it out of the first paint.
+const AgentFactory = lazy(() => import("../components/three/AgentFactory"));
 
 /**
  * Where a visitor should go first, by why they are here. Someone who just
@@ -15,9 +19,9 @@ const doors = [
     id: "watch",
     mode: "stage",
     to: "/slides",
-    kicker: "I was in the room",
-    title: "Replay the talk",
-    desc: "The deck, the live-build beats, and every speaker note. Runs at 15, 30, or 60 minutes.",
+    kicker: "Follow the talk",
+    title: "Open the deck",
+    desc: "The DevFest deck: three acts in 35 minutes, with every speaker note.",
   },
   {
     id: "build",
@@ -92,8 +96,8 @@ export const LandingPage = () => {
     {
       id: "agentic",
       title: "Agentic Dev & Personalized Software",
-      description: "Master prompt-to-app speedruns, Context Engineering, and subagent orchestration tailored across 4 audience tiers.",
-      difficulty: "4 Tiers (Novice to Architect)",
+      description: "Prompt anatomy, reading agent diffs, and verification gates — the methods behind the DevFest talk.",
+      difficulty: "All levels",
       duration: "60-90 mins",
       icon: "robot",
       link: "/agentic-studio",
@@ -110,6 +114,18 @@ export const LandingPage = () => {
       <div className="absolute bottom-[-10%] right-[-20%] w-[600px] h-[600px] rounded-full bg-(--color-accent)/10 blur-[120px] pointer-events-none animate-pulse duration-7000"></div>
 
       <div className="max-w-6xl mx-auto space-y-24 relative z-10">
+        {/* Opening shot: a crew of agents turning frictions into software. */}
+        <Suspense
+          fallback={
+            <div
+              className="stage h-[clamp(320px,58vh,640px)] w-full rounded-[4px] border"
+              style={{ borderColor: "var(--stage-border)", backgroundColor: "var(--stage-bg)" }}
+            />
+          }
+        >
+          <AgentFactory />
+        </Suspense>
+
         {/* Hero Section */}
         <div className="text-center space-y-6 max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-(--color-primary)/10 border border-(--color-primary)/25 text-(--color-primary) rounded-full text-xs font-semibold uppercase tracking-widest shadow-inner">
@@ -120,9 +136,9 @@ export const LandingPage = () => {
             {nextEvent ? `${nextEvent.shortTitle} — ${nextEvent.date}` : "Live"}
           </div>
           <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-none text-(--color-text) dark:text-(--color-text-dark)">
-            Coding at the <br />
+            Pull the cord. <br />
             <span className="text-(--color-primary)">
-              Speed of Thought
+              Bring backup.
             </span>
           </h1>
           <p className="text-lg md:text-xl text-(--color-muted-text) dark:text-(--color-muted-text-dark) font-medium">
@@ -178,7 +194,7 @@ export const LandingPage = () => {
             <p className="text-xs font-semibold uppercase tracking-wider text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Course Tracks</p>
           </div>
           <div className="text-center space-y-1">
-            <h3 className="text-3xl font-black text-(--color-primary)">32</h3>
+            <h3 className="text-3xl font-black text-(--color-primary)">36</h3>
             <p className="text-xs font-semibold uppercase tracking-wider text-(--color-muted-text) dark:text-(--color-muted-text-dark)">Curated Themes</p>
           </div>
           <div className="text-center space-y-1">

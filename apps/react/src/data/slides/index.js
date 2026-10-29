@@ -18,7 +18,8 @@ import { prideDeckMeta, prideSlides, pridePresenterNotes } from "./prideSlides";
  *   combined — THE talk. "Pull the Cord. Bring Backup." Elastic: 30 / 40 / 60
  *              min talk and 90 min / 3 h workshop off one spine (see runtime.js),
  *              built around the character pairings.
- *   devfest  — the Michigan DevFest workshop, which builds on that spine.
+ *   devfest  — "Pull the Cord: Chapter Two": 35 minutes (~30 talking, 5 for
+ *              questions), three acts, built on that spine (runtime locked).
  *
  * WHY `combined` AND NOT `lhm`
  * ---------------------------
@@ -97,7 +98,8 @@ export const decks = {
   },
 };
 
-export const DEFAULT_DECK_ID = "combined";
+// The next talk is the default: /slides opens the DevFest hour.
+export const DEFAULT_DECK_ID = "devfest";
 
 /** Legacy and convenience ids kept working so old links and muscle memory do not break. */
 const ALIASES = {

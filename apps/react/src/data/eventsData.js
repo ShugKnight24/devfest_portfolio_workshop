@@ -3,7 +3,7 @@
  *
  * Details for upcoming keynotes, workshops, and archives:
  * - Detroit Latin Heritage Month Innovation Summit (Sept 19, 2026)
- * - Michigan DevFest & AI Hackathon 2026 (Nov 2026)
+ * - Michigan DevFest & AI Hackathon 2026 (Nov 14, 2026)
  * - Detroit Pride Summit 2026 (Archive)
  */
 
@@ -15,8 +15,8 @@ export const speakingEvents = [
     organization: "Google GDG Detroit",
     date: "September 19, 2026",
     location: "Detroit, MI",
-    badge: "Upcoming Keynote",
-    status: "upcoming",
+    badge: "Previous Keynote",
+    status: "archived",
     url: "https://gdg.community.dev/events/details/google-gdg-detroit-presents-detroit-latin-heritage-month-innovation-summit/cohost-gdg-detroit/",
     slideDeckRoute: "/slides/combined",
     topic:
@@ -34,19 +34,19 @@ export const speakingEvents = [
     title: "Michigan DevFest & AI Hackathon 2026",
     shortTitle: "Michigan DevFest & AI Hackathon",
     organization: "Google GDG Detroit",
-    date: "November 2026",
+    date: "November 14, 2026",
     location: "Detroit, MI",
-    badge: "Upcoming Workshop & Hackathon",
+    badge: "Upcoming Talk",
     status: "upcoming",
     url: "https://gdg.community.dev/events/details/google-gdg-detroit-presents-michigan-devfest-ai-hackathon-2026/cohost-gdg-detroit/",
     slideDeckRoute: "/slides/devfest",
-    topic: "Hackathon Velocity: From Audience of One to Sovereign Software",
+    topic: "Pull the Cord: Chapter Two — what the hype leaves out",
     abstract:
-      "A high-speed masterclass in building and shipping production AI applications during a hackathon: subagent orchestration, modular state machines, and closed-loop verification gates.",
+      "Thirty minutes, three acts, one hands-on hunt, then five minutes of questions. Read the scene like Reacher, plan the fight before you prompt, then pull the cord like Denji, and verify what the agent built. Agents are getting better all the time. They still make mistakes: trust them, then verify them.",
     highlights: [
-      "Subagent Orchestration (`cavecrew` Investigator, Builder, Reviewer)",
-      "Zero-Human Verification Gates (Vitest + Production Build)",
-      "Rapid Hackathon Prototyping & Live Deployment",
+      "Act I: Read the diff — catch what the agent got confidently wrong",
+      "Act II: Prompt anatomy and skills — Goal, Files, Constraint, Done when",
+      "Act III: Verification gates and blast radius — least privilege for your agents",
     ],
   },
   {

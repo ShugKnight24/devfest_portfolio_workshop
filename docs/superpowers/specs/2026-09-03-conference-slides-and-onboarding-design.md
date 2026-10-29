@@ -71,7 +71,7 @@ Structured dataset driving the Events Showcase on the landing page, guide, and s
   - Slide 5: "In an Investigation, Details Matter" — Prompting as Root-Cause Deduction.
   - Slide 6: "Travel Light" — Zero-bloat architecture (no 50-library dependency chains).
   - Slide 7: "Beyond the Portfolio" — Moving from passive resume sites to bespoke personal tools that solve your own pain points.
-  - Slide 8: Real Shipping Proof — Case studies: J. Simmons Productions, Jacked Alien, Criminal Cookies.
+  - Slide 8: Real Shipping Proof — Case studies: J. Simmons Productions, Clockwork Carnage, Cart Commerce.
   - Slide 9: "Hope for the Best, Plan for the Worst" — Automated Verification Gates (Vitest + Build checks).
   - Slide 10: The Challenge — Building a tool for an Audience of One and packaging it for an Audience of Many.
 - **DevFest Keynote (`/slides/devfest`)**:
@@ -114,8 +114,8 @@ Integrated at the top of `/guide` and accessible via navigation:
    - The philosophy of the "Audience of One": building sovereign tools to eliminate personal frictions.
    - Real-world production examples:
      - *J. Simmons Productions*: Dynamic media delivery modules.
-     - *Jacked Alien*: Zero-bloat fitness state machines.
-     - *Criminal Cookies*: Localized high-frequency checkout engine.
+     - *Clockwork Carnage*: Procedural canvas rendering with no engine and no sprite sheets.
+     - *Cart Commerce*: Localized high-frequency checkout engine.
    - Roadmap for packaging, documenting, and open-sourcing bespoke tools so others can build upon them.
 
 ---

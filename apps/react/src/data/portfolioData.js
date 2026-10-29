@@ -94,9 +94,9 @@ export const portfolioData = {
   projects: [
     {
       id: 1,
-      title: "MiDevFest Website & Portfolio Workshop",
+      title: "MiDevFest Website",
       description:
-        "The Chainsaw Man Framework (Speed via Momentum): A living canvas sandbox built with React and Tailwind CSS. Attendees prompt the engine live and mold the chaos into production software in seconds.",
+        "The official Michigan DevFest site for GDG Detroit, built with React and Tailwind CSS.",
       image: "./assets/images/devfest_site.png",
       tags: ["Speed via Momentum", "Chainsaw Man", "React", "TailwindCSS"],
       githubUrl: "https://github.com/GDG-Detroit/devfest-website",
@@ -127,28 +127,17 @@ export const portfolioData = {
     },
     {
       id: 4,
-      title: "Jacked Alien",
+      title: "Cart Commerce (High-Frequency Cart)",
       description:
-        "Fitness automation scaled through modular state machines. Reusable training modules replace complex customized code, driving rapid progress tracking.",
-      image: "./assets/images/personal_portfolio.png",
-      tags: ["Audience of One", "State Machines", "React", "Zero-Bloat"],
-      githubUrl: "https://github.com/shugknight24/jacked-alien",
-      liveUrl: null,
+        "The Reacher Protocol (Speed via Deduction): A white-label storefront on Next.js 15 and React 19. Cart state is a reducer, styling is CSS Modules on design tokens, and every SKU ships GA4 enhanced-ecommerce events plus client-side bot scoring. 129 Vitest tests, zero Sass.",
+      image: "./assets/images/cart_commerce.png",
+      tags: ["Speed via Deduction", "The Reacher Protocol", "Next.js 15", "React 19", "Zero Bloat"],
+      githubUrl: "https://github.com/ShugKnight24/next_shopping_cart",
+      liveUrl: "https://next-shopping-cart-beta.vercel.app",
       featured: true,
     },
     {
       id: 5,
-      title: "Criminal Cookies (High-Frequency Cart)",
-      description:
-        "The Reacher Framework (Speed via Deduction): Guerilla-style e-commerce at scale. A localized, high-frequency checkout engine engineered to eliminate NPM bloat and 45 tracking scripts.",
-      image: "./assets/images/shum_sol.png",
-      tags: ["Speed via Deduction", "The Reacher Framework", "Zero Bloat", "Vite"],
-      githubUrl: "https://github.com/shugknight24/criminal-cookies",
-      liveUrl: null,
-      featured: true,
-    },
-    {
-      id: 6,
       title: "Shumunov Solutions",
       description:
         "A business website for Shumunov Solutions, offering custom web development, backend integrations, and technical consulting.",
@@ -159,15 +148,26 @@ export const portfolioData = {
       featured: true,
     },
     {
-      id: 7,
-      title: "Pomodoro (Pomidor Micro-Loop)",
+      id: 6,
+      title: "Pomidor (\u043f\u043e\u043c\u0438\u0434\u043e\u0440)",
       description:
-        "The Iron Framework (Speed via Form): An Audience of One productivity micro-loop. Built with strict architectural isolation separating the state machine from the UI.",
-      image: "./assets/images/pomodoro.png",
-      tags: ["Speed via Form", "The Iron Protocol", "State Isolation", "JavaScript"],
-      githubUrl: "https://github.com/shugknight24/pomodoro",
-      liveUrl: "https://shugknight24.github.io/pomodoro/",
-      featured: false,
+        "The Iron Protocol (Speed via Form): An offline-first focus suite in zero-dependency vanilla ES modules. Every tenant's tasks, streaks and notes live in their own client-storage partition \u2014 no backend to trust, no tracking to opt out of. Installable PWA, four languages (EN/RU/AZ/HE).",
+      image: "./assets/images/pomidor.png",
+      tags: ["Speed via Form", "The Iron Protocol", "Vanilla JS", "PWA", "Audience of One"],
+      githubUrl: "https://github.com/ShugKnight24/pomidor",
+      liveUrl: "https://shugknight24.github.io/pomidor/",
+      featured: true,
+    },
+    {
+      id: 7,
+      title: "Clockwork Carnage",
+      description:
+        "The Chainsaw Man Framework (Speed via Momentum): A DOOM-inspired FPS in vanilla JavaScript and HTML5 Canvas. No engine, no sprite sheets \u2014 every pixel is drawn procedurally in code. Nine-level campaign, endless arena mode, and a level builder that exports JSON.",
+      image: "./assets/images/clockwork_carnage.png",
+      tags: ["Speed via Momentum", "Chainsaw Man", "Vanilla JS", "HTML5 Canvas"],
+      githubUrl: "https://github.com/ShugKnight24/clockwork_carnage",
+      liveUrl: "https://shugknight24.github.io/clockwork_carnage/",
+      featured: true,
     },
   ],
 
@@ -239,7 +239,7 @@ console.log(calculateTargets(88));`,
       name: "Pomidor // Tactical Focus Engine",
       character: "O'Donnell (The Switchblade)",
       problem: "Eliminating distraction with a high-intensity focus timer that bypasses bloated SaaS subscription trackers.",
-      target: "React 19 / Pure State Machine",
+      target: "Vanilla JS / Pure State Machine",
       constraints: ["Decoupled state machine", "Zero external analytics", "Sub-10ms render latency"],
       samplePrompt: "Target: React component. Goal: Pomodoro interval state machine with work, short break, and long break states. Constraints: Pure reducer, Web Audio API beeps, no npm sound files.",
       sampleCode: `export function pomidorReducer(state, action) {
@@ -251,33 +251,6 @@ console.log(calculateTargets(88));`,
       return { ...state, isRunning: !state.isRunning };
     default:
       return state;
-  }
-}`,
-    },
-    {
-      id: "criminal-cookies-cart",
-      name: "Criminal Cookies // Localized High-Frequency Cart",
-      character: "Finlay & Dixon (Guardrails + Forensic Telemetry)",
-      problem: "Bypassing heavy 15-megabyte e-commerce templates with a sub-50ms localized cart that preserves user privacy.",
-      target: "Vanilla JS / Web Storage API",
-      constraints: ["Zero tracking pixels", "Sub-50ms checkout ready", "WCAG AA accessible"],
-      samplePrompt: "Target: Cart module. Goal: High-speed shopping cart with quantity management and tax deduction. Constraints: Vanilla JS class, localStorage, zero tracking tags.",
-      sampleCode: `export class SovereignCart {
-  constructor(key = 'sovereign_cart') {
-    this.key = key;
-    this.items = JSON.parse(localStorage.getItem(key) || '[]');
-  }
-  add(item) {
-    const existing = this.items.find(i => i.id === item.id);
-    if (existing) existing.qty += 1;
-    else this.items.push({ ...item, qty: 1 });
-    this.persist();
-  }
-  persist() {
-    localStorage.setItem(this.key, JSON.stringify(this.items));
-  }
-  total() {
-    return this.items.reduce((sum, i) => sum + (i.price * i.qty), 0);
   }
 }`,
     },

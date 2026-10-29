@@ -619,6 +619,13 @@ Never:
 - derive an id from `Date.now()` alone. Two records created in the same
   millisecond collide, and colliding ids silently share one row of state. Same
   for a human-readable timestamp used as a delete key: `"14:32"` is not unique
+- pass an explicit default down to a child that defaults the same prop itself.
+  `<Shell showKinds={true}>` feeding a child whose signature is
+  `showKinds ?? routeDefault` means the `??` never sees `undefined`, so the
+  route logic it was written for is dead — and it typechecks, renders, and
+  looks right until the one route that needed the other branch. Default in one
+  place only: the level that owns the decision. The other level passes
+  `undefined` and says so in its own type
 - leave a `setTimeout` un-refed when a second call can land inside its window.
   The first timer clears the second one's state early, and a pending timer
   outlives the component. One ref, cleared on each call and on unmount

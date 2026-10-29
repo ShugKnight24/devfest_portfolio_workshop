@@ -101,7 +101,7 @@
 - [ ] **Step 2: Build track switcher tabs in `InstructionSteps.jsx`**
 - [ ] **Step 3: Populate Student Track with visual component anatomy and quick-wins**
 - [ ] **Step 4: Populate Professional Track with Reacher root-cause audit, context hierarchy, and subagent pipelines**
-- [ ] **Step 5: Populate Maker Track with Audience of One to Many case studies (J. Simmons, Jacked Alien, Criminal Cookies)**
+- [ ] **Step 5: Populate Maker Track with Audience of One to Many case studies (J. Simmons, Clockwork Carnage, Cart Commerce)**
 
 ---
 

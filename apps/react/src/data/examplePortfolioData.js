@@ -47,7 +47,7 @@ export const portfolioData = {
       id: 1,
       title: "MiDevFest Website",
       description:
-        "The official website for MiDevFest 2025, built with React and Tailwind CSS. Features event details, speaker bios, and previous events.",
+        "The official website for Michigan DevFest, built with React and Tailwind CSS. Features event details, speaker bios, and previous events.",
       image: "./assets/images/devfest_site.png",
       tags: ["React", "TailwindCSS"],
       githubUrl: "https://github.com/GDG-Detroit/devfest-website",
@@ -78,13 +78,13 @@ export const portfolioData = {
     },
     {
       id: 4,
-      title: "Pomodoro",
+      title: "Pomidor",
       description:
         "A clean, focused Pomodoro timer app for productivity and time management.",
-      image: "./assets/images/pomodoro.png",
+      image: "./assets/images/pomidor.png",
       tags: ["JavaScript"],
-      githubUrl: "https://github.com/shugknight24/pomodoro",
-      liveUrl: "https://shugknight24.github.io/pomodoro/",
+      githubUrl: "https://github.com/ShugKnight24/pomidor",
+      liveUrl: "https://shugknight24.github.io/pomidor/",
       featured: false,
     },
   ],

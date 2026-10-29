@@ -117,6 +117,14 @@ export const routes = [
     keywords: ["setup", "install", "getting started", "instructions", "guide"],
   },
   {
+    to: "/learn",
+    label: "Learn the fundamentals",
+    desc: "JavaScript, TypeScript, Node, DSA, system design, git and Python. Runnable lessons that build on each other.",
+    section: "Learn",
+    modes: ["workshop", "explore"],
+    keywords: ["learn", "course", "javascript", "typescript", "node", "python", "dsa", "algorithms", "data structures", "system design", "git", "fundamentals"],
+  },
+  {
     to: "/lessons",
     label: "Lessons",
     desc: "Five tracks: React, Vanilla, Vue, Svelte, Agentic.",

@@ -18,7 +18,7 @@ import { validateCode } from "../utils/validators";
  */
 
 // Challenge definitions
-const CHALLENGES = [
+export const CHALLENGES = [
   {
     id: "hello-world",
     title: "Hello World",

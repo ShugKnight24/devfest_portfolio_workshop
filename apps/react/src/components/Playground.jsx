@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CopyButton } from "./CopyButton";
 import { EmojiIcon } from "./Icons/EmojiIcon";
 import { ChevronRight, Refresh } from "./Icons";
+import { runCode as runInWorker } from "../learn/engine/run";
 
 export const Playground = ({
   title,
@@ -15,15 +16,20 @@ export const Playground = ({
   const [showHints, setShowHints] = useState(false);
   const [currentHint, setCurrentHint] = useState(0);
 
-  // Safe evaluation for simple expressions
-  const runCode = () => {
+  // Runs in a Web Worker (the same runner as /learn), so a stray infinite loop can't freeze the page.
+  // A lone expression like `"Hello, " + name` prints its value; anything else prints its console.log output.
+  const runCode = async () => {
+    let src = code;
     try {
-      // Only evaluate safe, simple JavaScript expressions
-      const result = new Function(`return (${code})`)();
-      setOutput(JSON.stringify(result, null, 2));
-    } catch (error) {
-      setOutput(`Error: ${error.message}`);
+      new Function(`return (${code}\n)`); // compile only, never called
+      src = `console.log(${code}\n)`;
+    } catch {
+      // statements, not an expression: run as written
     }
+    setOutput("Running…");
+    const { results, logs } = await runInWorker("js", src);
+    const errors = results.filter((r) => !r.pass).map((r) => `Error: ${r.error}`);
+    setOutput([...logs, ...errors].join("\n") || "(nothing printed — add a console.log)");
   };
 
   return (

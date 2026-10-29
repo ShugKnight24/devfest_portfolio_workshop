@@ -15,6 +15,7 @@ import {
   validateUseEffectBasic,
   validateCode,
 } from "./validators";
+import { CHALLENGES } from "../components/ChallengeMode";
 
 describe("validateHelloWorld", () => {
   it("should pass with correct solution", () => {
@@ -453,5 +454,156 @@ describe("validateCode (dispatcher)", () => {
     const result = validateCode(code, challenge);
     expect(result.valid).toBe(true);
     expect(result.message).toBe("No validator available");
+  });
+});
+
+describe("challenge solutions", () => {
+  it.each(CHALLENGES.map((c) => [c.id, c]))(
+    "%s: the provided solution passes its validator",
+    (_id, challenge) => {
+      const result = validateCode(challenge.solution, challenge);
+      expect(result.errors).toEqual([]);
+      expect(result.valid).toBe(true);
+    }
+  );
+
+  it.each(CHALLENGES.map((c) => [c.id, c]))(
+    "%s: the untouched starter code does not pass",
+    (_id, challenge) => {
+      expect(validateCode(challenge.starterCode, challenge).valid).toBe(false);
+    }
+  );
+});
+
+describe("alternative correct answers", () => {
+  it("Hello World: arrow function with implicit return", () => {
+    const code = `const Greeting = () => <h1>Hello, World!</h1>;
+export default Greeting;`;
+    expect(validateHelloWorld(code).errors).toEqual([]);
+  });
+
+  it("Hello World: export default function declaration", () => {
+    const code = `export default function Greeting() {
+  return (
+    <h1 className="title">Hello, World!</h1>
+  );
+}`;
+    expect(validateHelloWorld(code).errors).toEqual([]);
+  });
+
+  it("Props 101: arrow function with a differently named props object", () => {
+    const code = `const Welcome = (p) => <h1>Welcome, {p.name}!</h1>;
+export default Welcome;`;
+    expect(validatePropsBasics(code).errors).toEqual([]);
+  });
+
+  it("Props 101: template literal inside JSX", () => {
+    const code = `function Welcome({ name }) {
+  return <h1>{\`Welcome, \${name}!\`}</h1>;
+}
+export default Welcome;`;
+    expect(validatePropsBasics(code).errors).toEqual([]);
+  });
+
+  it("Props 101: fails when 'Welcome' only appears in the declaration", () => {
+    const code = `function Welcome({ name }) {
+  return <h1>Hi, {name}!</h1>;
+}
+export default Welcome;`;
+    expect(validatePropsBasics(code).errors).toContain(
+      "Include 'Welcome' in the displayed text"
+    );
+  });
+
+  it("Props 101: fails when name is accepted but never displayed", () => {
+    const code = `function Welcome({ name }) {
+  return <h1>Welcome!</h1>;
+}
+export default Welcome;`;
+    expect(validatePropsBasics(code).errors).toContain(
+      "Display the 'name' prop in your output"
+    );
+  });
+
+  it("Counter: different state name and updater functions", () => {
+    const code = `import { useState } from "react";
+const Counter = () => {
+  const [value, setValue] = useState(0);
+  return (
+    <div>
+      <button onClick={() => setValue((v) => v - 1)}>-</button>
+      <p>{value}</p>
+      <button onClick={() => setValue((v) => v + 1)}>+</button>
+    </div>
+  );
+};
+export default Counter;`;
+    expect(validateStateCounter(code).errors).toEqual([]);
+  });
+
+  it("List Master: arrow function, props object, and stable keys", () => {
+    const code = `const TodoList = (props) => (
+  <ul>
+    {props.todos.map((todo) => (
+      <li key={todo}>{todo}</li>
+    ))}
+  </ul>
+);
+export default TodoList;`;
+    expect(validateListRendering(code).errors).toEqual([]);
+  });
+
+  it("List Master: fails when todos is not a prop", () => {
+    const code = `function TodoList() {
+  const todos = ["a"];
+  return <ul>{todos.map((t) => <li key={t}>{t}</li>)}</ul>;
+}`;
+    expect(validateListRendering(code).errors).toContain(
+      "Accept 'todos' as a prop"
+    );
+  });
+
+  it("Show & Hide: && only, with double quotes", () => {
+    const code = `import { useState } from "react";
+function Toggle() {
+  const [open, setOpen] = useState(true);
+  return (
+    <div>
+      <button onClick={() => setOpen((o) => !o)}>
+        {open && "Hide"}
+        {!open && "Show"}
+      </button>
+      {open && <p>Hello!</p>}
+    </div>
+  );
+}
+export default Toggle;`;
+    expect(validateConditionalRender(code).errors).toEqual([]);
+  });
+
+  it("Show & Hide: fails without any conditional", () => {
+    const code = `import { useState } from "react";
+function Toggle() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div>
+      <button onClick={() => setOpen(!open)}>Show</button>
+      <p>Hello!</p>
+    </div>
+  );
+}`;
+    expect(validateConditionalRender(code).errors).toContain(
+      "Use conditional rendering (&& or ternary operator)"
+    );
+  });
+
+  it("Effect Hook: props object and one-line effect", () => {
+    const code = `import { useEffect } from "react";
+const PageTitle = (props) => {
+  useEffect(() => { document.title = props.title; }, [props.title]);
+  return <h1>{props.title}</h1>;
+};
+export default PageTitle;`;
+    expect(validateUseEffectBasic(code).errors).toEqual([]);
   });
 });

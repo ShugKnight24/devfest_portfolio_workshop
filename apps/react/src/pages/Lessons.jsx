@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { Playground } from "../components/Playground";
 import { Tooltip } from "../components/Tooltip";
 import { ProgressTracker } from "../components/ProgressTracker";
@@ -34,14 +34,14 @@ const TRACKS = {
     name: "SvelteKit",
     icon: "brick",
     color: "text-red-800 dark:text-red-400",
-    description: "Compile-time optimized components and reactive declarations",
+    description: "Svelte 5 runes, compile-time components, and SvelteKit routing",
   },
   agentic: {
     id: "agentic",
     name: "Agentic Dev",
     icon: "robot",
     color: "text-purple-800 dark:text-purple-400",
-    description: "AI-assisted development with Gemini, Claude, Copilot, Cursor & more",
+    description: "AI-assisted development with Gemini, Claude Code, Copilot, Cursor & more",
   },
 };
 
@@ -187,15 +187,13 @@ const reactLessons = [
         </p>
         <h3>Example:</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
-          {`
-            // Parent passes data
-            <Header name="Alex" title="Developer" />
+          {`// Parent passes data
+<Header name="Alex" title="Developer" />
 
-            // Child receives via props
-            function Header({ name, title }) {
-              return <h1>{name} - {title}</h1>;
-            }
-          `}
+// Child receives via props
+function Header({ name, title }) {
+  return <h1>{name} - {title}</h1>;
+}`}
         </pre>
       </div>
     ),
@@ -234,11 +232,9 @@ const reactLessons = [
           <code>key</code> prop to help React track which items changed.
         </p>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
-          {`
-            skills.map(skill => (
-              <Badge key={skill.id} name={skill.name} />
-            ))
-          `}
+          {`skills.map(skill => (
+  <Badge key={skill.id} name={skill.name} />
+))`}
         </pre>
       </div>
     ),
@@ -273,13 +269,11 @@ const reactLessons = [
         </p>
         <h3>The useState Hook</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
-          {`
-            const [count, setCount] = useState(0);
+          {`const [count, setCount] = useState(0);
 
-            // count = current value
-            // setCount = function to update it
-            // 0 = initial value
-          `}
+// count = current value
+// setCount = function to update it
+// 0 = initial value`}
         </pre>
         <h3>Rules of State:</h3>
         <ul>
@@ -319,17 +313,15 @@ const reactLessons = [
         </p>
         <h3>Three Common Patterns:</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
-          {`
-            // 1. Ternary Operator
-            {isLoggedIn ? <Dashboard /> : <Login />}
+          {`// 1. Ternary Operator
+{isLoggedIn ? <Dashboard /> : <Login />}
 
-            // 2. Logical AND (&&)
-            {hasNotifications && <Badge count={3} />}
+// 2. Logical AND (&&)
+{hasNotifications && <Badge count={3} />}
 
-            // 3. Early Return
-            if (!data) return <Loading />;
-            return <Content data={data} />;
-          `}
+// 3. Early Return
+if (!data) return <Loading />;
+return <Content data={data} />;`}
         </pre>
       </div>
     ),
@@ -367,14 +359,12 @@ const reactLessons = [
         </ul>
         <h3>Example:</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
-          {`
-            <button
-              className="px-4 py-2 bg-blue-600
-              text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Click Me
-            </button>
-          `}
+          {`<button
+  className="px-4 py-2 bg-blue-600
+  text-white rounded-lg hover:bg-blue-700 transition-colors"
+>
+  Click Me
+</button>`}
         </pre>
       </div>
     ),
@@ -438,17 +428,23 @@ it('renders skill name', () => {
     ),
     playground: {
       title: "Write a Test",
-      starterCode: `// Write a test for this function:
+      description: "Check a function with simple pass/fail assertions",
+      concept: "Testing",
+      initialCode: `// Write a test for this function:
 function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-// Your test:
-const result = capitalize('hello');
-console.log('Test:', result === 'Hello' ? '[PASS]' : '[FAIL]');
+// A tiny version of Vitest's expect(...).toBe(...)
+function test(name, actual, expected) {
+  const result = actual === expected ? '[PASS]' : '[FAIL]';
+  console.log(result, name, '→', JSON.stringify(actual));
+}
 
-const result2 = capitalize('world');
-console.log('Test 2:', result2 === 'World' ? '[PASS]' : '[FAIL]');`,
+test('capitalizes a word', capitalize('hello'), 'Hello');
+test('keeps capitals', capitalize('World'), 'World');
+test('handles empty string', capitalize(''), '');
+// Add your own: what about ' hello' (leading space)?`,
       hints: ["Think about edge cases: empty strings, already capitalized, numbers"],
     },
   },
@@ -521,12 +517,12 @@ git push -u origin main`}
         </p>
         <h3>Top AI Tools for React Development:</h3>
         <ul>
-          <li><strong>Gemini Code Assist</strong> — Google's AI, deep integration with VS Code and Android Studio</li>
-          <li><strong>GitHub Copilot</strong> — Inline code suggestions as you type</li>
-          <li><strong>Cursor</strong> — AI-first code editor with full codebase understanding</li>
-          <li><strong>Claude</strong> — Anthropic's AI, excellent at reasoning about complex code</li>
-          <li><strong>OpenCode</strong> — Open-source AI coding CLI</li>
-          <li><strong>Antigravity</strong> — Google DeepMind's agentic AI assistant</li>
+          <li><strong>Gemini Code Assist</strong> — Google's coding assistant for VS Code and JetBrains IDEs</li>
+          <li><strong>GitHub Copilot</strong> — Inline suggestions as you type, plus chat and agent mode</li>
+          <li><strong>Cursor</strong> — AI-first code editor (a VS Code fork) that indexes your codebase</li>
+          <li><strong>Claude Code</strong> — Anthropic's agentic coding tool for the terminal and IDEs</li>
+          <li><strong>OpenCode</strong> — Open-source AI coding agent for the terminal</li>
+          <li><strong>Google Antigravity</strong> — Google's agentic IDE, where agents work across editor, terminal, and browser</li>
         </ul>
         <h3>Effective Prompting for React:</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
@@ -573,7 +569,9 @@ CSS and make it accessible."`}
     ),
     playground: {
       title: "Prompt Engineering Practice",
-      starterCode: `// Write a prompt that would generate a ContactForm component.
+      description: "Score a prompt against a checklist",
+      concept: "Prompting",
+      initialCode: `// Write a prompt that would generate a ContactForm component.
 // Include: what props it takes, what it looks like, how it behaves.
 // Then evaluate your prompt — is it specific enough?
 
@@ -582,17 +580,18 @@ Create a React ContactForm component that...
 [YOUR PROMPT HERE]
 \`;
 
-// Checklist for good prompts:
+// Checklist for good prompts (each entry is a word to look for):
 const checklist = {
-  specifiesProps: false,      // Does it say what props/data it needs?
-  specifiesStyling: false,    // Does it mention Tailwind/CSS approach?
-  specifiesBehavior: false,   // Does it describe what happens on submit?
-  specifiesA11y: false,       // Does it mention accessibility?
-  specifiesValidation: false, // Does it mention form validation?
+  props: /props?|onSubmit/i,       // Does it say what props/data it needs?
+  styling: /tailwind|css/i,        // Does it mention the styling approach?
+  behavior: /submit|loading/i,     // Does it describe what happens on submit?
+  a11y: /accessib|aria|label/i,    // Does it mention accessibility?
+  validation: /valid|required/i,   // Does it mention form validation?
 };
 
-console.log("Review your prompt against the checklist!");
-console.log(checklist);`,
+for (const [item, pattern] of Object.entries(checklist)) {
+  console.log(pattern.test(myPrompt) ? '[x]' : '[ ]', item);
+}`,
       hints: [
         "Include: props (onSubmit callback, fields array), styling (Tailwind classes), validation (required fields, email format), accessibility (labels, error messages), and behavior (loading state, success feedback)."
       ],
@@ -625,7 +624,7 @@ console.log(checklist);`,
           <li>Go to vercel.com and sign in with GitHub</li>
           <li>Import your repository</li>
           <li>
-            Set the Root Directory to <code>react_starter</code>
+            Set the Root Directory to <code>apps/react</code>
           </li>
           <li>Click Deploy!</li>
         </ol>
@@ -902,7 +901,9 @@ document.addEventListener("keydown", (e) => {
     ),
     playground: {
       title: "Responsive Breakpoints",
-      starterCode: `// Simulate responsive breakpoints
+      description: "See which breakpoint a screen width falls into",
+      concept: "Media Queries",
+      initialCode: `// Simulate responsive breakpoints
 const breakpoints = {
   mobile: 0,
   tablet: 768,
@@ -1000,7 +1001,7 @@ console.log(\`Columns: \${
           <li><strong>Copilot</strong> — Excellent inline DOM manipulation suggestions</li>
           <li><strong>Cursor</strong> — Full file editing for CSS + JS together</li>
           <li><strong>Claude</strong> — Deep understanding of browser APIs</li>
-          <li><strong>Antigravity</strong> — Agentic workflow for full-page builds</li>
+          <li><strong>Google Antigravity</strong> — Agentic IDE for full-page builds</li>
         </ul>
         <h3>Example Prompt for Vanilla JS:</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
@@ -1024,7 +1025,9 @@ console.log(\`Columns: \${
     ),
     playground: {
       title: "AI-Generated DOM Code",
-      starterCode: `// Challenge: Use AI thinking to write a function
+      description: "Render HTML strings from data with template literals",
+      concept: "Template Literals",
+      initialCode: `// Challenge: Use AI thinking to write a function
 // that renders project cards from data.
 
 const projects = [
@@ -1267,7 +1270,7 @@ const skills = ref([
         </p>
         <h3>Core Primitives:</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
-          {`import { ref, computed, watch, onMounted } from 'vue'
+          {`import { ref, reactive, computed, watch, onMounted } from 'vue'
 
 // ref — single reactive value
 const count = ref(0)
@@ -1303,14 +1306,14 @@ onMounted(() => {
         <p>Vue provides directives for conditionally rendering elements in the template.</p>
         <h3>v-if vs v-show:</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
-          {`<!-- v-if: adds/removes from DOM -->
+          {`<!-- v-if: creates/destroys the element -->
 <div v-if="isLoading">Loading...</div>
 <div v-else-if="error">{{ error }}</div>
 <div v-else>
   <ProjectList :projects="projects" />
 </div>
 
-<!-- v-show: toggles CSS display -->
+<!-- v-show: always rendered, toggles CSS display -->
 <!-- Better for frequent toggles -->
 <div v-show="showFilters">
   <FilterPanel />
@@ -1318,8 +1321,8 @@ onMounted(() => {
         </pre>
         <h3>When to Use Which:</h3>
         <ul>
-          <li><code>v-if</code> — when the condition rarely changes (cheaper toggle cost, higher initial cost)</li>
-          <li><code>v-show</code> — when toggling frequently (always rendered, just hidden via CSS)</li>
+          <li><code>v-if</code> — when the condition rarely changes at runtime. Higher toggle cost (the element is destroyed and recreated), but nothing renders while it is false</li>
+          <li><code>v-show</code> — when toggling frequently. Higher initial render cost (always rendered), but toggling only flips CSS <code>display</code></li>
           <li><code>v-if</code> with <code>v-else</code> — for mutually exclusive views</li>
         </ul>
       </div>
@@ -1383,7 +1386,7 @@ onMounted(() => {
           <li><strong>Copilot</strong> — Great for inline SFC completion</li>
           <li><strong>Cursor</strong> — Multi-file refactoring across .vue files</li>
           <li><strong>Claude</strong> — Deep reasoning about reactive patterns</li>
-          <li><strong>Antigravity</strong> — Full agentic workflow for Vue apps</li>
+          <li><strong>Google Antigravity</strong> — Agentic IDE for multi-step Vue tasks</li>
         </ul>
         <h3>Example Vue Prompt:</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
@@ -1405,7 +1408,9 @@ onMounted(() => {
     ),
     playground: {
       title: "Vue Prompt Engineering",
-      starterCode: `// Write a prompt to generate a Vue 3 composable
+      description: "Draft a prompt, then see the composable idea in plain JS",
+      concept: "Composables",
+      initialCode: `// Write a prompt to generate a Vue 3 composable
 // that manages a theme system.
 
 const prompt = \`
@@ -1419,9 +1424,23 @@ Create a Vue 3 composable called useTheme that:
 console.log("Your prompt:");
 console.log(prompt);
 
+// The idea behind a composable, in plain JS:
+// a function that owns some state and returns what callers need.
+function useTheme(initial = "light") {
+  let theme = initial;
+  const setTheme = (next) => { theme = next; };
+  const isDark = () => theme === "dark";
+  return { setTheme, isDark };
+}
+
+const { setTheme, isDark } = useTheme();
+console.log("isDark:", isDark());
+setTheme("dark");
+console.log("isDark after setTheme('dark'):", isDark());
+
 // Evaluate:
 console.log("\\nDoes your prompt specify:");
-console.log("- Return type (ref, reactive, computed)?");
+console.log("- Return values (ref, reactive, computed)?");
 console.log("- Side effects (localStorage, watch)?");
 console.log("- TypeScript types?");`,
       hints: ["Include: ref for currentTheme, computed for isDark, function setTheme() that updates CSS vars and persists to localStorage, watch to sync with system preference. Return { currentTheme, isDark, setTheme, themes }."],
@@ -1446,8 +1465,8 @@ npm run preview`}
         <ol>
           <li>Push code to GitHub</li>
           <li>Connect repo on vercel.com</li>
-          <li>Framework preset: <strong>Vue.js</strong> (auto-detected)</li>
-          <li>Root directory: <code>apps/vue</code></li>
+          <li>Framework preset: <strong>Vite</strong> (auto-detected for Vue + Vite projects)</li>
+          <li>Root directory: the folder that contains your Vue app's <code>package.json</code></li>
           <li>Deploy — live in under a minute</li>
         </ol>
         <h3>Vue Router History Mode:</h3>
@@ -1472,12 +1491,14 @@ const svelteLessons = [
         <h2>Welcome to Svelte!</h2>
         <p>
           Svelte is a compiler that turns your declarative components into efficient
-          JavaScript that surgically updates the DOM. No virtual DOM, no runtime overhead.
+          JavaScript that surgically updates the DOM. No virtual DOM, and only a small runtime.
+          This track uses <strong>Svelte 5</strong>, the current major version, and its
+          <strong>runes</strong> (<code>$state</code>, <code>$derived</code>, <code>$props</code>, <code>$effect</code>).
         </p>
         <h3>Why Svelte?</h3>
         <ul>
           <li><strong>No virtual DOM</strong> — compiles to vanilla JS at build time</li>
-          <li><strong>Less boilerplate</strong> — reactive by default, no <code>useState</code> or <code>ref()</code></li>
+          <li><strong>Less boilerplate</strong> — <code>let count = $state(0)</code> and plain assignment (<code>count++</code>) updates the UI</li>
           <li><strong>Tiny bundles</strong> — ships less JavaScript to the browser</li>
           <li><strong>Built-in animations</strong> — transitions and motion are first-class</li>
         </ul>
@@ -1486,6 +1507,13 @@ const svelteLessons = [
           <li><strong>Svelte</strong> — the component framework (like React or Vue)</li>
           <li><strong>SvelteKit</strong> — the app framework (like Next.js or Nuxt) — includes routing, SSR, and more</li>
         </ul>
+        <h3>Reading Older Svelte Code:</h3>
+        <p>
+          Svelte 4 code (and many tutorials) uses <code>export let</code> for props,{" "}
+          <code>$:</code> for reactive statements, and <code>on:click</code> for events.
+          Svelte 5 still runs that syntax for compatibility, but new SvelteKit projects
+          use runes, so that's what this track teaches.
+        </p>
       </div>
     ),
   },
@@ -1521,6 +1549,18 @@ const svelteLessons = [
           <li><code>+layout.svelte</code> — wraps all child pages (nav, footer)</li>
           <li><code>$lib/</code> — alias for <code>src/lib/</code>, importable anywhere</li>
         </ul>
+        <h3>A Layout in Svelte 5:</h3>
+        <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
+          {`<!-- src/routes/+layout.svelte -->
+<script>
+  let { children } = $props();
+</script>
+
+<nav>...</nav>
+<main>
+  {@render children()}  <!-- the current page goes here -->
+</main>`}
+        </pre>
       </div>
     ),
   },
@@ -1535,13 +1575,14 @@ const svelteLessons = [
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
           {`<!-- Header.svelte -->
 <script>
-  let name = 'Alex';
-  let title = 'Web Developer';
+  let name = $state('Alex');
+  let title = 'Web Developer'; // never changes, so no rune needed
 </script>
 
 <header>
   <h1>{name}</h1>
   <p>{title}</p>
+  <button onclick={() => (name = 'Sam')}>Rename</button>
 </header>
 
 <style>
@@ -1557,7 +1598,7 @@ const svelteLessons = [
         <h3>Key Differences from React/Vue:</h3>
         <ul>
           <li>No <code>return</code> statement — markup is top-level</li>
-          <li>Variables are reactive by default — just assign with <code>=</code></li>
+          <li>Wrap changing values in <code>$state()</code>, then just assign with <code>=</code></li>
           <li>Curly braces <code>{"{}"}</code> for expressions (like JSX, not mustache)</li>
           <li>Styles are auto-scoped (no <code>scoped</code> attribute needed)</li>
         </ul>
@@ -1570,13 +1611,12 @@ const svelteLessons = [
     content: (
       <div className="prose dark:prose-invert max-w-none">
         <h2>Data In, Events Out</h2>
-        <p>Svelte uses <code>export let</code> for props and <code>createEventDispatcher</code> or callback props for events.</p>
+        <p>Svelte 5 reads props with the <code>$props()</code> rune and sends events up through <strong>callback props</strong> (functions passed in as props).</p>
         <h3>Props:</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
           {`<!-- SkillBadge.svelte -->
 <script>
-  export let name;
-  export let level = 50; // default value
+  let { name, level = 50 } = $props(); // 50 is the default
 </script>
 
 <span class="badge">
@@ -1590,18 +1630,20 @@ const svelteLessons = [
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
           {`<!-- ThemePicker.svelte -->
 <script>
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher();
-
-  const select = (theme) => dispatch('change', theme);
+  let { onChange } = $props();
 </script>
 
-<!-- Or use callback props (simpler) -->
-<script>
-  export let onChange;
-</script>
-<button on:click={() => onChange('dark')}>Dark</button>`}
+<button onclick={() => onChange('dark')}>Dark</button>
+<button onclick={() => onChange('light')}>Light</button>
+
+<!-- Parent usage -->
+<ThemePicker onChange={(theme) => applyTheme(theme)} />`}
         </pre>
+        <p>
+          Event handlers are plain attributes: <code>onclick</code>, <code>oninput</code>,{" "}
+          <code>onsubmit</code>. Older code uses <code>on:click</code> and{" "}
+          <code>createEventDispatcher</code>, which Svelte 5 deprecates.
+        </p>
       </div>
     ),
   },
@@ -1625,7 +1667,7 @@ const svelteLessons = [
 {#each skills as skill (skill.id)}
   <div class="skill-card">
     <h3>{skill.name}</h3>
-    <progress value={skill.level} max="100" />
+    <progress value={skill.level} max="100"></progress>
   </div>
 {:else}
   <p>No skills added yet.</p>
@@ -1642,52 +1684,57 @@ const svelteLessons = [
   },
   {
     id: "reactivity",
-    title: "Reactive Declarations",
+    title: "Runes & Reactivity",
     content: (
       <div className="prose dark:prose-invert max-w-none">
         <h2>Svelte's Superpower</h2>
         <p>
-          In Svelte, reactivity is baked into the language. Assignments trigger updates.
-          Derived values use the <code>$:</code> label.
+          Svelte 5 makes reactivity explicit with <strong>runes</strong>: <code>$state</code> for
+          values that change, <code>$derived</code> for values computed from them, and{" "}
+          <code>$effect</code> for side effects. Assignments to state trigger updates.
         </p>
-        <h3>Reactive Assignments:</h3>
+        <h3>The Three Core Runes:</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
           {`<script>
-  let count = 0;
+  // $state — a value that changes
+  let count = $state(0);
 
-  // This re-runs whenever count changes
-  $: doubled = count * 2;
+  // $derived — recalculates whenever count changes
+  let doubled = $derived(count * 2);
 
-  // Reactive statement (like useEffect)
-  $: console.log('Count is now', count);
-
-  // Reactive block
-  $: {
-    if (count > 10) {
-      alert('Big number!');
-      count = 0;
-    }
-  }
+  // $effect — runs after the DOM updates (like useEffect)
+  $effect(() => {
+    console.log('Count is now', count);
+  });
 </script>
 
-<button on:click={() => count++}>
+<button onclick={() => count++}>
   {count} × 2 = {doubled}
 </button>`}
         </pre>
-        <h3>Stores (Global State):</h3>
+        <p>
+          Use <code>$derived</code> for values you can calculate. Save{" "}
+          <code>$effect</code> for talking to the outside world (logging,{" "}
+          <code>localStorage</code>, timers) — don't use it to set other state.
+        </p>
+        <h3>Shared State Across Components:</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
-          {`// stores/theme.js
-import { writable } from 'svelte/store';
+          {`// src/lib/theme.svelte.js — runes work in .svelte.js files
+export const theme = $state({ current: 'default' });
 
-export const currentTheme = writable('default');
-
-// In any component — $ prefix auto-subscribes
+<!-- Any component -->
 <script>
-  import { currentTheme } from '$lib/stores/theme';
+  import { theme } from '$lib/theme.svelte.js';
 </script>
 
-<p>Current: {$currentTheme}</p>`}
+<p>Current: {theme.current}</p>
+<button onclick={() => (theme.current = 'dark')}>Dark</button>`}
         </pre>
+        <p>
+          Older code shares state with stores (<code>writable</code> from{" "}
+          <code>svelte/store</code> and the <code>$store</code> prefix). Stores
+          still work in Svelte 5.
+        </p>
       </div>
     ),
   },
@@ -1764,9 +1811,13 @@ export const currentTheme = writable('default');
         </pre>
         <h3>CSS Variables for Theming:</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
-          {`<!-- Pass CSS vars as component props -->
-<div style="--color: {theme.primary}">
-  <slot />
+          {`<!-- ThemedBox.svelte: set a CSS variable from a prop -->
+<script>
+  let { color, children } = $props();
+</script>
+
+<div style:--color={color}>
+  {@render children()}
 </div>
 
 <style>
@@ -1775,6 +1826,11 @@ export const currentTheme = writable('default');
   }
 </style>`}
         </pre>
+        <p>
+          Content placed between a component's tags arrives as the{" "}
+          <code>children</code> snippet; <code>{"{@render children()}"}</code> shows it.
+          This replaces <code>{"<slot />"}</code> from Svelte 4.
+        </p>
         <h3>Built-in Transitions:</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
           {`<script>
@@ -1797,38 +1853,44 @@ export const currentTheme = writable('default');
       <div className="prose dark:prose-invert max-w-none">
         <h2>Building Svelte Apps with AI</h2>
         <p>
-          Svelte's unique syntax (reactive declarations, each blocks, transitions)
-          is well-understood by modern AI tools, making them excellent companions
-          for Svelte development.
+          AI tools can write Svelte components quickly, but many were trained mostly
+          on Svelte 4 code. Always say <strong>"Svelte 5 with runes"</strong> in your
+          prompt, and check the output for <code>export let</code>, <code>$:</code>,
+          or <code>on:click</code>.
         </p>
         <h3>AI Tools for Svelte:</h3>
         <ul>
           <li><strong>Gemini</strong> — Generates clean .svelte components with transitions</li>
-          <li><strong>Copilot</strong> — Predicts reactive declarations and store patterns</li>
+          <li><strong>Copilot</strong> — Inline completion for markup and runes</li>
           <li><strong>Cursor</strong> — Multi-file SvelteKit refactoring</li>
-          <li><strong>Claude</strong> — Excellent at Svelte 5 runes and store logic</li>
-          <li><strong>Antigravity</strong> — Full agentic workflow for SvelteKit apps</li>
+          <li><strong>Claude</strong> — Reasoning about runes and component design</li>
+          <li><strong>Google Antigravity</strong> — Agentic IDE for multi-step SvelteKit tasks</li>
         </ul>
         <h3>Example Svelte Prompt:</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
-          {`"Create a Svelte component called ProjectCard.svelte:
+          {`"Create a Svelte 5 component called ProjectCard.svelte:
+- Use runes: read props with $props()
 - Props: title, description, tags (array), githubUrl, liveUrl
 - Use {#each} to render tags as badges
-- Add hover transition: scale(1.02) with Svelte transition
+- Hover effect: CSS transition to scale(1.02)
 - Style: scoped, CSS custom properties for theming
-- Include a slot for custom footer content"`}
+- Accept an optional footer snippet and show it with {@render}"`}
         </pre>
-        <h3>AI for Svelte 5 Runes:</h3>
+        <h3>Migrating Older Code:</h3>
         <p>
-          Ask AI to help migrate from Svelte 4 reactive declarations (<code>$:</code>)
-          to Svelte 5 runes (<code>$state</code>, <code>$derived</code>, <code>$effect</code>).
-          AI handles this migration pattern very well.
+          AI is useful for converting Svelte 4 code to runes: <code>export let</code>{" "}
+          → <code>$props()</code>, <code>$:</code> → <code>$derived</code> or{" "}
+          <code>$effect</code>, <code>on:click</code> → <code>onclick</code>. Svelte
+          also ships a migration script (<code>npx sv migrate svelte-5</code>); review
+          every change either way.
         </p>
       </div>
     ),
     playground: {
       title: "Svelte Component from Prompt",
-      starterCode: `// Practice: Write a prompt for an AI to generate
+      description: "Draft a prompt, then see state and derived values in plain JS",
+      concept: "Runes",
+      initialCode: `// Practice: Write a prompt for an AI to generate
 // a Svelte theme toggle component.
 
 const sveltePrompt = \`
@@ -1842,6 +1904,16 @@ Create a Svelte 5 component called ThemeToggle.svelte:
 
 console.log("Your Svelte prompt:");
 console.log(sveltePrompt);
+
+// The idea behind $state + $derived, in plain JS:
+// derived values are recalculated from state, never stored separately.
+let theme = "light";                       // like $state("light")
+const label = () => theme === "dark" ? "Switch to light" : "Switch to dark"; // like $derived
+
+console.log("\\nButton label:", label());
+theme = "dark";
+console.log("After toggling:", label());
+
 console.log("\\nTip: Mention Svelte-specific features!");
 console.log("- $state, $derived, $effect (runes)");
 console.log("- transition:fade, transition:slide");
@@ -1856,6 +1928,10 @@ console.log("- class: directive for conditional classes");`,
       <div className="prose dark:prose-invert max-w-none">
         <h2>Deploy Your SvelteKit Portfolio</h2>
         <p>SvelteKit supports multiple adapters — choose based on your hosting target.</p>
+        <p>
+          New projects start with <code>@sveltejs/adapter-auto</code>, which detects
+          Vercel, Netlify, and other supported hosts automatically.
+        </p>
         <h3>Static Adapter (GitHub Pages / Netlify / Vercel):</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
           {`# Install static adapter
@@ -1869,12 +1945,16 @@ export default {
     adapter: adapter({
       pages: 'build',
       assets: 'build',
-      fallback: 'index.html' // SPA mode
+      // Only for SPA mode; the file name depends on your host
+      // fallback: '200.html'
     })
   }
-};`}
+};
+
+// src/routes/+layout.js — prerender every page to HTML
+export const prerender = true;`}
         </pre>
-        <h3>Vercel Adapter (recommended):</h3>
+        <h3>Vercel Adapter (for Vercel-specific options):</h3>
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg text-sm">
           {`npm install -D @sveltejs/adapter-vercel
 
@@ -1920,12 +2000,12 @@ const agenticLessons = [
         </p>
         <h3>The AI Tool Landscape:</h3>
         <ul>
-          <li><strong>Gemini Code Assist</strong> — Google's AI, integrated into VS Code and Cloud</li>
-          <li><strong>GitHub Copilot</strong> — Inline suggestions as you type</li>
+          <li><strong>Gemini Code Assist</strong> — Google's coding assistant for VS Code, JetBrains, and Google Cloud</li>
+          <li><strong>GitHub Copilot</strong> — Inline suggestions as you type, plus chat and agent mode</li>
           <li><strong>Cursor</strong> — AI-first code editor with full codebase awareness</li>
-          <li><strong>Claude</strong> — Anthropic's AI, strong at reasoning and long context</li>
-          <li><strong>OpenCode</strong> — Open-source AI CLI for the terminal</li>
-          <li><strong>Antigravity</strong> — Google DeepMind's agentic AI coding assistant</li>
+          <li><strong>Claude Code</strong> — Anthropic's agentic coding tool for the terminal and IDEs</li>
+          <li><strong>OpenCode</strong> — Open-source AI coding agent for the terminal</li>
+          <li><strong>Google Antigravity</strong> — Google's agentic IDE (announced November 2025)</li>
         </ul>
         <h3>AI is a Tool, Not a Replacement</h3>
         <p>
@@ -1981,7 +2061,9 @@ const agenticLessons = [
     ),
     playground: {
       title: "Prompt Crafting Exercise",
-      starterCode: `// EXERCISE: Write a CRISP prompt for an AI to generate
+      description: "Assemble a CRISP prompt from its parts",
+      concept: "CRISP Prompts",
+      initialCode: `// EXERCISE: Write a CRISP prompt for an AI to generate
 // a responsive navigation bar component.
 //
 // Fill in each section:
@@ -2016,36 +2098,40 @@ console.log(fullPrompt);`,
         </p>
         <h3>Gemini Code Assist</h3>
         <p>
-          Google's AI coding assistant. Excels at understanding Google Cloud, Android,
-          and full-stack web development. Available in VS Code, JetBrains, and Cloud Shell.
+          Google's AI coding assistant, powered by Gemini. Strong on Google Cloud,
+          Android, and full-stack web development. Available in VS Code, JetBrains
+          IDEs, and Cloud Shell.
         </p>
         <h3>GitHub Copilot</h3>
         <p>
-          The original AI coding assistant. Best for inline autocomplete — it predicts
-          the next line as you type. Great for boilerplate and repetitive patterns.
+          One of the first widely used AI coding assistants. Known for inline
+          autocomplete — it predicts the next lines as you type — and now also offers
+          chat and an agent mode that can edit multiple files.
         </p>
         <h3>Cursor</h3>
         <p>
           An AI-first code editor (VS Code fork) that understands your entire codebase.
-          Best for large refactors and multi-file changes. Its Cmd+K (edit) and
-          Composer (multi-file) features are industry-leading.
+          Best for large refactors and multi-file changes. Use Cmd+K (Ctrl+K) for
+          inline edits and its Agent mode for multi-file changes.
         </p>
-        <h3>Claude (Anthropic)</h3>
+        <h3>Claude &amp; Claude Code (Anthropic)</h3>
         <p>
-          Excels at long, complex reasoning. Best for: explaining legacy code,
-          debugging tricky issues, architectural decisions, and code review.
-          Handles very long files well.
+          Claude is Anthropic's model family, strong at long, complex reasoning:
+          explaining legacy code, debugging tricky issues, architectural decisions,
+          and code review. <strong>Claude Code</strong> is Anthropic's agentic coding
+          tool — it runs in your terminal (and IDEs), reads your repo, edits files,
+          and runs commands with your approval.
         </p>
         <h3>OpenCode</h3>
         <p>
-          Open-source AI coding CLI. Runs in your terminal, supports multiple AI
-          models. Great for developers who prefer terminal workflows.
+          Open-source AI coding agent. Runs in your terminal and works with models
+          from many providers. Great for developers who prefer terminal workflows.
         </p>
-        <h3>Antigravity</h3>
+        <h3>Google Antigravity</h3>
         <p>
-          Google DeepMind's agentic AI. Can read your codebase, run commands, edit
-          files, search the web, and iterate on complex tasks autonomously. 
-          Designed for multi-step development workflows.
+          Google's agentic IDE, announced with Gemini 3 in November 2025. You hand
+          tasks to agents that work across the editor, terminal, and a browser, then
+          review what they produced. Designed for multi-step development workflows.
         </p>
         <h3>Quick Comparison:</h3>
         <table>
@@ -2053,12 +2139,12 @@ console.log(fullPrompt);`,
             <tr><th>Tool</th><th>Best For</th><th>Style</th></tr>
           </thead>
           <tbody>
-            <tr><td>Gemini</td><td>Google ecosystem, full-stack</td><td>Chat + inline</td></tr>
-            <tr><td>Copilot</td><td>Autocomplete, boilerplate</td><td>Inline suggestions</td></tr>
-            <tr><td>Cursor</td><td>Multi-file refactors</td><td>Editor-integrated</td></tr>
-            <tr><td>Claude</td><td>Complex reasoning, review</td><td>Chat + agentic</td></tr>
-            <tr><td>OpenCode</td><td>Terminal workflows</td><td>CLI</td></tr>
-            <tr><td>Antigravity</td><td>Agentic multi-step tasks</td><td>Autonomous agent</td></tr>
+            <tr><td>Gemini Code Assist</td><td>Google ecosystem, full-stack</td><td>Chat + inline</td></tr>
+            <tr><td>Copilot</td><td>Autocomplete, boilerplate</td><td>Inline + chat + agent</td></tr>
+            <tr><td>Cursor</td><td>Multi-file refactors</td><td>AI code editor</td></tr>
+            <tr><td>Claude Code</td><td>Complex reasoning, review</td><td>Terminal agent</td></tr>
+            <tr><td>OpenCode</td><td>Terminal workflows</td><td>Terminal agent</td></tr>
+            <tr><td>Antigravity</td><td>Agentic multi-step tasks</td><td>Agentic IDE</td></tr>
           </tbody>
         </table>
       </div>
@@ -2121,14 +2207,15 @@ Agent:
       <div className="prose dark:prose-invert max-w-none">
         <h2>Model Context Protocol (MCP)</h2>
         <p>
-          MCP is an open protocol that lets AI models connect to external tools and
-          data sources. Think of it as "USB for AI" — a standard way for AI to
-          interact with databases, APIs, file systems, and development tools.
+          MCP is an open standard, introduced by Anthropic in November 2024, that lets
+          AI applications connect to external tools and data sources. Think of it as
+          a "USB-C port for AI" — one standard way for AI to work with databases,
+          APIs, file systems, and development tools.
         </p>
         <h3>How MCP Works:</h3>
         <ol>
-          <li><strong>Client</strong> (your AI tool) connects to MCP servers</li>
-          <li><strong>Server</strong> exposes tools (functions the AI can call)</li>
+          <li><strong>Client</strong> (inside your AI tool) connects to MCP servers</li>
+          <li><strong>Server</strong> exposes <em>tools</em> (functions the AI can call), <em>resources</em> (data it can read), and <em>prompts</em> (reusable templates)</li>
           <li><strong>AI</strong> decides which tools to use based on your request</li>
           <li><strong>Results</strong> flow back to the AI to continue reasoning</li>
         </ol>
@@ -2190,7 +2277,9 @@ What's causing this and how do I fix it?"`}
     ),
     playground: {
       title: "Debug with AI Thinking",
-      starterCode: `// This code has a bug. Can you find it?
+      description: "Find and fix a crash caused by missing data",
+      concept: "Debugging",
+      initialCode: `// This code has a bug. Can you find it?
 // Think like an AI debugger — trace the data flow.
 
 const projects = [
@@ -2370,7 +2459,7 @@ Create an implementation plan with:
         <ol>
           <li><strong>Identify the exact problem:</strong> Don't build a generic CRM; build a conference networking badge scanner with 1-click email drafts.</li>
           <li><strong>Choose zero-friction storage:</strong> Use browser <code>localStorage</code> or simple JSON exports. Skip complex databases for personal utilities.</li>
-          <li><strong>Scaffold in one command:</strong> <code>npx create-vite my-tool --template react</code></li>
+          <li><strong>Scaffold in one command:</strong> <code>npm create vite@latest my-tool -- --template react</code></li>
           <li><strong>Prompt the agent:</strong> Feed a concise CRISP prompt with your exact design requirements.</li>
           <li><strong>Verify:</strong> Run it on the real input (yours or your partner's) and read the diff before you keep it.</li>
           <li><strong>Deploy:</strong> Ship live with <code>vercel --prod</code> or GitHub Pages.</li>
@@ -2578,6 +2667,12 @@ export const Lessons = () => {
           {track.description}
         </p>
         <TrackSelector activeTrack={activeTrack} onTrackChange={handleTrackChange} />
+        <p className="mt-4 text-sm text-(--color-muted-text) dark:text-(--color-muted-text-dark)">
+          New to the fundamentals underneath these frameworks?{" "}
+          <Link to="/learn" className="font-semibold text-(--color-primary) underline underline-offset-2">
+            Learn JavaScript, TypeScript, Node, DSA, system design and git →
+          </Link>
+        </p>
       </div>
 
       <div className="grid lg:grid-cols-4 gap-8">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { trackEvent } from "@portfolio/telemetry";
 
@@ -21,6 +21,8 @@ import { Resources } from "./pages/Resources";
 import { AgenticStudio } from "./pages/AgenticStudio";
 import { OperativesPage } from "./pages/OperativesPage";
 import { SpeakingEventsHub } from "./components/SpeakingEventsHub";
+// /learn ships its lessons as data, so it loads on first visit instead of with every page
+const LearnPage = lazy(() => import("./learn/LearnPage"));
 
 // Components
 import { Navigation } from "./components/Navigation";
@@ -178,6 +180,11 @@ export const App = () => {
                 <Route path="/lessons" element={<Lessons />} />
                 {/* Deep link -> Go directly to a specific lesson */}
                 <Route path="/lessons/:lessonId" element={<Lessons />} />
+                {/* Learn - runnable fundamentals: JS, TS, Node, DSA, system design, git, Python */}
+                <Route path="/learn" element={<Suspense fallback={null}><LearnPage /></Suspense>} />
+                <Route path="/learn/:track" element={<Suspense fallback={null}><LearnPage /></Suspense>} />
+                <Route path="/learn/:track/:lesson" element={<Suspense fallback={null}><LearnPage /></Suspense>} />
+                <Route path="/learn/:track/:lesson/:step" element={<Suspense fallback={null}><LearnPage /></Suspense>} />
                 {/* A Showcase of different portfolio styles - Compare how different components would look */}
                 <Route path="/showcase" element={<Showcase />} />
                 {/* What's Next - Learning resources and next steps */}

@@ -10,17 +10,55 @@
  * 3. Cleaner ChallengeMode component
  */
 
+const IDENT = "[A-Za-z_$][\\w$]*";
+
+/**
+ * True if the code declares a component called `name`, either as a
+ * function declaration or as a const/let/var (arrow function or expression).
+ */
+function declaresComponent(code, name) {
+  return new RegExp(
+    `(function\\s+${name}\\s*\\(|\\b(const|let|var)\\s+${name}\\s*=)`
+  ).test(code);
+}
+
+/**
+ * True if component `name` receives `prop`, either destructured
+ * ({ prop }) or through a props object that is read as `props.prop`.
+ */
+function acceptsProp(code, name, prop) {
+  const params = code.match(
+    new RegExp(
+      `\\b${name}\\s*(?:=\\s*(?:function\\s*)?\\(?|\\()\\s*(\\{[^}]*\\}|${IDENT})`
+    )
+  );
+  if (!params) return false;
+  const param = params[1];
+  if (param.startsWith("{")) {
+    return new RegExp(`\\b${prop}\\b`).test(param);
+  }
+  return new RegExp(`\\b${param}\\.${prop}\\b`).test(code);
+}
+
+/**
+ * True if the code returns JSX, via `return <...>` or an arrow
+ * function's implicit return `=> <...>`.
+ */
+function returnsJsx(code) {
+  return /(return|=>)\s*\(?\s*</.test(code);
+}
+
 /**
  * Validate code for the Hello World challenge
  */
 export function validateHelloWorld(code) {
   const errors = [];
 
-  if (!/function\s+Greeting\s*\(/.test(code)) {
+  if (!declaresComponent(code, "Greeting")) {
     errors.push("Define a function called 'Greeting'");
   }
 
-  if (!/return\s*[\s\S]*?</.test(code)) {
+  if (!returnsJsx(code)) {
     errors.push("Add a return statement with JSX");
   }
 
@@ -49,27 +87,28 @@ export function validateHelloWorld(code) {
 export function validatePropsBasics(code) {
   const errors = [];
 
-  if (!/function\s+Welcome\s*\(/.test(code)) {
+  if (!declaresComponent(code, "Welcome")) {
     errors.push("Define a function called 'Welcome'");
   }
 
-  if (!/Welcome\s*\(\s*(\{[^}]*name[^}]*\}|props)/.test(code)) {
+  if (!acceptsProp(code, "Welcome", "name")) {
     errors.push("Accept 'name' as a prop (via destructuring or props object)");
   }
 
-  if (
-    !/(props\.name|\{.*name.*\}|`[^`]*\$\{name\}|\+\s*name|name\s*\+)/.test(
-      code
-    )
-  ) {
+  // `name` (or `props.name`) used inside a {...} expression after a tag opens
+  if (!/>[^<]*\{[^}]*\bname\b[^}]*\}/.test(code)) {
     errors.push("Display the 'name' prop in your output");
   }
 
-  if (!/Welcome/i.test(code.replace(/function\s+Welcome/, ""))) {
+  // Ignore the declaration and export so only displayed text counts
+  const withoutDeclarations = code
+    .replace(/\b(function|const|let|var)\s+Welcome\b/g, "")
+    .replace(/export\s+default\s+Welcome\b/g, "");
+  if (!/Welcome/i.test(withoutDeclarations)) {
     errors.push("Include 'Welcome' in the displayed text");
   }
 
-  if (!/return\s*[\s\S]*?</.test(code)) {
+  if (!returnsJsx(code)) {
     errors.push("Return JSX from your component");
   }
 
@@ -111,7 +150,12 @@ export function validateStateCounter(code) {
     errors.push("Add two buttons (increment and decrement)");
   }
 
-  if (!/\{.*count.*\}/.test(code)) {
+  // Use whatever name the learner gave the state variable
+  const stateMatch = code.match(
+    new RegExp(`\\[\\s*(${IDENT})\\s*,\\s*${IDENT}\\s*\\]\\s*=\\s*useState`)
+  );
+  const stateVar = stateMatch ? stateMatch[1] : "count";
+  if (!new RegExp(`\\{\\s*${stateVar}\\s*\\}`).test(code)) {
     errors.push("Display the current count value");
   }
 
@@ -128,15 +172,15 @@ export function validateStateCounter(code) {
 export function validateListRendering(code) {
   const errors = [];
 
-  if (!/function\s+TodoList\s*\(/.test(code)) {
+  if (!declaresComponent(code, "TodoList")) {
     errors.push("Define a function called 'TodoList'");
   }
 
-  if (!/TodoList\s*\(\s*\{[^}]*todos/.test(code)) {
+  if (!acceptsProp(code, "TodoList", "todos")) {
     errors.push("Accept 'todos' as a prop");
   }
 
-  if (!/.map\s*\(/.test(code)) {
+  if (!/\.map\s*\(/.test(code)) {
     errors.push("Use the .map() method to iterate over todos");
   }
 
@@ -181,7 +225,7 @@ export function validateConditionalRender(code) {
     errors.push("Add an onClick handler to toggle visibility");
   }
 
-  if (!/(\\\&\\\&|[\?:])/.test(code)) {
+  if (!/&&|\?[^.][\s\S]*?:/.test(code)) {
     errors.push("Use conditional rendering (&& or ternary operator)");
   }
 
@@ -218,7 +262,7 @@ export function validateUseEffectBasic(code) {
     errors.push("Set document.title inside useEffect");
   }
 
-  if (!/document\.title\s*=\s*title/.test(code)) {
+  if (!/document\.title\s*=\s*(\w+\.)?title\b/.test(code)) {
     errors.push("Assign the 'title' prop to document.title");
   }
 
@@ -226,7 +270,7 @@ export function validateUseEffectBasic(code) {
     errors.push("Add a dependency array to useEffect");
   }
 
-  if (!/\[\s*title\s*\]/.test(code)) {
+  if (!/\[\s*(\w+\.)?title\s*\]/.test(code)) {
     errors.push("Include 'title' in the dependency array");
   }
 

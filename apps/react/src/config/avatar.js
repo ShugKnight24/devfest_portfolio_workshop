@@ -49,6 +49,67 @@ export const HAIR_STYLES = [
   { id: "bun", label: "Top knot" },
   { id: "long", label: "Long straight" },
   { id: "wavyBob", label: "Wavy bob" },
+  { id: "fade", label: "High-top fade" },
+  { id: "ponytail", label: "Ponytail" },
+  { id: "spiky", label: "Spiky" },
+  { id: "spaceBuns", label: "Space buns" },
+];
+
+export const EYE_COLORS = [
+  { id: "brown", label: "Brown", base: "#6B4226" },
+  { id: "dark", label: "Dark brown", base: "#3A2418" },
+  { id: "hazel", label: "Hazel", base: "#8E6B2F" },
+  { id: "amber", label: "Amber", base: "#C1862F" },
+  { id: "green", label: "Green", base: "#4E8A4A" },
+  { id: "blue", label: "Blue", base: "#3F7CC0" },
+  { id: "grey", label: "Grey", base: "#7C8794" },
+];
+
+/** Where you are in the scene: in the chair at the keyboard, or up on your feet in front of the desk. */
+export const POSES = [
+  { id: "seated", label: "At the desk" },
+  { id: "standing", label: "Standing" },
+];
+
+export const EXPRESSIONS = [
+  { id: "smile", label: "Smile" },
+  { id: "grin", label: "Big grin" },
+  { id: "laugh", label: "Laughing" },
+  { id: "smirk", label: "Smirk" },
+  { id: "focused", label: "Locked in" },
+  { id: "wow", label: "Wow" },
+];
+
+export const OUTFITS = [
+  { id: "tee", label: "T-shirt", phrase: "T-shirt" },
+  { id: "hoodie", label: "Hoodie", phrase: "hoodie" },
+  { id: "collared", label: "Collared shirt", phrase: "collared shirt" },
+  { id: "blazer", label: "Blazer", phrase: "blazer" },
+  { id: "turtleneck", label: "Turtleneck", phrase: "turtleneck" },
+];
+
+export const HATS = [
+  { id: "none", label: "No hat" },
+  { id: "beanie", label: "Beanie" },
+  { id: "cap", label: "Cap" },
+  { id: "backwardsCap", label: "Backwards cap" },
+  { id: "bucket", label: "Bucket hat" },
+  { id: "headband", label: "Headband" },
+];
+
+/** Frame shapes. Whether glasses are worn at all is the `glasses` toggle. */
+export const EYEWEAR_STYLES = [
+  { id: "round", label: "Round glasses" },
+  { id: "square", label: "Square glasses" },
+  { id: "catEye", label: "Cat-eye glasses" },
+  { id: "aviator", label: "Aviators" },
+  { id: "shades", label: "Sunglasses" },
+];
+
+export const EARRINGS = [
+  { id: "none", label: "None" },
+  { id: "studs", label: "Studs" },
+  { id: "hoops", label: "Hoops" },
 ];
 
 export const HAIR_COLORS = [
@@ -115,6 +176,7 @@ export const CHAIR_COLORS = [
 export const BACKDROPS = [
   { id: "night", label: "Night", phrase: "at night" },
   { id: "day", label: "Day", phrase: "in daylight" },
+  { id: "sunset", label: "Golden hour", phrase: "at golden hour" },
 ];
 
 /**
@@ -126,11 +188,19 @@ export const BACKDROPS = [
  * src/config/sceneItems.js.
  */
 export const AVATAR_CHOICES = [
+  { id: "pose", label: "Pose", group: "character", options: POSES },
   { id: "skinTone", label: "Skin tone", group: "character", swatch: "base", options: SKIN_TONES },
   { id: "hairStyle", label: "Hair style", group: "character", options: HAIR_STYLES },
   { id: "hairColor", label: "Hair colour", group: "character", swatch: "base", options: HAIR_COLORS },
   { id: "facialHair", label: "Facial hair", group: "character", options: FACIAL_HAIR },
   { id: "topColor", label: "Top colour", group: "character", swatch: "base", options: TOP_COLORS },
+  { id: "eyeColor", label: "Eye colour", group: "character", swatch: "base", options: EYE_COLORS },
+  { id: "expression", label: "Expression", group: "character", options: EXPRESSIONS },
+  { id: "outfit", label: "Outfit", group: "character", options: OUTFITS },
+  { id: "hat", label: "Hat", group: "character", options: HATS },
+  { id: "hatColor", label: "Hat colour", group: "character", swatch: "base", options: TOP_COLORS },
+  { id: "eyewear", label: "Eyewear", group: "character", options: EYEWEAR_STYLES },
+  { id: "earrings", label: "Earrings", group: "character", options: EARRINGS },
   { id: "display", label: "Display setup", group: "desk", options: DISPLAY_SETUPS },
   { id: "deskSurface", label: "Desk surface", group: "desk", swatch: "base", options: DESK_SURFACES },
   { id: "chairColor", label: "Chair colour", group: "desk", swatch: "base", options: CHAIR_COLORS },
@@ -141,12 +211,24 @@ export const AVATAR_CHOICES = [
 export const AVATAR_TOGGLES = [
   { id: "glasses", label: "Glasses", group: "character" },
   { id: "headphones", label: "Headphones", group: "character" },
+  { id: "freckles", label: "Freckles", group: "character" },
+  { id: "blush", label: "Blush", group: "character" },
   { id: "mug", label: "Coffee mug", group: "desk" },
   { id: "plant", label: "Plant", group: "desk" },
   { id: "books", label: "Books", group: "desk" },
   { id: "lamp", label: "Desk lamp", group: "desk" },
   { id: "mechKeyboard", label: "Mechanical keyboard", group: "desk" },
   { id: "phone", label: "Phone", group: "desk" },
+  { id: "mouse", label: "Mouse", group: "desk" },
+  { id: "notebook", label: "Notebook", group: "desk" },
+  { id: "stickies", label: "Sticky notes", group: "desk" },
+  { id: "duck", label: "Rubber duck", group: "desk" },
+  { id: "bottle", label: "Water bottle", group: "desk" },
+  { id: "succulent", label: "Cactus", group: "desk" },
+  { id: "speaker", label: "Speaker", group: "desk" },
+  { id: "floorPlant", label: "Floor plant", group: "desk" },
+  { id: "bin", label: "Waste bin", group: "desk" },
+  { id: "backpack", label: "Backpack", group: "desk" },
   { id: "bookcase", label: "Bookcase", group: "scene" },
 ];
 
@@ -196,12 +278,22 @@ export const SCENE_SURFACES = Object.freeze({
 export const DISPLAY_DEPTH = 50;
 
 export const SCENE_PROPS = Object.freeze([
-  { id: "lamp", label: "Desk lamp", surface: "desk", depth: 10, x: 276, y: DESK_TOP, box: { dx: -21, dy: -96, w: 69, h: 96 } },
+  { id: "speaker", label: "Speaker", surface: "desk", depth: 12, x: 300, y: DESK_TOP, box: { dx: -13, dy: -48, w: 26, h: 48 } },
+  { id: "lamp", label: "Desk lamp", surface: "desk", depth: 10, x: 276, y: DESK_TOP, box: { dx: -20, dy: -98, w: 72, h: 98 } },
   { id: "plant", label: "Plant", surface: "desk", depth: 20, x: 135, y: DESK_TOP, box: { dx: -27, dy: -94, w: 64, h: 94 } },
-  { id: "books", label: "Books", surface: "desk", depth: 30, x: 205, y: DESK_TOP, box: { dx: -33, dy: -32, w: 66, h: 32 } },
-  { id: "keyboard", label: "Keyboard", surface: "desk", depth: 60, x: 400, y: DESK_TOP, box: { dx: -60, dy: -22, w: 120, h: 22 } },
-  { id: "phone", label: "Phone", surface: "desk", depth: 70, x: 542, y: DESK_TOP, box: { dx: -18, dy: -40, w: 36, h: 40 } },
+  { id: "succulent", label: "Cactus", surface: "desk", depth: 22, x: 170, y: DESK_TOP, box: { dx: -13, dy: -45, w: 26, h: 45 } },
+  { id: "books", label: "Books", surface: "desk", depth: 30, x: 205, y: DESK_TOP, box: { dx: -34, dy: -44, w: 68, h: 44 } },
+  { id: "bottle", label: "Water bottle", surface: "desk", depth: 32, x: 240, y: DESK_TOP, box: { dx: -9, dy: -56, w: 18, h: 56 } },
+  { id: "keyboard", label: "Keyboard", surface: "desk", depth: 60, x: 400, y: DESK_TOP, box: { dx: -66, dy: -22, w: 132, h: 22 } },
+  { id: "notebook", label: "Notebook", surface: "desk", depth: 64, x: 610, y: DESK_TOP, box: { dx: -28, dy: -11, w: 58, h: 11 } },
+  { id: "stickies", label: "Sticky notes", surface: "desk", depth: 66, x: 640, y: DESK_TOP, box: { dx: -12, dy: -13, w: 24, h: 13 } },
+  { id: "phone", label: "Phone", surface: "desk", depth: 70, x: 542, y: DESK_TOP, box: { dx: -18, dy: -46, w: 36, h: 46 } },
+  { id: "duck", label: "Rubber duck", surface: "desk", depth: 72, x: 660, y: DESK_TOP, box: { dx: -18, dy: -24, w: 34, h: 24 } },
+  { id: "mouse", label: "Mouse", surface: "desk", depth: 75, x: 564, y: DESK_TOP, box: { dx: -26, dy: -14, w: 52, h: 14 } },
   { id: "mug", label: "Coffee mug", surface: "desk", depth: 80, x: 495, y: DESK_TOP, box: { dx: -17, dy: -34, w: 46, h: 34 } },
+  { id: "floorPlant", label: "Floor plant", surface: "floor", depth: 5, x: 76, y: 488, box: { dx: -34, dy: -171, w: 68, h: 171 } },
+  { id: "bin", label: "Waste bin", surface: "floor", depth: 6, x: 720, y: 480, box: { dx: -22, dy: -48, w: 44, h: 48 } },
+  { id: "backpack", label: "Backpack", surface: "floor", depth: 7, x: 600, y: 486, box: { dx: -26, dy: -52, w: 52, h: 52 } },
 ].map(Object.freeze));
 
 export const PROP_IDS = SCENE_PROPS.map((prop) => prop.id);
@@ -228,6 +320,16 @@ export const PROP_FOR_TOGGLE = Object.freeze({
   books: "books",
   lamp: "lamp",
   phone: "phone",
+  mouse: "mouse",
+  notebook: "notebook",
+  stickies: "stickies",
+  duck: "duck",
+  bottle: "bottle",
+  succulent: "succulent",
+  speaker: "speaker",
+  floorPlant: "floorPlant",
+  bin: "bin",
+  backpack: "backpack",
   mechKeyboard: "keyboard",
   display: "keyboard",
 });
@@ -657,7 +759,7 @@ export const arrangeProps = (avatar) => {
 /**
  * The default is Shug — this is his workshop, so the scene opens as him.
  * Matched from apps/react/public/assets/images/shug_headshot.jpg: shaved head,
- * full dark beard, heavy brows, warm olive skin, broad build, navy jacket.
+ * full dark beard, heavy brows, medium warm skin, broad build, navy jacket.
  *
  * Luna is drawn from photographs of Shug's late dog: a big lean fawn mix with a
  * cream chest and legs, dark mascara markings around the eyes, a grey muzzle
@@ -665,12 +767,22 @@ export const arrangeProps = (avatar) => {
  * is his. Attendees reshape all of it from the Customize panel.
  */
 export const DEFAULT_AVATAR = Object.freeze({
-  skinTone: "tan",
+  pose: "seated",
+  skinTone: "medium",
   hairStyle: "bald",
   hairColor: "jet",
   facialHair: "fullBeard",
   topColor: "indigo",
+  eyeColor: "dark",
+  expression: "smile",
+  outfit: "hoodie",
+  hat: "none",
+  hatColor: "mustard",
+  eyewear: "round",
+  earrings: "none",
   glasses: false,
+  freckles: false,
+  blush: true,
   headphones: false,
   display: "laptop",
   deskSurface: "walnut",
@@ -682,6 +794,16 @@ export const DEFAULT_AVATAR = Object.freeze({
   lamp: true,
   mechKeyboard: false,
   phone: false,
+  mouse: false,
+  notebook: false,
+  stickies: false,
+  duck: false,
+  bottle: false,
+  succulent: false,
+  speaker: false,
+  floorPlant: false,
+  bin: false,
+  backpack: false,
   bookcase: true,
   positions: DEFAULT_PROP_POSITIONS,
   companions: Object.freeze([Object.freeze({ id: "luna", kind: "dog", variant: "luna", x: 186, y: 480 })]),
@@ -859,8 +981,13 @@ export const describeAvatar = (input) => {
       ? "a shaved head"
       : `${hairColor.label.toLowerCase()} ${hairStyle.label.toLowerCase()}`;
 
+  const outfit = findOption(OUTFITS, avatar.outfit);
+  const hat = findOption(HATS, avatar.hat);
+  const eyewear = findOption(EYEWEAR_STYLES, avatar.eyewear);
   const worn = [
-    avatar.glasses && "glasses",
+    avatar.glasses && eyewear.label.toLowerCase(),
+    avatar.hat !== "none" && `${article(hat.label)} ${hat.label.toLowerCase()}`,
+    avatar.earrings !== "none" && `${findOption(EARRINGS, avatar.earrings).label.toLowerCase()}`,
     avatar.headphones && "headphones",
     avatar.facialHair !== "none" &&
       `${article(facialHair.label)} ${facialHair.label.toLowerCase()}`,
@@ -885,9 +1012,11 @@ export const describeAvatar = (input) => {
     : [];
 
   const sentences = [
-    `Illustration of a developer with ${skin.label.toLowerCase()} skin and ${hair}, in ${article(top.label)} ${top.label.toLowerCase()} top, coding ${backdrop.phrase}.`,
+    `Illustration of a developer with ${skin.label.toLowerCase()} skin and ${hair}, in ${article(top.label)} ${top.label.toLowerCase()} ${outfit.phrase}, coding ${backdrop.phrase}.`,
     worn.length ? `They are wearing ${listToText(worn)}.` : "",
-    `They sit in a ${chair.label.toLowerCase()} chair at a ${desk.label.toLowerCase()} desk with ${display.phrase}.`,
+    avatar.pose === "standing"
+      ? `They stand in front of a ${desk.label.toLowerCase()} desk with ${display.phrase}, an empty ${chair.label.toLowerCase()} chair behind it.`
+      : `They sit in a ${chair.label.toLowerCase()} chair at a ${desk.label.toLowerCase()} desk with ${display.phrase}.`,
     props.length ? `On the desk: ${listToText(props)}.` : "The desk is clear.",
     // Companions are part of the picture, so they belong in the alt text too.
     companions.length ? `With them: ${listToText(companions)}.` : "",

@@ -8,7 +8,7 @@ import {
   companionName,
   findCompanionKind,
 } from "../config/sceneItems";
-import { Close, Plus, Refresh, Swap } from "./Icons";
+import { Close, Download, Plus, Refresh, Swap } from "./Icons";
 
 /**
  * SceneCustomizer — the Studio: make the desk yours.
@@ -44,28 +44,42 @@ const LOOKS = [
     label: "Night shift",
     hint: "Dual screens, lamp on, headphones",
     sky: "radial-gradient(120% 90% at 70% 0%, #312e81 0%, #0b1020 60%)",
-    set: { backdrop: "night", display: "dual", deskSurface: "ebony", chairColor: "blackMesh", topColor: "charcoal", lamp: true, headphones: true, mug: true },
+    set: { pose: "seated", backdrop: "night", display: "dual", deskSurface: "ebony", chairColor: "blackMesh", topColor: "charcoal", lamp: true, headphones: true, mug: true },
   },
   {
     id: "golden",
     label: "Golden hour",
     hint: "Daylight, oak, a plant",
     sky: "radial-gradient(120% 90% at 30% 0%, #fde68a 0%, #d8a43f 55%, #8c5b36 100%)",
-    set: { backdrop: "day", display: "monitor", deskSurface: "oak", chairColor: "camel", topColor: "mustard", plant: true, lamp: false, headphones: false },
+    set: { pose: "seated", backdrop: "sunset", display: "monitor", deskSurface: "oak", chairColor: "camel", topColor: "mustard", plant: true, lamp: false, headphones: false },
+  },
+  {
+    id: "streamer",
+    label: "Streamer",
+    hint: "Beanie, cans on, big grin",
+    sky: "radial-gradient(120% 90% at 40% 0%, #7c3aed 0%, #1e1b4b 55%, #0b1020 100%)",
+    set: { pose: "seated", backdrop: "night", display: "dual", hat: "beanie", hatColor: "plum", headphones: true, expression: "grin", outfit: "hoodie", mechKeyboard: true, lamp: true },
+  },
+  {
+    id: "weekend",
+    label: "Weekend",
+    hint: "Bucket hat, shades, sunshine",
+    sky: "radial-gradient(120% 90% at 70% 0%, #fff3b0 0%, #8fd0f6 45%, #4fb0ec 100%)",
+    set: { pose: "standing", backdrop: "day", display: "laptop", hat: "bucket", hatColor: "bone", glasses: true, eyewear: "shades", outfit: "tee", expression: "laugh", headphones: false, plant: true },
   },
   {
     id: "minimal",
     label: "Minimal",
     hint: "One laptop, nothing else",
     sky: "radial-gradient(120% 90% at 50% 0%, #f6f7f9 0%, #cbd5e1 60%, #64748b 100%)",
-    set: { backdrop: "day", display: "laptop", deskSurface: "whiteLaminate", chairColor: "graphite", topColor: "slate", mug: true, plant: false, books: false, lamp: false, mechKeyboard: false, phone: false, bookcase: false, headphones: false },
+    set: { pose: "seated", backdrop: "day", display: "laptop", deskSurface: "whiteLaminate", chairColor: "graphite", topColor: "slate", mug: true, plant: false, books: false, lamp: false, mechKeyboard: false, phone: false, bookcase: false, headphones: false },
   },
   {
     id: "collector",
     label: "Collector",
     hint: "Bookcase, books, the works",
     sky: "radial-gradient(120% 90% at 60% 0%, #ff5fa2 0%, #7f1d2e 45%, #12101e 100%)",
-    set: { backdrop: "night", display: "monitor", deskSurface: "walnut", chairColor: "crimson", bookcase: true, books: true, plant: true, mechKeyboard: true },
+    set: { pose: "seated", backdrop: "night", display: "monitor", deskSurface: "walnut", chairColor: "crimson", bookcase: true, books: true, plant: true, mechKeyboard: true },
   },
 ];
 
@@ -122,12 +136,20 @@ const SECTIONS = [
     label: "You",
     title: "You",
     parts: [
+      { id: "pose", label: "Pose" },
       { id: "hairStyle", label: "Hair" },
-      { id: "hairColor", label: "Colour" },
-      { id: "facialHair", label: "Face" },
+      { id: "hairColor", label: "Hair tint" },
       { id: "skinTone", label: "Skin" },
-      { id: "topColor", label: "Top" },
-      { id: "wearing", label: "Extras", toggles: ["glasses", "headphones"] },
+      { id: "eyeColor", label: "Eyes" },
+      { id: "expression", label: "Mood" },
+      { id: "facialHair", label: "Beard" },
+      { id: "outfit", label: "Outfit" },
+      { id: "topColor", label: "Outfit tint" },
+      { id: "hat", label: "Hat" },
+      { id: "hatColor", label: "Hat tint" },
+      { id: "eyewear", label: "Glasses" },
+      { id: "earrings", label: "Earrings" },
+      { id: "wearing", label: "Extras", toggles: ["headphones", "blush", "freckles"] },
     ],
   },
   {
@@ -136,7 +158,8 @@ const SECTIONS = [
     title: "The desk",
     parts: [
       { id: "display", label: "Screen" },
-      { id: "props", label: "Props", toggles: ["mug", "plant", "books", "lamp", "mechKeyboard", "phone"] },
+      { id: "props", label: "On the desk", toggles: ["mug", "plant", "lamp", "books", "mechKeyboard", "phone", "mouse", "notebook", "stickies", "duck", "bottle", "succulent", "speaker"] },
+      { id: "floor", label: "Floor", toggles: ["floorPlant", "bin", "backpack"] },
       { id: "deskSurface", label: "Surface" },
       { id: "chairColor", label: "Chair" },
     ],
@@ -148,7 +171,32 @@ const SECTIONS = [
 
 const byId = (list) => Object.fromEntries(list.map((x) => [x.id, x]));
 const CHOICES = byId(AVATAR_CHOICES);
+const EYEWEAR_CHOICE = { ...CHOICES.eyewear, label: "Glasses", options: [{ id: "none", label: "None" }, ...CHOICES.eyewear.options] };
 const TOGGLES = byId(AVATAR_TOGGLES);
+
+/** Pose glyphs: a figure in the chair behind the desk, or on its feet in front of it. */
+const POSE_ART = {
+  seated: (
+    <svg viewBox="0 0 64 40" className="h-full w-full" aria-hidden="true">
+      <rect x="22" y="12" width="20" height="18" rx="4" fill="#3c424e" />
+      <circle cx="32" cy="11" r="6.5" fill="var(--stage-accent)" />
+      <path d="M24 30c0-6 3.5-10 8-10s8 4 8 10z" fill="var(--stage-accent)" opacity=".75" />
+      <rect x="6" y="28" width="52" height="4" rx="1" fill="#8a6a4a" />
+      <rect x="10" y="32" width="3" height="7" fill="#6b5038" />
+      <rect x="51" y="32" width="3" height="7" fill="#6b5038" />
+    </svg>
+  ),
+  standing: (
+    <svg viewBox="0 0 64 40" className="h-full w-full" aria-hidden="true">
+      <rect x="14" y="14" width="16" height="15" rx="4" fill="#3c424e" />
+      <rect x="2" y="27" width="40" height="4" rx="1" fill="#8a6a4a" />
+      <rect x="6" y="31" width="3" height="8" fill="#6b5038" />
+      <circle cx="49" cy="8" r="6" fill="var(--stage-accent)" />
+      <path d="M42 26c0-7 3-11 7-11s7 4 7 11z" fill="var(--stage-accent)" opacity=".75" />
+      <path d="M46 26v12M52 26v12" stroke="var(--stage-accent)" strokeWidth="3.2" strokeLinecap="round" opacity=".75" />
+    </svg>
+  ),
+};
 
 /** Glyphs for the options that have no art of their own in the scene. */
 const DISPLAY_ART = {
@@ -186,7 +234,8 @@ const DISPLAY_ART = {
 
 const SKY = {
   night: { bg: "linear-gradient(160deg, #1e1b4b, #0b1020 60%, #12101e)", orb: "radial-gradient(circle at 35% 35%, #fff8e1, #e9d8a6)" },
-  day: { bg: "linear-gradient(160deg, #cfe3f2, #e9eef3 55%, #f3e7da)", orb: "radial-gradient(circle, #fff6d8, #f6c453)" },
+  day: { bg: "linear-gradient(170deg, #4fb0ec, #8fd0f6 45%, #ffe7c4)", orb: "radial-gradient(circle, #fff6d8, #ffc93c)" },
+  sunset: { bg: "linear-gradient(170deg, #4b3db8, #c95a9c 45%, #ff8f66 75%, #ffd08a)", orb: "radial-gradient(circle, #ffe0a8, #ffb347)" },
 };
 
 const BOOKCASE_ART = (
@@ -498,6 +547,7 @@ export const SceneCustomizer = ({
   onRemoveCompanion = () => {},
   onCompanionVariant = () => {},
   onTogglePlush = () => {},
+  onDownload = null,
   description = "",
 }) => {
   const rawId = useId();
@@ -512,9 +562,17 @@ export const SceneCustomizer = ({
     Object.entries(look.set).every(([key, value]) => (typeof value === "boolean" ? Boolean(avatar[key]) === value : avatar[key] === value));
 
   /** Each axis's tile art: a bust of you for the person, a glyph for the screen. */
-  const previewFor = (axis) => (optionId) => (axis === "display" ? DISPLAY_ART[optionId] ?? null : previews.head({ [axis]: optionId }));
+  const previewFor = (axis) => (optionId) =>
+    axis === "display" ? (DISPLAY_ART[optionId] ?? null) : axis === "pose" ? (POSE_ART[optionId] ?? null) : previews.head({ [axis]: optionId });
 
-  const picked = part && CHOICES[part.id] ? CHOICES[part.id].options.find((o) => o.id === avatar[part.id])?.label : null;
+  const picked =
+    part?.id === "eyewear"
+      ? avatar.glasses
+        ? CHOICES.eyewear.options.find((o) => o.id === avatar.eyewear)?.label
+        : "None"
+      : part && CHOICES[part.id]
+        ? CHOICES[part.id].options.find((o) => o.id === avatar[part.id])?.label
+        : null;
 
   const onRailKey = (event) => {
     const step = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[event.key];
@@ -657,7 +715,18 @@ export const SceneCustomizer = ({
                 ))}
               </div>
             ) : (
-              <ChoiceGrid choice={CHOICES[part.id]} value={avatar[part.id]} onChange={onChange} idPrefix={idPrefix} previewFor={previewFor(part.id)} />
+              part.id === "eyewear" ? (
+                // Glasses on/off and their frame are two fields; here they are one pick.
+                <ChoiceGrid
+                  choice={EYEWEAR_CHOICE}
+                  value={avatar.glasses ? avatar.eyewear : "none"}
+                  onChange={(_, id) => (id === "none" ? onChange("glasses", false) : onChange({ glasses: true, eyewear: id }))}
+                  idPrefix={idPrefix}
+                  previewFor={(id) => previews.head(id === "none" ? { glasses: false } : { glasses: true, eyewear: id })}
+                />
+              ) : (
+                <ChoiceGrid choice={CHOICES[part.id]} value={avatar[part.id]} onChange={onChange} idPrefix={idPrefix} previewFor={previewFor(part.id)} />
+              )
             ))}
 
           {tab === "room" && (
@@ -710,6 +779,31 @@ export const SceneCustomizer = ({
           )}
         </div>
 
+        {onDownload && (
+          <div className="flex items-center justify-between gap-2 border-t px-4 py-2.5" style={hair}>
+            <span className={KICKER} style={{ color: "var(--stage-accent)" }}>
+              Take it with you
+            </span>
+            <div className="flex gap-1.5">
+              {[
+                { kind: "avatar", label: "Avatar", aria: "Download your avatar as a PNG badge" },
+                { kind: "scene", label: "Desk", aria: "Download the whole desk scene as a PNG" },
+              ].map(({ kind, label, aria }) => (
+                <button
+                  key={kind}
+                  type="button"
+                  onClick={() => onDownload(kind)}
+                  aria-label={aria}
+                  className={`inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[11.5px] font-bold ${FOCUS}`}
+                  style={{ backgroundColor: "var(--stage-accent)", color: "var(--stage-on-accent, #05070a)" }}
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="flex items-center justify-between gap-2 border-t px-4 py-2.5" style={hair}>
           <span className="text-[11px]" style={muted}>
             Drag anything in the scene to move it.

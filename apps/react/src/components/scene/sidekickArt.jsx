@@ -8,7 +8,7 @@
  * ids, because several copies can share one SVG.
  */
 
-const INK = "#1B1B22";
+import { Cheeks, GlossyEye, INK } from "./inkKit";
 
 const GroundShadow = ({ rx, ry = 3.5, cx = 0 }) => (
   <ellipse cx={cx} cy={0} rx={rx} ry={ry} fill="#000000" opacity={0.3} />
@@ -53,10 +53,9 @@ const PochitaFigure = () => (
     <rect x={14.5} y={-10.5} width={7} height={3} rx={1.5} fill="#2F343E" />
     <rect x={14.5} y={-10.5} width={7} height={1.2} rx={0.6} fill="#5A6170" />
     {/* happy face: bead eyes, wide grin with a tongue */}
-    <circle cx={-6} cy={-20} r={1.8} fill={INK} />
-    <circle cx={6} cy={-20} r={1.8} fill={INK} />
-    <circle cx={-5.4} cy={-20.6} r={0.6} fill="#FFFFFF" />
-    <circle cx={6.6} cy={-20.6} r={0.6} fill="#FFFFFF" />
+    <GlossyEye cx={-6} cy={-20.4} r={2.7} />
+    <GlossyEye cx={6} cy={-20.4} r={2.7} />
+    <Cheeks x={9} y={-16.5} rx={2.2} ry={1.2} />
     <path d="M-6 -15 Q0 -8, 6 -15 Z" fill={INK} />
     <path d="M-2.5 -11.2 Q0 -13.6, 2.5 -11.2 Q0 -9.6, -2.5 -11.2 Z" fill="#F87171" />
     <path d="M-4.2 -15 L-3.4 -13.6 L-2.6 -15 Z M2.6 -15 L3.4 -13.6 L4.2 -15 Z" fill="#FFFFFF" />
@@ -154,10 +153,9 @@ const Meowy = () => (
     <circle cx={0} cy={-19.2} r={2} fill="#FBBF24" />
     <path d="M-1 -18.6 L1 -18.6" stroke="#B45309" strokeWidth={0.8} />
     {/* face */}
-    <ellipse cx={-5} cy={-36} rx={1.7} ry={2.2} fill={INK} />
-    <ellipse cx={5} cy={-36} rx={1.7} ry={2.2} fill={INK} />
-    <circle cx={-4.4} cy={-36.8} r={0.6} fill="#FFFFFF" />
-    <circle cx={5.6} cy={-36.8} r={0.6} fill="#FFFFFF" />
+    <GlossyEye cx={-5} cy={-36} r={2.6} iris="#5BA4D8" />
+    <GlossyEye cx={5} cy={-36} r={2.6} iris="#5BA4D8" />
+    <Cheeks x={7.6} y={-32} rx={2} ry={1.1} />
     <path d="M-1.2 -32.5 L1.2 -32.5 L0 -31.2 Z" fill="#F08BA2" />
     <path d="M0 -31.2 Q-1.5 -29, -3 -30 M0 -31.2 Q1.5 -29, 3 -30" stroke={INK} strokeWidth={1} fill="none" strokeLinecap="round" />
     <path d="M-8 -31 L-12.5 -32 M-8 -30 L-12.5 -29.5 M8 -31 L12.5 -32 M8 -30 L12.5 -29.5" stroke={MEOWY.patchShadow} strokeWidth={0.6} />

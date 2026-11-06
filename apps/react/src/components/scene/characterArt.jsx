@@ -14,7 +14,7 @@
  * each character only supplies its hair, costume details and face.
  */
 
-const INK = "#1B1B22";
+import { GlossyEye, INK } from "./inkKit";
 const BLUSH = "#F472B6";
 
 const SKIN = {
@@ -48,14 +48,10 @@ const starPath = (cx, cy, r) => {
  * ------------------------------------------------------------------------ */
 const HEAD_CY = -66;
 
-const Eyes = ({ iris, y = -64, gap = 6.5 }) => (
+const Eyes = ({ iris, y = -64, gap = 6.8 }) => (
   <g>
     {[-gap, gap].map((x) => (
-      <g key={x}>
-        <ellipse cx={x} cy={y} rx={2.6} ry={3.4} fill={INK} />
-        <ellipse cx={x} cy={y + 1} rx={1.8} ry={2.1} fill={iris} />
-        <circle cx={x - 0.8} cy={y - 1.3} r={0.9} fill="#FFFFFF" />
-      </g>
+      <GlossyEye key={x} cx={x} cy={y} r={3.2} iris={iris} />
     ))}
   </g>
 );
@@ -174,16 +170,21 @@ const FigureBody = ({
   );
 };
 
+const HEAD_GROW = "translate(0 -50) scale(1.16) translate(0 50)";
+
 const ChibiFigure = ({ skin, blush, scale, shadowRx = 17, behind, hairBack, body, face, hairFront, front }) => (
   <g>
     <GroundShadow rx={shadowRx} />
     <g transform={scale ? `scale(${scale})` : undefined}>
       {behind}
-      {hairBack}
+      {/* LoveMoji proportions: the head grows from the neck, the body stays put. */}
+      <g transform={HEAD_GROW}>{hairBack}</g>
       {body}
-      <FigureHead skin={skin} blush={blush} />
-      {face}
-      {hairFront}
+      <g transform={HEAD_GROW}>
+        <FigureHead skin={skin} blush={blush} />
+        {face}
+        {hairFront}
+      </g>
       {front}
     </g>
   </g>

@@ -165,6 +165,33 @@ export const COMPANION_KINDS = Object.freeze(
       variants: [{ id: "green", label: "Green" }],
     },
     {
+      id: "fox",
+      label: "Fox",
+      family: "pets",
+      surfaces: floor,
+      depth: 40,
+      box: { dx: -22, dy: -55, w: 52, h: 55 },
+      naming: "variantKind",
+      variants: [
+        { id: "red", label: "Red" },
+        { id: "arctic", label: "Arctic" },
+      ],
+    },
+    {
+      id: "axolotl",
+      label: "Axolotl",
+      family: "pets",
+      surfaces: ["desk", "shelf"],
+      depth: 65,
+      box: { dx: -24, dy: -41, w: 48, h: 41 },
+      naming: "variantKind",
+      variants: [
+        { id: "pink", label: "Pink" },
+        { id: "gold", label: "Gold" },
+        { id: "wild", label: "Wild type" },
+      ],
+    },
+    {
       id: "pochita",
       label: "Pochita",
       theme: "Chainsaw Man",

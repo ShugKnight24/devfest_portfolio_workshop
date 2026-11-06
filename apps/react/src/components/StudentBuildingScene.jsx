@@ -5,10 +5,7 @@ import {
   DESK_SURFACES,
   DESK_TOP,
   DISPLAY_DEPTH,
-  HAIR_COLORS,
   PROP_FOR_TOGGLE,
-  SKIN_TONES,
-  TOP_COLORS,
   addCompanion,
   clampItemPosition,
   companionKey,
@@ -39,6 +36,10 @@ import { CHARACTER_ART } from "./scene/characterArt";
 import { LunaPlush, PET_ART } from "./scene/petArt";
 import { SIDEKICK_ART } from "./scene/sidekickArt";
 import { SceneCustomizer } from "./SceneCustomizer";
+import { downloadSvgAsPng } from "./scene/exportSvg";
+import { Displays } from "./scene/displayArt";
+import { KeyboardArt, propArt } from "./scene/propArt";
+import { AvatarBack, AvatarBody, AvatarBust, AvatarDefs, AvatarHands, AvatarHead, AvatarStanding, INK, resolveLook } from "./scene/avatarArt";
 
 /**
  * Animated SVG Scene: a developer building their website.
@@ -58,645 +59,68 @@ import { SceneCustomizer } from "./SceneCustomizer";
  * Geometry — the whole figure is built off these, centred on x = 400.
  * ------------------------------------------------------------------------ */
 const CENTER = 400;
+/** Where the standing figure plants its feet: in front of the desk's right end. */
+const STANDING_SPOT = "translate(228 20)";
 /** Monitors emit a cool blue-white, not the brand hue. */
 const SCREEN_LIGHT = "#BFE6FF";
-const HEAD_PATH =
-  "M373 168 C373 145, 384 133, 400 133 C416 133, 427 145, 427 168 " +
-  "C427 181, 424 191, 416 197 C410 202, 405 204, 400 204 " +
-  "C395 204, 390 202, 384 197 C376 191, 373 181, 373 168 Z";
-const TORSO_PATH =
-  "M400 216 C382 216, 368 222, 356 231 C346 238, 340 252, 337 272 " +
-  "C334 296, 333 322, 333 348 L467 348 C467 322, 466 296, 463 272 " +
-  "C460 252, 454 238, 444 231 C432 222, 418 216, 400 216 Z";
-const NECK_PATH =
-  "M386 188 C386 203, 385 212, 381 220 C390 227, 410 227, 419 220 " +
-  "C415 212, 414 203, 414 188 Z";
-
-const EYE_Y = 170;
-const EYE_DX = 12;
-
 const mirror = "translate(800, 0) scale(-1, 1)";
 
-/* --------------------------------------------------------------------------
- * Hair — split into a layer behind the skull and a layer in front of it, so
- * volume (afros, locs, long hair) sits behind the face while the hairline and
- * fringe sit on top of it.
- * ------------------------------------------------------------------------ */
-const HairBack = ({ style, base, shadow }) => {
-  switch (style) {
-    case "coils":
-      return (
-        <g fill={shadow}>
-          <ellipse cx={CENTER} cy={150} rx={40} ry={34} />
-          {[
-            [366, 128, 11],
-            [386, 118, 12],
-            [412, 119, 12],
-            [432, 130, 11],
-            [440, 152, 10],
-            [360, 152, 10],
-            [364, 174, 9],
-            [436, 174, 9],
-          ].map(([cx, cy, r], i) => (
-            <circle key={`coil-${i}`} cx={cx} cy={cy} r={r} />
-          ))}
-        </g>
-      );
-    case "curls":
-      return (
-        <g fill={shadow}>
-          <ellipse cx={CENTER} cy={154} rx={35} ry={28} />
-          {[
-            [362, 160, 11],
-            [438, 160, 11],
-            [368, 136, 11],
-            [432, 136, 11],
-            [400, 124, 12],
-          ].map(([cx, cy, r], i) => (
-            <circle key={`curl-${i}`} cx={cx} cy={cy} r={r} />
-          ))}
-        </g>
-      );
-    case "locs":
-      return (
-        <g>
-          <ellipse cx={CENTER} cy={152} rx={32} ry={26} fill={shadow} />
-          {[368, 376, 424, 432].map((x, i) => (
-            <g key={`loc-${i}`}>
-              <rect
-                x={x - 4}
-                y={152}
-                width={8}
-                height={i < 2 ? 82 : 74}
-                rx={4}
-                fill={shadow}
-              />
-              <rect
-                x={x - 4}
-                y={152}
-                width={3}
-                height={i < 2 ? 82 : 74}
-                rx={1.5}
-                fill={base}
-                opacity={0.55}
-              />
-            </g>
-          ))}
-          <rect x={356} y={158} width={7} height={58} rx={3.5} fill={shadow} />
-          <rect x={437} y={158} width={7} height={58} rx={3.5} fill={shadow} />
-        </g>
-      );
-    case "braids":
-      return (
-        <g>
-          <ellipse cx={CENTER} cy={150} rx={33} ry={26} fill={shadow} />
-          {[360, 370, 430, 440].map((x, i) => (
-            <g key={`braid-${i}`}>
-              <rect x={x - 3} y={154} width={6} height={72} rx={3} fill={shadow} />
-              {[0, 1, 2, 3, 4].map((k) => (
-                <circle
-                  key={`bead-${i}-${k}`}
-                  cx={x}
-                  cy={168 + k * 14}
-                  r={4}
-                  fill={base}
-                  opacity={0.75}
-                />
-              ))}
-            </g>
-          ))}
-        </g>
-      );
-    case "long":
-      return (
-        <g fill={shadow}>
-          <path d="M366 150 C352 168, 348 214, 352 268 C356 288, 364 296, 372 292 C364 250, 364 196, 372 166 Z" />
-          <path d="M434 150 C448 168, 452 214, 448 268 C444 288, 436 296, 428 292 C436 250, 436 196, 428 166 Z" />
-          <ellipse cx={CENTER} cy={154} rx={33} ry={27} />
-        </g>
-      );
-    case "wavyBob":
-      return (
-        <g fill={shadow}>
-          <path d="M368 148 C354 166, 352 196, 360 218 C368 224, 376 220, 376 212 C368 192, 368 168, 376 154 Z" />
-          <path d="M432 148 C446 166, 448 196, 440 218 C432 224, 424 220, 424 212 C432 192, 432 168, 424 154 Z" />
-          <ellipse cx={CENTER} cy={152} rx={33} ry={26} />
-        </g>
-      );
-    case "bun":
-      return (
-        <g fill={shadow}>
-          <circle cx={CENTER} cy={124} r={14} />
-          <circle cx={CENTER} cy={124} r={9} fill={base} opacity={0.5} />
-          <ellipse cx={CENTER} cy={152} rx={30} ry={24} />
-        </g>
-      );
-    case "crop":
-      return <ellipse cx={CENTER} cy={154} rx={30} ry={24} fill={shadow} />;
-    case "buzz":
-      return <ellipse cx={CENTER} cy={156} rx={28} ry={22} fill={shadow} />;
-    default:
-      return null;
-  }
+/**
+ * The room's light. Day was a pale wash; it is now a real blue sky over a warm
+ * floor, and golden hour sits between it and night.
+ */
+const SKIES = {
+  night: { bg: ["#0B1020", "#0A0D14", "#12101E"], floor: ["#171B2A", "#0B0D14"], orb: [664, 90], sun: "#F4EBD0", glow: "#C7D2FE" },
+  day: { bg: ["#4FB0EC", "#8FD0F6", "#CDEBFB", "#FFE7C4"], floor: ["#E2B582", "#C48F55"], orb: [664, 92], sun: "#FFC93C", glow: "#FFE27A", cloudShade: "#D5E9F7" },
+  sunset: { bg: ["#4B3DB8", "#C95A9C", "#FF8F66", "#FFD08A"], floor: ["#B87548", "#87502F"], orb: [700, 150], sun: "#FFB347", glow: "#FF8A5B", cloudShade: "#F7B9C7" },
 };
-
-const HairFront = ({ style, base, shadow }) => {
-  switch (style) {
-    case "bald":
-      return null;
-    case "buzz":
-      return (
-        <g>
-          <path
-            d="M372 166 C372 143, 383 132, 400 132 C417 132, 428 143, 428 166
-               C428 154, 420 147, 400 147 C380 147, 372 154, 372 166 Z"
-            fill={base}
-          />
-          <path
-            d="M372 166 C372 143, 383 132, 400 132 C417 132, 428 143, 428 166"
-            fill="none"
-            stroke={shadow}
-            strokeWidth={1.4}
-            opacity={0.6}
-          />
-        </g>
-      );
-    case "crop":
-      return (
-        <g>
-          <path
-            d="M371 170 C370 142, 383 130, 400 130 C418 130, 430 142, 429 170
-               C429 155, 424 149, 414 149 C401 149, 391 155, 380 152
-               C375 151, 372 159, 371 170 Z"
-            fill={base}
-          />
-          <path
-            d="M400 131 C412 133, 421 141, 424 152"
-            fill="none"
-            stroke={shadow}
-            strokeWidth={2}
-            strokeLinecap="round"
-            opacity={0.7}
-          />
-        </g>
-      );
-    case "coils":
-      return (
-        <g>
-          <path
-            d="M371 164 C370 141, 383 129, 400 129 C418 129, 430 141, 429 164
-               C427 152, 418 145, 400 145 C382 145, 373 152, 371 164 Z"
-            fill={base}
-          />
-          {[
-            [378, 142, 7],
-            [391, 135, 8],
-            [409, 135, 8],
-            [422, 142, 7],
-            [372, 156, 6],
-            [428, 156, 6],
-          ].map(([cx, cy, r], i) => (
-            <circle key={`coilf-${i}`} cx={cx} cy={cy} r={r} fill={base} />
-          ))}
-        </g>
-      );
-    case "curls":
-      return (
-        <g fill={base}>
-          <path d="M372 162 C371 140, 384 128, 400 128 C417 128, 430 140, 428 162 C425 150, 416 144, 400 144 C384 144, 375 150, 372 162 Z" />
-          {[
-            [380, 138, 7],
-            [396, 130, 8],
-            [414, 132, 7],
-            [425, 145, 6],
-            [374, 150, 6],
-          ].map(([cx, cy, r], i) => (
-            <circle key={`curlf-${i}`} cx={cx} cy={cy} r={r} />
-          ))}
-        </g>
-      );
-    case "locs":
-      return (
-        <g>
-          <path
-            d="M371 162 C370 139, 383 128, 400 128 C418 128, 430 139, 429 162
-               C426 149, 417 143, 400 143 C383 143, 374 149, 371 162 Z"
-            fill={base}
-          />
-          {[381, 391, 401, 411, 421].map((x, i) => (
-            <rect key={`locf-${i}`} x={x - 3} y={128} width={6} height={24} rx={3} fill={base} />
-          ))}
-        </g>
-      );
-    case "braids":
-      return (
-        <g>
-          <path
-            d="M371 162 C370 139, 383 128, 400 128 C418 128, 430 139, 429 162
-               C426 149, 417 143, 400 143 C383 143, 374 149, 371 162 Z"
-            fill={base}
-          />
-          {[378, 388, 400, 412, 422].map((x, i) => (
-            <line
-              key={`braidf-${i}`}
-              x1={x}
-              y1={130}
-              x2={400 + (x - 400) * 1.35}
-              y2={152}
-              stroke={shadow}
-              strokeWidth={1.6}
-              opacity={0.75}
-            />
-          ))}
-        </g>
-      );
-    case "bun":
-      return (
-        <g>
-          <path
-            d="M371 164 C370 140, 383 129, 400 129 C418 129, 430 140, 429 164
-               C427 150, 418 144, 400 144 C382 144, 373 150, 371 164 Z"
-            fill={base}
-          />
-          <path
-            d="M376 150 C384 138, 416 138, 424 150"
-            fill="none"
-            stroke={shadow}
-            strokeWidth={1.6}
-            opacity={0.6}
-          />
-        </g>
-      );
-    case "long":
-    case "wavyBob":
-      return (
-        <g>
-          <path
-            d="M371 166 C370 140, 383 128, 400 128 C418 128, 430 140, 429 166
-               C428 150, 420 143, 404 143 C392 143, 382 150, 378 160
-               C376 165, 373 164, 371 166 Z"
-            fill={base}
-          />
-          <path
-            d="M404 144 C414 146, 422 153, 426 164"
-            fill="none"
-            stroke={shadow}
-            strokeWidth={2}
-            strokeLinecap="round"
-            opacity={0.6}
-          />
-        </g>
-      );
-    default:
-      return null;
-  }
-};
-
-/* --------------------------------------------------------------------------
- * Face
- * ------------------------------------------------------------------------ */
-const Eye = ({ side, clipId, skin, lidDelayClass }) => {
-  const cx = CENTER + side * EYE_DX;
-  return (
-    <g>
-      <clipPath id={clipId}>
-        <path
-          d={`M${cx - 6.5} ${EYE_Y} Q${cx} ${EYE_Y - 6} ${cx + 6.5} ${EYE_Y} Q${cx} ${EYE_Y + 5.5} ${cx - 6.5} ${EYE_Y} Z`}
-        />
-      </clipPath>
-      <g clipPath={`url(#${clipId})`}>
-        <rect x={cx - 8} y={EYE_Y - 8} width={16} height={16} fill="#F2EDE6" />
-        {/* iris */}
-        <circle cx={cx + side * 0.6} cy={EYE_Y} r={3.6} fill="#5B4636" />
-        <circle cx={cx + side * 0.6} cy={EYE_Y} r={3.6} fill="#1B2A33" opacity={0.45} />
-        {/* pupil */}
-        <circle cx={cx + side * 0.6} cy={EYE_Y} r={1.7} fill="#0B0F12" />
-        {/* specular catchlight from the screen */}
-        <circle cx={cx + side * 0.6 - 1.3} cy={EYE_Y - 1.4} r={1.1} fill="#FFFFFF" opacity={0.95} />
-        <circle cx={cx + side * 0.6 + 1.6} cy={EYE_Y + 1.5} r={0.6} fill="#FFFFFF" opacity={0.5} />
-        {/* upper lid shadow */}
-        <rect x={cx - 8} y={EYE_Y - 8} width={16} height={4.5} fill="#000000" opacity={0.22} />
-        {/* the lid that actually closes */}
-        <rect
-          className={`scene-lid ${lidDelayClass}`}
-          x={cx - 8}
-          y={EYE_Y - 6.5}
-          width={16}
-          height={13}
-          fill={skin.base}
-        />
-      </g>
-      {/* lash line */}
-      <path
-        d={`M${cx - 6.5} ${EYE_Y} Q${cx} ${EYE_Y - 6} ${cx + 6.5} ${EYE_Y}`}
-        fill="none"
-        stroke="#2A1D14"
-        strokeWidth={1.3}
-        strokeLinecap="round"
-        opacity={0.8}
-      />
-    </g>
-  );
-};
-
-const FacialHair = ({ style, base, shadow }) => {
-  if (style === "none") return null;
-  if (style === "stubble") {
-    return (
-      <path
-        d="M378 180 C379 192, 386 202, 400 204 C414 202, 421 192, 422 180
-           C420 194, 412 199, 400 199 C388 199, 380 194, 378 180 Z"
-        fill={shadow}
-        opacity={0.35}
-      />
-    );
-  }
-  if (style === "moustache") {
-    return (
-      <path
-        d="M390 188 Q400 184 410 188 Q400 193 390 188 Z"
-        fill={base}
-      />
-    );
-  }
-  if (style === "goatee") {
-    return (
-      <g fill={base}>
-        <path d="M390 188 Q400 184 410 188 Q400 193 390 188 Z" />
-        <path d="M393 196 Q400 194 407 196 Q407 203 400 205 Q393 203 393 196 Z" />
-      </g>
-    );
-  }
-  return (
-    <g>
-      <path
-        d="M376 172 C377 190, 385 203, 400 205 C415 203, 423 190, 424 172
-           C424 186, 416 194, 400 194 C384 194, 376 186, 376 172 Z"
-        fill={base}
-      />
-      <path d="M389 187 Q400 182 411 187 Q400 192 389 187 Z" fill={base} />
-      <path
-        d="M380 178 C382 192, 389 200, 400 202"
-        fill="none"
-        stroke={shadow}
-        strokeWidth={1.2}
-        opacity={0.55}
-      />
-    </g>
-  );
-};
-
-/* --------------------------------------------------------------------------
- * Hands — palm plus five separable digits, drawn once and mirrored.
- * ------------------------------------------------------------------------ */
-const Glasses = ({ accent }) => (
-  <g>
-    <rect x={376} y={161} width={23} height={18} rx={6} fill={accent} opacity={0.08} />
-    <rect x={401} y={161} width={23} height={18} rx={6} fill={accent} opacity={0.08} />
-    <rect
-      x={376}
-      y={161}
-      width={23}
-      height={18}
-      rx={6}
-      fill="none"
-      stroke="#1F2933"
-      strokeWidth={2}
-    />
-    <rect
-      x={401}
-      y={161}
-      width={23}
-      height={18}
-      rx={6}
-      fill="none"
-      stroke="#1F2933"
-      strokeWidth={2}
-    />
-    <path d="M399 168 L401 168" stroke="#1F2933" strokeWidth={2} strokeLinecap="round" />
-    <path d="M376 167 L370 170" stroke="#1F2933" strokeWidth={2} strokeLinecap="round" />
-    <path d="M424 167 L430 170" stroke="#1F2933" strokeWidth={2} strokeLinecap="round" />
-    {/* screen reflected in the lenses */}
-    <path d="M380 176 L392 163" stroke="#FFFFFF" strokeWidth={2} opacity={0.35} strokeLinecap="round" />
-    <path d="M405 176 L417 163" stroke="#FFFFFF" strokeWidth={2} opacity={0.35} strokeLinecap="round" />
-  </g>
-);
-
-const Headphones = ({ accent }) => (
-  <g>
-    <path
-      d="M364 168 C362 126, 438 126, 436 168"
-      fill="none"
-      stroke="#22262E"
-      strokeWidth={7}
-      strokeLinecap="round"
-    />
-    <path
-      d="M366 158 C366 132, 434 132, 434 158"
-      fill="none"
-      stroke="#3C424E"
-      strokeWidth={2.4}
-      strokeLinecap="round"
-    />
-    <rect x={356} y={160} width={15} height={28} rx={7} fill="#22262E" />
-    <rect x={429} y={160} width={15} height={28} rx={7} fill="#22262E" />
-    <rect x={359} y={164} width={9} height={20} rx={4.5} fill="#3C424E" />
-    <rect x={432} y={164} width={9} height={20} rx={4.5} fill="#3C424E" />
-    <rect x={357} y={184} width={13} height={2.5} rx={1.2} fill={accent} opacity={0.8} />
-    <rect x={430} y={184} width={13} height={2.5} rx={1.2} fill={accent} opacity={0.8} />
-  </g>
-);
-
-/* --------------------------------------------------------------------------
- * Studio previews — the Studio's tiles show the real art, not a word for it:
- * a head-and-shoulders bust for every look option, and each prop, companion
- * and plushie framed by the box it occupies in the scene.
- * ------------------------------------------------------------------------ */
-export const HeadPreview = ({ skin, hair, top, hairStyle, facialHair, glasses, headphones, accent }) => (
-  <svg viewBox="338 112 124 124" className="h-full w-full" aria-hidden="true">
-    <HairBack style={hairStyle} base={hair.base} shadow={hair.shadow} />
-    <path d={TORSO_PATH} style={{ fill: top.base }} />
-    <path d={NECK_PATH} fill={skin.shadow} />
-    <ellipse cx={371} cy={174} rx={5.5} ry={9} fill={skin.base} />
-    <ellipse cx={429} cy={174} rx={5.5} ry={9} fill={skin.base} />
-    <path d={HEAD_PATH} fill={skin.base} />
-    <ellipse cx={382} cy={182} rx={9} ry={7} fill={skin.shadow} opacity={0.25} />
-    <ellipse cx={418} cy={182} rx={9} ry={7} fill={skin.shadow} opacity={0.25} />
-    <path d="M381 162 Q388 157 396 160" fill="none" stroke={hair.shadow} strokeWidth={2.2} strokeLinecap="round" />
-    <path d="M404 160 Q412 157 419 162" fill="none" stroke={hair.shadow} strokeWidth={2.2} strokeLinecap="round" />
-    <ellipse cx={388} cy={EYE_Y} rx={2.6} ry={3} fill="#1B1B21" />
-    <ellipse cx={412} cy={EYE_Y} rx={2.6} ry={3} fill="#1B1B21" />
-    <path d="M395 184 Q400 188 405 184" fill="none" stroke={skin.shadow} strokeWidth={1.6} strokeLinecap="round" />
-    <path d="M390 191 Q400 195 410 191" fill="none" stroke="#5E3129" strokeWidth={1.7} strokeLinecap="round" />
-    <FacialHair style={facialHair} base={hair.base} shadow={hair.shadow} />
-    <HairFront style={hairStyle} base={hair.base} shadow={hair.shadow} />
-    {glasses && <Glasses accent={accent} />}
-    {headphones && <Headphones accent={accent} />}
-  </svg>
-);
-
-/** An SVG framed on a box `{ dx, dy, w, h }` around an anchor, with a little air. */
-const Framed = ({ x = 0, y = 0, box, pad = 6, children }) => (
-  <svg
-    viewBox={`${x + box.dx - pad} ${y + box.dy - pad} ${box.w + pad * 2} ${box.h + pad * 2}`}
-    className="h-full w-full"
-    aria-hidden="true"
-    overflow="visible"
-  >
-    {children}
-  </svg>
-);
-
-const Hand = ({ skin, flip }) => (
-  <g transform={flip ? mirror : undefined}>
-    {/* contact shadow where the hand meets the deck */}
-    <ellipse cx={362} cy={341} rx={20} ry={3.6} fill="#000000" opacity={0.28} />
-    {/* back of hand */}
-    <path
-      d="M343 327 C348 320, 358 319, 366 321 C374 323, 378 327, 377 331
-         C376 337, 367 340, 357 340 C349 340, 343 335, 343 327 Z"
-      fill={skin.base}
-    />
-    <path
-      d="M343 327 C348 320, 358 319, 366 321 C374 323, 378 327, 377 331"
-      fill="none"
-      stroke={skin.highlight}
-      strokeWidth={1.2}
-      opacity={0.7}
-    />
-    {/* fingers */}
-    {[
-      [366, 322, 379, 324],
-      [368, 326, 382, 328],
-      [367, 330, 380, 333],
-      [364, 334, 375, 337],
-    ].map(([x1, y1, x2, y2], i) => (
-      <g key={`finger-${i}`}>
-        <line
-          x1={x1}
-          y1={y1}
-          x2={x2}
-          y2={y2}
-          stroke={skin.base}
-          strokeWidth={5.2}
-          strokeLinecap="round"
-        />
-        <line
-          x1={x1}
-          y1={y1 - 1.4}
-          x2={x2}
-          y2={y2 - 1.4}
-          stroke={skin.highlight}
-          strokeWidth={1.4}
-          strokeLinecap="round"
-          opacity={0.55}
-        />
-      </g>
-    ))}
-    {/* thumb */}
-    <line
-      x1={349}
-      y1={333}
-      x2={353}
-      y2={342}
-      stroke={skin.base}
-      strokeWidth={6}
-      strokeLinecap="round"
-    />
-    <line
-      x1={349}
-      y1={333}
-      x2={353}
-      y2={342}
-      stroke={skin.shadow}
-      strokeWidth={1.1}
-      strokeLinecap="round"
-      opacity={0.45}
-    />
-    {/* knuckle shading */}
-    <path
-      d="M360 322 C366 322, 372 324, 376 328"
-      fill="none"
-      stroke={skin.shadow}
-      strokeWidth={1.1}
-      opacity={0.5}
-    />
-  </g>
-);
-
-/* --------------------------------------------------------------------------
- * Arms — upper arm and forearm are separate tapered shapes with a real elbow.
- * ------------------------------------------------------------------------ */
-const Arm = ({ skin, topColor, flip }) => (
-  <g transform={flip ? mirror : undefined}>
-    {/* upper arm */}
-    <path d="M332.4 240.2 L305.5 301.8 L322.5 310.2 L355.6 251.8 Z" fill={skin.base} />
-    <circle cx={314} cy={306} r={9.5} fill={skin.base} />
-    <circle cx={344} cy={246} r={13} fill={skin.base} />
-    {/* forearm */}
-    <path d="M308.3 313.6 L341.8 335.6 L350.2 324.4 L319.7 298.4 Z" fill={skin.base} />
-    <circle cx={346} cy={330} r={7} fill={skin.base} />
-    {/* underside shadow along the whole limb */}
-    <path
-      d="M305.5 301.8 L322.5 310.2 L350.2 324.4"
-      fill="none"
-      stroke={skin.shadow}
-      strokeWidth={2.4}
-      strokeLinecap="round"
-      opacity={0.5}
-    />
-    {/* light catching the top of the forearm, facing the screen */}
-    <path
-      d="M319.7 300 L348 322"
-      fill="none"
-      stroke={skin.highlight}
-      strokeWidth={2}
-      strokeLinecap="round"
-      opacity={0.55}
-    />
-    {/* elbow crease */}
-    <path
-      d="M309 306 Q314 312 320 309"
-      fill="none"
-      stroke={skin.shadow}
-      strokeWidth={1.2}
-      opacity={0.55}
-    />
-    {/* short sleeve */}
-    <path
-      d="M331 239.5 L317.6 273.1 Q328 285 338.2 283.3 L357 252.5 Z"
-      fill={topColor}
-    />
-    <path
-      d="M317.6 273.1 Q328 285 338.2 283.3"
-      fill="none"
-      stroke="#000000"
-      strokeWidth={2.4}
-      opacity={0.22}
-    />
-    <path
-      d="M333 244 L321 272"
-      fill="none"
-      stroke="#FFFFFF"
-      strokeWidth={2}
-      opacity={0.12}
-    />
-  </g>
-);
 
 /**
- * A seated leg, seen from the front.
- *
- * The figure used to stop at the desk edge, so nothing of a person existed below
- * the desktop: the scene read as a torso floating over an empty floor. From the
- * front, a seated person's thighs run toward the viewer and are hidden by the
- * desk's apron; what shows below it is the shin, dropping to a shoe on the
- * floor. The knee is drawn slightly above the apron's lower edge so the apron
- * overlaps it, which is what makes the leg read as continuing up to the seat.
- *
- * Drawn for the viewer's left and mirrored for the right, like Arm, so the pair
- * is symmetric by construction rather than by hand.
+ * The Studio's tiles: your bust, at thumbnail size, in the scene's own art.
+ * Each tile is its own SVG, so it gets its own id prefix for the art's clips.
  */
+export const HeadPreview = ({ look }) => {
+  const uid = `hp${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+  return (
+    <svg viewBox="304 74 192 192" className="h-full w-full" aria-hidden="true">
+      <AvatarBust look={look} uid={uid} />
+    </svg>
+  );
+};
+
+/** An SVG framed on a box `{ dx, dy, w, h }` around an anchor, with a little air. */
+const Framed = ({ x = 0, y = 0, box, pad = 6, children }) => {
+  const id = `fr${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+  return (
+    <svg
+      viewBox={`${x + box.dx - pad} ${y + box.dy - pad} ${box.w + pad * 2} ${box.h + pad * 2}`}
+      className="h-full w-full"
+      aria-hidden="true"
+      overflow="visible"
+    >
+      {/* The scene's ink line, so a tile looks like the thing you will place. */}
+      <InkFilter id={id} radius={Math.max(box.w, box.h) / 64} />
+      <g filter={`url(#${id})`}>{children}</g>
+    </svg>
+  );
+};
+
+/** One warm outline around every solid silhouette; faint glows are skipped. */
+const InkFilter = ({ id, radius = 1.6 }) => (
+  <filter id={id} x="-10%" y="-10%" width="120%" height="120%">
+    <feComponentTransfer in="SourceAlpha" result="solid">
+      <feFuncA type="discrete" tableValues="0 1" />
+    </feComponentTransfer>
+    <feMorphology in="solid" operator="dilate" radius={radius} result="grown" />
+    <feFlood floodColor={INK} />
+    <feComposite in2="grown" operator="in" result="line" />
+    <feMerge>
+      <feMergeNode in="line" />
+      <feMergeNode in="SourceGraphic" />
+    </feMerge>
+  </filter>
+);
+
 const TROUSER = { base: "#2B3242", shadow: "#1B2030", light: "#3B4660" };
 const SHOE = { base: "#15171C", sole: "#2A2D34" };
 
@@ -746,63 +170,6 @@ const ChairBase = ({ color }) => (
 );
 
 /* --------------------------------------------------------------------------
- * Displays
- * ------------------------------------------------------------------------ */
-const CodeLines = ({ x, y, width, scale = 1 }) => {
-  const rows = [
-    [[0, 22, "#C084FC"], [26, 40, "#67E8F9"], [70, 16, "#C084FC"], [90, 44, "#86EFAC"]],
-    [[0, 18, "#C084FC"], [22, 34, "#FCD34D"], [60, 8, "#94A3B8"], [72, 12, "#FCD34D"]],
-    [[8, 22, "#C084FC"], [34, 8, "#94A3B8"]],
-    [[16, 8, "#94A3B8"], [28, 14, "#F472B6"], [46, 28, "#67E8F9"]],
-    [[24, 8, "#94A3B8"], [36, 10, "#F472B6"], [50, 44, "#E2E8F0"]],
-    [[24, 8, "#94A3B8"], [36, 24, "#67E8F9"], [64, 30, "#E2E8F0"]],
-    [[16, 8, "#94A3B8"], [28, 14, "#F472B6"]],
-    [[8, 8, "#94A3B8"]],
-  ];
-
-  return (
-    <g>
-      {rows.map((row, r) =>
-        row.map(([dx, w, color], i) => (
-          <rect
-            key={`code-${r}-${i}`}
-            x={x + dx * scale}
-            y={y + r * 9 * scale}
-            width={Math.min(w, width / scale - dx) * scale}
-            height={3 * scale}
-            rx={1.5}
-            fill={color}
-            opacity={0.85}
-          />
-        )),
-      )}
-      <rect
-        className="scene-blink"
-        x={x + 14 * scale}
-        y={y + 7 * 9 * scale - 1}
-        width={2}
-        height={6 * scale}
-        rx={1}
-        fill="#7DD3FC"
-      />
-    </g>
-  );
-};
-
-const ScreenPanel = ({ x, y, width, height, screenGradId, glowGradId, children }) => (
-  <g>
-    <rect x={x - 6} y={y - 6} width={width + 12} height={height + 14} rx={6} fill="#1A1D24" />
-    <rect x={x - 6} y={y - 6} width={width + 12} height={2} rx={1} fill="#2E333D" />
-    <rect x={x} y={y} width={width} height={height} rx={3} fill={`url(#${screenGradId})`} />
-    <rect x={x} y={y} width={width} height={height} rx={3} fill={`url(#${glowGradId})`} />
-    <circle cx={x + 10} cy={y + 8} r={2.4} fill="#EF4444" opacity={0.85} />
-    <circle cx={x + 18} cy={y + 8} r={2.4} fill="#EAB308" opacity={0.85} />
-    <circle cx={x + 26} cy={y + 8} r={2.4} fill="#22C55E" opacity={0.85} />
-    {children}
-  </g>
-);
-
-/* --------------------------------------------------------------------------
  * Movable props
  *
  * Each prop's art is still drawn at the coordinates it was authored at; the
@@ -822,7 +189,7 @@ const ARROW_DELTAS = {
 
 /** A focus/drag ring that survives both backdrops: dark halo, accent core. */
 const PropRing = ({ box, invalid }) => (
-  <g pointerEvents="none">
+  <g pointerEvents="none" data-export="skip">
     <rect
       x={box.x - RING_PAD}
       y={box.y - RING_PAD}
@@ -900,132 +267,6 @@ const MovableProp = ({
       <rect x={box.x} y={box.y} width={box.w} height={box.h} fill="transparent" />
       {children}
       {active && <PropRing box={box} invalid={invalid} />}
-    </g>
-  );
-};
-
-/* --------------------------------------------------------------------------
- * Desk props
- * ------------------------------------------------------------------------ */
-const Plant = () => (
-  <g>
-    <path d="M118 312 L152 312 L148 344 L122 344 Z" fill="#B4531F" />
-    <rect x={114} y={306} width={42} height={9} rx={3} fill="#D2691E" />
-    <path d="M135 308 C135 288, 128 274, 118 264" stroke="#15803D" strokeWidth={2.4} fill="none" />
-    <path d="M118 264 C108 258, 102 266, 108 272 C114 276, 118 270, 118 264 Z" fill="#22C55E" />
-    <path d="M135 308 C138 290, 146 278, 156 270" stroke="#15803D" strokeWidth={2.4} fill="none" />
-    <path d="M156 270 C166 264, 172 272, 164 278 C158 281, 155 275, 156 270 Z" fill="#4ADE80" />
-    <path d="M135 308 C135 292, 134 278, 134 266" stroke="#15803D" strokeWidth={2.4} fill="none" />
-    <path d="M134 266 C128 254, 140 250, 143 260 C144 268, 138 270, 134 266 Z" fill="#16A34A" />
-    <ellipse cx={135} cy={344} rx={24} ry={4} fill="#000000" opacity={0.3} />
-  </g>
-);
-
-const Books = () => (
-  <g>
-    <ellipse cx={205} cy={344} rx={36} ry={4} fill="#000000" opacity={0.3} />
-    <rect x={172} y={332} width={66} height={12} rx={2} fill="#B91C1C" />
-    <rect x={172} y={332} width={66} height={3} rx={1.5} fill="#EF4444" opacity={0.6} />
-    <rect x={176} y={322} width={58} height={10} rx={2} fill="#1D4ED8" />
-    <rect x={176} y={322} width={58} height={2.5} rx={1.2} fill="#60A5FA" opacity={0.6} />
-    <rect x={180} y={312} width={50} height={10} rx={2} fill="#047857" />
-    <rect x={180} y={312} width={50} height={2.5} rx={1.2} fill="#34D399" opacity={0.6} />
-    <rect x={172} y={338} width={66} height={1.5} fill="#000000" opacity={0.25} />
-  </g>
-);
-
-const Lamp = ({ accent, lit }) => (
-  <g>
-    <ellipse cx={276} cy={344} rx={24} ry={4.5} fill="#000000" opacity={0.35} />
-    <ellipse cx={276} cy={340} rx={21} ry={6} fill="#2B303A" />
-    <ellipse cx={276} cy={337} rx={21} ry={5} fill="#3A404C" />
-    {/* lower + upper arm with a visible joint, like an architect lamp */}
-    <line x1={276} y1={336} x2={266} y2={280} stroke="#3A404C" strokeWidth={5} strokeLinecap="round" />
-    <line x1={266} y1={280} x2={306} y2={256} stroke="#3A404C" strokeWidth={5} strokeLinecap="round" />
-    <circle cx={266} cy={280} r={4} fill="#4A515F" />
-    {/* shade, mouth pointing down at the desk */}
-    <path d="M300 248 L316 248 L324 272 L296 272 Z" fill="#454C5A" />
-    <path d="M300 248 L308 248 L302 272 L296 272 Z" fill="#FFFFFF" opacity={0.08} />
-    <ellipse cx={310} cy={272} rx={14} ry={3.5} fill={lit ? accent : "#1C2029"} opacity={lit ? 0.9 : 1} />
-    {lit && <path d="M296 272 L268 344 L352 344 L324 272 Z" fill={accent} opacity={0.1} />}
-  </g>
-);
-
-const Mug = ({ accent }) => (
-  <g>
-    <ellipse cx={495} cy={344} rx={20} ry={3.6} fill="#000000" opacity={0.3} />
-    <path d="M512 320 C522 320, 524 326, 524 330 C524 334, 522 340, 512 340" stroke="#E2E8F0" strokeWidth={4} fill="none" />
-    <path d="M478 314 L512 314 L509 342 Q495 346 481 342 Z" fill="#E8EAEE" />
-    <path d="M478 314 L512 314 L511 320 L479 320 Z" fill={accent} opacity={0.85} />
-    <ellipse cx={495} cy={314} rx={17} ry={4} fill="#3F2A1B" />
-    <ellipse cx={495} cy={314} rx={17} ry={4} fill="#000000" opacity={0.3} />
-    <path
-      className="scene-steam1"
-      d="M487 310 Q490 302 487 294"
-      stroke="#CBD5E1"
-      strokeWidth={1.6}
-      fill="none"
-      strokeLinecap="round"
-      opacity={0.45}
-    />
-    <path
-      className="scene-steam2"
-      d="M495 308 Q492 300 495 292"
-      stroke="#CBD5E1"
-      strokeWidth={1.6}
-      fill="none"
-      strokeLinecap="round"
-      opacity={0.45}
-    />
-    <path
-      className="scene-steam3"
-      d="M503 310 Q506 302 503 294"
-      stroke="#CBD5E1"
-      strokeWidth={1.6}
-      fill="none"
-      strokeLinecap="round"
-      opacity={0.45}
-    />
-  </g>
-);
-
-const Phone = ({ accent }) => (
-  <g>
-    <ellipse cx={542} cy={344} rx={18} ry={3.4} fill="#000000" opacity={0.3} />
-    <path d="M534 344 L534 330 L550 326 L550 341 Z" fill="#2A2F38" />
-    <rect x={526} y={306} width={30} height={38} rx={4} fill="#14181F" transform="rotate(-8 541 325)" />
-    <rect x={529} y={309} width={24} height={30} rx={2} fill={accent} opacity={0.35} transform="rotate(-8 541 324)" />
-    <rect x={532} y={313} width={14} height={2} rx={1} fill={accent} opacity={0.9} transform="rotate(-8 541 324)" />
-    <rect x={532} y={318} width={18} height={2} rx={1} fill="#94A3B8" opacity={0.7} transform="rotate(-8 541 324)" />
-    <rect x={532} y={323} width={10} height={2} rx={1} fill="#94A3B8" opacity={0.5} transform="rotate(-8 541 324)" />
-  </g>
-);
-
-const Keyboard = ({ mech, accent }) => {
-  const y = mech ? 322 : 326;
-  const height = mech ? 22 : 18;
-  return (
-    <g>
-      <ellipse cx={CENTER} cy={DESK_TOP} rx={64} ry={4.5} fill="#000000" opacity={0.3} />
-      <rect x={340} y={y} width={120} height={height} rx={mech ? 4 : 3} fill={mech ? "#23272F" : "#3A3F49"} />
-      <rect x={340} y={y} width={120} height={2.5} rx={1.2} fill={mech ? "#3B424E" : "#525967"} />
-      {[0, 1, 2].map((row) =>
-        Array.from({ length: 12 }, (_, i) => (
-          <rect
-            key={`kb-${row}-${i}`}
-            x={344 + i * 9.6}
-            y={y + 4 + row * (mech ? 5.6 : 4.4)}
-            width={7.6}
-            height={mech ? 4.4 : 3.2}
-            rx={1}
-            fill={mech && (row + i) % 7 === 0 ? accent : mech ? "#454C59" : "#525967"}
-            opacity={mech && (row + i) % 7 === 0 ? 0.9 : 1}
-          />
-        )),
-      )}
-      {mech && (
-        <rect x={340} y={y + height - 2} width={120} height={2} rx={1} fill={accent} opacity={0.5} />
-      )}
     </g>
   );
 };
@@ -1115,6 +356,7 @@ export const StudentBuildingScene = ({
   /** Spoken, not drawn: every move and every addition is announced. */
   const [status, setStatus] = useState("");
   const svgRef = useRef(null);
+  const badgeRef = useRef(null);
 
   const avatar = useMemo(
     () => normalizeAvatar(avatarProp ?? storedAvatar),
@@ -1224,6 +466,19 @@ export const StudentBuildingScene = ({
     commit(DEFAULT_AVATAR);
     setStatus("Scene reset to its starting layout.");
   }, [commit]);
+
+  /** Save what you made: the whole desk, or your avatar as a round badge. */
+  const handleDownload = useCallback(async (kind) => {
+    const avatarOnly = kind === "avatar";
+    const svg = avatarOnly ? badgeRef.current : svgRef.current;
+    if (!svg) return;
+    try {
+      await downloadSvgAsPng(svg, avatarOnly ? { width: 1024, height: 1024, filename: "my-dev-avatar.png" } : { width: 2000, height: 1000, filename: "my-dev-desk.png" });
+      setStatus(avatarOnly ? "Avatar badge downloaded." : "Desk scene downloaded.");
+    } catch {
+      setStatus("The download did not work in this browser.");
+    }
+  }, []);
 
   /* ---------------- moving props ---------------- */
 
@@ -1358,14 +613,14 @@ export const StudentBuildingScene = ({
     [avatar, movePropTo],
   );
 
-  const skin = findOption(SKIN_TONES, avatar.skinTone);
-  const hair = findOption(HAIR_COLORS, avatar.hairColor);
-  const top = findOption(TOP_COLORS, avatar.topColor);
   const desk = findOption(DESK_SURFACES, avatar.deskSurface);
   const chair = findOption(CHAIR_COLORS, avatar.chairColor);
+  const seated = avatar.pose !== "standing";
 
   const accent = accentProp || "var(--color-primary, #00FFCC)";
   const isNight = avatar.backdrop === "night";
+  const sky = SKIES[avatar.backdrop] ?? SKIES.night;
+  const look = resolveLook(avatar, accent);
   /** The accent is legible on the dark backdrop; daylight needs real ink. */
   const motifInk = isNight ? accent : "#0E7490";
   const label = describeAvatar(avatar);
@@ -1374,18 +629,11 @@ export const StudentBuildingScene = ({
   const interactive = customizable && !avatarProp;
 
   /* The art for each desk prop, drawn at its authored anchor. */
-  const propArt = {
-    lamp: <Lamp accent={isNight ? "#FDE68A" : "#FFFFFF"} lit={isNight} />,
-    plant: <Plant />,
-    books: <Books />,
-    keyboard: <Keyboard mech={avatar.mechKeyboard} accent={accent} />,
-    phone: <Phone accent={accent} />,
-    mug: <Mug accent={accent} />,
-  };
+  const propArtMap = propArt({ accent, lit: isNight || avatar.backdrop === "sunset", mech: avatar.mechKeyboard });
 
   /** Companions and plushies are drawn around (0, 0); see src/components/scene. */
   const renderArt = (item) => {
-    if (item.type === "prop") return propArt[item.key];
+    if (item.type === "prop") return propArtMap[item.key];
     if (item.type === "plush") {
       if (item.kind.id === "luna") return <LunaPlush />;
       const Plush = SIDEKICK_ART[item.kind.id] || CHARACTER_ART[item.kind.id];
@@ -1434,32 +682,18 @@ export const StudentBuildingScene = ({
         }}
         onBlur={() => setFocusedProp((current) => (current === item.key ? null : current))}
       >
-        {renderArt(item)}
+        <g filter={`url(#${gid("ink")})`}>{renderArt(item)}</g>
       </MovableProp>
     );
   };
 
   /** What the Studio's tiles draw: the same art, at thumbnail size. */
   const previews = {
-    head: (patch = {}) => {
-      const look = { ...avatar, ...patch };
-      return (
-        <HeadPreview
-          skin={findOption(SKIN_TONES, look.skinTone)}
-          hair={findOption(HAIR_COLORS, look.hairColor)}
-          top={findOption(TOP_COLORS, look.topColor)}
-          hairStyle={look.hairStyle}
-          facialHair={look.facialHair}
-          glasses={look.glasses}
-          headphones={look.headphones}
-          accent={accent}
-        />
-      );
-    },
+    head: (patch = {}) => <HeadPreview look={resolveLook({ ...avatar, ...patch }, accent)} />,
     prop: (toggleId) => {
       const prop = findProp(PROP_FOR_TOGGLE[toggleId]);
       if (!prop) return null;
-      const art = toggleId === "mechKeyboard" ? <Keyboard mech accent={accent} /> : propArt[prop.id];
+      const art = toggleId === "mechKeyboard" ? <KeyboardArt mech accent={accent} /> : propArtMap[prop.id];
       return (
         <Framed x={prop.x} y={prop.y} box={prop.box}>
           {art}
@@ -1537,57 +771,14 @@ export const StudentBuildingScene = ({
           >
             <defs>
               <linearGradient id={gid("bg")} x1="0" y1="0" x2="1000" y2="500" gradientUnits="userSpaceOnUse">
-                {isNight ? (
-                  <>
-                    <stop offset="0%" stopColor="#0B1020" />
-                    <stop offset="55%" stopColor="#0A0D14" />
-                    <stop offset="100%" stopColor="#12101E" />
-                  </>
-                ) : (
-                  <>
-                    <stop offset="0%" stopColor="#CFE3F2" />
-                    <stop offset="55%" stopColor="#E9EEF3" />
-                    <stop offset="100%" stopColor="#F3E7DA" />
-                  </>
-                )}
+                {sky.bg.map((c, i) => (
+                  <stop key={c + i} offset={`${(i / (sky.bg.length - 1)) * 100}%`} stopColor={c} />
+                ))}
               </linearGradient>
 
               <radialGradient id={gid("ambient")} cx="0.5" cy="0.62" r="0.55">
                 <stop offset="0%" stopColor={accent} stopOpacity={isNight ? 0.22 : 0.12} />
                 <stop offset="100%" stopColor={accent} stopOpacity="0" />
-              </radialGradient>
-
-              {/* Skin: base with a soft falloff to shadow at the silhouette edge. */}
-              <radialGradient id={gid("skin")} cx="0.44" cy="0.42" r="0.68">
-                <stop offset="0%" stopColor={skin.highlight} />
-                <stop offset="45%" stopColor={skin.base} />
-                <stop offset="100%" stopColor={skin.shadow} />
-              </radialGradient>
-
-              {/* The display is the key light: it rakes UP from below the chin.
-                  Screen light is blue-white, not the accent hue — a saturated wash
-                  reads as illness, a cool desaturated one reads as a monitor. */}
-              <linearGradient id={gid("keyLight")} x1="0" y1="208" x2="0" y2="158" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor={SCREEN_LIGHT} stopOpacity="0.34" />
-                <stop offset="35%" stopColor={SCREEN_LIGHT} stopOpacity="0.1" />
-                <stop offset="100%" stopColor={SCREEN_LIGHT} stopOpacity="0" />
-              </linearGradient>
-
-              <radialGradient id={gid("chestLight")} cx="0.5" cy="0.18" r="0.6">
-                <stop offset="0%" stopColor={SCREEN_LIGHT} stopOpacity="0.22" />
-                <stop offset="100%" stopColor={SCREEN_LIGHT} stopOpacity="0" />
-              </radialGradient>
-
-              {/* neck: deep in the chin's occlusion at the top, lit at the base */}
-              <linearGradient id={gid("neck")} x1="0" y1="188" x2="0" y2="228" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#000000" stopOpacity="0.45" />
-                <stop offset="60%" stopColor="#000000" stopOpacity="0.16" />
-                <stop offset="100%" stopColor={SCREEN_LIGHT} stopOpacity="0.14" />
-              </linearGradient>
-
-              <radialGradient id={gid("chinShadow")} cx="0.5" cy="0.5" r="0.5">
-                <stop offset="0%" stopColor="#000000" stopOpacity="0.42" />
-                <stop offset="100%" stopColor="#000000" stopOpacity="0" />
               </radialGradient>
 
               {/* separates the figure from the backdrop: a lift at night, a
@@ -1596,20 +787,6 @@ export const StudentBuildingScene = ({
                 <stop offset="0%" stopColor={isNight ? accent : "#0F172A"} stopOpacity={isNight ? 0.16 : 0.08} />
                 <stop offset="100%" stopColor={isNight ? accent : "#0F172A"} stopOpacity="0" />
               </radialGradient>
-
-              {/* Far side of the figure falls away from the key light. */}
-              <linearGradient id={gid("farSide")} x1="373" y1="0" x2="427" y2="0" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#000000" stopOpacity="0.06" />
-                <stop offset="55%" stopColor="#000000" stopOpacity="0" />
-                <stop offset="100%" stopColor="#000000" stopOpacity="0.3" />
-              </linearGradient>
-
-              <linearGradient id={gid("torsoForm")} x1="333" y1="0" x2="467" y2="0" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#000000" stopOpacity="0.28" />
-                <stop offset="18%" stopColor="#000000" stopOpacity="0.04" />
-                <stop offset="55%" stopColor="#FFFFFF" stopOpacity="0.1" />
-                <stop offset="100%" stopColor="#000000" stopOpacity="0.34" />
-              </linearGradient>
 
               <linearGradient id={gid("desk")} x1="0" y1="344" x2="0" y2="366" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stopColor={desk.base} />
@@ -1636,26 +813,54 @@ export const StudentBuildingScene = ({
                 <stop offset="100%" stopColor={accent} stopOpacity="0" />
               </radialGradient>
 
-              <clipPath id={gid("headClip")}>
-                <path d={HEAD_PATH} />
-              </clipPath>
-              <clipPath id={gid("torsoClip")}>
-                <path d={TORSO_PATH} />
-              </clipPath>
+              {/* Ink outline for everything not hand-inked: one warm line around
+                  each silhouette, as the avatar has. Faint glows (alpha < 0.5)
+                  are dropped before the dilate, so only solid shapes get a line. */}
+              <InkFilter id={gid("ink")} />
+              <linearGradient id={gid("floor")} x1="0" y1="440" x2="0" y2="500" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor={sky.floor[0]} />
+                <stop offset="100%" stopColor={sky.floor[1]} />
+              </linearGradient>
+              <radialGradient id={gid("sunGlow")} cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0%" stopColor={sky.glow} stopOpacity={isNight ? 0.25 : 0.7} />
+                <stop offset="100%" stopColor={sky.glow} stopOpacity="0" />
+              </radialGradient>
 
               <filter id={gid("soft")} x="-20%" y="-20%" width="140%" height="150%">
                 <feDropShadow dx="0" dy="6" stdDeviation="8" floodOpacity="0.35" />
               </filter>
             </defs>
+            <AvatarDefs uid={gid("av")} look={look} />
 
             <rect width="1000" height="500" rx="16" fill={`url(#${gid("bg")})`} />
             <rect width="1000" height="500" rx="16" fill={`url(#${gid("ambient")})`} />
 
-            {/* ---------- BACKDROP: sun or moon + stars ---------- */}
+            {/* ---------- BACKDROP: sun or moon, stars or clouds, then the floor ---------- */}
+            <circle cx={sky.orb[0]} cy={sky.orb[1]} r={110} fill={`url(#${gid("sunGlow")})`} />
             <g className="scene-float-slow">
-              <circle cx={664} cy={90} r={40} fill={isNight ? "#CBD5E1" : "#FBBF24"} opacity={0.1} />
-              <circle cx={664} cy={90} r={24} fill={isNight ? "#E2E8F0" : "#FCD34D"} opacity={isNight ? 0.85 : 0.95} />
-              {isNight && <circle cx={654} cy={83} r={22} fill="#0A0D14" opacity="0.9" />}
+              {!isNight && (
+                <g opacity={0.5}>
+                  {Array.from({ length: 12 }, (_, i) => {
+                    const a = (i / 12) * Math.PI * 2;
+                    const [cx, cy] = sky.orb;
+                    return (
+                      <path
+                        key={`ray-${i}`}
+                        d={`M${cx + Math.cos(a) * 40} ${cy + Math.sin(a) * 40} L${cx + Math.cos(a) * 54} ${cy + Math.sin(a) * 54}`}
+                        stroke={sky.sun}
+                        strokeWidth={4}
+                        strokeLinecap="round"
+                      />
+                    );
+                  })}
+                </g>
+              )}
+              <circle cx={sky.orb[0]} cy={sky.orb[1]} r={28} fill={sky.sun} stroke={INK} strokeWidth={3} />
+              {isNight ? (
+                <circle cx={sky.orb[0] - 11} cy={sky.orb[1] - 7} r={25} fill={sky.bg[0]} />
+              ) : (
+                <ellipse cx={sky.orb[0] - 9} cy={sky.orb[1] - 9} rx={9} ry={6} fill="#FFFFFF" opacity={0.6} transform={`rotate(-30 ${sky.orb[0] - 9} ${sky.orb[1] - 9})`} />
+              )}
             </g>
             {isNight &&
               [
@@ -1666,20 +871,36 @@ export const StudentBuildingScene = ({
                 [730, 168],
                 [620, 46],
                 [120, 148],
+                [470, 40],
+                [790, 70],
               ].map(([cx, cy], i) => (
-                <circle key={`star-${i}`} cx={cx} cy={cy} r={i % 2 ? 1.4 : 2} fill="#E2E8F0" opacity={0.55} />
+                <path
+                  key={`star-${i}`}
+                  d={`M${cx} ${cy - 4} L${cx + 1.2} ${cy - 1.2} L${cx + 4} ${cy} L${cx + 1.2} ${cy + 1.2} L${cx} ${cy + 4} L${cx - 1.2} ${cy + 1.2} L${cx - 4} ${cy} L${cx - 1.2} ${cy - 1.2} Z`}
+                  fill="#FFF4C7"
+                  opacity={i % 3 ? 0.55 : 0.9}
+                />
               ))}
             {!isNight &&
               [
-                [140, 96, 26],
-                [236, 74, 18],
-                [548, 118, 22],
+                [140, 96, 30],
+                [250, 70, 20],
+                [548, 120, 26],
+                [800, 150, 22],
               ].map(([cx, cy, r], i) => (
-                <g key={`cloud-${i}`} opacity={0.5}>
-                  <ellipse cx={cx} cy={cy} rx={r} ry={r * 0.5} fill="#FFFFFF" />
-                  <ellipse cx={cx + r * 0.6} cy={cy + 3} rx={r * 0.7} ry={r * 0.4} fill="#FFFFFF" />
+                <g key={`cloud-${i}`} className={i % 2 ? "scene-float-slow" : "scene-float-delay"} filter={`url(#${gid("ink")})`}>
+                  <ellipse cx={cx} cy={cy} rx={r} ry={r * 0.62} fill="#FFFFFF" />
+                  <ellipse cx={cx + r * 0.75} cy={cy + 4} rx={r * 0.72} ry={r * 0.48} fill="#FFFFFF" />
+                  <ellipse cx={cx - r * 0.7} cy={cy + 5} rx={r * 0.6} ry={r * 0.42} fill="#FFFFFF" />
+                  <path d={`M${cx - r * 1.2} ${cy + r * 0.5} L${cx + r * 1.4} ${cy + r * 0.5}`} stroke={sky.cloudShade} strokeWidth={r * 0.3} strokeLinecap="round" />
                 </g>
               ))}
+            {/* the floor the desk stands on, so nothing floats */}
+            <rect x={0} y={448} width={1000} height={52} fill={`url(#${gid("floor")})`} />
+            <path d="M0 448 L1000 448" stroke={INK} strokeWidth={3} opacity={isNight ? 0.6 : 0.85} />
+            {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+              <path key={`board-${i}`} d={`M${i * 140 + 60} 450 L${i * 140 + 20} 500`} stroke={INK} strokeWidth={1.4} opacity={0.12} />
+            ))}
 
             {/* ---------- FLOATING CODE MOTIFS (background layer) ---------- */}
             <g opacity={isNight ? 0.85 : 0.9}>
@@ -1736,10 +957,14 @@ export const StudentBuildingScene = ({
             <ellipse cx={CENTER} cy={268} rx={190} ry={150} fill={`url(#${gid("figureHalo")})`} />
 
             {/* ---------- BOOKCASE (furniture; its plushies are placed items) ---------- */}
-            {avatar.bookcase && <Bookcase wood={desk} />}
+            {avatar.bookcase && (
+              <g filter={`url(#${gid("ink")})`}>
+                <Bookcase wood={desk} />
+              </g>
+            )}
 
             {/* ---------- CHAIR ---------- */}
-            <g>
+            <g filter={`url(#${gid("ink")})`}>
               <path
                 d="M308 246 C308 226, 320 216, 340 216 L460 216 C480 216, 492 226, 492 246 L492 330
                    C492 342, 484 348, 470 348 L330 348 C316 348, 308 342, 308 330 Z"
@@ -1765,224 +990,37 @@ export const StudentBuildingScene = ({
               <rect x={480} y={306} width={34} height={12} rx={6} fill={chair.shadow} />
             </g>
 
-            {/* ---------- FIGURE ---------- */}
-            {/* hair volume that sits behind the skull */}
-            <HairBack style={avatar.hairStyle} base={hair.base} shadow={hair.shadow} />
-
-            {/* torso */}
-            <g>
-              <path d={TORSO_PATH} fill={top.base} />
-              <g clipPath={`url(#${gid("torsoClip")})`}>
-                <rect x={320} y={210} width={160} height={150} fill={`url(#${gid("torsoForm")})`} />
-                <rect x={320} y={210} width={160} height={150} fill={`url(#${gid("chestLight")})`} />
-                {/* collar + placket, so the top reads as a garment */}
-                <path
-                  d="M378 218 C386 234, 414 234, 422 218 L432 224 C424 246, 376 246, 368 224 Z"
-                  fill="#000000"
-                  opacity={0.22}
-                />
-                <rect x={398} y={240} width={3} height={108} fill="#000000" opacity={0.16} />
-                {/* trapezius line into the shoulders */}
-                <path
-                  d="M368 226 C380 238, 420 238, 432 226"
-                  fill="none"
-                  stroke="#FFFFFF"
-                  strokeWidth={2}
-                  opacity={0.12}
-                />
-              </g>
-              {/* rim light along the shoulder line, facing the screen */}
-              <path
-                d="M356 231 C346 238, 340 252, 337 272"
-                fill="none"
-                stroke={SCREEN_LIGHT}
-                strokeWidth={2.2}
-                opacity={0.28}
-                strokeLinecap="round"
-              />
-              <path
-                d="M444 231 C454 238, 460 252, 463 272"
-                fill="none"
-                stroke={SCREEN_LIGHT}
-                strokeWidth={2.2}
-                opacity={0.28}
-                strokeLinecap="round"
-              />
-            </g>
-
-            {/* arms */}
-            <Arm skin={skin} topColor={top.base} />
-            <Arm skin={skin} topColor={top.base} flip />
-
-            {/* neck + the occlusion shadow the chin casts on it */}
-            <g>
-              <path d={NECK_PATH} fill={skin.base} />
-              <path d={NECK_PATH} fill={`url(#${gid("neck")})`} />
-              <ellipse cx={CENTER} cy={196} rx={22} ry={12} fill={`url(#${gid("chinShadow")})`} />
-              {/* sternocleidomastoid, so the neck has structure */}
-              <path
-                d="M390 196 C389 206, 386 214, 383 220"
-                fill="none"
-                stroke="#000000"
-                strokeWidth={1.4}
-                opacity={0.18}
-                strokeLinecap="round"
-              />
-              <path
-                d="M410 196 C411 206, 414 214, 417 220"
-                fill="none"
-                stroke="#000000"
-                strokeWidth={1.4}
-                opacity={0.18}
-                strokeLinecap="round"
-              />
-              <path
-                d="M388 215 C394 222, 406 222, 412 215"
-                fill="none"
-                stroke={SCREEN_LIGHT}
-                strokeWidth={2}
-                opacity={0.22}
-                strokeLinecap="round"
-              />
-            </g>
-
-            {/* head */}
-            <g>
-              <ellipse cx={371} cy={174} rx={5.5} ry={9} fill={skin.base} />
-              <ellipse cx={429} cy={174} rx={5.5} ry={9} fill={skin.base} />
-              <ellipse cx={371} cy={175} rx={2.6} ry={4.4} fill={skin.shadow} opacity={0.6} />
-              <ellipse cx={429} cy={175} rx={2.6} ry={4.4} fill={skin.shadow} opacity={0.6} />
-
-              <path d={HEAD_PATH} fill={`url(#${gid("skin")})`} />
-
-              <g clipPath={`url(#${gid("headClip")})`}>
-                {/* far side falls into shadow */}
-                <rect x={370} y={128} width={60} height={80} fill={`url(#${gid("farSide")})`} />
-                {/* screen light raking up from under the jaw */}
-                <rect x={370} y={128} width={60} height={80} fill={`url(#${gid("keyLight")})`} />
-                {/* cheekbone + temple shading */}
-                <ellipse cx={382} cy={182} rx={9} ry={7} fill={skin.shadow} opacity={0.25} />
-                <ellipse cx={418} cy={182} rx={9} ry={7} fill={skin.shadow} opacity={0.25} />
-                {/* brow ridge shadow */}
-                <path
-                  d="M378 162 C386 156, 414 156, 422 162 L422 168 L378 168 Z"
-                  fill={skin.shadow}
-                  opacity={0.22}
-                />
-              </g>
-
-              {/* brow */}
-              <path
-                d="M381 162 Q388 157 396 160"
-                fill="none"
-                stroke={hair.shadow}
-                strokeWidth={2.2}
-                strokeLinecap="round"
-                opacity={0.9}
-              />
-              <path
-                d="M404 160 Q412 157 419 162"
-                fill="none"
-                stroke={hair.shadow}
-                strokeWidth={2.2}
-                strokeLinecap="round"
-                opacity={0.9}
-              />
-
-              <Eye side={-1} clipId={gid("eyeL")} skin={skin} lidDelayClass="" />
-              <Eye side={1} clipId={gid("eyeR")} skin={skin} lidDelayClass="scene-lid-b" />
-
-              {/* nose bridge, tip and nostril */}
-              <path
-                d="M399 166 C398 173, 397 179, 396 183"
-                fill="none"
-                stroke={skin.shadow}
-                strokeWidth={1.4}
-                strokeLinecap="round"
-                opacity={0.55}
-              />
-              <path
-                d="M395 184 Q400 188 405 184"
-                fill="none"
-                stroke={skin.shadow}
-                strokeWidth={1.6}
-                strokeLinecap="round"
-                opacity={0.75}
-              />
-              <path
-                d="M401 167 C403 174, 404 180, 405 183"
-                fill="none"
-                stroke={skin.highlight}
-                strokeWidth={1.4}
-                strokeLinecap="round"
-                opacity={0.5}
-              />
-
-              {/* mouth — restrained, slightly amused */}
-              <path
-                d="M390 191 Q395 190 400 191 Q405 190 410 191 Q405 197 400 197 Q395 197 390 191 Z"
-                fill="#7A4338"
-                opacity={0.55}
-              />
-              <path
-                d="M390 191 Q400 194 410 191"
-                fill="none"
-                stroke="#5E3129"
-                strokeWidth={1.7}
-                strokeLinecap="round"
-                opacity={0.9}
-              />
-              <path
-                d="M395 195 Q400 196 405 195"
-                fill="none"
-                stroke={skin.highlight}
-                strokeWidth={1.5}
-                strokeLinecap="round"
-                opacity={0.5}
-              />
-              {/* shadow under the lower lip, then the lit chin */}
-              <path
-                d="M394 199 Q400 201 406 199"
-                fill="none"
-                stroke={skin.shadow}
-                strokeWidth={1.6}
-                strokeLinecap="round"
-                opacity={0.4}
-              />
-              <path
-                d="M393 202 Q400 205 407 202"
-                fill="none"
-                stroke={SCREEN_LIGHT}
-                strokeWidth={1.8}
-                strokeLinecap="round"
-                opacity={0.3}
-              />
-
-              <FacialHair style={avatar.facialHair} base={hair.base} shadow={hair.shadow} />
-
-              <HairFront style={avatar.hairStyle} base={hair.base} shadow={hair.shadow} />
-
-              {avatar.glasses && <Glasses accent={accent} />}
-
-              {avatar.headphones && <Headphones accent={accent} />}
-            </g>
+            {/* ---------- FIGURE ----------
+                The chibi rig (scene/avatarArt): hair volume, then body and
+                arms, then the head and everything worn on it. */}
+            {seated && (
+              <>
+                <AvatarBack look={look} />
+                <AvatarBody look={look} uid={gid("av")} />
+                <AvatarHead look={look} uid={gid("av")} />
+              </>
+            )}
 
             {/* ---------- LEGS ----------
                 Drawn before the desk so its apron overlaps the knees, which is
                 what makes the legs read as running up to the seat. The chair
                 base goes first so the shins stand in front of it. */}
-            <ChairBase color={chair.shadow} />
-            <Leg />
-            <Leg flip />
+            <g filter={`url(#${gid("ink")})`}>
+              <ChairBase color={chair.shadow} />
+              {seated && <Leg />}
+              {seated && <Leg flip />}
+            </g>
 
             {/* ---------- DESK ---------- */}
             <g filter={`url(#${gid("soft")})`}>
+             <g filter={`url(#${gid("ink")})`}>
               <rect x={96} y={DESK_TOP} width={620} height={22} rx={3} fill={`url(#${gid("desk")})`} />
               <rect x={96} y={DESK_TOP} width={620} height={3} rx={1.5} fill={desk.highlight} opacity={0.75} />
               <rect x={126} y={366} width={14} height={98} rx={4} fill={desk.shadow} />
               <rect x={672} y={366} width={14} height={98} rx={4} fill={desk.shadow} />
               <rect x={126} y={366} width={4} height={98} rx={2} fill={desk.highlight} opacity={0.3} />
               <rect x={672} y={366} width={4} height={98} rx={2} fill={desk.highlight} opacity={0.3} />
+             </g>
             </g>
 
             {/* ---------- MOVABLE PROPS (behind the display plane) ----------
@@ -1991,57 +1029,9 @@ export const StudentBuildingScene = ({
             {propsBehindDisplay.map(renderProp)}
 
             {/* ---------- DISPLAY(S) ---------- */}
-            {avatar.display === "dual" && (
-              <g transform="rotate(-7 636 280)">
-                <ScreenPanel
-                  x={566}
-                  y={244}
-                  width={140}
-                  height={72}
-                  screenGradId={gid("screen")}
-                  glowGradId={gid("screenGlow")}
-                >
-                  <CodeLines x={578} y={258} width={124} scale={0.82} />
-                </ScreenPanel>
-                <rect x={628} y={322} width={16} height={18} rx={3} fill="#2A2E37" />
-                <rect x={610} y={338} width={52} height={7} rx={3.5} fill="#22262E" />
-              </g>
-            )}
-
-            {avatar.display === "laptop" ? (
-              <g>
-                <ScreenPanel
-                  x={348}
-                  y={248}
-                  width={104}
-                  height={74}
-                  screenGradId={gid("screen")}
-                  glowGradId={gid("screenGlow")}
-                >
-                  <CodeLines x={358} y={262} width={92} scale={0.78} />
-                </ScreenPanel>
-                <circle cx={400} cy={245} r={1.6} fill="#3C424E" />
-                {/* base */}
-                <path d="M334 328 L466 328 L472 340 Q400 346 328 340 Z" fill="#2A2E37" />
-                <path d="M334 328 L466 328 L466 331 L334 331 Z" fill="#3C424E" />
-                <rect x={378} y={333} width={44} height={4} rx={2} fill="#3C424E" opacity={0.7} />
-              </g>
-            ) : (
-              <g>
-                <ScreenPanel
-                  x={336}
-                  y={238}
-                  width={128}
-                  height={80}
-                  screenGradId={gid("screen")}
-                  glowGradId={gid("screenGlow")}
-                >
-                  <CodeLines x={348} y={252} width={112} scale={0.82} />
-                </ScreenPanel>
-                <rect x={392} y={324} width={16} height={16} rx={3} fill="#2A2E37" />
-                <rect x={368} y={338} width={64} height={7} rx={3.5} fill="#22262E" />
-              </g>
-            )}
+            <g filter={`url(#${gid("ink")})`}>
+              <Displays display={avatar.display} accent={accent} uid={gid("disp")} />
+            </g>
 
             {/* light spilling from the display onto the desk */}
             <ellipse cx={CENTER} cy={340} rx={130} ry={26} fill={`url(#${gid("spill")})`} />
@@ -2052,10 +1042,43 @@ export const StudentBuildingScene = ({
             {propsInFrontOfDisplay.map(renderProp)}
 
             {/* ---------- HANDS ---------- */}
-            <Hand skin={skin} />
-            <Hand skin={skin} flip />
+            {seated && <AvatarHands look={look} />}
+
+            {/* ---------- STANDING ----------
+                On your feet in front of the desk's right end, nearer the viewer
+                than everything on it; the chair waits empty behind. */}
+            {!seated && (
+              <g transform={STANDING_SPOT}>
+                <AvatarStanding look={look} uid={gid("av")} />
+              </g>
+            )}
           </svg>
           {footer}
+          {/* The download badge: your bust in a sticker ring. Never shown, only exported. */}
+          <svg
+            ref={badgeRef}
+            viewBox="294 62 212 212"
+            aria-hidden="true"
+            focusable="false"
+            style={{ position: "absolute", width: 0, height: 0, overflow: "hidden" }}
+          >
+            <defs>
+              <clipPath id={gid("badge")}>
+                <circle cx={400} cy={168} r={100} />
+              </clipPath>
+              <linearGradient id={gid("badgeBg")} x1="0" y1="68" x2="0" y2="268" gradientUnits="userSpaceOnUse">
+                {sky.bg.map((c, i) => (
+                  <stop key={c + i} offset={`${(i / (sky.bg.length - 1)) * 100}%`} stopColor={c} />
+                ))}
+              </linearGradient>
+            </defs>
+            <circle cx={400} cy={168} r={104} fill="#FFFFFF" />
+            <circle cx={400} cy={168} r={100} fill={`url(#${gid("badgeBg")})`} />
+            <g clipPath={`url(#${gid("badge")})`}>
+              <AvatarBust look={look} uid={gid("badgeav")} />
+            </g>
+            <circle cx={400} cy={168} r={100} fill="none" stroke={INK} strokeWidth={4} />
+          </svg>
         </div>
 
         {interactive && (
@@ -2070,6 +1093,7 @@ export const StudentBuildingScene = ({
               onRemoveCompanion={handleRemoveCompanion}
               onCompanionVariant={handleCompanionVariant}
               onTogglePlush={handleTogglePlush}
+              onDownload={handleDownload}
               description={label}
             />
           </div>

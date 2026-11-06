@@ -7,7 +7,7 @@
  * are no gradients or ids, because several pets can render in one SVG.
  * ------------------------------------------------------------------------ */
 
-const INK = "#1B1B22";
+import { Cheeks, GlossyEye, INK } from "./inkKit";
 
 const GroundShadow = ({ rx }) => <ellipse cx={0} cy={0} rx={rx} ry={4} fill="#000000" opacity={0.3} />;
 
@@ -177,10 +177,7 @@ const MUZZLE = "M-9 3 C-11 8 -10.5 15 -7 19.5 C-4 22.5 4 22.5 7 19.5 C10.5 15 11
 
 const DogEye = ({ iris, lidColor }) => (
   <g>
-    <circle cx={-7} cy={-0.8} r={3} fill={iris} />
-    <circle cx={-7} cy={-0.6} r={1.9} fill={INK} />
-    <circle cx={-6} cy={-1.7} r={0.85} fill="#FFFFFF" />
-    <circle cx={-7.9} cy={0.5} r={0.4} fill="#FFFFFF" opacity={0.8} />
+    <GlossyEye cx={-7} cy={-0.6} r={3.3} iris={iris} lash={false} />
     {/* a soft upper lid: gentle rather than startled */}
     <path d="M-10.4 -1.8 Q-7 -4.9 -3.6 -2 L-3.6 -4.4 L-10.4 -4.4 Z" fill={lidColor} />
     <path d="M-10.2 -1.9 Q-7 -4.6 -3.8 -2.1" stroke={INK} strokeWidth={1.2} strokeLinecap="round" fill="none" />
@@ -433,9 +430,7 @@ const Cat = ({ variant }) => {
         <ellipse cx={-2.4} cy={6.2} rx={3.2} ry={2.6} fill={muzzle[0]} />
         <ellipse cx={2.4} cy={6.2} rx={3.2} ry={2.6} fill={muzzle[0]} />
         <Pair>
-          <ellipse cx={-5.5} cy={0} rx={2.6} ry={3} fill={look.eye} />
-          <ellipse cx={-5.5} cy={0.2} rx={0.9} ry={2.3} fill={INK} />
-          <circle cx={-4.7} cy={-1.2} r={0.75} fill="#FFFFFF" />
+          <GlossyEye cx={-5.5} cy={0} r={3} iris={look.eye} slit />
           <path d="M-8.5 5.6 L-17 4 M-8.5 7 L-17 7.6" stroke={pattern === "plain" || pattern === "tuxedo" ? "#B8B5C2" : "#FFFFFF"} strokeWidth={0.6} strokeLinecap="round" opacity={0.7} />
         </Pair>
         <path d="M-1.7 3.8 L1.7 3.8 L0 5.6 Z" fill={look.nose} />
@@ -546,8 +541,7 @@ const Bird = ({ variant }) => {
           <circle cx={7.8} cy={-24.6} r={1.1} fill="#5A5DC8" />
         </g>
       )}
-      <circle cx={3.8} cy={-29.8} r={1.6} fill={INK} />
-      <circle cx={4.3} cy={-30.4} r={0.55} fill="#FFFFFF" />
+      <GlossyEye cx={3.8} cy={-29.8} r={2.3} lash={false} />
       {/* beak */}
       {kind === "parrot" ? (
         <g>
@@ -603,10 +597,9 @@ const Bunny = ({ variant }) => {
       <path d="M-10.5 -24 C-10.5 -19 -6 -15.5 0 -15.5 C-4.5 -17 -7.5 -20.5 -7.5 -25 C-7.5 -28.5 -6 -31 -3.5 -32.2 C-7.5 -31.5 -10.5 -28.5 -10.5 -24 Z" fill={coat[1]} />
       <ellipse cx={-2.3} cy={-19.6} rx={2.8} ry={2.2} fill={belly[0]} />
       <ellipse cx={2.3} cy={-19.6} rx={2.8} ry={2.2} fill={belly[0]} />
-      <circle cx={-4.6} cy={-25} r={1.9} fill={eye} />
-      <circle cx={4.6} cy={-25} r={1.9} fill={eye} />
-      <circle cx={-4} cy={-25.7} r={0.65} fill="#FFFFFF" />
-      <circle cx={5.2} cy={-25.7} r={0.65} fill="#FFFFFF" />
+      <GlossyEye cx={-4.6} cy={-25} r={2.6} iris={eye} />
+      <GlossyEye cx={4.6} cy={-25} r={2.6} iris={eye} />
+      <Cheeks x={6.4} y={-21.4} rx={2} ry={1.1} />
       <path d="M-1.3 -22 L1.3 -22 L0 -20.8 Z" fill="#E48A9A" />
       <path d="M0 -20.8 L0 -19.8 M-1.8 -19 Q-0.9 -18.4 0 -19.8 Q0.9 -18.4 1.8 -19" stroke={INK} strokeWidth={1} strokeLinecap="round" fill="none" />
     </g>
@@ -632,10 +625,9 @@ const Hamster = ({ variant }) => {
       <ellipse cx={0} cy={-5} rx={7.5} ry={5} fill={belly[0]} />
       <ellipse cx={-6.8} cy={-7.8} rx={3.4} ry={2.6} fill={belly[0]} />
       <ellipse cx={6.8} cy={-7.8} rx={3.4} ry={2.6} fill={belly[0]} />
-      <circle cx={-4.2} cy={-11.5} r={1.35} fill={INK} />
-      <circle cx={4.2} cy={-11.5} r={1.35} fill={INK} />
-      <circle cx={-3.8} cy={-12} r={0.45} fill="#FFFFFF" />
-      <circle cx={4.6} cy={-12} r={0.45} fill="#FFFFFF" />
+      <GlossyEye cx={-4.2} cy={-11.6} r={2.1} />
+      <GlossyEye cx={4.2} cy={-11.6} r={2.1} />
+      <Cheeks x={6.8} y={-8.6} rx={1.8} ry={1} />
       <circle cx={0} cy={-9.4} r={0.9} fill="#E48A9A" />
       <path d="M0 -8.5 L0 -7.6 M-1.4 -7.1 Q-0.7 -6.5 0 -7.6 Q0.7 -6.5 1.4 -7.1" stroke={INK} strokeWidth={0.8} strokeLinecap="round" fill="none" />
       {/* tiny front paws tucked together on the belly */}
@@ -667,8 +659,7 @@ const Turtle = ({ variant }) => {
       <path d="M11 -7 C13 -11 15 -13.5 17 -14.5 L20 -9 C17 -7.5 15 -5 14 -3.5 Z" fill={skin[0]} />
       <circle cx={17.8} cy={-12} r={4.9} fill={skin[0]} />
       <path d="M13 -12.5 C13 -9.5 15 -7.2 18 -7.1 C16 -8.5 15 -10.5 15.4 -13 Z" fill={skin[1]} />
-      <circle cx={19.2} cy={-13.3} r={1.25} fill={INK} />
-      <circle cx={19.6} cy={-13.8} r={0.45} fill="#FFFFFF" />
+      <GlossyEye cx={19.2} cy={-13.3} r={1.8} />
       <path d="M18.8 -10 Q20.6 -9 22 -10.2" stroke={INK} strokeWidth={1} strokeLinecap="round" fill="none" />
       <ellipse cx={-5} cy={-1.8} rx={3.6} ry={2.4} fill={skin[0]} />
       <ellipse cx={5.5} cy={-1.8} rx={3.6} ry={2.4} fill={skin[0]} />
@@ -747,7 +738,90 @@ const LunaPlush = () => {
   );
 };
 
-export const PET_ART = { dog: Dog, cat: Cat, bird: Bird, bunny: Bunny, hamster: Hamster, turtle: Turtle };
+
+/* ---------- fox ---------- */
+const FOX_COATS = {
+  red: { coat: ["#E8742C", "#B9551A"], light: "#FFF6EC", tip: "#2B211C" },
+  arctic: { coat: ["#F1F3F6", "#C9CFD8"], light: "#FFFFFF", tip: "#9AA3B2" },
+};
+const Fox = ({ variant }) => {
+  const c = FOX_COATS[variant] ?? FOX_COATS.red;
+  return (
+    <g>
+      <GroundShadow rx={22} />
+      {/* brush: curled round the right side, white tip */}
+      <path d="M8 -2 C24 0 32 -12 26 -24 C22 -32 14 -30 15 -24 C20 -22 20 -12 8 -10 Z" fill={c.coat[0]} />
+      <path d="M26 -24 C22 -32 14 -30 15 -24 C18 -25 22 -26 26 -24 Z" fill={c.light} />
+      <path d="M10 -3 C22 -2 30 -10 28 -18 C26 -10 20 -6 10 -7 Z" fill={c.coat[1]} />
+      {/* body and chest */}
+      <path d="M-12 0 C-15 -14 -10 -26 0 -28 C10 -26 15 -14 12 0 Z" fill={c.coat[0]} />
+      <path d="M4 -27 C10 -24 15 -14 12 0 L6 0 Z" fill={c.coat[1]} />
+      <path d="M-6 -2 C-8 -12 -5 -22 0 -24 C5 -22 8 -12 6 -2 Z" fill={c.light} />
+      {[-6, 6].map((x) => (
+        <ellipse key={x} cx={x} cy={-1.5} rx={4} ry={2.4} fill={c.tip} />
+      ))}
+      {/* head */}
+      <path d="M-13 -40 L-11 -54 L-4 -45 Z" fill={c.coat[0]} />
+      <path d="M13 -40 L11 -54 L4 -45 Z" fill={c.coat[1]} />
+      <path d="M-11.6 -50 L-11 -54 L-8.4 -50.6 Z" fill={c.tip} />
+      <path d="M11.6 -50 L11 -54 L8.4 -50.6 Z" fill={c.tip} />
+      <path d="M-14 -38 C-14 -46 -8 -48 0 -48 C8 -48 14 -46 14 -38 C14 -32 8 -26 0 -24 C-8 -26 -14 -32 -14 -38 Z" fill={c.coat[0]} />
+      <path d="M6 -47 C12 -45 14 -42 14 -38 C14 -32 8 -26 0 -24 C6 -28 9 -34 6 -47 Z" fill={c.coat[1]} opacity={0.8} />
+      <path d="M-14 -36 C-10 -30 -5 -27 0 -24 C5 -27 10 -30 14 -36 C9 -33 4 -33 0 -30 C-4 -33 -9 -33 -14 -36 Z" fill={c.light} />
+      <GlossyEye cx={-5.4} cy={-38.5} r={2.3} iris="#C98A2C" />
+      <GlossyEye cx={5.4} cy={-38.5} r={2.3} iris="#C98A2C" />
+      <path d="M-1.8 -29.5 L1.8 -29.5 L0 -27.6 Z" fill={INK} />
+      <path d="M0 -27.6 L0 -26.6 M-2 -26 Q-1 -25.2 0 -26.6 Q1 -25.2 2 -26" stroke={INK} strokeWidth={0.9} strokeLinecap="round" fill="none" />
+      <Cheeks x={8} y={-33.5} rx={1.8} ry={1} />
+    </g>
+  );
+};
+
+/* ---------- axolotl, in a little desk tank ---------- */
+const AXOLOTL_COATS = {
+  pink: { body: ["#F7A8C4", "#E07FA2"], gills: "#E8557F" },
+  gold: { body: ["#F6C85F", "#D9A43A"], gills: "#E8823A" },
+  wild: { body: ["#7C8B66", "#5D6B4C"], gills: "#4E5A3E" },
+};
+const Axolotl = ({ variant }) => {
+  const c = AXOLOTL_COATS[variant] ?? AXOLOTL_COATS.pink;
+  const gills = (s) =>
+    [-6, -2, 2].map((dy, i) => (
+      <path key={i} d={`M${s * 7} ${-19 + dy} q${s * 5} ${-2 + i} ${s * 7} ${-1 + i * 1.5}`} stroke={c.gills} strokeWidth={2.2} strokeLinecap="round" fill="none" />
+    ));
+  return (
+    <g>
+      <GroundShadow rx={24} />
+      {/* tank: glass, water, gravel, a sprig of weed */}
+      <rect x={-23} y={-38} width={46} height={38} rx={3} fill="#BFE6F2" opacity={0.55} />
+      <rect x={-23} y={-32} width={46} height={32} rx={2} fill="#7CC7E0" opacity={0.45} />
+      <path d="M-23 -6 Q-12 -9 0 -6 Q12 -3 23 -6 L23 -1 Q0 1 -23 -1 Z" fill="#C9B497" />
+      {[-17, -11, 14, 18].map((x, i) => (
+        <circle key={x} cx={x} cy={-4 + (i % 2)} r={1.4} fill={i % 2 ? "#8E7C63" : "#E2D3BC"} />
+      ))}
+      <path d="M-16 -6 C-18 -14 -13 -18 -15 -26 M-16 -6 C-12 -12 -10 -16 -11 -22" stroke="#3D8F57" strokeWidth={2} strokeLinecap="round" fill="none" />
+      {/* the axolotl, resting on the gravel */}
+      <path d="M-6 -10 C-2 -14 12 -14 18 -9 C14 -7 4 -6 -2 -7 Z" fill={c.body[1]} />
+      <path d="M14 -10 C18 -13 21 -11 22 -9 C19 -8 16 -8 14 -9 Z" fill={c.body[0]} />
+      <g>
+        {gills(-1)}
+        {gills(1)}
+        <ellipse cx={0} cy={-18} rx={9} ry={7} fill={c.body[0]} />
+        <path d="M4 -24 C8 -22 9 -16 6 -12 C8 -16 7 -20 4 -24 Z" fill={c.body[1]} opacity={0.6} />
+        <GlossyEye cx={-4} cy={-19} r={1.5} lash={false} />
+        <GlossyEye cx={4} cy={-19} r={1.5} lash={false} />
+        <path d="M-2.6 -15.4 Q0 -13.6 2.6 -15.4" stroke={INK} strokeWidth={0.8} strokeLinecap="round" fill="none" />
+        <Cheeks x={5.6} y={-16} rx={1.4} ry={0.8} />
+      </g>
+      {/* glass: rim and a highlight */}
+      <rect x={-23} y={-38} width={46} height={38} rx={3} fill="none" stroke="#E8F6FB" strokeWidth={1.4} opacity={0.9} />
+      <path d="M-19 -34 L-19 -14" stroke="#FFFFFF" strokeWidth={2} strokeLinecap="round" opacity={0.6} />
+      <rect x={-24} y={-40} width={48} height={3} rx={1.5} fill="#5D6470" />
+    </g>
+  );
+};
+
+export const PET_ART = { dog: Dog, cat: Cat, bird: Bird, bunny: Bunny, hamster: Hamster, turtle: Turtle, fox: Fox, axolotl: Axolotl };
 
 export const PET_VARIANTS = {
   dog: [
@@ -778,6 +852,15 @@ export const PET_VARIANTS = {
     { id: "white", label: "White" },
   ],
   turtle: [{ id: "green", label: "Green" }],
+  fox: [
+    { id: "red", label: "Red" },
+    { id: "arctic", label: "Arctic" },
+  ],
+  axolotl: [
+    { id: "pink", label: "Pink" },
+    { id: "gold", label: "Gold" },
+    { id: "wild", label: "Wild type" },
+  ],
 };
 
 export { LunaPlush };

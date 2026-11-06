@@ -299,7 +299,8 @@ export const finalTexture = (product) => {
 
 /**
  * The device the product ships on. Origin at the bottom centre of the device,
- * screen facing +z. Returns the group and the screen planes to crossfade.
+ * screen facing +z. Returns the group, the screen planes to crossfade, a slot
+ * per part and the glass rectangle.
  */
 export const buildDevice = (product, materials) => {
   const [sw, sh] = product.screen;
@@ -340,5 +341,7 @@ export const buildDevice = (product, materials) => {
     center: new THREE.Vector3((x + w / 2 - 0.5) * sw, screenY + (0.5 - (y + h / 2)) * sh, 0.075),
     size: [w * sw, h * sh],
   }));
-  return { group, blueprint, final, slots, height: lift + frameH };
+  // The glass, in device space: where a reviewer's stamp has to land.
+  const screen = { width: sw, height: sh, center: new THREE.Vector3(0, screenY, 0.048) };
+  return { group, blueprint, final, slots, screen, height: lift + frameH };
 };

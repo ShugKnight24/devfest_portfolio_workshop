@@ -1,7 +1,7 @@
 {
   "name": "portfolio_workshop_starter",
   "version": "0.0.1",
-  "description": "Interactive Portfolio Builder Workshop - Vite + React + Tailwind",
+  "description": "Pull the Cord. Bring Backup. An agentic development workshop - Vite + React + Tailwind",
   "type": "module",
   "packageManager": "pnpm@10.18.3",
   "scripts": {

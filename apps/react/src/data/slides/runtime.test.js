@@ -379,14 +379,17 @@ describe("devfest one-hour deck", () => {
     const { devfestSlides, devfestDeckMeta, devfestPresenterNotes } = await import("./devfestSlides");
 
     expect(devfestDeckMeta.continuesFrom).toBe("combined");
+    // The header shows the deck title: a short name, never a presenter note.
+    expect(devfestDeckMeta.title).toBe("Pull the Cord: Chapter Two");
     expect(devfestDeckMeta.fixedRuntime).toBe(true);
 
     const hour = selectSlides(devfestSlides, { runtime: devfestDeckMeta.defaultRuntime });
     expect(hour.map((s) => s.id)).toEqual(devfestSlides.map((s) => s.id));
 
+    // No ceiling: the speaker runs it as a conversation, so the clock is
+    // theirs. It just has to be a real talk.
     const minutes = hour.reduce((sum, s) => sum + slideBudget(s), 0) / 60;
     expect(minutes).toBeGreaterThan(30);
-    expect(minutes).toBeLessThanOrEqual(35);
     // Five of those minutes are questions, at the end of the talk.
     const qa = hour.find((s) => s.id === "questions");
     expect(qa.budget).toBe(300);
@@ -396,26 +399,27 @@ describe("devfest one-hour deck", () => {
     }
   });
 
-  it("keeps one hands-on exercise in Act I, the three gaps, and the scenes in story order", async () => {
+  it("keeps Act III on verification, the three gaps, and the scenes in story order", async () => {
     const { devfestSlides } = await import("./devfestSlides");
     const ids = devfestSlides.map((s) => s.id);
-    // No labs in thirty minutes: the diff hunt is the one thing the room does.
+    // A conversation, not a workshop: no labs.
     expect(devfestSlides.filter((s) => s.type === "lab")).toHaveLength(0);
-    const hunt = ids.indexOf("read-the-diff");
-    expect(hunt).toBeGreaterThan(ids.indexOf("act-1"));
-    expect(hunt).toBeLessThan(ids.indexOf("act-2"));
+    // Trust, then verify: the gates open Act III.
+    expect(ids.indexOf("verification-gate")).toBe(ids.indexOf("act-3") + 1);
     // What the hype leaves out: the perception gap, skills, the blast radius.
     for (const id of ["perception-gap", "skills-caveman", "blast-radius"]) expect(ids).toContain(id);
-    expect(devfestSlides.find((s) => s.id === "skills-caveman").link.href).toBe("https://github.com/juliusbrussee/caveman");
+    expect(devfestSlides.find((s) => s.id === "skills-caveman").stages.map((st) => st.rule)).toContain("juliusbrussee/caveman");
     const scenes = devfestSlides.filter((s) => s.type === "scene").map((s) => s.scene);
-    expect(scenes).toEqual(["pochita", "reacher-investigate", "reacher", "chainsaw-man", "chainsaw-devil", "mice"]);
-    // The pre-show: KICK BACK, IRIS OUT, then the Reze arc in story order; JANE DOE closes.
+    expect(scenes).toEqual(["pochita", "chainsaw-man", "next-mountain", "next-peak", "mice", "reacher-investigate", "reacher"]);
+    // The pre-show: IRIS OUT, then the Reze arc in story order; KICK BACK follows Pochita's deal; JANE DOE closes.
     const songs = devfestSlides.filter((s) => s.type === "song");
     // Pochita's dream clip rides the song slide too (video beside a film), inside the hour.
-    expect(songs.map((s) => s.id)).toEqual(["song-kick-back", "song-iris-out", "song-first-glance", "song-in-the-pool", "song-jane-slept", "pochita-dream", "song-jane-doe"]);
-    expect(ids.slice(ids.indexOf("cold-open"), ids.indexOf("cold-open") + 4)).toEqual(["cold-open", "chainsaw-man-101", "pochita-dream", "your-dream"]);
-    expect(ids.slice(0, 6)).toEqual(["song-kick-back", "song-iris-out", "song-first-glance", "song-in-the-pool", "song-jane-slept", "cold-open"]);
-    expect(ids.slice(-2)).toEqual(["song-jane-doe", "city-or-country"]);
+    expect(songs.map((s) => s.id)).toEqual(["song-iris-out", "song-first-glance", "song-in-the-pool", "song-jane-slept", "song-slow-summer-eve", "pochita-dream", "song-kick-back", "song-police-dog-blues", "song-jane-doe"]);
+    // The contract and the fight come first, then the lesson: pull the cord, then find the dream.
+    expect(ids.slice(ids.indexOf("cold-open"), ids.indexOf("cold-open") + 6)).toEqual(["cold-open", "chainsaw-man-101", "pochita-dream", "song-kick-back", "start-now", "your-dream"]);
+    // Who is talking, the talk, then the three stories it covers.
+    expect(ids.slice(0, 9)).toEqual(["song-iris-out", "song-first-glance", "song-in-the-pool", "song-jane-slept", "song-slow-summer-eve", "bio", "title", "why-these-two", "cold-open"]);
+    expect(ids.at(-1)).toBe("song-jane-doe");
     // One video per song, and every song has one.
     songs.forEach((s) => expect(s.song.youtubeId).toMatch(/^[\w-]{11}$/));
     expect(new Set(songs.map((s) => s.song.youtubeId)).size).toBe(songs.length);

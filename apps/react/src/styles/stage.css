@@ -84,6 +84,35 @@
 
   /* ---- Palette: REZE OVERRIDE ----
      The whole room changes on one attribute. No per-element ternaries. */
+  /* ---- Lenses: the three stories the title introduces ----
+     A slide tagged with a lens takes its colours, so the room can tell which
+     story it is in before a word is said. Declared before the Reze Override,
+     which still wins when it is on. */
+  .stage[data-stage-lens="denji"] {
+    /* The engine: chainsaw orange, starter-cord yellow. */
+    --stage-accent: #ff6a1a;
+    --stage-accent-alt: #ffd23f;
+    --stage-accent-deep: #ff8a3d;
+    --stage-accent-rgb: 255 106 26;
+    --stage-accent-alt-rgb: 255 210 63;
+  }
+  .stage[data-stage-lens="reacher"] {
+    /* The evidence board: night-rain blue, red ink circles. */
+    --stage-accent: #6fb4ff;
+    --stage-accent-alt: #ff5a4f;
+    --stage-accent-deep: #9ccaff;
+    --stage-accent-rgb: 111 180 255;
+    --stage-accent-alt-rgb: 255 90 79;
+  }
+  .stage[data-stage-lens="musashi"] {
+    /* Ink on washi: paper cream, vermilion seal. */
+    --stage-accent: #efe2c4;
+    --stage-accent-alt: #e0503a;
+    --stage-accent-deep: #f6edd8;
+    --stage-accent-rgb: 239 226 196;
+    --stage-accent-alt-rgb: 224 80 58;
+  }
+
   .stage[data-stage-mode="reze"] {
     --stage-accent: #ff0055;
     --stage-accent-alt: #c6ff00;
@@ -105,6 +134,17 @@
     --stage-text-muted: #d4d4d4;
     --stage-text-dim: #a8a8a8;
     --stage-border: rgb(var(--stage-accent-rgb) / 0.6);
+  }
+
+  /* Theatre: the words share the screen with a scene, so on wide screens the
+     ramp follows the column (its @container), not the viewport. */
+  @media (min-width: 1024px) {
+    .stage-theatre {
+      --stage-fs-body: clamp(1.05rem, 2.6cqi, 1.5rem);
+      --stage-fs-lead: clamp(1.1rem, 3cqi, 1.9rem);
+      --stage-fs-h2: clamp(1.6rem, 5.5cqi, 3.4rem);
+      --stage-fs-h1: clamp(2rem, 8.5cqi, 5.5rem);
+    }
   }
 }
 

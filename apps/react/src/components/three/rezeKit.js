@@ -1,8 +1,9 @@
 import * as THREE from "three";
-import { createParticles, lightBeam } from "./kit";
+import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
+import { canvasTexture, createParticles, hash, lerp, lightBeam } from "./kit";
 import { INK, PAPER, inkMaterial, mangaBackdrop, outlineMaterial, outline, syncInk } from "./ink";
 import { createModelFigure } from "./modelFigure";
-import { aim, createBlade, createChainsawHead } from "./chainsawParts";
+import { addBladeBlood, aim, bloodMaterial, createBlade, createHybridHead } from "./chainsawParts";
 
 /**
  * The Reze arc kit — what the pre-show songs are shot with.
@@ -169,6 +170,27 @@ const buildCafe = (w) => {
   box(4.2, 0.08, 0.14, frame, 2.4, 1.0, -2.52, g);
   for (const x of [0.3, 1.7, 3.1, 4.5]) box(0.08, 2.1, 0.14, frame, x, 2.05, -2.52, g);
   box(4.1, 2.0, 0.02, glow("#fff3d6"), 2.4, 2.05, -2.57, g);
+  // Her café's name on a signboard over the window: Crossroads.
+  box(2.5, 0.52, 0.06, frame, 2.4, 3.5, -2.57, g);
+  const name = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.4, 0.46),
+    new THREE.MeshBasicMaterial({
+      transparent: true,
+      toneMapped: false,
+      map: canvasTexture(1024, 196, (ctx, cw, ch) => {
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "#f6e3bd";
+        ctx.font = "italic 700 128px Georgia, 'Times New Roman', serif";
+        ctx.fillText("Crossroads", cw / 2, ch * 0.42);
+        ctx.font = "600 36px Georgia, 'Times New Roman', serif";
+        ctx.fillText("C  A  F  É", cw / 2, ch * 0.86);
+      }),
+    }),
+  );
+  name.position.set(2.4, 3.5, -2.535);
+  g.add(name);
+  g.add(name);
   const sun = lightBeam({ from: [2.6, 2.6, -2.4], to: [1.0, 0, 0.6], radiusFrom: 1.0, radiusTo: 1.8, color: "#ffd59a" });
   sun.material.uniforms.uIntensity.value = 0.22;
   g.add(sun);
@@ -195,11 +217,18 @@ const buildCafe = (w) => {
   water.rotation.x = -Math.PI / 2;
   water.position.set(-0.45, 1.26, -0.42);
   g.add(water);
-  for (const [tilt, yaw] of [[-0.22, 0.4], [0.25, -0.6]]) {
+  // Each stem goes in through the mouth and stands in the water near the
+  // bottom; the heads lean apart above it.
+  const foot = new THREE.Vector3();
+  for (const [tilt, roll, yaw] of [[-0.16, 0.2, 0.4], [0.2, -0.22, -0.6]]) {
     const own = buildDaisy(w);
     own.scale.setScalar(1.25);
-    own.rotation.set(tilt, yaw, tilt * 0.6);
-    own.position.set(-0.45 + tilt * 0.12, 1.21 + 0.27, -0.42);
+    own.rotation.set(tilt, yaw, roll);
+    own.updateMatrix();
+    foot.set(0, -0.25, 0).applyMatrix4(own.matrix);
+    // Set the foot back against the lean, so the stem crosses the mouth near its middle.
+    const lean = foot.clone().negate().normalize();
+    own.position.set(-0.45 - lean.x * 0.08, 1.14, -0.42 - lean.z * 0.08).sub(foot);
     g.add(own);
   }
   box(1.4, 0.8, 0.05, w.ink({ tint: "#1d2a22", tone: 0.4, rim: 0.4 }), -2.4, 2.6, -2.5, g);
@@ -451,12 +480,13 @@ export const createSets = (w, ids) => {
  * The cast.
  * ------------------------------------------------------------------------ */
 
-export const buildDaisy = (w) => {
+/** A daisy, its head at the origin and the stem hanging 0.26 below it. `petals` tints it (white by default). */
+export const buildDaisy = (w, { petals = "#ffffff" } = {}) => {
   const g = new THREE.Group();
   const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.008, 0.26, 6), w.ink({ tint: "#4f8a3a", tone: 0.6, rim: 0.4 }));
   stem.position.y = -0.13;
   g.add(stem);
-  const petal = w.ink({ tint: "#ffffff", tone: 1.1, rim: 0.3 });
+  const petal = w.ink({ tint: petals, tone: 1.1, rim: 0.3 });
   for (let i = 0; i < 12; i++) {
     const p = new THREE.Mesh(new THREE.SphereGeometry(0.03, 8, 6), petal);
     p.scale.set(0.35, 0.12, 1);
@@ -472,102 +502,547 @@ export const buildDaisy = (w) => {
   return g;
 };
 
+/** A lathe profile's radius at height `y` (points are [radius, height], rising). */
+const profileAt = (prof, y) => {
+  for (let i = 1; i < prof.length; i++) {
+    if (y <= prof[i][1]) return lerp(prof[i - 1][0], prof[i][0], (y - prof[i - 1][1]) / Math.max(1e-6, prof[i][1] - prof[i - 1][1]));
+  }
+  return prof[prof.length - 1][0];
+};
+
+/** A rope along `points` (Vector3s): a CatmullRom tube. */
+const rope = (points, radius, closed = false, segments = points.length * 6) => new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points, closed), segments, radius, 5, closed);
+
 /**
- * The Bomb Devil's head: a long, ridged iron shell swept back like a grenade
- * on its side, a wide grin of teeth, a crown of spikes with the pin in it,
- * and a wrapped neck. Built at life size, rooted at the neck.
+ * A three-strand braid along `points`. `out(p)` is the direction away from
+ * the body at p (the braid lies flat against it); `r` is one strand's radius.
+ */
+const braid = (points, r, out, perMetre = 70) => {
+  const curve = new THREE.CatmullRomCurve3(points);
+  const len = curve.getLength();
+  const n = Math.max(8, Math.ceil(len * 160));
+  const tangent = new THREE.Vector3();
+  const side = new THREE.Vector3();
+  return [0, 1, 2].map((k) => {
+    const strand = [];
+    for (let i = 0; i <= n; i++) {
+      const u = i / n;
+      const p = curve.getPointAt(u);
+      curve.getTangentAt(u, tangent);
+      const o = out(p);
+      side.crossVectors(tangent, o).normalize();
+      const a = u * len * perMetre + (k * Math.PI * 2) / 3;
+      strand.push(p.clone().addScaledVector(side, Math.cos(a) * r * 1.5).addScaledVector(o, Math.sin(a) * r * 0.8));
+    }
+    return rope(strand, r, false, n * 2);
+  });
+};
+
+/**
+ * The Bomb Devil's head, after the film: a smooth black casing like a warhead
+ * on its side, nose forward and tail lifted, seams round the shell and a small
+ * finned tail; a lipless skull grin of teeth across the bottom of the nose;
+ * fuse cord wound up the neck. Built at life size, rooted at the neck, face +z.
  */
 const buildBombHead = (w) => {
   const g = new THREE.Group();
-  const iron = w.ink({ tint: "#2b2d35", tone: 0.62, rim: 1.4 });
-  const dark = w.ink({ tint: "#1a1b20", tone: 0.5, rim: 1.2 });
-  const shell = new THREE.Mesh(new THREE.SphereGeometry(0.14, 28, 18), iron);
-  shell.scale.set(0.95, 1.0, 1.55);
-  shell.position.set(0, 0.2, -0.07);
-  g.add(shell);
-  outline(shell, w.line);
-  // Ridges across the skull, front to back.
-  for (let i = 0; i < 6; i++) {
-    const arc = new THREE.Mesh(new THREE.TorusGeometry(0.135 * (1 - Math.abs(i - 2.5) * 0.07), 0.011, 6, 24, Math.PI), dark);
-    arc.position.set(0, 0.2, 0.06 - i * 0.055);
-    arc.scale.y = 1.02;
-    g.add(arc);
-  }
-  // The grin: a black slot, teeth top and bottom, wider than any mouth should be.
-  const slot = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.05, 0.05), w.flat);
-  slot.position.set(0, 0.12, 0.1);
-  g.add(slot);
+  const iron = w.ink({ tint: "#25262d", tone: 0.62, rim: 1.4 });
+  const dark = w.ink({ tint: "#121317", tone: 0.5, rim: 1 });
+  const fuse = w.ink({ tint: "#2b2622", tone: 0.62, rim: 0.9 });
   const teeth = w.ink({ tint: PAPER, tone: 1.2, rim: 0.2 });
-  for (let i = 0; i < 11; i++) {
-    const a = -0.75 + (i / 10) * 1.5;
-    for (const [y, flip] of [[0.143, Math.PI], [0.097, 0]]) {
-      const t = new THREE.Mesh(new THREE.BoxGeometry(0.011, 0.022, 0.012), teeth);
-      t.position.set(Math.sin(a) * 0.1, y, 0.08 + Math.cos(a) * 0.04);
-      t.rotation.set(flip ? 0 : 0, -a, 0);
-      g.add(t);
+
+  // The neck, the fuse wound up it in loose turns.
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.046, 0.15, 14), dark);
+  neck.position.y = 0.05;
+  g.add(neck);
+  const coil = [];
+  for (let i = 0; i <= 90; i++) {
+    const a = (i / 90) * Math.PI * 2 * 5.5;
+    const r = 0.05 + 0.003 * Math.sin(a * 2.3);
+    coil.push(new THREE.Vector3(Math.cos(a) * r, -0.012 + (i / 90) * 0.13, Math.sin(a) * r));
+  }
+  const wound = new THREE.Mesh(rope(coil, 0.0078, false, 300), fuse);
+  g.add(wound);
+  outline(wound, w.line);
+
+  // The shell: a lathe from the nose (height 0) back to the tail.
+  // Lying across her shoulders like the figure's: the nose turned to her right
+  // and a little down, the finned tail back over her left shoulder and up.
+  const skull = new THREE.Group();
+  skull.position.set(0.03, 0.2, 0.02);
+  skull.rotation.set(0.26, -0.55, 0, "YXZ");
+  g.add(skull);
+  const NOSE = 0.17;
+  const WIDE = 0.94; // a touch narrower than tall
+  const prof = [[0, 0], [0.05, 0.005], [0.085, 0.022], [0.106, 0.05], [0.118, 0.095], [0.12, 0.15], [0.11, 0.215], [0.09, 0.275], [0.064, 0.325], [0.042, 0.365], [0.03, 0.4], [0.024, 0.43], [0, 0.44]];
+  const shellGeo = new THREE.LatheGeometry(prof.map(([r, y]) => new THREE.Vector2(r, y)), 36);
+  shellGeo.rotateX(-Math.PI / 2); // nose to tail runs toward -z
+  shellGeo.scale(WIDE, 1, 1);
+  shellGeo.translate(0, 0, NOSE);
+  const shell = new THREE.Mesh(shellGeo, iron);
+  skull.add(shell);
+  outline(shell, w.line);
+  // Seams round the shell.
+  const seams = [0.075, 0.135, 0.2, 0.265, 0.325].map((y) => {
+    const ring = new THREE.TorusGeometry(profileAt(prof, y) + 0.002, 0.0042, 6, 44);
+    ring.scale(WIDE, 1, 1);
+    return ring.translate(0, 0, NOSE - y);
+  });
+  skull.add(new THREE.Mesh(mergeGeometries(seams), dark));
+  // The tail: three small swept fins round the tip.
+  const fin = new THREE.Shape();
+  fin.moveTo(0, 0);
+  fin.lineTo(0.06, 0);
+  fin.lineTo(0.075, 0.05);
+  fin.lineTo(0.022, 0.018);
+  fin.lineTo(0, 0);
+  const fins = [0, (Math.PI * 2) / 3, (Math.PI * 4) / 3].map((roll) => {
+    const f = new THREE.ExtrudeGeometry(fin, { depth: 0.007, bevelEnabled: false });
+    f.translate(0, 0.018, -0.0035);
+    f.rotateY(Math.PI / 2); // runs back along -z, stands up +y
+    f.rotateZ(roll);
+    return f.translate(0, 0, NOSE - 0.37);
+  });
+  const tail = new THREE.Mesh(mergeGeometries(fins), iron);
+  skull.add(tail);
+  outline(tail, w.line);
+
+  // The grin, across the bottom of the nose: a dark slot, square skull teeth
+  // above and below it, no lips. Each tooth sits on the shell's surface.
+  const onShell = (a, y) => {
+    const c = new THREE.Vector3(0, y, NOSE - 0.11);
+    const d = new THREE.Vector3(Math.sin(a), 0, Math.cos(a));
+    const p = new THREE.Vector3();
+    for (let s = 0; s < 0.2; s += 0.002) {
+      p.copy(c).addScaledVector(d, s);
+      const depth = NOSE - p.z;
+      if (depth < 0 || Math.hypot(p.x / WIDE, p.y) > profileAt(prof, depth)) return p;
+    }
+    return p;
+  };
+  // Big square teeth, a skull's, clenched in a grin.
+  const MOUTH = -0.05;
+  const slot = [];
+  for (let i = 0; i <= 16; i++) slot.push(onShell(lerp(-1.15, 1.15, i / 16), MOUTH));
+  skull.add(new THREE.Mesh(rope(slot, 0.02, false, 48), w.flat));
+  const toothGeo = [];
+  for (const [y, h] of [[MOUTH + 0.02, -1], [MOUTH - 0.02, 1]]) {
+    for (let i = 0; i < 10; i++) {
+      const a = lerp(-1.0, 1.0, (i + 0.5) / 10);
+      const t = new THREE.BoxGeometry(0.017, 0.036, 0.012);
+      t.translate(0, (h * 0.016) / 2, 0.003);
+      t.rotateY(a);
+      const p = onShell(a, y);
+      toothGeo.push(t.translate(p.x, p.y, p.z));
     }
   }
-  // Spikes at the back of the crown; the pin hangs among them.
-  for (let i = 0; i < 6; i++) {
-    const spike = new THREE.Mesh(new THREE.ConeGeometry(0.014, 0.12 + (i % 2) * 0.05, 6), dark);
-    const a = -0.8 + (i / 5) * 1.6;
-    spike.position.set(Math.sin(a) * 0.05, 0.32, -0.2 + Math.cos(a) * 0.02);
-    spike.rotation.set(-0.5, 0, -a * 0.6);
-    g.add(spike);
-  }
-  const pin = new THREE.Mesh(new THREE.TorusGeometry(0.04, 0.007, 8, 24), w.ink({ tint: "#e6e6e1", tone: 1.3, rim: 0.4 }));
-  pin.position.set(0.05, 0.36, -0.2);
-  pin.rotation.y = Math.PI / 2;
-  g.add(pin);
-  // The neck, wrapped.
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.05, 0.16, 14), dark);
-  neck.position.y = 0.04;
-  g.add(neck);
-  for (let i = 0; i < 4; i++) {
-    const band = new THREE.Mesh(new THREE.TorusGeometry(0.048, 0.008, 6, 18), iron);
-    band.rotation.x = Math.PI / 2;
-    band.position.y = -0.02 + i * 0.035;
-    g.add(band);
-  }
+  const grin = new THREE.Mesh(mergeGeometries(toothGeo), teeth);
+  skull.add(grin);
+  outline(grin, w.line);
   return g;
 };
 
-/** The canister she carries at her side: a tall banded drum. */
-const buildCanister = (w) => {
+/**
+ * The dynamite she wears down the front of her skirt: a long, flat-fronted
+ * bundle of thin black sticks as wide as her hips, from the waist to the
+ * ankles, bound by eight cord bands evenly down it, the bottom ends ragged.
+ * Top centre at the origin, it hangs down -y, face +z. `DYNAMITE` holds a
+ * stick's radius and the bundle's half width and half depth.
+ */
+const DYNAMITE = { stick: 0.0105, w: 0.13, d: 0.016 };
+const buildDynamite = (w, length) => {
+  const { stick, w: W, d: D } = DYNAMITE;
   const g = new THREE.Group();
-  const drum = new THREE.Mesh(new THREE.CylinderGeometry(0.105, 0.105, 0.95, 20), w.ink({ tint: "#55565c", tone: 0.7, rim: 1 }));
-  g.add(drum);
-  outline(drum, w.line);
-  const band = w.ink({ tint: "#1d1e22", tone: 0.5, rim: 0.8 });
-  for (let i = 0; i < 8; i++) {
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.107, 0.012, 6, 24), band);
-    ring.rotation.x = Math.PI / 2;
-    ring.position.y = -0.44 + i * 0.125;
-    g.add(ring);
+  const sticks = [];
+  let n = 0;
+  // Two staggered rows: the front one flat, the back one showing in the gaps.
+  for (const [z, shift] of [[D * 0.55, 0], [-D * 0.55, stick]]) {
+    for (let x = -W + shift; x <= W + 1e-6; x += stick * 2.05) {
+      // Ragged ends: no two sticks quite the same length, the bottom most of all.
+      const top = hash(n * 3 + 1) * 0.015;
+      const len = length - top - hash(n * 3 + 2) * 0.06;
+      const s = new THREE.CylinderGeometry(stick, stick * 0.96, len, 8);
+      sticks.push(s.translate(x, -top - len / 2, z));
+      n++;
+    }
   }
+  const bundle = new THREE.Mesh(mergeGeometries(sticks), w.ink({ tint: "#26262c", tone: 0.72, rim: 1.1 }));
+  g.add(bundle);
+  outline(bundle, w.line);
+  // The bands: flat across the front and back, rounded at the sides.
+  const straps = [];
+  const N = 8;
+  for (let i = 0; i < N; i++) {
+    const y = -lerp(0.05, length - 0.1, i / (N - 1));
+    const loop = [];
+    for (let k = 0; k < 32; k++) {
+      const a = (k / 32) * Math.PI * 2;
+      const sx = Math.sin(a);
+      const cz = Math.cos(a);
+      loop.push(new THREE.Vector3(Math.sign(sx) * Math.abs(sx) ** 0.2 * (W + stick + 0.003), y, Math.sign(cz) * Math.abs(cz) ** 0.6 * (D + stick + 0.003)));
+    }
+    straps.push(rope(loop, 0.0055, true, 96));
+  }
+  const strapMesh = new THREE.Mesh(mergeGeometries(straps), w.ink({ tint: "#0e0e11", tone: 0.5, rim: 0.9 }));
+  g.add(strapMesh);
+  outline(strapMesh, w.line);
   return g;
+};
+
+/**
+ * What the Bomb Devil wears over Reze's clothes, fitted to `fig` at rest: the
+ * white collar and black ribbon, a halter of braided fuse cord over them, and
+ * gloves of knotted cord to the shoulder with frayed ends, all on her bones;
+ * and the dynamite column, in the scene. Returns `{ dynamite, hang }`: call
+ * `hang()` once she is posed. The column hangs plumb from her waist over her
+ * right leg, and swings forward over the knee when that thigh comes up.
+ */
+const dressBombDevil = (w, fig) => {
+  const cordMat = w.ink({ tint: "#1d1b21", tone: 0.66, rim: 1.1 });
+  const at = (o) => o.getWorldPosition(new THREE.Vector3());
+  const pin = (geos, bone, material = cordMat) => {
+    const mesh = new THREE.Mesh(mergeGeometries(geos), material);
+    mesh.userData.devilWear = true;
+    outline(mesh, w.line);
+    w.scene.add(mesh);
+    bone.attach(mesh);
+    return mesh;
+  };
+
+  // The body's surface at rest, in world space.
+  let body = null;
+  fig.model.traverse((o) => o.isSkinnedMesh && (!body || o.geometry.attributes.position.count > body.geometry.attributes.position.count) && (body = o));
+  const pts = [];
+  for (let i = 0; i < body.geometry.attributes.position.count; i++) pts.push(body.getVertexPosition(i, new THREE.Vector3()).applyMatrix4(body.matrixWorld));
+  /** The front (dir 1) or back (dir -1) of the body at (x, y), or null off it. */
+  const surface = (x, y, dir = 1, r = 0.012) => {
+    let z = null;
+    for (const p of pts) if (Math.abs(p.x - x) < r && Math.abs(p.y - y) < r && (z === null || (p.z - z) * dir > 0)) z = p.z;
+    return z;
+  };
+  const neckAt = at(fig.bones.neck);
+  const hipsAt = at(fig.bones.hips);
+  const chest = fig.bones.chest ?? fig.bones.spine;
+  const midZ = (y) => ((surface(0, y, 1) ?? 0.1) + (surface(0, y, -1) ?? -0.1)) / 2;
+  /** Half the torso's width at y, across its front. */
+  const halfWidth = (y) => {
+    const mz = midZ(y);
+    let x = 0;
+    while (x < 0.25 && (surface(x + 0.006, y, 1) ?? -Infinity) > mz && (surface(-x - 0.006, y, 1) ?? -Infinity) > mz) x += 0.006;
+    return x;
+  };
+
+  // The white collar and the black ribbon under it.
+  const white = w.ink({ tint: "#f1efe9", tone: 1.05, rim: 0.6 });
+  const neckFront = surface(0, neckAt.y - 0.04, 1) ?? neckAt.z + 0.06;
+  const collar = [-1, 1].map((s) => {
+    const flap = new THREE.BoxGeometry(0.07, 0.048, 0.01);
+    flap.rotateZ(s * -0.6);
+    flap.rotateY(s * 0.5);
+    flap.rotateX(-0.35);
+    return flap.translate(neckAt.x + s * 0.038, neckAt.y - 0.035, neckFront + 0.012);
+  });
+  pin(collar, fig.bones.neck, white);
+  const bow = [];
+  for (const s of [-1, 1]) {
+    const loop = new THREE.TorusGeometry(0.012, 0.0035, 5, 14);
+    loop.scale(1.3, 0.8, 0.6);
+    bow.push(loop.translate(neckAt.x + s * 0.015, neckAt.y - 0.058, neckFront + 0.02));
+    bow.push(rope([new THREE.Vector3(neckAt.x, neckAt.y - 0.06, neckFront + 0.02), new THREE.Vector3(neckAt.x + s * 0.008, neckAt.y - 0.1, neckFront + 0.024), new THREE.Vector3(neckAt.x + s * 0.016, neckAt.y - 0.14, neckFront + 0.022)], 0.0032));
+  }
+  pin(bow, fig.bones.neck, w.flat);
+
+  // The halter: rows of braided cord across her front from the waist to the
+  // bust, straps from the bust round the back of the neck. The top rows ride
+  // the chest, the lower ones the spine, so a bend creases it at the middle.
+  const top = neckAt.y - 0.13;
+  const bottom = hipsAt.y + 0.09;
+  const mid = (top + bottom) / 2;
+  const rows = { upper: [], lower: [] };
+  const flat = () => new THREE.Vector3(0, 0, 1);
+  for (let y = bottom, i = 0; y <= top; y += 0.019, i++) {
+    const hw = halfWidth(y) * 0.92;
+    const path = [];
+    for (let k = 0; k <= 12; k++) {
+      const x = lerp(-hw, hw, k / 12);
+      const z = surface(x, y, 1, 0.015);
+      if (z !== null) path.push(new THREE.Vector3(x, y + 0.004 * Math.sin(k * 1.7 + i * 2.3), z + 0.008));
+    }
+    if (path.length > 3) rows[y > mid ? "upper" : "lower"].push(...braid(path, 0.0042, flat));
+  }
+  const hwTop = halfWidth(top) * 0.92;
+  const neckAxis = new THREE.Vector3(neckAt.x, 0, neckAt.z);
+  const away = (p) => new THREE.Vector3(p.x, 0, p.z).sub(neckAxis).normalize();
+  for (const s of [-1, 1]) {
+    const y1 = neckAt.y - 0.065;
+    const strap = [
+      new THREE.Vector3(s * hwTop * 0.75, top, (surface(s * hwTop * 0.75, top, 1, 0.015) ?? neckFront) + 0.008),
+      new THREE.Vector3(s * 0.055, y1, (surface(s * 0.055, y1, 1, 0.015) ?? neckFront) + 0.01),
+      new THREE.Vector3(neckAt.x + s * 0.062, neckAt.y - 0.03, neckAt.z + 0.01),
+      new THREE.Vector3(neckAt.x + s * 0.035, neckAt.y - 0.035, neckAt.z - 0.058),
+      new THREE.Vector3(neckAt.x, neckAt.y - 0.04, neckAt.z - 0.064),
+    ];
+    rows.upper.push(...braid(strap, 0.0042, away));
+  }
+  pin(rows.upper, chest);
+  if (rows.lower.length) pin(rows.lower, fig.bones.spine);
+
+  // The skirt: short, black, a little flared, with soft folds at the hem. Four
+  // panels, each hung from the hip joint on its side, so a raised thigh lifts
+  // the front of the skirt (or a kick back the back of it) instead of going
+  // through the cloth.
+  const span = (y) => {
+    const b = { x0: Infinity, x1: -Infinity, z0: Infinity, z1: -Infinity };
+    for (const p of pts) {
+      if (Math.abs(p.y - y) > 0.012 || Math.abs(p.x - hipsAt.x) > 0.22) continue;
+      b.x0 = Math.min(b.x0, p.x);
+      b.x1 = Math.max(b.x1, p.x);
+      b.z0 = Math.min(b.z0, p.z);
+      b.z1 = Math.max(b.z1, p.z);
+    }
+    return { cx: (b.x0 + b.x1) / 2, cz: (b.z0 + b.z1) / 2, rx: (b.x1 - b.x0) / 2, rz: (b.z1 - b.z0) / 2 };
+  };
+  const skirtTop = hipsAt.y + 0.075;
+  const skirtLen = 0.2;
+  const waist = span(skirtTop);
+  const hem = span(skirtTop - skirtLen);
+  const skirtMat = w.ink({ tint: "#1a191f", tone: 0.7, rim: 1.2 });
+  skirtMat.side = THREE.DoubleSide;
+  const thighs = ["l", "r"].map((sd) => ({ hip: fig.bones[`${sd}Hip`], knee: fig.bones[`${sd}Knee`] }));
+  const hipsQ = fig.bones.hips.getWorldQuaternion(new THREE.Quaternion()).invert();
+  const toHips = (v) => v.clone().applyQuaternion(hipsQ);
+  const fwdL = toHips(new THREE.Vector3(0, 0, 1));
+  const upL = toHips(new THREE.Vector3(0, 1, 0));
+  const sideL = toHips(new THREE.Vector3(1, 0, 0));
+  /** How far forward a thigh swings, in the hips' frame (radians, 0 hanging). */
+  const thighAngle = ({ hip, knee }) => {
+    const d = toHips(knee.getWorldPosition(new THREE.Vector3()).sub(hip.getWorldPosition(new THREE.Vector3())));
+    return Math.atan2(d.dot(fwdL), -d.dot(upL));
+  };
+  const skirt = [];
+  for (const [t0, front] of [[0, 1], [Math.PI / 2, 0], [Math.PI, 0], [Math.PI * 1.5, 1]]) {
+    const geo = new THREE.CylinderGeometry(1, 1, skirtLen, 14, 4, true, t0 - 0.06, Math.PI / 2 + 0.12);
+    const pos = geo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const a = Math.atan2(pos.getX(i), pos.getZ(i));
+      const t = 0.5 - pos.getY(i) / skirtLen; // 0 at the waist, 1 at the hem
+      const fold = 1 + 0.05 * t * Math.sin(a * 9);
+      const rx = (lerp(waist.rx, hem.rx, t) + 0.012 + 0.03 * t) * fold;
+      const rz = (lerp(waist.rz, hem.rz, t) + 0.012 + 0.03 * t) * fold;
+      pos.setXYZ(i, lerp(waist.cx, hem.cx, t) + Math.sin(a) * rx, skirtTop - t * skirtLen, lerp(waist.cz, hem.cz, t) + Math.cos(a) * rz);
+    }
+    geo.computeVertexNormals();
+    // The panel's side: + x is her left.
+    const thigh = thighs.reduce((best, th) => (Math.sign(at(th.hip).x - hipsAt.x) === Math.sign(Math.sin(t0 + Math.PI / 4)) ? th : best), thighs[0]);
+    const pivot = new THREE.Object3D();
+    pivot.position.copy(at(thigh.hip));
+    const mesh = new THREE.Mesh(geo.translate(-pivot.position.x, -pivot.position.y, -pivot.position.z), skirtMat);
+    mesh.userData.devilWear = true;
+    outline(mesh, w.line);
+    pivot.add(mesh);
+    w.scene.add(pivot);
+    fig.bones.hips.attach(pivot);
+    skirt.push({ pivot, q0: pivot.quaternion.clone(), thigh, front, rest: thighAngle(thigh) });
+  }
+  const swingQ = new THREE.Quaternion();
+  const liftSkirt = () =>
+    skirt.forEach(({ pivot, q0, thigh, front, rest }) => {
+      const a = thighAngle(thigh) - rest;
+      const k = front ? Math.min(1.3, Math.max(0, a) * 0.85) : Math.max(-1.0, Math.min(0, a) * 0.85);
+      pivot.quaternion.copy(swingQ.setFromAxisAngle(sideL, -k)).multiply(q0);
+    });
+
+  // The gloves: knotted rings of cord down each arm, sized to it, frayed
+  // ends sticking out of the top and the cuff.
+  const ringAt = (P, d, seed) => {
+    const radii = [];
+    const q = new THREE.Vector3();
+    for (const p of pts) {
+      q.subVectors(p, P);
+      const along = q.dot(d);
+      if (Math.abs(along) > 0.012) continue;
+      const rho = q.addScaledVector(d, -along).length();
+      if (rho < 0.075) radii.push(rho);
+    }
+    radii.sort((a, b) => a - b);
+    const r = THREE.MathUtils.clamp(radii[Math.floor(radii.length / 2)] ?? 0.035, 0.022, 0.055) + 0.005;
+    const turn = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), d);
+    const loop = [];
+    for (let k = 0; k < 14; k++) {
+      const a = (k / 14) * Math.PI * 2;
+      const rk = r * (1 + 0.1 * (hash(seed * 31 + k) - 0.5));
+      loop.push(new THREE.Vector3(Math.cos(a) * rk, (hash(seed * 17 + k) - 0.5) * 0.008, Math.sin(a) * rk).applyQuaternion(turn).add(P));
+    }
+    const geos = [rope(loop, 0.0058, true, 42)];
+    // A knot or two on every ring.
+    for (let k = 0; k < 2; k++) {
+      const a = hash(seed * 7 + k) * Math.PI * 2;
+      const knot = new THREE.SphereGeometry(0.0095, 6, 4);
+      knot.scale(1.3, 0.9, 1);
+      knot.applyQuaternion(turn);
+      geos.push(knot.translate(...new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r).applyQuaternion(turn).add(P).toArray()));
+    }
+    return { geos, r, turn };
+  };
+  const frays = (P, d, r, turn, seed, count, reach) =>
+    Array.from({ length: count }, (_, k) => {
+      const a = hash(seed + k * 5) * Math.PI * 2;
+      const base = new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r).applyQuaternion(turn).add(P);
+      const spread = new THREE.Vector3(Math.cos(a), 0, Math.sin(a)).applyQuaternion(turn);
+      const len = reach * (0.5 + hash(seed + k * 5 + 1) * 0.8);
+      const dir = d.clone().multiplyScalar(0.8).addScaledVector(spread, 0.7).normalize();
+      const bend = spread.clone().multiplyScalar(len * 0.25);
+      return rope([base, base.clone().addScaledVector(dir, len * 0.5).add(bend), base.clone().addScaledVector(dir, len).add(bend.multiplyScalar(2.2))], 0.0042, false, 12);
+    });
+  ["l", "r"].forEach((side, si) => {
+    const shoulder = fig.bones[`${side}Shoulder`];
+    const elbow = fig.bones[`${side}Elbow`];
+    const hand = fig.model.getObjectByName(`hand_${side}`);
+    const S = at(shoulder);
+    const E = at(elbow);
+    const H = hand ? at(hand) : E.clone().lerp(S, -1);
+    for (const [from, to, bone, t0, t1, part] of [
+      [S, E, shoulder, 0.42, 1, 0], // opera length: the shoulders bare
+      [E, H, elbow, 0.04, 0.96, 1],
+    ]) {
+      const d = to.clone().sub(from).normalize();
+      const len = from.distanceTo(to);
+      const geos = [];
+      const n = Math.max(3, Math.round(((t1 - t0) * len) / 0.021));
+      let first = null;
+      let last = null;
+      for (let i = 0; i <= n; i++) {
+        const P = from.clone().lerp(to, lerp(t0, t1, i / n));
+        const ring = ringAt(P, d, si * 100 + part * 50 + i);
+        geos.push(...ring.geos);
+        if (i === 0) first = { P, ...ring };
+        last = { P, ...ring };
+      }
+      // Frayed: out of the top of the glove, and loose at the cuff.
+      if (part === 0) geos.push(...frays(first.P, d.clone().negate(), first.r, first.turn, si * 13 + 3, 6, 0.08));
+      else geos.push(...frays(last.P, d, last.r, last.turn, si * 13 + 7, 3, 0.05));
+      pin(geos, bone);
+    }
+  });
+
+  // The dynamite: hung from a point on the front of her waist over her right
+  // leg, clear of her thigh all the way down.
+  const thighR = fig.model.getObjectByName("thigh_r");
+  const side = Math.sign((thighR ? at(thighR).x : -1) - hipsAt.x) || -1;
+  const footR = fig.model.getObjectByName("foot_r");
+  const cx = side * 0.03;
+  const waistY = hipsAt.y + 0.06;
+  let clear = -Infinity;
+  for (let y = (footR ? at(footR).y : 0.1) + 0.05; y <= waistY; y += 0.02) {
+    for (let x = cx - DYNAMITE.w; x <= cx + DYNAMITE.w; x += 0.02) clear = Math.max(clear, surface(x, y, 1, 0.012) ?? -Infinity);
+  }
+  if (!Number.isFinite(clear)) clear = hipsAt.z + 0.12;
+  const hinge = new THREE.Object3D();
+  hinge.position.set(cx, waistY, Math.max(clear, hem.cz + hem.rz + 0.04) + DYNAMITE.d + DYNAMITE.stick + 0.008);
+  w.scene.add(hinge);
+  fig.bones.hips.attach(hinge);
+  const length = waistY - ((footR ? at(footR).y : 0.1) + 0.06);
+  const dynamite = buildDynamite(w, length);
+  dynamite.children.forEach((o) => (o.userData.devilWear = true));
+  dynamite.visible = false;
+  w.scene.add(dynamite);
+
+  // How far the front of each knee stands ahead of the hang line, at rest: the
+  // column is as wide as her hips, so either knee can push it.
+  const kneesOf = [["calf_r", "rKnee", side], ["calf_l", "lKnee", -side]].map(([name, bone, sd]) => ({ o: fig.model.getObjectByName(name) ?? fig.bones[bone], sd })).filter((k) => k.o);
+  const yaw = new THREE.Quaternion();
+  const fwd = new THREE.Vector3();
+  const v = new THREE.Vector3();
+  const X = new THREE.Vector3(1, 0, 0);
+  const Z = new THREE.Vector3(0, 0, 1);
+  const swing = new THREE.Quaternion();
+  const tip = new THREE.Quaternion();
+  const LEAN = 0.05; // at rest the foot of it tucks in toward her shins
+  const tiltOf = (knee) => {
+    knee.getWorldPosition(v).addScaledVector(fwd, 0.06 + DYNAMITE.d + DYNAMITE.stick).sub(dynamite.position);
+    return Math.atan2(v.dot(fwd), Math.max(0.02, -v.y));
+  };
+  hinge.getWorldPosition(dynamite.position);
+  fwd.set(0, 0, 1);
+  kneesOf.forEach((k) => (k.rest = tiltOf(k.o)));
+  const hang = () => {
+    dynamite.visible = true;
+    fig.root.updateMatrixWorld(true);
+    liftSkirt();
+    hinge.getWorldPosition(dynamite.position);
+    fig.root.getWorldQuaternion(yaw);
+    fwd.set(0, 0, 1).applyQuaternion(yaw);
+    // A raised thigh pushes it forward only so far, then out to the side:
+    // pushed level, a column of sticks off her lap reads as a gun.
+    let lift = 0;
+    let to = side;
+    for (const k of kneesOf) {
+      const l = tiltOf(k.o) - k.rest;
+      if (l > lift) [lift, to] = [l, k.sd];
+    }
+    swing.setFromAxisAngle(Z, to * Math.min(0.35, lift * 0.4));
+    dynamite.quaternion.copy(yaw).multiply(swing).multiply(tip.setFromAxisAngle(X, LEAN - Math.min(0.55, lift)));
+  };
+  return { dynamite, hang };
 };
 
 /** What they wear, from the film's model sheets. */
 export const OUTFITS = {
   // White shirt, sleeves rolled, black tie, brown belt, dark slacks, white-and-red sneakers.
-  denji: { skin: "#f2cfb0", top: "#eef0ea", bottom: "#2c3436", shoes: "#ecebe6", trim: "#b5332a", hair: "#e3a849", sleeves: "rolled", tie: "#15161b", belt: "#6b3f22" },
-  // A white blouse under a black pinafore, short skirt, black thigh-highs, loafers.
-  reze: { skin: "#f3d9cc", top: "#1d1b22", collar: "#f1efe9", sleeve: "#f1efe9", bottom: "#1d1b22", shoes: "#4a2b1a", hair: "#2a2140", sleeves: "short", skirt: 0.11, stockings: "#17161b", stockingsTop: 0.4 },
-  // The Bomb Devil: the same clothes, sleeveless, gloved to the shoulder.
-  bomb: { skin: "#f3d9cc", top: "#1d1b22", collar: "#f1efe9", arms: "#18181d", bottom: "#1d1b22", shoes: "#4a2b1a", hair: "#2a2140", sleeves: "none", skirt: 0.11, stockings: "#17161b", stockingsTop: 0.4 },
+  // His face: dark irises under a heavy lid, bold brows a shade under his
+  // blond, a little tired under the eyes. His sneakers: white high-tops with
+  // maroon side panels and heel, and the red stripe round the sole.
+  denji: {
+    skin: "#f2cfb0", top: "#eef0ea", bottom: "#28322f", shoes: "#ecebe6", trim: "#b5332a", panel: "#9a3a2c", sole: "#f4f1ea",
+    hair: "#e3a849", sleeves: "rolled", tie: "#15161b", belt: "#6b3f22",
+    iris: "#4b2c1c", pupil: "#0f0907", brows: "#8a5a22", tired: true,
+  },
+  // Her date look, the arc's standard until she turns: a white sleeveless
+  // collared blouse with a thin black ribbon, tucked into black high-waisted
+  // shorts to mid-thigh, black thigh-highs, brown penny loafers. Navy-purple
+  // hair, green eyes.
+  reze: {
+    skin: "#f3d9cc", top: "#f1efe9", bottom: "#1d1b22", shoes: "#4a2b1a", footwear: "loafers", hair: "#2a2140",
+    sleeves: "none", waist: 0.6, skirt: 0.195, stockings: "#17161b", stockingsTop: 0.345, bow: "#121116",
+    iris: "#3f9a68", pupil: "#0b1a12", lid: "#1d1626",
+  },
+  // First Glance: a white raglan tee with black sleeves and the square print,
+  // worn out over skinny jeans, black-and-white canvas low-tops, a brown
+  // leather school bag on both shoulders.
+  rezeCasual: {
+    skin: "#f3d9cc", top: "#f1efe9", sleeve: "#1d1b22", bottom: "#5677ab", shoes: "#2b2d33", footwear: "sneakers", sole: "#f1efe9", hair: "#2a2140",
+    sleeves: "long", waist: 0.53, neckband: "#1d1b22", print: "#1d1b22", printArt: "#e8b25c", backpack: "#8a4a26",
+    iris: "#3f9a68", pupil: "#0b1a12", lid: "#1d1626",
+  },
+  // The Bomb Devil: the same clothes, sleeveless, shoulders bare, opera gloves
+  // from halfway down the upper arm (`sleeves` as a fraction: skin to there); the loafers.
+  bomb: { skin: "#f3d9cc", top: "#1d1b22", collar: "#f1efe9", sleeve: "#f3d9cc", arms: "#18181d", bottom: "#1d1b22", shoes: "#4a2b1a", footwear: "loafers", hair: "#2a2140", sleeves: 0.17, skirt: 0.11, stockings: "#17161b", stockingsTop: 0.4 },
   devil: { skin: "#8f8578", top: "#7d7368", bottom: "#4a443e", shoes: "#2a2622", hair: "#2a2622", sleeves: "long" },
+};
+
+/**
+ * The clothes that need a silhouette, built as geometry on the bones
+ * (createModelFigure's `dress`): Denji's collar points, his tie hanging off the
+ * knot, the button placket, belt, rolled cuffs, high-tops and spiky hair.
+ * Reze's date look: the blouse's collar, ribbon and placket, the hem of the
+ * shorts, a low bun and the fringe over her right eye. Her casual look: the
+ * tee's print, the school bag, a low ponytail and the fringe.
+ */
+export const DRESS = {
+  denji: { collar: true, tie: true, placket: true, belt: true, cuffs: true, sneakers: true, spikes: true },
+  reze: { collar: true, bow: true, placket: true, shorts: true, bun: true, fringe: "right" },
+  rezeCasual: { print: true, backpack: true, ponytail: true, fringe: "right" },
 };
 
 /**
  * Denji and Reze (plus any `devils`), loaded once and moved between sets.
  * Resolves with the cast; scenes check `cast.ready` before posing anyone.
+ * `rezeLook` dresses her: "date" (the default) or "casual" (First Glance).
  */
-export const createCast = (w, { devils = 0, chainsaw = true, bomb = false, daisy = false } = {}) => {
+export const createCast = (w, { devils = 0, chainsaw = true, bomb = false, daisy = false, rezeLook = "date" } = {}) => {
   const cast = { denji: null, reze: null, devils: [], daisy: null, bombHead: null, saw: null };
   const steel = w.ink({ tint: "#e6e6e1", tone: 1.3, rim: 0.4 });
   const rail = w.ink({ tint: "#2b2b2b", tone: 1.1, rim: 0.6 });
-  const bone = w.ink({ tone: 1.15, rim: 0.2 });
 
   if (daisy) {
     cast.daisy = buildDaisy(w);
@@ -580,8 +1055,11 @@ export const createCast = (w, { devils = 0, chainsaw = true, bomb = false, daisy
   }
 
   const loads = [
-    createModelFigure({ height: 1.72, hair: ["HairSimpleParted", "EyebrowsRegular"], line: w.line, ink: { tone: 0.78, rim: 1.4 }, outfit: OUTFITS.denji, fist: 0.35 }),
-    createModelFigure({ body: "SuperheroFemale", height: 1.62, hair: ["HairLong", "EyebrowsFemale"], line: w.line, ink: { tone: 0.8, rim: 1.4 }, outfit: OUTFITS.reze, fist: 0.3 }),
+    createModelFigure({ height: 1.72, hair: ["HairSimpleParted", "EyebrowsRegular"], line: w.line, ink: { tone: 0.78, rim: 1.4 }, outfit: OUTFITS.denji, dress: DRESS.denji, fist: 0.35 }),
+    createModelFigure({
+      body: "SuperheroFemale", height: 1.62, hair: ["HairLong", "EyebrowsFemale"], line: w.line, ink: { tone: 0.8, rim: 1.4 },
+      outfit: rezeLook === "casual" ? OUTFITS.rezeCasual : OUTFITS.reze, dress: rezeLook === "casual" ? DRESS.rezeCasual : DRESS.reze, fist: 0.3,
+    }),
     bomb ? createModelFigure({ body: "SuperheroFemale", height: 1.62, hair: [], line: w.line, ink: { tone: 0.8, rim: 1.4 }, outfit: OUTFITS.bomb, fist: 0.2 }) : null,
     ...Array.from({ length: devils }, (_, i) =>
       createModelFigure({ height: 1.8 + (i % 3) * 0.15, horns: true, line: w.line, ink: { tone: 0.55, rim: 1.3 }, outfit: OUTFITS.devil }),
@@ -603,10 +1081,7 @@ export const createCast = (w, { devils = 0, chainsaw = true, bomb = false, daisy
       bombFig.bones.head.scale.setScalar(0.001);
       bombFig.apply({});
       bombFig.root.updateMatrixWorld(true);
-      const canister = buildCanister(w);
-      canister.position.copy(bombFig.bones.hips.getWorldPosition(new THREE.Vector3())).add(new THREE.Vector3(0.21, -0.3, 0.02));
-      w.scene.add(canister);
-      bombFig.bones.hips.attach(canister);
+      const wear = dressBombDevil(w, bombFig);
       const bonesOf = (f) => {
         let skinned = null;
         f.model.traverse((o) => !skinned && o.isSkinnedMesh && (skinned = o));
@@ -632,70 +1107,22 @@ export const createCast = (w, { devils = 0, chainsaw = true, bomb = false, daisy
         bombFig.bones.neck.getWorldQuaternion(q);
         cast.bombHead.quaternion.copy(q);
         cast.bombHead.scale.setScalar(Math.max(0.01, grow));
+        wear.hang();
       };
       cast.untransform = () => {
         reze.root.visible = true;
         bombFig.root.visible = false;
         cast.bombHead.visible = false;
+        wear.dynamite.visible = false;
       };
     }
-
-    // Clothes that need a silhouette, not just paint: collars, his tie, his belt.
-    const dress = (fig, { tie, belt, collar }) => {
-      fig.apply({});
-      fig.root.updateMatrixWorld(true);
-      const neckAt = fig.bones.neck.getWorldPosition(new THREE.Vector3());
-      const hipsAt = fig.bones.hips.getWorldPosition(new THREE.Vector3());
-      const chestBone = fig.bones.chest ?? fig.bones.spine;
-      const pieces = [];
-      if (collar) {
-        const white = w.ink({ tint: collar, tone: 1.05, rim: 0.6 });
-        for (const side of [-1, 1]) {
-          const flap = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.05, 0.012), white);
-          flap.position.copy(neckAt).add(new THREE.Vector3(side * 0.04, -0.035, 0.075));
-          flap.rotation.set(-0.35, side * 0.5, side * -0.6);
-          outline(flap, w.line);
-          pieces.push([flap, fig.bones.neck]);
-        }
-      }
-      if (tie) {
-        // Solid ink, not shaded cloth: a lit black tie went grey and vanished
-        // into the white shirt behind it.
-        const black = w.flat;
-        const knot = new THREE.Mesh(new THREE.BoxGeometry(0.042, 0.04, 0.03), black);
-        knot.position.copy(neckAt).add(new THREE.Vector3(0, -0.05, 0.09));
-        outline(knot, w.line);
-        pieces.push([knot, fig.bones.neck]);
-        const blade = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.34, 0.016), black);
-        blade.geometry.translate(0, -0.17, 0);
-        blade.position.copy(neckAt).add(new THREE.Vector3(0, -0.07, 0.115));
-        blade.rotation.x = -0.12;
-        outline(blade, w.line);
-        pieces.push([blade, chestBone]);
-      }
-      if (belt) {
-        const strap = new THREE.Mesh(new THREE.TorusGeometry(0.145, 0.022, 6, 32), w.ink({ tint: belt, tone: 0.75, rim: 0.8 }));
-        strap.rotation.x = Math.PI / 2;
-        strap.scale.set(1, 0.72, 1);
-        strap.position.copy(hipsAt).add(new THREE.Vector3(0, 0.085, 0.005));
-        const buckle = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.035, 0.012), w.ink({ tint: "#c9c4b8", tone: 1.2, rim: 0.4 }));
-        buckle.position.copy(hipsAt).add(new THREE.Vector3(0, 0.085, 0.11));
-        pieces.push([strap, fig.bones.hips], [buckle, fig.bones.hips]);
-      }
-      pieces.forEach(([mesh, bone]) => {
-        w.scene.add(mesh);
-        bone.attach(mesh);
-      });
-    };
-    dress(denji, { collar: "#eef0ea", tie: "#15161b", belt: "#6b3f22" });
-    dress(reze, { collar: "#f1efe9" });
 
     // Her choker, and the pin hanging from it.
     reze.apply({});
     reze.root.updateMatrixWorld(true);
     const neck = reze.bones.neck;
     const neckAt = neck.getWorldPosition(new THREE.Vector3());
-    const choker = new THREE.Mesh(new THREE.TorusGeometry(0.052, 0.008, 8, 28), w.ink({ tint: "#141414", tone: 0.6, rim: 1 }));
+    const choker = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.0065, 8, 32), w.ink({ tint: "#141414", tone: 0.6, rim: 1 }));
     choker.rotation.x = Math.PI / 2;
     choker.position.copy(neckAt).add(new THREE.Vector3(0, 0.04, 0.005));
     w.scene.add(choker);
@@ -707,23 +1134,52 @@ export const createCast = (w, { devils = 0, chainsaw = true, bomb = false, daisy
     cast.pin = pin;
 
     if (chainsaw) {
-      const { head, blade } = createChainsawHead({ skin: w.ink({ tint: "#d65a24", tone: 0.92, rim: 1.2 }), steel, rail, ink: w.flat, bone, line: w.line, lineThin: w.line, scale: 1.05, bladeLength: 0.7 });
-      // A blade out of each forearm, as in the film.
-      const armBlades = ["r", "l"].map(() => createBlade({ length: 0.6, radius: 0.07, steel, rail, ink: w.flat, line: w.line, teeth: 22, thickness: 0.03 }));
+      // The hybrid's head (chainsawParts), on a pivot that copies the head
+      // bone's turn but not its scale, so his own head can shrink away under it.
+      const S = 1.72 / 1.82;
+      const hybrid = createHybridHead({ scale: S, bladeLength: 0.62, line: w.line, lineThin: w.line });
+      const { head, blade } = hybrid;
+      hybrid.setMouth(0.15);
       denji.apply({});
       denji.root.updateMatrixWorld(true);
-      const dNeck = denji.model.getObjectByName("neck_01") ?? denji.bones.neck;
-      head.position.copy(denji.bones.neck.getWorldPosition(new THREE.Vector3()));
-      w.scene.add(head);
-      dNeck.attach(head);
+      const headBone = denji.bones.head;
+      const headRest = headBone.scale.clone();
+      const pivot = new THREE.Object3D();
+      pivot.scale.copy(headRest);
+      // It follows the bone on every matrix update, whatever posed it.
+      pivot.updateMatrixWorld = function (force) {
+        this.position.copy(headBone.position);
+        this.quaternion.copy(headBone.quaternion);
+        THREE.Object3D.prototype.updateMatrixWorld.call(this, force);
+      };
+      pivot.position.copy(headBone.position);
+      pivot.quaternion.copy(headBone.quaternion);
+      headBone.parent.add(pivot);
+      head.position.copy(headBone.getWorldPosition(new THREE.Vector3()));
+      pivot.attach(head);
       const scale = head.scale.clone();
-      armBlades.forEach((armBlade, i) => {
-        const side = i ? "l" : "r";
-        armBlade.group.position.copy(denji.model.getObjectByName(`hand_${side}`).getWorldPosition(new THREE.Vector3()));
-        aim(armBlade.group, new THREE.Vector3(0, -1, 0.08), new THREE.Vector3(0, 0, 1));
+      // A bar out of the back of each forearm, past the fist, bloodied.
+      const m = hybrid.materials;
+      const gore = bloodMaterial();
+      const arm = { length: 0.6 * S, radius: 0.066 * S, thickness: 0.028 * S };
+      const armBlades = [
+        ["l", 1],
+        ["r", -1],
+      ].map(([side, s], i) => {
+        const elbow = denji.bones[`${side}Elbow`];
+        const e = elbow.getWorldPosition(new THREE.Vector3());
+        const h = denji.model.getObjectByName(`hand_${side}`).getWorldPosition(new THREE.Vector3());
+        const armBlade = createBlade({ ...arm, steel: m.steel, rail: m.rail, ink: m.chain, line: w.line, teeth: 26 });
+        armBlade.group.position.copy(e).lerp(h, 0.3).add(new THREE.Vector3(s * 0.047 * S, 0, 0));
+        aim(armBlade.group, h.clone().sub(e).normalize(), new THREE.Vector3(0, 0, 1));
         w.scene.add(armBlade.group);
-        denji.bones[`${side}Elbow`].attach(armBlade.group);
+        elbow.attach(armBlade.group);
+        addBladeBlood(armBlade, { ...arm, material: gore, seed: 5 + i * 4 })(0.35);
+        w.register(armBlade.group);
+        return armBlade;
       });
+      addBladeBlood(blade, { length: 0.62, radius: 0.072, thickness: 0.03, material: gore, seed: 3, count: 7 })(0.35);
+      w.register(head);
       // The starter cord in his chest: a T-grip on the sternum and the cord
       // behind it. Pulled, the grip rides his right hand out and the cord
       // stretches after it; let go, it snaps home.
@@ -767,11 +1223,12 @@ export const createCast = (w, { devils = 0, chainsaw = true, bomb = false, daisy
       /** 0 = Denji, 1 = the Chainsaw Man. */
       cast.saw = {
         set(k, time = 0) {
-          denji.bones.head.scale.setScalar(k > 0.5 ? 0.001 : 1);
+          headBone.scale.copy(headRest).multiplyScalar(k > 0.5 ? 0.001 : 1);
           head.visible = k > 0.01;
           head.scale.copy(scale).multiplyScalar(Math.max(0.001, k));
           blade.extend(k);
           blade.run(time * 9);
+          hybrid.setVents(k * (0.85 + 0.15 * Math.sin(time * 41)));
           armBlades.forEach((b, i) => {
             b.extend(k);
             b.run(time * (10 + i));

@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { canvasTexture, clamp01, easeInOutCubic, easeOutBack, lerp, lightBeam, segment } from "../kit";
 import { INK, PAPER, RED, inkMaterial, mangaBackdrop, outlineMaterial, syncInk, setInkStyle } from "../ink";
-import { blendPose } from "../figure";
 import { createModelFigure } from "../modelFigure";
 import { createCaption, createSfx } from "../sfx";
 
@@ -232,6 +231,124 @@ const SLOTS = [
   [0.6, 0.75, -0.1],
 ];
 
+/*
+ * How he works the table. Every move is a sum of eased hand-offs between
+ * keys (case file → A … F → case file), so nothing can snap: a joint is
+ * always a continuous function of the cycle clock, and the last key is the
+ * first, so the loop seam is still. The eyes go first, the shoulders follow,
+ * the torch arm lands last, just as the circle starts to draw. Between
+ * exhibits he takes a half step along the edge, and holds about a second on
+ * each before the eyes move on.
+ */
+const ROOT_Z = -1.25;
+const CASE_AIM = [-0.08, 1.0];
+const WIDE = [0, 0.25];
+const aimKey = ([x, z]) => {
+  const rootX = x * 0.35;
+  const dx = x - rootX;
+  const dz = z - ROOT_Z;
+  return { x, z, rootX, yaw: Math.atan2(dx, dz), dist: Math.hypot(dx, dz) };
+};
+// The detail on each card, in table space (the cards lie flat and never move).
+const detailAim = (i) => {
+  const [x, z, rot] = SLOTS[i];
+  const u = (EXHIBITS[i].detail[0] - 0.5) * CARD_W;
+  const v = (0.5 - EXHIBITS[i].detail[1]) * CARD_H;
+  // Plane rotated -90° about x then `rot` about its normal: local (u, v) → world (x, -z).
+  return [x + u * Math.cos(rot) - v * Math.sin(rot), z - (u * Math.sin(rot) + v * Math.cos(rot))];
+};
+const KEYS = [aimKey(CASE_AIM), ...EXHIBITS.map((_, i) => aimKey(detailAim(i))), aimKey(CASE_AIM)];
+const keyTime = (j) => START + j * STEP;
+
+// Quintic ease: speed and acceleration both start and end at zero, so no move begins with a kick.
+const glide = (t) => t * t * t * (t * (t * 6 - 15) + 10);
+// How far the beam travels between consecutive keys; long sweeps get more time.
+const SPAN = KEYS.slice(1).map((k, j) => Math.hypot(k.x - KEYS[j].x, k.z - KEYS[j].z));
+
+/**
+ * Hand-offs from key to key for one body part. Each move lands at
+ * `keyTime(j) + land` and lasts `base` plus a little per metre of travel,
+ * so the landing (and the circle it cues) stays on the beat.
+ */
+const track = (c, field, [land, base]) => {
+  let v = KEYS[0][field];
+  for (let j = 0; j < KEYS.length - 1; j++) {
+    const t1 = keyTime(j) + land;
+    v += glide(segment(c, t1 - base - SPAN[j] * 0.17, t1)) * (KEYS[j + 1][field] - KEYS[j][field]);
+  }
+  return v;
+};
+const moveStart = (j, [land, base]) => keyTime(j) + land - base - SPAN[j] * 0.17;
+
+// When each part arrives (s after the exhibit's slot opens) and its shortest move:
+// eyes first, then shoulders and feet, then the torch, just as the circle starts (0.54 s).
+const HEAD = [0.36, 0.62];
+const BODY = [0.48, 0.56];
+const ARM = [0.54, 0.44];
+const RELEASE = [18.4, 1.0]; // the wide beam narrows back onto the file while the room goes dark
+
+/** Reacher's whole body for a moment of the cycle: pose, feet, and where the beam lands. */
+export const reacherPoseAt = (c, time = c) => {
+  const headYaw = track(c, "yaw", HEAD);
+  const headDist = track(c, "dist", HEAD);
+  const bodyYaw = track(c, "yaw", BODY);
+  const bodyDist = track(c, "dist", BODY);
+  const rootX = track(c, "rootX", BODY);
+  const armYaw = track(c, "yaw", ARM);
+  const armDist = track(c, "dist", ARM);
+
+  // The half step: a soft bell (sin²: it starts and ends at rest) over each move, its lead foot set by the direction of travel.
+  let stepL = 0;
+  let stepR = 0;
+  for (let j = 0; j < KEYS.length - 1; j++) {
+    const dx = KEYS[j + 1].rootX - KEYS[j].rootX;
+    const t0 = moveStart(j, BODY);
+    const bell = Math.sin(Math.PI * segment(c, t0, keyTime(j) + BODY[0])) ** 2 * Math.min(1, Math.abs(dx) / 0.22);
+    if (dx > 0) stepL += bell;
+    else stepR += bell;
+  }
+  const step = stepL + stepR;
+
+  // He notices: a small nod as each circle draws, then a breath out as its letter lands.
+  let nod = 0;
+  for (let i = 0; i < EXHIBITS.length; i++) {
+    nod += Math.sin(Math.PI * segment(c, START + (i + 0.3) * STEP, START + (i + 0.8) * STEP)) ** 2;
+  }
+  const breathe = Math.sin(time * 1.1);
+  const reach = (d) => d - 1.55;
+
+  const pose = {
+    hips: [0, 0, (stepR - stepL) * 0.035],
+    spine: [LEAN.spine[0] + breathe * 0.015 + reach(bodyDist) * 0.06 + step * 0.03, bodyYaw * 0.22, (stepL - stepR) * 0.03],
+    chest: [LEAN.chest[0] + breathe * 0.012, bodyYaw * 0.14, 0],
+    neck: [LEAN.neck[0], headYaw * 0.16, 0],
+    head: [LEAN.head[0] - reach(headDist) * 0.22 + nod * 0.05, headYaw * 0.3, 0],
+    lShoulder: [LEAN.lShoulder[0] - step * 0.05, 0, LEAN.lShoulder[2]],
+    lElbow: LEAN.lElbow,
+    rShoulder: [LEAN.rShoulder[0] - reach(armDist) * 0.3 + Math.sin(time * 1.7) * 0.008, 0, LEAN.rShoulder[2] + armYaw * 0.5],
+    rElbow: [LEAN.rElbow[0] + Math.sin(time * 1.3 + 1) * 0.01, 0, 0],
+    lHip: [LEAN.lHip[0] - stepL * 0.22, 0, LEAN.lHip[2] + stepL * 0.14],
+    lKnee: [LEAN.lKnee[0] + stepL * 0.45 + stepR * 0.12, 0, 0],
+    rHip: [LEAN.rHip[0] - stepR * 0.22, 0, LEAN.rHip[2] - stepR * 0.14],
+    rKnee: [LEAN.rKnee[0] + stepR * 0.45 + stepL * 0.12, 0, 0],
+    lift: -step * 0.025,
+  };
+
+  // The beam rides the arm's timing; after the search it opens wide over everything, then closes again in the dark.
+  const wide = glide(segment(c, CONNECT, CONNECT + 0.8)) * (1 - glide(segment(c, RELEASE[0], RELEASE[0] + RELEASE[1])));
+  const bx = track(c, "x", ARM);
+  const bz = track(c, "z", ARM);
+  return {
+    pose,
+    rootX,
+    rootYaw: bodyYaw * 0.2,
+    beam: [lerp(bx, WIDE[0], wide), lerp(bz, WIDE[1], wide)],
+    wide,
+    // The camera drifts after his attention, slower than he moves.
+    look: track(c, "x", [0.9, 1.1]) * 0.12,
+  };
+};
+
 export const createReacherInvestigationScene = (stage, { overlay } = {}) => {
   const { scene, camera, renderer, pointer, staticMode } = stage;
   scene.background = null;
@@ -338,6 +455,7 @@ export const createReacherInvestigationScene = (stage, { overlay } = {}) => {
     camRig.distance = aspect >= 1.6 ? 4.7 : 6.1 * (1.3 / Math.min(aspect, 1.3)) ** 0.8;
   });
   const lookAt = new THREE.Vector3(0, 1.25, -0.1);
+  const UP = new THREE.Vector3(0, 1, 0);
   const viewDir = new THREE.Vector3(0.12, 0.55, 1).normalize();
   const tmp = new THREE.Vector3();
   const tip = new THREE.Vector3();
@@ -348,56 +466,55 @@ export const createReacherInvestigationScene = (stage, { overlay } = {}) => {
   };
   const detailWorld = (c, out) => c.circle.getWorldPosition(out);
 
-  const update = (time) => {
+  const eye = { x: 0, y: 0 };
+  const update = (time, dt = 1 / 60) => {
     const c = staticMode ? STATIC_TIME : time % CYCLE;
     const fade = staticMode ? 1 : Math.min(segment(c, 0, 0.8), 1 - segment(c, CYCLE - 0.8, CYCLE));
+    const body = reacherPoseAt(c, time);
 
+    // The pointer is eased too, so a mouse flick cannot jerk the frame.
+    const ease = staticMode ? 1 : 1 - Math.exp(-Math.min(dt, 0.1) * 3);
+    eye.x += (pointer.x - eye.x) * ease;
+    eye.y += (pointer.y - eye.y) * ease;
+    lookAt.x = body.look;
     camera.position.copy(viewDir).multiplyScalar(camRig.distance).add(lookAt);
-    camera.position.x += Math.sin(time * 0.1) * 0.25 + pointer.x * 0.25;
-    camera.position.y += pointer.y * 0.15;
+    camera.position.x += Math.sin(time * 0.1) * 0.25 + eye.x * 0.25;
+    camera.position.y += eye.y * 0.15;
     camera.lookAt(lookAt);
     if (!reacher) return; // body still loading
 
-    // Which exhibit the beam is on, and how far along its circle is.
-    const s = (c - START) / STEP;
-    const k = Math.max(0, Math.min(EXHIBITS.length - 1, Math.floor(s)));
-    const local = s - Math.floor(s);
-    const searching = c >= START && s < EXHIBITS.length;
-
-    // Head and torch follow the beam; a slow breath under it.
-    const pose = blendPose(LEAN, LEAN, 0);
-    pose.spine = [LEAN.spine[0] + Math.sin(time * 1.1) * 0.015, (SLOTS[k][0] / 1.2) * -0.2, 0];
-    pose.head = [LEAN.head[0], (SLOTS[k][0] / 1.2) * -0.35, 0];
-    pose.rShoulder = [LEAN.rShoulder[0] + SLOTS[k][1] * 0.25, 0, LEAN.rShoulder[2] - SLOTS[k][0] * 0.32];
-    reacher.apply(pose);
+    const searching = c >= START && c < CONNECT;
+    reacher.root.position.x = body.rootX;
+    reacher.root.rotation.y = body.rootYaw;
+    reacher.apply(body.pose);
     reacher.root.updateMatrixWorld(true);
 
-    // Beam: eases from the last exhibit to this one, then holds while the circle draws.
-    const prev = cards[Math.max(0, k - 1)];
-    const here = cards[k];
-    const travel = k === 0 && s < 1 ? 1 : easeInOutCubic(segment(local, 0, 0.3));
-    const from = detailWorld(prev, new THREE.Vector3());
-    detailWorld(here, target);
-    target.lerpVectors(from, target, searching ? travel : 1);
-    if (!searching && c >= START) target.set(0, TABLE_Y, 0.25); // wide, over everything found
+    // Beam: glides from exhibit to exhibit on the arm's eased path, then opens over the whole table.
+    target.set(body.beam[0], TABLE_Y, body.beam[1]);
     torch.getWorldPosition(tip);
     const len = tip.distanceTo(target);
+    const spread = lerp(1, 2.4, body.wide);
     beam.position.copy(tip);
-    beam.scale.set(searching ? 1 : 2.4, len, searching ? 1 : 2.4);
-    beam.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), target.clone().sub(tip).normalize());
-    beam.material.uniforms.uIntensity.value = 0.6 * fade * (c < START ? segment(c, 0.4, START) : 1);
+    beam.scale.set(spread, len, spread);
+    beam.quaternion.setFromUnitVectors(UP, tmp.copy(target).sub(tip).normalize());
+    // Additive light adds up: when the beam opens over the whole table it covers
+    // far more of the frame, so it thins out in step and the room stays readable.
+    beam.material.uniforms.uIntensity.value = (0.6 / spread ** 1.5) * fade * (c < START ? segment(c, 0.4, START) : 1);
     pool.position.set(target.x, TABLE_Y + 0.004, target.z);
-    pool.scale.setScalar(searching ? 1 : 3.2);
-    pool.material.opacity = 0.2 * fade;
+    pool.scale.setScalar(lerp(1, 3.2, body.wide));
+    pool.material.opacity = 0.2 * lerp(1, 0.3, body.wide) * fade;
+    const reachOfPool = lerp(0.55, 2.4, body.wide);
 
     cards.forEach((card, i) => {
       const found = c >= START + (i + 0.35) * STEP;
       const draw = clamp01((c - (START + (i + 0.3) * STEP)) / (STEP * 0.4));
       card.circle.material.uniforms.uProgress.value = draw;
       card.circle.visible = draw > 0 && fade > 0.05;
-      const near = Math.max(0, 1 - card.card.position.distanceTo(pool.position) / (searching ? 0.55 : 2.4));
-      const lit = (found ? 0.62 : 0.18) + near * 0.5;
-      card.mat.color.setScalar(lerp(0.12, Math.min(1, lit), fade));
+      const near = Math.max(0, 1 - card.card.position.distanceTo(pool.position) / reachOfPool);
+      // Under the wide beam every card is near the light: cap them below the
+      // bloom threshold so six exhibits do not turn into six white panels.
+      const lit = (found ? 0.62 : 0.18) + near * lerp(0.5, 0.1, body.wide);
+      card.mat.color.setScalar(lerp(0.12, Math.min(lerp(1, 0.68, body.wide), lit), fade));
 
       const [x, y] = toScreen(detailWorld(card, tmp.clone()).add(new THREE.Vector3(0.22, 0.05, -0.2)));
       const pop = segment(c, START + (i + 0.55) * STEP, START + (i + 0.75) * STEP);
@@ -414,7 +531,7 @@ export const createReacherInvestigationScene = (stage, { overlay } = {}) => {
       if (thread.built) thread.mesh.geometry.setDrawRange(0, Math.floor(thread.mesh.geometry.index.count * easeInOutCubic(draw)));
     });
     casePin.visible = c >= CONNECT && fade > 0.05;
-    const caseLit = c >= CONNECT ? 0.35 + 0.6 * segment(c, CONNECT, CONNECT + 0.6) : 0.22;
+    const caseLit = c >= CONNECT ? 0.35 + 0.37 * segment(c, CONNECT, CONNECT + 0.6) : 0.22;
     caseCard.material.color.setScalar(lerp(0.12, caseLit, fade));
     const slam = segment(c, STAMP, STAMP + 0.25);
     stamp.visible = slam > 0 && fade > 0.05;

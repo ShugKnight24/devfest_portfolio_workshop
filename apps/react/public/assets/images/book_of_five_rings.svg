@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 220" role="img" aria-label="The Book of Five Rings">
+  <rect x="6" y="6" width="148" height="208" rx="3" fill="#1d2a3a"/>
+  <rect x="6" y="6" width="148" height="208" rx="3" fill="none" stroke="#0e151e" stroke-width="3"/>
+  <g stroke="#e9dfc8" stroke-width="2" fill="none">
+    <line x1="22" y1="6" x2="22" y2="214"/>
+    <path d="M6 40 Q14 34 22 40 M6 90 Q14 84 22 90 M6 140 Q14 134 22 140 M6 190 Q14 184 22 190"/>
+  </g>
+  <rect x="96" y="26" width="40" height="150" fill="#f3ead6" stroke="#b9a882" stroke-width="1.5"/>
+  <text x="116" y="66" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" font-size="30" fill="#141414" text-anchor="middle">五</text>
+  <text x="116" y="108" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" font-size="30" fill="#141414" text-anchor="middle">輪</text>
+  <text x="116" y="150" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" font-size="30" fill="#141414" text-anchor="middle">書</text>
+  <rect x="104" y="184" width="22" height="22" fill="#b3261e"/>
+  <text x="56" y="200" font-family="Georgia,serif" font-size="9" fill="#e9dfc8" text-anchor="middle">GO RIN NO SHO</text>
+</svg>

@@ -92,6 +92,7 @@ export const Navigation = () => {
   const { openPalette } = useShell();
 
   const barRef = useRef(null);
+  const sheetRef = useRef(null);
   const openButtonRef = useRef(null);
 
   const [openSection, setOpenSection] = useState(null);
@@ -114,10 +115,14 @@ export const Navigation = () => {
   }, [location.pathname, closeAll]);
 
   // Dismiss on outside click and on Escape, restoring focus to the opener.
+  // The mobile sheet renders outside the bar, so it counts as inside too: a
+  // tap on one of its links would otherwise close it on mousedown and unmount
+  // the link before the click could navigate.
   useEffect(() => {
     if (!openSection && !isSheetOpen) return undefined;
     const onPointerDown = (e) => {
-      if (barRef.current && !barRef.current.contains(e.target)) closeAll();
+      const inside = [barRef, sheetRef].some((ref) => ref.current?.contains(e.target));
+      if (!inside) closeAll();
     };
     const onKeyDown = (e) => {
       if (e.key !== "Escape") return;
@@ -277,6 +282,7 @@ export const Navigation = () => {
       {/* Mobile sheet: every section, every route, grouped the same way. */}
       {isSheetOpen && (
         <div
+          ref={sheetRef}
           id="app-bar-sheet"
           className="md:hidden fixed inset-x-2 top-16 z-60 max-h-[75vh] overflow-y-auto p-2
             bg-(--color-surface) dark:bg-(--color-surface-dark)

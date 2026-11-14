@@ -114,17 +114,21 @@ export const LandingPage = () => {
       <div className="absolute bottom-[-10%] right-[-20%] w-[600px] h-[600px] rounded-full bg-(--color-accent)/10 blur-[120px] pointer-events-none animate-pulse duration-7000"></div>
 
       <div className="max-w-6xl mx-auto space-y-24 relative z-10">
-        {/* Opening shot: a crew of agents turning frictions into software. */}
-        <Suspense
-          fallback={
-            <div
-              className="stage h-[clamp(320px,58vh,640px)] w-full rounded-[4px] border"
-              style={{ borderColor: "var(--stage-border)", backgroundColor: "var(--stage-bg)" }}
-            />
-          }
-        >
-          <AgentFactory />
-        </Suspense>
+        {/* Opening shot: a crew of agents turning frictions into software.
+            Wrapped: the scene's own figure sets m-0, which would cancel the
+            section gap and leave the event badge touching its bottom edge. */}
+        <div>
+          <Suspense
+            fallback={
+              <div
+                className="stage h-[clamp(320px,58vh,640px)] w-full rounded-[4px] border"
+                style={{ borderColor: "var(--stage-border)", backgroundColor: "var(--stage-bg)" }}
+              />
+            }
+          >
+            <AgentFactory />
+          </Suspense>
+        </div>
 
         {/* Hero Section */}
         <div className="text-center space-y-6 max-w-3xl mx-auto">

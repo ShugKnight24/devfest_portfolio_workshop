@@ -4,7 +4,7 @@ import { canvasTexture, clamp01, createParticles, easeInOutCubic, easeOutBack, e
 import { INK, PAPER, RED, inkMaterial, mangaBackdrop, outlineMaterial, syncInk, setInkStyle } from "../ink";
 import { blendPose } from "../figure";
 import { createModelFigure } from "../modelFigure";
-import { aim, createBlade, createChainsawHead } from "../chainsawParts";
+import { createChainsawMan } from "../chainsawMan";
 import { createSfx } from "../sfx";
 
 /**
@@ -15,11 +15,13 @@ import { createSfx } from "../sfx";
  *   0    -> 0.15 he draws the arm back
  *   0.15 -> 0.3  YANK: the cord rips out to arm's length
  *   0.3  -> 0.42 the page flashes to negative
- *   0.42 -> 0.8  the blades come: one out of the forehead, one out of each
- *                forearm, the human head gone under the Chainsaw Man skull
- *   0.8  -> 1    he drops into his stance; chains run; VRRRN!!
+ *   0.42 -> 0.8  the change: his head goes, the chainsaw head (orange
+ *                casing, fangs, cords down his neck) takes its place; the
+ *                bar comes out of the forehead, one out of each forearm; the
+ *                starter grip snaps home to his chest; blood
+ *   0.8  -> 1    he drops into his stance, jaw open; chains run; VRRRN!!
  *
- * Denji is a silhouette (ink, red rim); the chainsaw parts carry the detail.
+ * Denji in his clothes, and the hybrid form, are chainsawMan.js.
  */
 
 const DURATION = 2.2;
@@ -29,9 +31,9 @@ const REST = {
   head: [0.12, 0, 0],
   lShoulder: [0.05, 0, 0.12],
   lElbow: [-0.2, 0, 0],
-  // Right fist closed on the cord handle at his sternum.
-  rShoulder: [-1.15, 0, -0.35],
-  rElbow: [-2.1, 0.3, 0],
+  // Right fist closed on the cord's grip at his sternum.
+  rShoulder: [-0.6, 0, -0.4],
+  rElbow: [-1.7, 0, 1.2],
   lHip: [0, 0, 0.06],
   rHip: [0, 0, -0.06],
 };
@@ -107,56 +109,26 @@ export const createDenjiScene = (stage, { props = {}, overlay } = {}) => {
 
   let fired = Boolean(props.fired);
   let firedAt = null;
-  let chain = 0;
 
   const backdrop = mangaBackdrop();
   scene.add(backdrop);
 
   const line = outlineMaterial(1.1);
   const lineThin = outlineMaterial(0.7);
-  const body = inkMaterial({ tone: 0.16, rim: 1.6, spec: 0 });
-  const skin = inkMaterial({ tint: "#d65a24", tone: 0.92, rim: 1.2, spec: 0 });
-  const steel = inkMaterial({ tint: "#e6e6e1", tone: 1.3, rim: 0.4 });
-  const rail = inkMaterial({ tint: "#2b2b2b", tone: 1.1, rim: 0.6 });
   const ink = inkMaterial({ flat: true });
-  const bone = inkMaterial({ tone: 1.15, rim: 0.2 });
-  const ropeMat = inkMaterial({ tone: 1.05, rim: 0.4 });
 
-  // Denji: the Quaternius Superhero body (CC0), near-solid ink rimmed in red.
-  // His own head is the model's; on the change the head bone collapses to
-  // nothing and the chainsaw skull, riding the neck bone, takes its place.
+  // Denji: the Quaternius Superhero body (CC0) in his clothes, starting
+  // human, fist closed on the starter grip in his chest. On the change his
+  // head collapses and the hybrid form's chainsaw head takes its place.
   let denji = null;
   let demon = null;
-  const { head: csmHead, blade: headBlade } = createChainsawHead({ skin, steel, rail, ink, bone, line, lineThin, scale: 1.15, bladeLength: 0.7 });
-  const armBlades = ["lElbow", "rElbow"].map(() =>
-    createBlade({ length: 0.62, radius: 0.07, steel, rail, ink, line: lineThin, teeth: 22, thickness: 0.03 }),
-  );
   const ready = Promise.all([
-    createModelFigure({ height: 1.82, hair: ["HairSimpleParted", "EyebrowsRegular"], line, ink: { tone: 0.78, rim: 1.4 }, outfit: OUTFITS.denji, fist: 0.6 }),
+    createChainsawMan({ height: 1.82, line, lineThin, ink: { tone: 0.78, rim: 1.4 }, fist: 0.6, form: 0, blades: 0, rev: 0, mouth: 0.1, blood: 0 }),
     // The demon he is about to fight: bigger, horned, rimmed in paper.
     createModelFigure({ height: 2.35, horns: true, line, ink: { tone: 0.55, rim: 1.3, rimColor: PAPER }, outfit: OUTFITS.devil }),
-  ]).then(([figure, foe]) => {
-    denji = figure;
+  ]).then(([man, foe]) => {
+    denji = man;
     scene.add(denji.root);
-    // Bind the chainsaw parts at rest, so they follow every pose after.
-    denji.apply({});
-    denji.root.updateMatrixWorld(true);
-    const at = (bone) => denji.bones[bone].getWorldPosition(new THREE.Vector3());
-    const neck = denji.model.getObjectByName("neck_01") ?? denji.bones.neck;
-    csmHead.position.copy(at("neck"));
-    scene.add(csmHead);
-    neck.attach(csmHead);
-    headScale.copy(csmHead.scale); // whatever undoes the bone chain's scale
-    armBlades.forEach((blade, i) => {
-      const elbow = denji.bones[i ? "rElbow" : "lElbow"];
-      const hand = denji.model.getObjectByName(i ? "hand_r" : "hand_l");
-      blade.group.position.copy(hand.getWorldPosition(new THREE.Vector3())).add(new THREE.Vector3(0, 0.05, -0.03));
-      aim(blade.group, new THREE.Vector3(0, -1, 0.08), new THREE.Vector3(0, 0, 1));
-      scene.add(blade.group);
-      elbow.attach(blade.group);
-    });
-    hands.l = denji.model.getObjectByName("hand_l");
-    hands.r = denji.model.getObjectByName("hand_r");
 
     demon = foe;
     demon.root.position.set(1.6, 0, -0.9);
@@ -164,15 +136,6 @@ export const createDenjiScene = (stage, { props = {}, overlay } = {}) => {
     scene.add(demon.root);
     syncInk(scene, renderer.getPixelRatio());
   });
-  const hands = { l: null, r: null };
-  const headScale = new THREE.Vector3(1, 1, 1);
-
-  // The starter cord: from his chest to his fist, rebuilt every frame.
-  const cord = new THREE.Mesh(new THREE.BufferGeometry(), ropeMat);
-  scene.add(cord);
-  const handle = new THREE.Mesh(new THREE.CapsuleGeometry(0.03, 0.14, 4, 10), ink);
-  scene.add(handle);
-  const cordCurve = new THREE.QuadraticBezierCurve3(new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3());
 
   const pool = new THREE.Mesh(new THREE.CircleGeometry(0.75, 40), ink);
   pool.rotation.x = -Math.PI / 2;
@@ -239,34 +202,21 @@ export const createDenjiScene = (stage, { props = {}, overlay } = {}) => {
     denji.root.position.set(Math.sin(time * 83) * shake, 0, Math.sin(time * 61) * shake);
     denji.root.updateMatrixWorld(true);
 
-    // The change: human head out, chainsaw skull and blades in.
+    // The change: human head out, the chainsaw head and the bars in; the
+    // engine catches, the jaw drops open on the roar, and he bleeds for it.
     const change = easeOutBack(segment(t, 0.42, 0.72));
-    denji.bones.head.scale.setScalar(change < 0.5 ? 1 : 0.001);
-    csmHead.visible = change > 0.01;
-    csmHead.scale.copy(headScale).multiplyScalar(Math.max(0.001, change));
-    headBlade.extend(easeOutCubic(segment(t, 0.48, 0.8)));
-    armBlades.forEach((b, i) => b.extend(easeOutCubic(segment(t, 0.52 + i * 0.05, 0.85))));
-    chain += (go ? lerp(0, 9, segment(t, 0.6, 0.9)) : 0) * dt;
-    headBlade.run(chain);
-    armBlades.forEach((b) => b.run(chain * 1.1));
+    denji.setForm(change, easeOutCubic(segment(t, 0.48, 0.8)));
+    denji.setBlades(easeOutCubic(segment(t, 0.52, 0.85)), easeOutCubic(segment(t, 0.57, 0.85)));
+    denji.setRev(go ? segment(t, 0.6, 0.9) : 0);
+    denji.setMouth(go ? lerp(0.1, 0.75, easeOutCubic(segment(t, 0.62, 0.78))) : 0.1);
+    denji.setBlood(go ? 0.75 * easeOutCubic(segment(t, 0.5, 0.75)) : 0);
+    denji.update(time, dt);
 
-    // Cord: chest to fist while he holds it; it drops slack once he lets go.
-    denji.bones.chest.getWorldPosition(chestPt).add(tmp.set(0.03, 0.05, 0.16).applyQuaternion(denji.root.quaternion));
-    hands.r.getWorldPosition(fistPt);
-    const held = 1 - segment(t, 0.42, 0.5);
-    cord.visible = held > 0;
-    handle.visible = held > 0;
-    if (held > 0) {
-      cordCurve.v0.copy(chestPt);
-      cordCurve.v2.copy(fistPt);
-      cordCurve.v1.lerpVectors(chestPt, fistPt, 0.5);
-      cordCurve.v1.y -= lerp(0.12, 0, yank);
-      cord.geometry.dispose();
-      cord.geometry = new THREE.TubeGeometry(cordCurve, 24, 0.014, 6);
-      handle.position.copy(fistPt);
-      handle.quaternion.copy(denji.bones.rElbow.getWorldQuaternion(new THREE.Quaternion()));
-      handle.rotateZ(Math.PI / 2);
-    }
+    // Cord: the grip in his fist, the cord out of his chest to it; once he
+    // lets go it snaps home to his sternum.
+    denji.cordAnchor(chestPt);
+    const held = 1 - easeOutCubic(segment(t, 0.42, 0.5));
+    denji.setCord(held, denji.fistPoint("r", fistPt));
 
     // The demon looms, then reels when the blades come out at him.
     if (demon) {
@@ -280,7 +230,7 @@ export const createDenjiScene = (stage, { props = {}, overlay } = {}) => {
     // Blood when the blades tear out.
     if (go && !burstDone && t >= 0.5 && dt > 0) {
       burstDone = true;
-      const sources = [headBlade, ...armBlades].map((b) => b.group.getWorldPosition(new THREE.Vector3()));
+      const sources = [denji.headBlade, ...denji.armBlades].map((b) => b.group.getWorldPosition(new THREE.Vector3()));
       sources.forEach((p, s) => {
         for (let i = 0; i < 60; i++) {
           spray.emit({
@@ -347,7 +297,7 @@ export const createDenjiScene = (stage, { props = {}, overlay } = {}) => {
     },
     dispose() {
       unsubscribeResize();
-      cord.geometry.dispose();
+      denji?.dispose();
       [hush, vroom, rip].forEach((s) => s.dispose());
     },
   };

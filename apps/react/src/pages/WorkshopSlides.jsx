@@ -10,12 +10,14 @@ import { StageSidebar } from "../components/StageSidebar";
 import { RipcordStarter } from "../components/stage/RipcordStarter";
 import { TrackEmbed, TrackPlayer, useStageTrack } from "../components/stage/TrackPlayer";
 import { SongSlide } from "../components/stage/SongSlide";
+import { BuildVerifyShift } from "../components/stage/BuildVerifyShift";
 import { EvidenceThread } from "../components/stage/EvidenceThread";
-import { DiffHuntSlide } from "../components/stage/DiffHunt";
+import { InkEnso } from "../components/stage/InkEnso";
 import { getCharacters } from "../data/slides/characters";
 
 // three.js and the character models load only when a deck reaches a scene.
 const SceneStage = lazy(() => import("../components/three/SceneStage"));
+const AgentFactory = lazy(() => import("../components/three/AgentFactory"));
 import {
   RUNTIMES,
   RUNTIME_ORDER,
@@ -47,7 +49,7 @@ import {
  * directly by pulling the handle on screen. Each beat component draws itself
  * from `fired` alone, so re-entering a slide re-arms it.
  */
-const BEAT_COMPONENTS = { ripcord: RipcordStarter, thread: EvidenceThread };
+const BEAT_COMPONENTS = { ripcord: RipcordStarter, thread: EvidenceThread, ink: InkEnso };
 
 const Beat = ({ beat, fired, onPull, ...rest }) => {
   const Component = BEAT_COMPONENTS[beat.kind];
@@ -92,10 +94,11 @@ const TitleSlide = ({
   const lines = slide.title.split("\n");
   // One beat per title line: each line lights when its own pull lands.
   const paired = Array.isArray(slide.beats) && slide.beats.length === lines.length && lines.length > 1;
+  const three = paired && lines.length === 3;
 
   return (
     <div
-      className={`flex flex-col items-center justify-center min-h-[70vh] text-center transition-all duration-700 max-w-5xl mx-auto px-4 ${
+      className={`flex flex-col items-center justify-center min-h-[70vh] text-center transition-all duration-700 ${three ? "max-w-7xl" : "max-w-5xl"} mx-auto px-4 ${
         isActive ? "opacity-100 scale-100" : "opacity-0 scale-95"
       }`}
     >
@@ -108,20 +111,23 @@ const TitleSlide = ({
       {paired ? (
         <div className="relative w-full">
           <h1 className="sr-only">{lines.join(" ")}</h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+          <div className={`grid grid-cols-1 ${three ? "md:grid-cols-3 gap-6" : "md:grid-cols-2 gap-8"} items-start`}>
             {lines.map((line, i) => (
               <div key={line} className="flex flex-col items-center gap-4">
                 <p
                   aria-hidden="true"
                   className="stage-h1 stage-glow-text transition-opacity duration-500"
-                  style={{ opacity: beatStep > i ? 1 : 0.4, fontSize: "clamp(2.25rem, 4.6vw, 5rem)" }}
+                  style={{
+                    opacity: beatStep > i ? 1 : 0.4,
+                    fontSize: three ? "clamp(2rem, 3.4vw, 3.75rem)" : "clamp(2.25rem, 4.6vw, 5rem)",
+                  }}
                 >
                   {line}
                 </p>
                 <div className="w-full">
                   {/* The track hangs over the chainsaw, because that is the one
                       it bleeds for. */}
-                  {track && slide.beats[i].kind === "ripcord" && (
+                  {track && !slide.noTrack && slide.beats[i].kind === "ripcord" && (
                     <div className="mb-3">
                       <TrackPlayer
                         track={track}
@@ -176,6 +182,45 @@ const TitleSlide = ({
 };
 
 /**
+ * SlideBackdrop — a 3D scene for an ordinary slide. Keyed by slide, so each
+ * visit starts the scene from its first frame.
+ *
+ * Theatre (the default on wide screens): the scene takes the left half, with
+ * no scrim, and the words sit beside it, so neither covers the other. Below
+ * lg, or with theatre off (V), it plays full-bleed behind the words under a
+ * scrim. B hides the words either way and gives the scene the whole screen.
+ */
+const SlideBackdrop = ({ scene, label, sceneOnly, theatre }) => {
+  const split = theatre && !sceneOnly;
+  return (
+    <div
+      className={`fixed inset-0 z-0 ${split ? "lg:inset-auto lg:left-0 lg:top-14 lg:bottom-[4.5rem] lg:w-1/2" : ""}`}
+      aria-hidden={!sceneOnly}
+    >
+      <Suspense fallback={null}>
+        <SceneStage scene={scene} label={label} className="h-full w-full" />
+      </Suspense>
+      {/* Full-bleed: a scrim keeps the words readable. In theatre it only
+          covers the stacked layout below lg. */}
+      <div
+        className={`pointer-events-none absolute inset-0 transition-opacity duration-700 ${split ? "lg:hidden" : ""}`}
+        style={{
+          opacity: sceneOnly ? 0 : 1,
+          background: "linear-gradient(180deg, rgb(5 7 10 / 0.72) 0%, rgb(5 7 10 / 0.84) 55%, rgb(5 7 10 / 0.92) 100%)",
+        }}
+      />
+      {/* Theatre: only the inner edge fades into the page. */}
+      {split && (
+        <div
+          className="pointer-events-none absolute inset-y-0 right-0 hidden w-24 lg:block"
+          style={{ background: "linear-gradient(90deg, transparent, var(--color-surface-dark, #05070a))" }}
+        />
+      )}
+    </div>
+  );
+};
+
+/**
  * Scene slide — a full-bleed ink scene with one line under it. The clicker's
  * next press fires the scene (Pochita revs, the cord is pulled, the Devil
  * roars) before it advances, through the same beat mechanism as the ripcord.
@@ -185,8 +230,19 @@ const SceneSlide = ({ slide, isActive, beatStep = 0, onBeat = () => {}, track, t
   const withTrack = Boolean(slide.trackPlayer && track);
   const fired = beatStep > 0 || (withTrack && trackPlaying);
   const hasBeat = Array.isArray(slide.beats) && slide.beats.length > 0;
+  // Several beats walk the scene through its moments: the scene gets the step,
+  // and the button names the next moment until the last one has played.
+  const steps = hasBeat ? slide.beats.length : 0;
+  const walked = steps > 1;
+  const done = walked ? beatStep >= steps : fired;
+  // `side`: scene and words side by side, for a scene that carries an argument.
+  const side = Boolean(slide.side);
   return (
-    <div className={`w-full transition-opacity duration-500 ${isActive ? "opacity-100" : "opacity-0"}`}>
+    <div
+      className={`w-full transition-opacity duration-500 ${isActive ? "opacity-100" : "opacity-0"} ${
+        side ? "grid items-center gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]" : ""
+      }`}
+    >
       <div
         className="relative mx-auto w-full overflow-hidden border"
         style={{ aspectRatio: "16 / 9", maxHeight: slide.quiet ? "76vh" : "58vh", borderColor: "var(--stage-border)", borderRadius: "var(--stage-radius)" }}
@@ -194,7 +250,7 @@ const SceneSlide = ({ slide, isActive, beatStep = 0, onBeat = () => {}, track, t
         <Suspense fallback={<div className="absolute inset-0" style={{ backgroundColor: "#f1ece2" }} />}>
           {/* ThreeStage positions itself (relative); the box gives it the size. */}
           <div className="absolute inset-0">
-            <SceneStage scene={slide.scene} fired={fired} label={slide.alt} className="h-full w-full" />
+            <SceneStage scene={slide.scene} fired={fired} step={walked ? beatStep : undefined} label={slide.alt} className="h-full w-full" />
           </div>
         </Suspense>
         {/* With a track, the line goes on the page as a manga caption: the
@@ -210,12 +266,12 @@ const SceneSlide = ({ slide, isActive, beatStep = 0, onBeat = () => {}, track, t
       </div>
       {/* `quiet` scenes speak for themselves: no kicker, no line, no button. */}
       {!slide.quiet && (
-      <div className={`mt-5 flex flex-wrap items-end gap-4 ${withTrack ? "justify-end" : "justify-between"}`}>
+      <div className={`flex flex-wrap items-end gap-4 ${side ? "mt-0 flex-col items-start" : "mt-5"} ${withTrack ? "justify-end" : "justify-between"}`}>
         <div className="min-w-0">
           {slide.phase && <p className="stage-kicker mb-1">{slide.phase}</p>}
           {/* Smaller than a full slide's heading: the scene is the headline here. */}
           {!withTrack && (
-            <h2 className="stage-h2" style={{ whiteSpace: "pre-line", fontSize: "clamp(1.4rem, 2.5vw, 2.6rem)" }}>
+            <h2 className="stage-h2" style={{ whiteSpace: "pre-line", fontSize: side ? "clamp(1.6rem, 2.8vw, 3rem)" : "clamp(1.4rem, 2.5vw, 2.6rem)" }}>
               {slide.title}
             </h2>
           )}
@@ -228,16 +284,20 @@ const SceneSlide = ({ slide, isActive, beatStep = 0, onBeat = () => {}, track, t
         {hasBeat && (
           <button
             type="button"
-            onClick={() => !fired && onBeat(0)}
-            aria-disabled={fired}
+            onClick={() => !done && onBeat(walked ? beatStep : 0)}
+            aria-disabled={done}
             className="stage-kicker shrink-0 border px-4 py-2"
             style={{
-              borderColor: fired ? "var(--stage-border)" : "var(--stage-accent)",
-              color: fired ? "var(--stage-text-muted)" : "var(--stage-accent)",
+              borderColor: done ? "var(--stage-border)" : "var(--stage-accent)",
+              color: done ? "var(--stage-text-muted)" : "var(--stage-accent)",
               borderRadius: "var(--stage-radius)",
             }}
           >
-            {fired ? slide.firedLabel ?? "Running" : slide.fireLabel ?? "Fire"}
+            {done
+              ? slide.firedLabel ?? "Running"
+              : walked
+                ? `${slide.beats[beatStep]?.label ?? slide.fireLabel ?? "Next"} · ${beatStep + 1}/${steps}`
+                : slide.fireLabel ?? "Fire"}
           </button>
         )}
         {withTrack && (
@@ -685,7 +745,10 @@ const ProcessSlide = ({ slide, isActive }) => (
       isActive ? "opacity-100" : "opacity-0"
     }`}
   >
-    <div className="text-center mb-8">
+    <div className="text-center mb-4 @3xl:mb-8">
+      {slide.image && (
+        <img src={slide.image} alt={slide.imageAlt ?? ""} className="mx-auto mb-3 h-20 @3xl:h-28 w-auto" />
+      )}
       <span className="stage-kicker mb-3">
         {slide.subtitle || "ARCHITECTURE // CI GATE"}
       </span>
@@ -693,45 +756,47 @@ const ProcessSlide = ({ slide, isActive }) => (
         {slide.title}
       </h2>
       {slide.quote && <p className="stage-body italic mx-auto">"{slide.quote}"</p>}
+      {slide.description && <p className="stage-body mx-auto">{slide.description}</p>}
     </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+    {/* A narrow column (theatre, phones) stacks the stages as compact rows. */}
+    <div className="grid grid-cols-1 @3xl:grid-cols-3 gap-3 @3xl:gap-6 w-full">
       {slide.stages.map((st, i) => (
         <div
           key={i}
-          className="stage-card flex flex-col justify-between"
+          className="stage-card flex flex-col justify-between @max-3xl:py-3"
           style={{
             borderTopStyle: "solid",
             borderTopWidth: "var(--stage-rule)",
             borderTopColor: "var(--stage-accent)",
           }}
         >
-          <div>
+          <div className="@max-3xl:grid @max-3xl:grid-cols-[auto_1fr] @max-3xl:gap-x-3">
             <span
-              className="text-2xl font-black font-mono mb-2 block"
+              className="text-2xl font-black font-mono mb-2 block @max-3xl:row-span-2 @max-3xl:mb-0"
               style={{ color: "var(--stage-accent-alt)" }}
             >
               {st.num}
             </span>
             <h4
-              className="text-lg font-bold mb-2 uppercase font-mono"
+              className="text-lg font-bold mb-2 uppercase font-mono @max-3xl:mb-1"
               style={{ color: "var(--stage-text)" }}
             >
               {st.name}
             </h4>
-            <p className="text-xs leading-relaxed mb-4" style={{ color: "var(--stage-text-muted)" }}>
+            <p className="text-xs leading-relaxed mb-4 @max-3xl:mb-0" style={{ color: "var(--stage-text-muted)" }}>
               {st.detail}
             </p>
           </div>
           <div
-            className="pt-3 border-t flex justify-between items-center gap-3"
+            className="pt-3 border-t hidden @3xl:flex justify-between items-center gap-3"
             style={{ borderColor: "var(--stage-border)" }}
           >
             <span
               className="text-[10px] font-mono font-semibold uppercase shrink-0"
               style={{ color: "var(--stage-text-muted)" }}
             >
-              Protocol Rule
+              {slide.ruleLabel || "Protocol Rule"}
             </span>
             <span className="text-xs font-mono font-bold text-right" style={{ color: "var(--stage-accent)" }}>
               {st.rule}
@@ -765,7 +830,61 @@ const SourceMaterialSlide = ({ slide, isActive }) => (
       )}
     </div>
 
-    {/* Cover art carries the argument here: none of these is a software book. */}
+    {/* Grouped: one section per story, so the slide doubles as the map of the talk. */}
+    {slide.groups ? (
+      <div className="grid gap-3 lg:grid-cols-3 w-full mb-4">
+        {slide.groups.map((group) => (
+          <section
+            key={group.label}
+            data-stage-lens={group.lens}
+            className="stage stage-card flex flex-col gap-2"
+            style={{ padding: "var(--stage-gap-xs)", backgroundColor: "var(--stage-surface)" }}
+          >
+            <header className="px-1">
+              <h3
+                className="font-mono font-black uppercase tracking-tight"
+                style={{ fontSize: "var(--stage-fs-body)", lineHeight: 1.1, color: "var(--stage-accent)" }}
+              >
+                {group.label}
+              </h3>
+              <p className="text-xs leading-snug mt-1" style={{ color: "var(--stage-text-muted)" }}>
+                {group.lesson}
+              </p>
+            </header>
+            <ul className={`grid gap-2 list-none p-0 m-0 ${["grid-cols-1", "grid-cols-1", "grid-cols-2", "grid-cols-3"][Math.min(group.sources.length, 3)]}`}>
+              {group.sources.map((src) => (
+                <li key={src.label} className="flex flex-col gap-1">
+                  <div
+                    className="w-full overflow-hidden h-[clamp(88px,15vh,168px)] p-1"
+                    style={{
+                      borderRadius: "var(--stage-radius)",
+                      backgroundColor: "var(--stage-bg-deep)",
+                      border: "var(--stage-hairline) solid var(--stage-border-strong)",
+                    }}
+                  >
+                    <img
+                      src={src.image}
+                      alt={src.alt}
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  </div>
+                  <p
+                    className="text-[10px] font-mono uppercase tracking-wider"
+                    style={{ color: "var(--stage-text-dim)" }}
+                  >
+                    {src.label} · {src.meta}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+    ) : (
+    /* Cover art carries the argument here: none of these is a software book. */
     <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3 w-full list-none p-0 m-0 mb-4">
       {slide.sources.map((src) => (
         <li
@@ -810,6 +929,7 @@ const SourceMaterialSlide = ({ slide, isActive }) => (
         </li>
       ))}
     </ul>
+    )}
 
     {slide.quotes?.length ? (
       <div className="grid gap-4 md:grid-cols-2 w-full">
@@ -854,9 +974,12 @@ const BioSlide = ({ slide, isActive }) => (
       {/* Left Details */}
       <div className="stage-card p-8 flex flex-col justify-between">
         <div>
-          <span className="stage-kicker mb-3">
-            {slide.title || "CLEARANCE LEVEL: ADMIN"}
-          </span>
+          {/* An empty title drops the kicker; a missing one keeps the default. */}
+          {(slide.title ?? "CLEARANCE LEVEL: ADMIN") && (
+            <span className="stage-kicker mb-3">
+              {slide.title ?? "CLEARANCE LEVEL: ADMIN"}
+            </span>
+          )}
           <h3
             className="stage-h2 mb-1"
             style={{ color: "var(--stage-accent)" }}
@@ -1034,15 +1157,18 @@ const LaunchSlide = ({ slide, isActive }) => (
   >
     <h2 className="stage-h1 mb-4">{slide.title}</h2>
     <p className="stage-body mb-8 mx-auto">{slide.subtitle}</p>
-    <Link
-      to={slide.ctaLink || "/guide"}
-      className="stage-btn no-underline cursor-pointer inline-flex items-center gap-2"
-    >
-      {slide.ctaText || "Open Starter Guide"}
-      <span aria-hidden="true">
-        <ChevronRight className="w-4 h-4" />
-      </span>
-    </Link>
+    {/* `cta: false` leaves the close on its words and its cord. */}
+    {slide.cta !== false && (
+      <Link
+        to={slide.ctaLink || "/guide"}
+        className="stage-btn no-underline cursor-pointer inline-flex items-center gap-2"
+      >
+        {slide.ctaText || "Open Starter Guide"}
+        <span aria-hidden="true">
+          <ChevronRight className="w-4 h-4" />
+        </span>
+      </Link>
+    )}
   </div>
 );
 
@@ -1081,7 +1207,24 @@ const StatementSlide = ({ slide, isActive }) => {
         {slide.description}
       </p>
 
-      {slide.signature && (
+      {slide.callback && <CallbackStrip callback={slide.callback} />}
+
+      {/* A graphic sits beside the signature, so the slide still fits a laptop screen. */}
+      {slide.graphic === "build-verify" && (
+        <div className="mt-6 flex w-full items-end gap-6 text-left">
+          <BuildVerifyShift isActive={isActive} />
+          {slide.signature && (
+            <div
+              className="shrink-0 p-4 rounded-[2px] border font-mono text-sm tracking-wide whitespace-pre-line leading-relaxed font-semibold"
+              style={{ backgroundColor: "var(--stage-surface)", borderColor: "var(--stage-border)", color: "var(--stage-text)" }}
+            >
+              {slide.signature}
+            </div>
+          )}
+        </div>
+      )}
+
+      {slide.signature && !slide.graphic && (
         <div
           className="mt-10 p-4 rounded-[2px] border font-mono text-sm tracking-wide"
           style={{
@@ -1101,6 +1244,154 @@ const StatementSlide = ({ slide, isActive }) => {
   );
 };
 
+
+/**
+ * The three lenses the title introduces, in its order. Act dividers light
+ * the one in charge, so the room always knows which
+ * story it is in, and every divider points back at the title.
+ */
+const LENSES = [
+  { id: "denji", label: "Pull the cord" },
+  { id: "musashi", label: "Find your way" },
+  { id: "reacher", label: "Bring backup" },
+];
+
+const LensStrip = ({ lens }) => (
+  <div className="mb-8 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 font-mono text-xs uppercase tracking-[0.25em]">
+    {LENSES.map((l, i) => (
+      <span key={l.id} className="flex items-center gap-3">
+        {i > 0 && <span aria-hidden="true" style={{ color: "var(--stage-text-dim)" }}>·</span>}
+        <span
+          style={{
+            color: l.id === lens ? "var(--stage-accent)" : "var(--stage-text-dim)",
+            fontWeight: l.id === lens ? 700 : 400,
+          }}
+        >
+          {l.label}
+        </span>
+      </span>
+    ))}
+  </div>
+);
+
+/** Before we started: the pre-show films, named again where the talk calls back to them. */
+const CallbackStrip = ({ callback }) => (
+  <div className="mt-8 w-full max-w-4xl">
+    <div className="stage-kicker mb-3">{callback.kicker}</div>
+    <ol className="flex flex-wrap items-center justify-center gap-2 font-mono text-xs uppercase tracking-widest">
+      {callback.items.map((item, i) => (
+        <li key={item.title} className="flex items-center gap-2">
+          {i > 0 && <span aria-hidden="true" style={{ color: "var(--stage-text-dim)" }}>→</span>}
+          <span
+            className="rounded-[2px] border px-2.5 py-1.5 text-left normal-case tracking-normal"
+            style={{ borderColor: "var(--stage-border)", backgroundColor: "var(--stage-surface)" }}
+          >
+            <span className="block font-bold" style={{ color: "var(--stage-text)" }}>{item.title}</span>
+            <span className="block text-[11px]" style={{ color: "var(--stage-text-muted)" }}>{item.moment}</span>
+          </span>
+        </li>
+      ))}
+    </ol>
+    {callback.caption && (
+      <p className="stage-body mt-4" style={{ color: "var(--stage-text-muted)" }}>
+        {callback.caption}
+      </p>
+    )}
+  </div>
+);
+
+/**
+ * An act divider: the lens in charge, the act's line, and that lens's beat
+ * from the title slide, replayed here so each act opens the way the talk did.
+ */
+const ActSlide = ({ slide, isActive, beatStep = 0, onBeat }) => (
+  <div
+    className={`mx-auto flex min-h-[70vh] max-w-7xl flex-col items-center justify-center px-4 text-center transition-all duration-700 ${
+      isActive ? "scale-100 opacity-100" : "scale-95 opacity-0"
+    }`}
+  >
+    {slide.lens && <LensStrip lens={slide.lens} />}
+    {/* Wide: words left, the beat right, so the pull is never below the fold.
+        Narrow (theatre's half column, phones): stacked. */}
+    <div className="grid w-full items-center gap-10 @5xl:grid-cols-[minmax(0,2.2fr)_minmax(0,1fr)] @5xl:text-left">
+      <div>
+        {slide.phase && <div className="stage-kicker mb-6 inline-flex items-center gap-2">{slide.phase}</div>}
+        <h1 className="stage-h1 stage-glow-text mb-6 whitespace-pre-line" style={{ color: "var(--stage-text)" }}>
+          {slide.title}
+        </h1>
+        <p className="stage-lead mt-2" style={{ color: "var(--stage-text-muted)", fontWeight: 400 }}>
+          {slide.description}
+        </p>
+      </div>
+      {slide.beats?.length > 0 && (
+        <div className="print-hide mx-auto w-full max-w-xl">
+          {slide.beats.map((beat, i) => (
+            <Beat key={i} beat={beat} fired={beatStep > i} onPull={() => onBeat?.(i)} />
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+/** The pause at the end of each act: the same card every time, a question from that act. */
+const HandsUpSlide = ({ slide, isActive }) => (
+  <div
+    className={`mx-auto flex min-h-[70vh] max-w-5xl flex-col items-center justify-center px-4 text-center transition-all duration-700 ${
+      isActive ? "scale-100 opacity-100" : "scale-95 opacity-0"
+    }`}
+  >
+    {slide.lens && <LensStrip lens={slide.lens} />}
+    <div className="stage-kicker mb-6">Hands up // Your turn</div>
+    <h1 className="stage-h1 stage-glow-text mb-6 whitespace-pre-line" style={{ color: "var(--stage-text)" }}>
+      {slide.title}
+    </h1>
+    {slide.description && (
+      <p className="stage-lead mt-2 max-w-3xl" style={{ color: "var(--stage-text-muted)", fontWeight: 400 }}>
+        {slide.description}
+      </p>
+    )}
+  </div>
+);
+
+/** Where the talk lives: the portfolio's own opening scene beside the story of the title. */
+const LineageSlide = ({ slide, isActive }) => (
+  <div
+    className={`grid w-full items-center gap-8 transition-all duration-700 lg:grid-cols-2 ${
+      isActive ? "scale-100 opacity-100" : "scale-95 opacity-0"
+    }`}
+  >
+    <div className="aspect-[4/3] w-full overflow-hidden rounded-[4px] border" style={{ borderColor: "var(--stage-border)" }}>
+      {isActive && (
+        <Suspense fallback={null}>
+          <AgentFactory />
+        </Suspense>
+      )}
+    </div>
+    <div>
+      {slide.phase && <div className="stage-kicker mb-4">{slide.phase}</div>}
+      <h2 className="stage-h2 stage-glow-text mb-5 whitespace-pre-line" style={{ color: "var(--stage-text)" }}>
+        {slide.title}
+      </h2>
+      <ol className="mb-5 space-y-3">
+        {slide.chapters.map((c) => (
+          <li key={c.name} className="flex gap-4 border-l-2 pl-4" style={{ borderColor: c.now ? "var(--stage-accent)" : "var(--stage-border)" }}>
+            <div>
+              <div className="font-mono text-xs uppercase tracking-[0.2em]" style={{ color: c.now ? "var(--stage-accent)" : "var(--stage-text-muted)" }}>
+                {c.when}
+              </div>
+              <div className="stage-body font-bold" style={{ color: "var(--stage-text)" }}>{c.name}</div>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <p className="stage-body" style={{ color: "var(--stage-text-muted)" }}>
+        {slide.description}
+      </p>
+    </div>
+  </div>
+);
+
 // Slide: Comparison (Split-screen 2-column contrast for Prompts, Code Execution, and Squad Characters)
 const ComparisonSlide = ({ slide, isActive }) => {
   const cards = slide.columns || [
@@ -1114,19 +1405,40 @@ const ComparisonSlide = ({ slide, isActive }) => {
         isActive ? "opacity-100 scale-100" : "opacity-0 scale-95"
       }`}
     >
-      {/* Header Info */}
-      <div className="mb-8">
-        {slide.phase && (
-          <div className="stage-kicker inline-flex items-center gap-2 mb-3">
-            {slide.phase}
-          </div>
+      {/* Header Info, with an optional figure beside it on wide screens. */}
+      <div
+        className={`mb-4 @3xl:mb-8 ${
+          slide.figure ? "grid items-center gap-4 @3xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] @3xl:gap-6" : ""
+        }`}
+      >
+        <div>
+          {slide.phase && (
+            <div className="stage-kicker inline-flex items-center gap-2 mb-3">
+              {slide.phase}
+            </div>
+          )}
+          <h2 className="stage-h2">{slide.title}</h2>
+          {slide.description && <p className="stage-body mt-2">{slide.description}</p>}
+        </div>
+        {slide.figure && (
+          <figure className="m-0">
+            <img
+              src={slide.figure.image}
+              alt={slide.figure.alt}
+              className="w-full max-h-[30vh] object-contain"
+              style={{ borderRadius: "var(--stage-radius)", backgroundColor: "#fff" }}
+            />
+            {slide.figure.caption && (
+              <figcaption className="mt-1 font-mono text-[10px] uppercase tracking-wider" style={{ color: "var(--stage-text-dim)" }}>
+                {slide.figure.caption}
+              </figcaption>
+            )}
+          </figure>
         )}
-        <h2 className="stage-h2">{slide.title}</h2>
-        {slide.description && <p className="stage-body mt-2">{slide.description}</p>}
       </div>
 
       {/* 2-Column Side-by-Side Comparison */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+      <div className="grid grid-cols-1 @lg:grid-cols-2 gap-4 @3xl:gap-6 items-stretch">
         {cards.map((card, idx) => {
           const isBad = card.type === "bad";
           const isGood = card.type === "good";
@@ -1180,10 +1492,13 @@ const ComparisonSlide = ({ slide, isActive }) => {
                   </div>
                 )}
 
-                {/* Content Box or BoxContent */}
+                {/* Content Box or BoxContent. In a narrow column (theatre, phones)
+                    a box that only restates the narrative steps aside. */}
                 {(card.content || card.boxContent) && (
                   <div
-                    className="p-4 rounded-[2px] border font-mono text-xs md:text-sm leading-relaxed whitespace-pre-wrap overflow-x-auto"
+                    className={`p-4 rounded-[2px] border font-mono text-xs md:text-sm leading-relaxed whitespace-pre-wrap overflow-x-auto ${
+                      card.narrative && !card.content ? "@max-2xl:hidden" : ""
+                    }`}
                     style={{
                       backgroundColor: "var(--stage-bg-deep)",
                       borderColor: isBad
@@ -1210,6 +1525,23 @@ const ComparisonSlide = ({ slide, isActive }) => {
           );
         })}
       </div>
+      {/* One full-width box under both columns: what holds whichever view wins. */}
+      {slide.callout && (
+        <div
+          className="stage-card mt-3 @3xl:mt-4"
+          style={{ boxShadow: "var(--stage-glow-md)", padding: "var(--stage-gap-sm) var(--stage-gap-md)" }}
+        >
+          <div
+            className="font-mono text-xs font-bold uppercase tracking-wider mb-1"
+            style={{ color: "var(--stage-accent-alt)" }}
+          >
+            {slide.callout.label}
+          </div>
+          <p className="text-sm md:text-base leading-snug" style={{ color: "var(--stage-text)" }}>
+            {slide.callout.text}
+          </p>
+        </div>
+      )}
       {/* An outside link (a repo the slide is about), opened in a new tab. */}
       {slide.link && (
         <a
@@ -1378,7 +1710,7 @@ const CharacterRosterSlide = ({ slide, isActive }) => {
       <div
         className={
           focus
-            ? "grid gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-start"
+            ? "grid gap-6 @3xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] @3xl:items-start"
             : "contents"
         }
       >
@@ -1391,7 +1723,9 @@ const CharacterRosterSlide = ({ slide, isActive }) => {
           </p>
         )}
 
-      <ul className={`grid ${columns} ${dense ? "gap-3" : "gap-5"} w-full list-none p-0 m-0`}>
+      {/* In a narrow column (theatre) a focus card would push the text off the
+          screen; the parable and its application carry the slide there. */}
+      <ul className={`grid ${columns} ${dense ? "gap-3" : "gap-5"} w-full list-none p-0 m-0 ${focus ? "@max-3xl:hidden" : ""}`}>
         {roster.map((character) => {
           const Emblem = EMBLEMS[character.emblem];
           const nameId = `roster-${slide.id}-${character.id}`;
@@ -1495,13 +1829,12 @@ const CharacterRosterSlide = ({ slide, isActive }) => {
 const PRINT_SETTLE_MS = 2400;
 
 // Slide types that draw their own beats; everything else gets the BeatDock.
-const SELF_PLACED_BEATS = new Set([TitleSlide, SceneSlide, DiffHuntSlide]);
+const SELF_PLACED_BEATS = new Set([TitleSlide, SceneSlide, ActSlide]);
 
 const SlideComponents = {
   title: TitleSlide,
   scene: SceneSlide,
   song: SongSlide,
-  "diff-hunt": DiffHuntSlide,
   "character-roster": CharacterRosterSlide,
   statement: StatementSlide,
   comparison: ComparisonSlide,
@@ -1519,7 +1852,16 @@ const SlideComponents = {
   poll: PollSlide,
   quote: QuoteSlide,
   launch: LaunchSlide,
+  act: ActSlide,
+  "hands-up": HandsUpSlide,
+  lineage: LineageSlide,
 };
+
+// A one-line name for a slide in the rail's tooltip. Titles carry line breaks
+// for the stage; song slides name the song, and untitled slides fall back to
+// their kicker or id.
+const slideLabel = (s, i) =>
+  (s.song?.title || s.title || s.kicker || s.id || `Slide ${i + 1}`).replace(/\s*\n\s*/g, " ").trim();
 
 export const WorkshopSlides = () => {
   const { deckId } = useParams();
@@ -1575,8 +1917,26 @@ export const WorkshopSlides = () => {
   const flexZones = useMemo(() => getFlexZones(allSlides), [allSlides]);
 
   const [currentSlide, setCurrentSlide] = useState(0);
+  useEffect(() => setSceneOnly(false), [currentSlide]);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
+  // B on a slide with a `backdrop` scene: hide the words, let the scene play.
+  const [sceneOnly, setSceneOnly] = useState(false);
+  // V: backdrop scenes beside the words (theatre) or full-bleed behind them.
+  const [theatre, setTheatre] = useState(() => {
+    try {
+      return localStorage.getItem("deck-theatre") !== "off";
+    } catch {
+      return true;
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem("deck-theatre", theatre ? "on" : "off");
+    } catch {
+      // Private window or blocked storage: theatre still works for this visit.
+    }
+  }, [theatre]);
   const [isPrinting, setIsPrinting] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const closeSidebar = useCallback(() => setShowSidebar(false), []);
@@ -1813,6 +2173,11 @@ export const WorkshopSlides = () => {
         toggleFullscreen();
       } else if (e.key === "n" || e.key === "N") {
         setShowNotes((prev) => !prev);
+      } else if ((e.key === "b" || e.key === "B") && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        setSceneOnly((prev) => !prev);
+      } else if ((e.key === "v" || e.key === "V") && !e.metaKey && !e.ctrlKey && !e.altKey && slides[currentSlide]?.backdrop) {
+        // Song slides own V for their own theater; here it only means something with a backdrop.
+        setTheatre((prev) => !prev);
       } else if ((e.key === "m" || e.key === "M") && !e.metaKey && !e.ctrlKey && !e.altKey) {
         // M starts or stops the walk-on track from anywhere in the deck.
         e.preventDefault();
@@ -1856,7 +2221,7 @@ export const WorkshopSlides = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [nextSlide, prevSlide, toggleFullscreen, isFullscreen, goToSlide, slides.length, handlePrint, navigate, showSidebar, flexZones, toggleZone, changeRuntime, toggleTrack, runtimeLocked]);
+  }, [nextSlide, prevSlide, toggleFullscreen, isFullscreen, goToSlide, slides, currentSlide, handlePrint, navigate, showSidebar, flexZones, toggleZone, changeRuntime, toggleTrack, runtimeLocked]);
 
   // Touch/swipe support
   useEffect(() => {
@@ -1890,7 +2255,8 @@ export const WorkshopSlides = () => {
   const progress = ((currentSlide + 1) / slides.length) * 100;
 
   const currentAccent = currentDeck.meta?.accent || "var(--color-primary, #00ffcc)";
-  const accentColor = isRezeMode ? "#ff0055" : currentAccent;
+  // A slide in one of the three lenses takes that lens's colours (stage.css).
+  const accentColor = isRezeMode ? "#ff0055" : slide.lens ? "var(--stage-accent)" : currentAccent;
 
   // Where you stand against plan. Positive drift means running long.
   const pacing = pacingStatus(slides, currentSlide, elapsedTime);
@@ -1910,6 +2276,7 @@ export const WorkshopSlides = () => {
         isRezeMode ? "reze-mode" : ""
       }`}
       data-stage-mode={isRezeMode ? "reze" : "protocol"}
+      data-stage-lens={slide.lens}
       style={{ fontFamily: "var(--stage-font-display)" }}
     >
       {/* Glitch Keyframes CSS injection */}
@@ -2104,9 +2471,19 @@ export const WorkshopSlides = () => {
         />
       </div>
 
+      {/* A slide's backdrop scene: beside its words in theatre, else behind them. */}
+      {slide?.backdrop && (
+        <SlideBackdrop key={slide.id} scene={slide.backdrop} label={slide.backdropAlt} sceneOnly={sceneOnly} theatre={theatre} />
+      )}
+
       {/* Main Slide Presentation Stage */}
-      <main className="flex-1 flex items-center justify-center px-6 md:px-12 pt-20 pb-20 z-10">
-        <div className="w-full max-w-6xl">
+      <main
+        className={`flex-1 flex items-center justify-center px-6 md:px-12 pt-20 pb-20 z-10 transition-opacity duration-700 ${
+          slide?.backdrop && theatre ? "lg:pl-[calc(50%+2rem)] lg:pr-10" : ""
+        }`}
+        style={{ opacity: slide?.backdrop && sceneOnly ? 0 : 1 }}
+      >
+        <div className={`@container w-full max-w-6xl ${slide?.backdrop && theatre ? "stage-theatre" : ""}`}>
           {SlideComponent && (
             <SlideComponent
               slide={slide}
@@ -2220,22 +2597,45 @@ export const WorkshopSlides = () => {
           </span>
         </div>
 
-        {/* Slide Navigation Dots */}
-        <div className="hidden md:flex gap-1.5 max-w-md overflow-x-auto py-1">
-          {slides.map((s, i) => (
-            <button
-              key={s.id}
-              onClick={() => goToSlide(i)}
-              className="w-2.5 h-2.5 rounded-full transition-all cursor-pointer"
-              style={{
-                backgroundColor: i === currentSlide ? accentColor : "var(--stage-text-dim)",
-                transform: i === currentSlide ? "scale(1.3)" : "scale(1)",
-              }}
-              title={s.title}
-              aria-label={`Go to slide ${i + 1}`}
-            />
-          ))}
-        </div>
+        {/*
+          Slide rail: one segment per slide, stretched across the footer so
+          46 slides never crush into a barcode. Seen slides keep a dim accent,
+          the current one stands taller and glows, and hovering a segment names
+          the slide before you jump to it.
+        */}
+        <nav aria-label="Slides" className="hidden md:flex flex-1 items-center gap-[3px] mx-6 lg:mx-10 h-6">
+          {slides.map((s, i) => {
+            const label = slideLabel(s, i);
+            const isCurrent = i === currentSlide;
+            const isSeen = i < currentSlide;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => goToSlide(i)}
+                className="group relative flex h-full flex-1 min-w-[3px] items-center cursor-pointer"
+                aria-label={`Go to slide ${i + 1}: ${label}`}
+                aria-current={isCurrent ? "step" : undefined}
+              >
+                <span
+                  className="block w-full rounded-full transition-all duration-300 ease-out group-hover:h-2.5 group-hover:opacity-100"
+                  style={{
+                    height: isCurrent ? 10 : 4,
+                    backgroundColor: isCurrent || isSeen ? accentColor : "var(--stage-text-dim)",
+                    opacity: isCurrent ? 1 : isSeen ? 0.5 : 0.35,
+                    boxShadow: isCurrent ? `0 0 12px ${accentColor}` : "none",
+                  }}
+                />
+                <span
+                  role="tooltip"
+                  className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border px-2.5 py-1 font-mono text-[11px] opacity-0 translate-y-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-y-0 bg-(--color-surface-dark) text-(--color-text-dark) border-(--color-border-dark) shadow-lg"
+                >
+                  <span style={{ color: accentColor }}>{String(i + 1).padStart(2, "0")}</span> {label}
+                </span>
+              </button>
+            );
+          })}
+        </nav>
 
         {/* Right utility buttons */}
         <div className="flex items-center gap-2">

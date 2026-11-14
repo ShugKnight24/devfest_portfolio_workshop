@@ -16,8 +16,8 @@ const SceneStage = lazy(() => import("../three/SceneStage"));
  * One video per embed, on purpose: chaining songs through YouTube's own
  * `playlist` parameter played the wrong songs under the wrong titles.
  *
- * Theater (V, or the button): the same two frames fill the screen, half and
- * half, video left and film right. The elements are restyled, not remounted,
+ * Theater (V, or the button): the same two frames go fullscreen as a matched
+ * 16:9 pair, video left and film right, centered with the title below. The elements are restyled, not remounted,
  * so the song keeps playing straight through the switch. V or Esc leaves.
  *
  * Networks with YouTube's Restricted Mode on (schools, some venues) refuse
@@ -56,7 +56,33 @@ const usePlayerEvents = (frameRef, active, { onEnd, onError, onTime }) => {
   }, [frameRef, active, onEnd, onError, onTime]);
 };
 
+/**
+ * Scenes built for a clicker beat (Denji's pull) sit still on a song slide,
+ * where nobody clicks. `refire` seconds re-arms the beat on a loop instead: it
+ * fires a moment after the slide opens, holds, resets, and fires again.
+ */
+const useRefire = (active, seconds) => {
+  const [fired, setFired] = useState(false);
+  useEffect(() => {
+    setFired(false);
+    if (!active || !seconds) return undefined;
+    const timers = [];
+    const cycle = () => {
+      timers.push(setTimeout(() => setFired(true), 1500));
+      timers.push(setTimeout(() => setFired(false), seconds * 1000 - 400));
+    };
+    cycle();
+    const loop = setInterval(cycle, seconds * 1000);
+    return () => {
+      clearInterval(loop);
+      timers.forEach(clearTimeout);
+    };
+  }, [active, seconds]);
+  return fired;
+};
+
 export const SongSlide = ({ slide, isActive, onAdvance }) => {
+  const fired = useRefire(isActive, slide.refire);
   const frameRef = useRef(null);
   const { song } = slide;
   const sources = [song.youtubeId, ...(song.fallbackIds ?? [])].filter(Boolean);
@@ -124,14 +150,19 @@ export const SongSlide = ({ slide, isActive, onAdvance }) => {
     return () => document.removeEventListener("fullscreenchange", onChange);
   }, [theater]);
 
+  // Both frames stay 16:9 in theater too. A half-screen column is taller than
+  // wide on a laptop or a mirrored projector, so filling it letterboxed the
+  // video and stretched the film into a portrait crop. The pair centers as one
+  // matched band instead.
   const frame = theater
-    ? { height: "100%", backgroundColor: "#000", border: 0 }
+    ? { aspectRatio: "16 / 9", backgroundColor: "#000", border: 0 }
     : { aspectRatio: "16 / 9", borderColor: "var(--stage-border)", borderRadius: "var(--stage-radius)", backgroundColor: "#000" };
 
   return (
     <div className={`w-full transition-opacity duration-500 ${isActive ? "opacity-100" : "opacity-0"}`}>
       <header className="mb-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-        <p className="stage-kicker m-0">{slide.kicker}</p>
+        {/* No kicker on the pre-show; the spacer keeps the moment on the right. */}
+        {slide.kicker ? <p className="stage-kicker m-0">{slide.kicker}</p> : <span />}
         <p className="m-0 flex items-center gap-4 font-mono text-[11px] uppercase tracking-widest" style={{ color: "var(--stage-text-muted)" }}>
           {slide.moment}
           <button
@@ -147,7 +178,7 @@ export const SongSlide = ({ slide, isActive, onAdvance }) => {
 
       <div
         ref={theaterRef}
-        className={theater ? "fixed inset-0 z-[1000] grid grid-cols-2 bg-black" : "grid w-full grid-cols-1 items-center gap-4 md:grid-cols-2"}
+        className={theater ? "fixed inset-0 z-[1000] grid grid-cols-2 content-center bg-black" :"grid w-full grid-cols-1 items-center gap-4 md:grid-cols-2"}
         role={theater ? "dialog" : undefined}
         aria-label={theater ? `${song.title}, video and film side by side` : undefined}
       >
@@ -189,18 +220,29 @@ export const SongSlide = ({ slide, isActive, onAdvance }) => {
         {/* The story, in ink */}
         <figure className="relative m-0 w-full overflow-hidden border" style={{ ...frame, backgroundColor: "#0b1030" }}>
           <Suspense fallback={null}>
-            <div className="absolute inset-0">{isActive && <SceneStage scene={slide.scene} clock={clock} label={slide.alt} className="h-full w-full" />}</div>
+            <div className="absolute inset-0">{isActive && <SceneStage scene={slide.scene} clock={clock} fired={fired} label={slide.alt} className="h-full w-full" />}</div>
           </Suspense>
         </figure>
         {theater && (
-          <button
-            type="button"
-            onClick={() => setTheater(false)}
-            className="absolute right-3 top-3 z-10 font-mono text-[10px] uppercase tracking-widest opacity-50 hover:opacity-100"
-            style={{ color: "#fff" }}
-          >
-            V or Esc to exit
-          </button>
+          <>
+            {/* The band below the pair names the song. */}
+            <p className="col-span-2 m-0 mt-6 flex flex-wrap items-baseline justify-center gap-x-4 gap-y-1 px-6 text-center">
+              <span className="font-black uppercase tracking-tight" style={{ fontSize: "clamp(1.4rem, 2.6vw, 2.6rem)", lineHeight: 1, color: "#fff" }}>
+                {song.title}
+              </span>
+              <span className="font-mono text-sm uppercase tracking-widest" style={{ color: "var(--stage-accent)" }}>
+                {song.artist}
+              </span>
+            </p>
+            <button
+              type="button"
+              onClick={() => setTheater(false)}
+              className="absolute right-3 top-3 z-10 font-mono text-[10px] uppercase tracking-widest opacity-50 hover:opacity-100"
+              style={{ color: "#fff" }}
+            >
+              V or Esc to exit
+            </button>
+          </>
         )}
       </div>
 
@@ -217,6 +259,19 @@ export const SongSlide = ({ slide, isActive, onAdvance }) => {
           </span>
         )}
       </footer>
+      {/* A line from the story, under the song, for slides that carry one. */}
+      {slide.quote && (
+        <blockquote className="m-0 mt-3 max-w-4xl border-l-2 pl-4" style={{ borderColor: "var(--stage-accent)" }}>
+          <p className="m-0 text-base italic leading-relaxed" style={{ color: "var(--stage-text)" }}>
+            “{slide.quote.text}”
+          </p>
+          {slide.quote.cite && (
+            <cite className="mt-1 block font-mono text-[11px] not-italic uppercase tracking-widest" style={{ color: "var(--stage-text-muted)" }}>
+              {slide.quote.cite}
+            </cite>
+          )}
+        </blockquote>
+      )}
     </div>
   );
 };
